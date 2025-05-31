@@ -118,7 +118,7 @@ We value open conversations, practical feedback, and ambitious finance leaders w
 ## **Security**
 
 Security is at the core of financial trust. Found a vulnerability? Please report it responsibly.  
- *📩 Email: **support@reverfi.ai***
+ *📩 Email: **support@reverfin.ai***
 
 ## **Contributing**
 
