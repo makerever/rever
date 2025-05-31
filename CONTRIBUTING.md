@@ -121,7 +121,7 @@ rever/
 
 ## Communication
 
-- Join our [community discussions](https://github.com/reverfin/rever/discussions)
+- Join our [[community discussions](https://github.com/reverfin/rever/discussions)](https://community.reverfin.ai/)
 - Ask questions in the appropriate channels
 - Be respectful and considerate in all communications
 
