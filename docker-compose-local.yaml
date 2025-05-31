@@ -1,0 +1,117 @@
+services:
+  # API Service
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.api
+    restart: unless-stopped
+    networks:
+      - rever_dev
+    volumes:
+      - ./api:/app
+    env_file:
+      - ./api/.env
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+      - redis
+      - minio
+    command: python manage.py runserver 0.0.0.0:8000
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - web_node_modules:/app/web/node_modules
+      - web_next_cache:/app/web/.next
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
+    depends_on:
+      - api
+      - db
+      - redis
+      - minio
+      - worker
+    networks:
+      - rever_dev
+
+  # Celery Worker
+  worker:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.api
+    restart: unless-stopped
+    networks:
+      - rever_dev
+    volumes:
+      - ./api:/app
+    env_file:
+      - ./api/.env
+    depends_on:
+      - db
+      - redis
+      - minio
+    command: celery -A rever worker --loglevel=info
+
+  # PostgreSQL
+  db:
+    container_name: rever_db    
+    image: postgres:16-alpine
+    restart: unless-stopped
+    networks:
+      - rever_dev
+    command: postgres -c 'max_connections=1000'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    environment:
+      PGDATA: /var/lib/postgresql/data
+      POSTGRES_DB: rever_db
+      POSTGRES_USER: rever_user
+      POSTGRES_PASSWORD: password
+
+  redis:
+    # Valkey (Redis-compatible)
+    image: valkey/valkey:8.1.1-alpine
+    restart: unless-stopped
+    volumes:
+      - redisdata:/data
+    networks:
+      - rever_dev
+    ports:
+      - 6379:6379
+    command: ["--protected-mode", "no"]
+
+  
+  minio:
+    container_name: minio
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z # Using this version because minio changed their license after this.
+    restart: unless-stopped
+    entrypoint: sh
+    networks:
+      - rever_dev
+    command: -c 'mkdir -p /export/uploads && /usr/bin/minio server /export --console-address ":9090"' # create the default bucket
+    volumes:
+      - uploads:/export
+    ports:
+      - "9000:9000"   # S3 API access
+      - "9090:9090"   # Console (UI)
+
+
+networks:
+  rever_dev:
+    driver: bridge
+
+volumes:
+  pgdata:
+  redisdata:
+  uploads:
+  web_node_modules:
+  web_next_cache:

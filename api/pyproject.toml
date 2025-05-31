@@ -1,0 +1,131 @@
+[project]
+name = "Rever"
+version = "0.0.1"
+description = "api for rever app"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.38.20",
+    "celery==5.5.1",
+    "django==5.2.1",
+    "django-cors-headers==4.7.0",
+    "django-redis>=5.4.0",
+    "django-storages[boto3]>=1.14.6",
+    "djangorestframework==3.16.0",
+    "djangorestframework-simplejwt==5.5.0",
+    "psycopg2-binary==2.9.10",
+    "python-decouple==3.8",
+    "pytz==2025.2",
+    "redis==5.2.1",
+]
+
+[dependency-groups]
+dev = [
+    "django-stubs>=5.2.0",
+    "mypy>=1.15.0",
+    "pytest>=8.3.5",
+    "ruff>=0.11.10",
+    "types-pytz>=2025.2.0.20250516",
+]
+prod = [
+    "gunicorn>=23.0.0",
+]
+
+
+[tool.ruff]
+line-length = 99
+exclude = [
+    "**/migrations/*.py",
+    ".venv",
+    ".eggs",
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+[tool.ruff.lint]
+select = [
+    "F", # pyflakes
+    "E", # pycodestyle
+    "I", # isort
+    "N", # pep8-naming
+    "UP", # pyupgrade
+    "RUF", # ruff
+    "B", # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "ISC", # flake8-implicit-str-concat
+    "PIE", # flake8-pie
+    "PT", # flake-pytest-style
+    "PTH", # flake8-use-pathlib
+    "PD", # pandas-vet
+    "SIM", # flake8-simplify
+    "TID", # flake8-tidy-imports
+]
+extend-ignore = [
+    "RUF012",
+]
+[tool.ruff.lint.per-file-ignores]
+"**/migrations/**.py" = ["D100", "D101", "D102", "D103", "E501", "RUF012"]
+"**/tests/**/*.py" = ["S101", "E501", "PLR0917", "ISC001", "D100", "D101", "D102", "PLR0913", "PLR2004"]
+"**/*serializer*.py" = ["N815"]
+"**/views.py" = ["N815"]
+"**/__init__.py" = ["D104"]
+# Ignore imported but unused in __init__.py files
+"__init__.py" = ["F401"]
+"**/models.py" = ["COM819"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["rever"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["ninja.Query", "ninja.Depends", "ninja.File"]
+
+[tool.ruff.lint.pep8-naming]
+classmethod-decorators = ["pydantic.validator", "pydantic.root_validator"]
+
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["mypy_django_plugin.main"]
+strict = false
+show_error_codes = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+check_untyped_defs = true
+disallow_untyped_defs = false
+no_implicit_optional = true
+
+[[tool.mypy.overrides]]
+module = ["*.migrations.*"]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = [
+    "celery",
+    "celery.*",
+    "rest_framework",
+    "rest_framework.*",
+    "decouple",
+    "decouple.*",
+    "rest_framework.response",
+    "rest_framework.routers",
+    "rest_framework.views",
+    "rest_framework.generics",
+    "rest_framework.permissions"
+]
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "rever.settings"

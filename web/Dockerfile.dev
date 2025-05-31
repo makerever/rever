@@ -1,0 +1,18 @@
+FROM node:20-alpine
+RUN apk add --no-cache libc6-compat 
+
+# Set working directory
+WORKDIR /app
+
+# Copy the entire monorepo structure
+COPY . .
+
+RUN yarn global add turbo
+# Install dependencies using workspace
+RUN yarn install
+
+# Make sure next is in the path
+ENV PATH=/app/node_modules/.bin:$PATH
+
+
+CMD ["yarn", "dev"]

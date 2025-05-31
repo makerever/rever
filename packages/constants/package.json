@@ -1,0 +1,13 @@
+{
+  "name": "@rever/constants",
+  "version": "0.0.1",
+  "license": "AGPL-3.0",  
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "files": [
+    "src"
+  ],
+  "description": "Constant values across the monorepo",
+  "dependencies": {}
+}

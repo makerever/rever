@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "@rever/common": ["../common/src"]
+    },
+    "jsx": "react-jsx"
+  }
+}

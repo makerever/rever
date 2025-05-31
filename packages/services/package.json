@@ -1,0 +1,13 @@
+{
+  "name": "@rever/services",
+  "version": "0.0.1",
+  "license": "AGPL-3.0",  
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "files": [
+    "src"
+  ],
+  "description": "API services across the monorepo",
+  "dependencies": {}
+}

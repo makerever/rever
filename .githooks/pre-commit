@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Exit on error
+set -e
+
+echo "Running pre-commit hook..."
+
+# Get the list of staged files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+# Check if there are any Python files in the api directory
+if echo "$STAGED_FILES" | grep -q "^api/.*\.py$"; then
+    echo "Running ruff format on Python files in api directory..."
+    # Save current directory
+    CURRENT_DIR=$(pwd)
+    
+    # Change to api directory, run ruff, then return to original directory
+    cd api && python -m ruff format . && python -m ruff check --fix .
+    cd "$CURRENT_DIR"
+    
+    # Stage the formatted files from the root directory
+    git add $(echo "$STAGED_FILES" | grep "^api/.*\.py$")
+    
+    echo "Ruff format and check completed."
+fi
+
+# Check if there are any TypeScript/TSX/Markdown files
+if echo "$STAGED_FILES" | grep -q "\.ts$\|\.tsx$\|\.md$"; then
+    echo "Running yarn format..."
+    # Save current directory if not already saved
+    if [ -z "$CURRENT_DIR" ]; then
+        CURRENT_DIR=$(pwd)
+    fi
+    
+    # Run yarn format
+    yarn format
+    
+    # Stage the formatted files
+    git add $(echo "$STAGED_FILES" | grep "\.ts$\|\.tsx$\|\.md$")
+    
+    echo "Yarn format completed."
+fi
+
+echo "Pre-commit hook completed successfully."

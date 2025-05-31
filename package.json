@@ -1,0 +1,23 @@
+{
+  "name": "rever",
+  "description": "Invioce and payment management system",
+  "private": true,
+  "repository": "https://github.com/makerever/rever.git",
+  "version": "1.0.0",
+  "license": "AGPL-3.0",
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "workspaces": [
+    "web",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "turbo": "^2.5.3"
+  },
+  "packageManager": "yarn@1.22.22"
+}

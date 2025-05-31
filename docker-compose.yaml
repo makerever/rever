@@ -1,0 +1,117 @@
+services:
+  # API Service
+  api:
+    image: reverfin/rever-api:latest
+    container_name: rever-api
+    restart: unless-stopped
+    networks:
+      - rever_dev
+    env_file:
+      - .env
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+      - redis
+      - minio
+    command: gunicorn rever.wsgi:application --bind 0.0.0.0:8000 -w 4 --max-requests 1200 --max-requests-jitter 1000 --access-logfile -
+
+  web:
+    image: reverfin/rever-frontend:latest
+    container_name: rever-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    # command: tail -f /dev/null
+    networks:
+      - rever_dev
+
+  # Celery Worker
+  worker:
+    image: reverfin/rever-api:latest
+    container_name: rever-worker
+    restart: unless-stopped
+    networks:
+      - rever_dev
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+      - minio
+    command: celery -A rever worker --loglevel=info
+
+  # PostgreSQL
+  db:
+    image: postgres:16-alpine
+    container_name: rever-db
+    restart: unless-stopped
+    networks:
+      - rever_dev
+    command: postgres -c 'max_connections=1000'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    environment:
+      PGDATA: /var/lib/postgresql/data
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+  redis:
+    container_name: rever-redis
+    # Valkey (Redis-compatible)
+    image: valkey/valkey:8.1.1-alpine
+    restart: unless-stopped
+    volumes:
+      - redisdata:/data
+    networks:
+      - rever_dev
+    ports:
+      - 6379:6379
+    command: ["--protected-mode", "no"]
+  
+  minio:
+    container_name: rever-minio
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z  # Using this version because minio changed their license after this.
+    restart: unless-stopped
+    entrypoint: sh
+    networks:
+      - rever_dev
+    command: -c 'mkdir -p /export/uploads && /usr/bin/minio server /export --console-address ":9090"' # create the default bucket
+    volumes:
+      - uploads:/export
+
+  proxy:
+    container_name: rever-proxy
+    image: reverfin/rever-proxy:latest
+    ports:
+      - target: 80
+        published: ${NGINX_PORT:-80}
+        protocol: tcp
+        mode: host
+    environment:
+      NGINX_PORT: ${NGINX_PORT:-80}
+      BUCKET_NAME: ${AWS_S3_BUCKET_NAME:-uploads}
+      FILE_SIZE_LIMIT: ${FILE_SIZE_LIMIT:-5242880}
+    networks:
+      - rever_dev
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    depends_on:
+      - web
+      - api
+
+networks:
+  rever_dev:
+    driver: bridge
+
+volumes:
+  pgdata:
+  redisdata:
+  uploads:
