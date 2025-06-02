@@ -1,0 +1,7 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Help and Support
+    about: Reach out to us on our discourse server or GitHub discussions.
+  - name: Dedicated support
+    url: mailto:support@reverfin.ai
+    about: Write to us if you'd like dedicated support for Rever.

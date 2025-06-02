@@ -1,0 +1,29 @@
+services:
+  web:
+    image: reverfin/rever-frontend:${APP_RELEASE:-latest}
+    build:
+      context: .
+      dockerfile: ./web/Dockerfile.web
+      args:
+        NEXT_PUBLIC_API_BASE_URL: /api
+      platforms:
+        - linux/amd64
+        - linux/arm64
+
+  api:
+    image: reverfin/rever-api:${APP_RELEASE:-latest}
+    build:
+      context: ./api
+      dockerfile: ./Dockerfile.api
+      platforms:
+        - linux/amd64
+        - linux/arm64
+
+  proxy:
+    image: reverfin/rever-proxy:${APP_RELEASE:-latest}
+    build:
+      context: ./nginx
+      dockerfile: ./Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64

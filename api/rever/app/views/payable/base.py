@@ -1,0 +1,264 @@
+import calendar
+from datetime import date, timedelta
+
+from django.core.cache import cache
+from django.core.exceptions import PermissionDenied
+from django.db import IntegrityError
+from django.db.models import ProtectedError
+from django.utils import timezone
+from rest_framework import status
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
+
+from rever.app.serializers import (
+    BillItemSerializer,
+    BillSerializer,
+    VendorSerializer,
+)
+from rever.app.views.base import BaseAPIView
+from rever.app.views.base_viewsets import BaseModelViewSet
+from rever.bgtasks import generate_bill_summary, generate_monthly_bill_summary
+from rever.db.models import Bill, BillItem, Vendor
+from rever.utils.bill_constants import STATUS_CHOICES
+from rever.utils.cache import clear_report_cache
+
+
+class VendorViewSet(BaseModelViewSet):
+    serializer_class = VendorSerializer
+
+    def get_queryset(self):
+        qs = Vendor.objects.filter(organization=self.request.user.organization)
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        if lookup_url_kwarg and lookup_url_kwarg in self.kwargs:
+            return qs
+        if self.request.query_params.get("include_inactive") == "true":
+            return qs
+        return qs.filter(is_active=True)
+
+    def perform_create(self, serializer):
+        serializer.save(organization=self.request.user.organization)
+
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request, *args, **kwargs)
+        except IntegrityError:
+            return Response(
+                {"detail": "A vendor with that name already exists in your organization."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    def update(self, request, *args, **kwargs):
+        try:
+            return super().update(request, *args, **kwargs)
+        except IntegrityError:
+            return Response(
+                {"detail": "A vendor with this name already exists in your organization."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            self.perform_destroy(instance)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except ProtectedError:
+            return Response(
+                {"detail": "Cannot delete this vendor because it is linked to one or more bills."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
+class BillViewSet(BaseModelViewSet):
+    serializer_class = BillSerializer
+
+    def get_queryset(self):
+        qs = (
+            Bill.objects.filter(organization=self.request.user.organization)
+            .select_related("vendor", "vendor__billing_address")
+            .prefetch_related("items")
+        )
+
+        params = self.request.query_params
+        if params.get("include_inactive") != "true":
+            qs = qs.filter(is_active=True)
+
+        status_param = params.get("status")
+        if status_param in {c[0] for c in STATUS_CHOICES}:
+            qs = qs.filter(status=status_param)
+
+        dr = params.get("date_range")
+
+        if dr:
+            today = timezone.localdate()
+            start = end = None
+
+            if dr == "today":
+                start = end = today
+
+            elif dr == "this_week":
+                start = today - timedelta(days=today.weekday())
+                end = start + timedelta(days=6)
+
+            elif dr == "this_month":
+                start = today.replace(day=1)
+                last_day = calendar.monthrange(today.year, today.month)[1]
+                end = today.replace(day=last_day)
+
+            elif dr == "last_30_days":
+                end = today
+                start = today - timedelta(days=30)
+
+            elif dr == "last_3_months":
+                end = today
+                m = (today.month - 3 - 1) % 12 + 1
+                y = today.year + ((today.month - 3 - 1) // 12)
+                start = date(y, m, 1)
+
+            elif dr == "this_year":
+                start = date(today.year, 1, 1)
+                end = date(today.year, 12, 31)
+
+            elif dr == "last_year":
+                y = today.year - 1
+                start = date(y, 1, 1)
+                end = date(y, 12, 31)
+
+            elif dr == "custom":
+                from_str = params.get("from")
+                to_str = params.get("to")
+                try:
+                    if from_str:
+                        start = date.fromisoformat(from_str)
+                    if to_str:
+                        end = date.fromisoformat(to_str)
+                except ValueError:
+                    return qs.none()
+
+            if start and end:
+                qs = qs.filter(bill_date__range=(start, end))
+
+        return qs
+
+    def perform_create(self, serializer):
+        serializer.save(organization=self.request.user.organization)
+        clear_report_cache(self.request.user.id, "bill_summary")
+        clear_report_cache(self.request.user.id, "bill_summary_sync")
+
+    def perform_update(self, serializer):
+        serializer.save()
+        clear_report_cache(self.request.user.id, "bill_summary")
+        clear_report_cache(self.request.user.id, "bill_summary_sync")
+
+    def perform_destroy(self, instance):
+        if instance.status in ["under_approval", "approved"]:
+            raise ValidationError(
+                {"detail": f"Cannot delete bill with status '{instance.status}'."}
+            )
+        instance.delete()
+        clear_report_cache(self.request.user.id, "bill_summary")
+        clear_report_cache(self.request.user.id, "bill_summary_sync")
+
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request, *args, **kwargs)
+        except IntegrityError:
+            return Response(
+                {"detail": "Bill number already exists for this organization."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    def update(self, request, *args, **kwargs):
+        try:
+            return super().update(request, *args, **kwargs)
+        except IntegrityError:
+            return Response(
+                {"detail": "A bill with this number already exists in your organization."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    # def destroy(self, request, *args, **kwargs):
+    #    clear_bill_summary_cache(self.request.user.id)
+    #    return super().destroy(request, *args, **kwargs)
+
+
+class BillItemViewSet(BaseModelViewSet):
+    serializer_class = BillItemSerializer
+
+    def get_queryset(self):
+        return BillItem.objects.filter(
+            bill__organization=self.request.user.organization
+        ).select_related("bill")
+
+    def perform_create(self, serializer):
+        bill = serializer.validated_data["bill"]
+        if bill.organization != self.request.user.organization:
+            raise PermissionDenied("Cannot add item to a foreign bill.")
+        serializer.save()
+
+
+class BillSummaryAsyncAPIView(BaseAPIView):
+    def get(self, request):
+        user = request.user
+        org = user.organization
+
+        filter_type = request.query_params.get("filter", "this_month")
+        include_inactive = request.query_params.get("include_inactive", "false").lower() == "true"
+        refresh = str(request.query_params.get("refresh", "false")).lower() == "true"
+
+        cache_key = f"bill_summary_sync:{user.id}:{filter_type}:{str(include_inactive).lower()}"
+
+        if not refresh:
+            cached_data = cache.get(cache_key)
+            if cached_data:
+                if "error" in cached_data:
+                    return Response(
+                        {"status": "error", "message": cached_data["error"]}, status=400
+                    )
+                return Response({"status": "ready", "data": cached_data})
+
+        generate_bill_summary.delay(
+            user_id=user.id,
+            organization_id=org.id,
+            filter_type=filter_type,
+            include_inactive=include_inactive,
+            cache_key=cache_key,
+        )
+
+        return Response(
+            {
+                "status": "processing",
+                "message": "Report is being generated. Please try again shortly.",
+            }
+        )
+
+
+class MonthlyBillSummaryAsyncAPIView(BaseAPIView):
+    def get(self, request):
+        user = request.user
+        org = user.organization
+        filter_type = request.query_params.get("filter", "last_3_months")
+        include_inactive = request.query_params.get("include_inactive", "false").lower() == "true"
+
+        refresh = str(request.query_params.get("refresh", "false")).lower() == "true"
+
+        cache_key = f"bill_summary:{user.id}:{filter_type}:{str(include_inactive).lower()}"
+
+        if not refresh:
+            cached_data = cache.get(cache_key)
+            if cached_data:
+                return Response({"status": "ready", "data": cached_data})
+
+        generate_monthly_bill_summary.delay(
+            user_id=user.id,
+            organization_id=org.id,
+            filter_type=filter_type,
+            include_inactive=include_inactive,
+            cache_key=cache_key,
+        )
+
+        return Response(
+            {
+                "status": "processing",
+                "message": "Report is being generated. Please try again shortly.",
+            }
+        )

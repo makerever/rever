@@ -1,0 +1,20 @@
+{
+  "name": "@rever/tailwind-config",
+  "version": "0.1.0",
+  "license": "AGPL-3.0",
+  "description": "common tailwind configuration across monorepo",
+  "main": "tailwind.config.js",
+  "private": true,
+  "files": [
+    "tailwind.config.js",
+    "postcss.config.js"
+  ],
+  "dependencies": {
+    "tailwindcss": "^3.4.17",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.3"
+  }
+}

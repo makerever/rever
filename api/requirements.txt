@@ -1,0 +1,13 @@
+Django==5.2.1
+djangorestframework==3.16.0
+djangorestframework_simplejwt==5.5.0
+django-cors-headers==4.7.0
+celery==5.5.1
+redis==5.2.1
+python-decouple==3.8
+psycopg2-binary==2.9.10
+django-storages[boto3]==1.14.6
+boto3==1.38.20
+pytz==2025.2
+django-redis==5.4.0
+gunicorn==23.0.0

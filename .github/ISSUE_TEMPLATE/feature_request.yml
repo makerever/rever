@@ -1,0 +1,38 @@
+name: Feature Request
+description: Suggest an idea for this project
+title: "[Feature]: "
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to suggest a new Rever feature!
+      
+  - type: textarea
+    id: summary
+    attributes:
+      label: Describe the feature you would like in Rever
+      description: A clear and concise description of the feature you want.
+      placeholder: Describe how you think this should work
+    validations:
+      required: true
+      
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add any other context, screenshots, or mockups about the feature request here
+      placeholder: Any other information that might help us understand
+    validations:
+      required: false
+      
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Before submitting
+      description: Please confirm the following
+      options:
+        - label: I have searched for similar feature requests and didn't find any duplicates
+          required: true
+        - label: I have considered how this feature would benefit the broader community, not just my specific use case
+          required: true
