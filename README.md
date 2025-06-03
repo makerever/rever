@@ -1,7 +1,7 @@
 # Rever
 
 <p align="center">
-  <img src="https://framerusercontent.com/images/2uHHZjG6NQok5sixJnxkjnG3IsY.svg?scale-down-to=1024" alt="Rever Logo" width="200"/>
+  <img src="https://framerusercontent.com/images/pZfYtzXk5wss6pfBH6w1KrFcGfE.png?scale-down-to=1024" alt="Rever Logo" width="200"/>
 </p>
 
 <p align="center">
