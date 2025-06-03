@@ -185,7 +185,7 @@ const PieChart = ({
         {/* Render radial (donut) chart if type is "radialBar" */}
 
         <div
-          className={`transition-all grid sm:place-self-center duration-300 overflow-x-auto sm:overflow-hidden custom_scrollbar ${
+          className={`transition-all grid sm:place-self-center duration-300 overflow-x-auto sm:overflow-visible custom_scrollbar ${
             sidebarCollapsed ? "sm:w-[calc(100%-80px)]" : "w-[calc(100%)]"
           }`}
         >
