@@ -62,7 +62,7 @@ export function ProfileSidebar({
 
   return (
     <aside
-      className={`fixed height_f px-3 pt-4 pb-2.5 flex flex-col justify-between z-20 top-0 left-0 bg-white dark:bg-gray-900 shadow-md transition-all duration-300 ${
+      className={`fixed height_f px-3 pt-2.5 pb-2.5 flex flex-col justify-between z-20 top-0 left-0 bg-white dark:bg-gray-900 shadow-md transition-all duration-300 ${
         isProfileSidebarCollapsed ? "w-14" : "w-56"
       }`}
     >

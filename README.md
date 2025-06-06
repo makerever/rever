@@ -28,7 +28,7 @@ Every growing business has non-standard financial processes
 Every standard reporting tool struggles to turn them into actionable insights
 
 The result? Fragmented systems. Overburdened accountants. Missed opportunities.
-Rever was born to fix this — an AI-enabled Finance Copilot that simplifies, streamlines, and supercharges the modern finance function.
+Rever was born to fix this, an AI-enabled Finance Copilot that simplifies, streamlines, and supercharges the modern finance function.
 
 ## **Installation**
 
@@ -48,21 +48,21 @@ For self hosting Rever on your server please check [Self-Hosting Rever](INSTALL_
 
 ### 🔹 **Key Features of Rever**
 
-1. **Customizable Transactio**n **Controls** Enable multi-way document matching and AI-led validation for informed, rule-based transaction approvals tailored to your workflows.
+1. **Vendor Management**: Create, view, and manage vendor records in a centralized Vendor Master.
+   Maintain critical details such as contact info, bank details, and audit history. Designed to eliminate duplicates and ensure consistent data across all transactions.
 
-2. **AI-Driven Document Automation** Rever uses semantic AI to read, tag, verify, and extract insights from financial documents across business processes — reducing manual work and improving accuracy.
+2. **Purchase Orders (POs)** Easily create and manage purchase orders with structured fields for items, quantities, and pricing.
+   POs are stored in a centralized PO Master, enabling tracking, approvals, and integration with bills for seamless procurement-to-payment workflows.
 
-3. **Hands-Off One-Click Approvals**  
-   Simplify approval workflows with one-click decisioning. Automatically collates approvals based on authority delegation matrices — reducing manual effort and accelerating turnaround time.
+3. **Bill Management & Two-Way Matching** Create bills manually or ingest them via automation (in future versions).
+   Bills can be associated with vendor records and compared against POs through a two-way match, verifying quantities and amounts between bill and PO. This improves accuracy and prevents overbilling or mismatched invoices.
 
-4. **Audit and Due Deligence Ready DMS** Every document is automatically tracked and organized to ensure seamless audit trails and due diligence readiness.
+4. **Approval Workflows** Integrated approval flows across both bills and POs, allowing teams to route documents 
+   for review and sign-off before execution. 
 
-5. **Intelligent Automation of Accounting Data Entry**  
-   Significantly reduces manual effort in posting entries to accounting systems and eliminates the need for tool-specific training.
+5. **Audit History** Every action on a bill: creation, updates, approvals are logged in a detailed audit trail.
+   This ensures traceability, supports compliance requirements, and aids in internal or external audits.
 
-6. **Compliance Management Made Easy** From contracts to tax to regulatory filings — Rever ensures compliance across all finance touchpoints, effortlessly.
-
-7. **Goal-Oriented Intelligent Analytics** Get proactive insights and sensitive forecasts tied to real business outcomes — cost visibility, productivity tracking, and action-oriented intelligence that powers decisions. Coming soon for all except- point 1(transaction Control), DMS (point4), point3 (hands off),
 
 ## **Built With**
 
@@ -79,32 +79,47 @@ For self hosting Rever on your server please check [Self-Hosting Rever](INSTALL_
 ## **Screenshots**
 
 <p align="center">
-  <img src="images/Frame 2147224091.png" alt="Rever Screenshot 1" width="700"/>
+  <img src="images/dashboard.svg" alt="Rever Dashboard" width="700"/>
 </p>
 
 <p align="center">
-  <img src="images/Frame 2147224093.png" alt="Rever Screenshot 2" width="700"/>
+  <img src="images/add-vendor.svg" alt="Rever Vendor List" width="700"/>
 </p>
 
 <p align="center">
-  <img src="images/Frame 2147224094.png" alt="Rever Screenshot 3" width="700"/>
+  <img src="images/po-list.svg" alt="Rever PO List" width="700"/>
 </p>
 
 <p align="center">
-  <img src="images/Frame 2147224095.png" alt="Rever Screenshot 4" width="700"/>
+  <img src="images/create-bills.svg" alt="Rever Bill List" width="700"/>
 </p>
 
-## **(Upcoming Features)**
+<p align="center">
+  <img src="images/pdf-bill.svg" alt="Rever Bill PDF" width="700"/>
+</p>
 
-- Auto-Reconciliation UI
-- Budget Tracker \+ Alerts
-- Compliance Risk Dashboards
-- Document Classifier
-- Planning Simulator
+<p align="center">
+  <img src="images/2way-match.svg" alt="Rever 2 Way Match" width="700"/>
+</p>
+
+### 🔹 **Upcoming Features**
+
+1. **Document Management System (DMS)**
+   A module to upload, tag, and manage supporting documents like contracts, invoices, and receipts: all linked to POs and bills.
+
+2. **3-Way Matching**
+   Go beyond 2-way matching by comparing POs, Bills, and Goods Receipt Notes for tighter control over payments and deliveries.
+
+3. **Request Receipts**
+   Let internal teams or external vendors request receipt confirmations, helping close the loop in procurement workflows.
+
+4. **Advanced Analytics**
+   Dashboards and insights to visualize spend patterns, approval cycle times, vendor performance, and more.
+
 
 ## **Documentation**
 
-Explore how ReverI works — from setting up your environment to integrating with your existing systems. Detailed walkthroughs for CFOs, controllers, and finance ops teams.
+Explore how ReverI works from setting up your environment to integrating with your existing systems. Detailed walkthroughs for CFOs, controllers, and finance ops teams.
 
 ## **Community**
 
@@ -118,7 +133,7 @@ We value open conversations, practical feedback, and ambitious finance leaders w
 ## **Security**
 
 Security is at the core of financial trust. Found a vulnerability? Please report it responsibly.  
- *📩 Email: **support@reverfin.ai***
+ \*📩 Email: **support@reverfin.ai***
 
 ## **Contributing**
 
@@ -137,8 +152,8 @@ This project is licensed under the GNU Affero General Public License v3.0 (AGPL-
 
 ## **💬 About**
 
-Rever is built by finance practitioners who’ve lived the chaos — and technologists who knew it could be done better. It’s the result of a decade’s worth of problems, distilled into one intelligent platform.
-A **Virtual CFO System** — purpose-built to **preserve and enhance stakeholder value**, decision by decision.
+Rever is built by finance practitioners who’ve lived the chaos and technologists who knew it could be done better. It’s the result of a decade’s worth of problems, distilled into one intelligent platform.
+A **Virtual CFO System** purpose-built to **preserve and enhance stakeholder value**, decision by decision.
 
 <p align="center">
   Made with ❤️ by the <a href="https://reverfin.ai">Rever</a> team

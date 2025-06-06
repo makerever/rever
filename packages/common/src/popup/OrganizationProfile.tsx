@@ -10,6 +10,7 @@ import { LoggedUserProps } from "@rever/types";
 import { CirclePlus, Dot, LogOut, UserRoundPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useLoader } from "@rever/common";
 
 // OrgProfile component displays a popup with organization actions and profile info
 const OrgProfile = ({
@@ -19,6 +20,7 @@ const OrgProfile = ({
 }: SidebarProps) => {
   // Get logout function from user store
   const logoutUser = useUserStore((state) => state.logout);
+  const { setShow } = useLoader();
 
   const router = useRouter();
 
@@ -34,15 +36,15 @@ const OrgProfile = ({
 
   // Handles user logout: clears token, updates store, redirects to home
   const logOut = () => {
-    clearAuthToken();
+    setShow(true);
     logoutUser();
-    router.push("/");
+    clearAuthToken(true);
   };
 
   return (
     <div
       className={`${
-        isSidebarCollapsed ? "left-3 top-14" : "left-3 top-16"
+        isSidebarCollapsed ? "left-3 top-14" : "left-3 top-14"
       } popup-slide-down absolute z-20 min-w-60 rounded-md shadow-5xl bg-white p-2`}
     >
       {/* Organization avatar and info */}

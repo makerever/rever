@@ -63,11 +63,20 @@ export interface billingAddress {
   country?: string | null;
 }
 
+// For vendor bank details
+export interface bankDetailsTypes {
+  id?: string;
+  account_holder_name?: string | null;
+  account_number?: string | null;
+  bank_name?: string | null;
+}
+
 // For organization data
 export interface OrgDataProps {
   name?: string;
   date_format?: string;
   currency?: string;
+  matching_type?: string | number;
 }
 
 // For enabling approval

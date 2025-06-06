@@ -17,7 +17,9 @@ const MAIN_ROUTES = [
   "/home",
   "/settings",
   "/vendor",
+  "/purchaseorder",
   "/bill",
+  "/approvals",
   "/404",
   "/not-access",
 ];
@@ -44,12 +46,21 @@ const IGNORED_PATH_PREFIXES = [
 
 // Role restrictions: define routes that are *restricted* per role
 const ROLE_BASED_RESTRICTIONS: Record<string, string[]> = {
-  admin: ["/bill/approvals/list"],
-  member: ["/bill/approvals/list", "/settings/members/invite"],
+  admin: ["/approvals/list/review", "/approvals/list/review/match"],
+  member: [
+    "/approvals/list/review",
+    "/approvals/list/review/match",
+    "/settings/members/invite",
+  ],
   finance_manager: [
     "/vendor/add",
     "/vendor/update",
+    "/purchaseorder/list",
+    "/purchaseorder/view",
+    "/purchaseorder/add",
+    "/purchaseorder/edit",
     "/bill/list",
+    "/bill/view",
     "/bill/add",
     "/bill/edit",
     "/settings/approvals",

@@ -22,13 +22,18 @@ export interface Bill {
   bill?: string | undefined;
   vendor_id?: string;
   vendor?: { id: string | number; name: string } | null;
-  payment_terms?: string | undefined;
+  purchase_order_id?: string;
+  purchase_order?: { id: string | number; po_number: string } | null;
+  comments?: string;
+  payment_terms?: string | undefined | null;
   bill_date?: string | undefined | null;
   due_date?: string | undefined | null;
   sub_total?: string | number;
   total_tax?: string | number;
   tax_percentage?: string | number;
   total?: number | string;
+  is_attachment?: boolean;
+  updated_at?: string;
   status: string;
   items?: BillItemTypeProps[];
 }
@@ -78,3 +83,36 @@ export interface AttachmentProps {
   file?: string;
   id?: string;
 }
+
+// Types for matching b/w PO and bill
+export interface PurchaseOrderItem {
+  quantity: string | number;
+  unit_price: string | number;
+  description: string;
+}
+
+export interface BillItem {
+  quantity: string | number;
+  unit_price: string | number;
+  description: string;
+}
+
+export interface MatchedLineItem {
+  purchase_order_item: PurchaseOrderItem;
+  bill_item?: BillItem;
+  description_status?: string;
+  quantity_status?: boolean;
+  unit_price_status?: boolean;
+  overall_status?: "matched" | "mismatched" | "partial";
+}
+
+export interface UnmatchedLineItem {
+  purchase_order_item: PurchaseOrderItem;
+}
+
+export interface OrgDetails {
+  currency?: string;
+}
+
+export type MatchStatus = "matched" | "mismatched" | "partial";
+export type TooltipSide = "right" | "top" | "bottom" | "left";

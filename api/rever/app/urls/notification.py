@@ -1,11 +1,11 @@
 from django.urls import path
 
-from rever.app.views import NotificationSettingAPIView
+from rever.app.views import UserNotificationPreferenceAPIView
 
 urlpatterns = [
     path(
-        "notification/settings/",
-        NotificationSettingAPIView.as_view(),
-        name="notification-settings",
+        "users/me/notification-preferences/",
+        UserNotificationPreferenceAPIView.as_view(),
+        name="user-notification-preferences",
     ),
 ]

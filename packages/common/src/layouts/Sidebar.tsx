@@ -13,7 +13,7 @@ import {
 } from "@rever/constants";
 import { Role, SidebarProps } from "@rever/types";
 import UserProfile from "../popup/UserProfile";
-import { OutsideClickHandler } from "@rever/common";
+import { CustomTooltip, OutsideClickHandler } from "@rever/common";
 import { SearchInput } from "@rever/common";
 import OrgProfile from "../popup/OrganizationProfile";
 import { useUserStore } from "@rever/stores";
@@ -107,7 +107,7 @@ export function Sidebar({
     <>
       {/* Sidebar container */}
       <aside
-        className={`fixed height_f px-3 pt-4 pb-2.5 flex flex-col justify-between z-20 top-0 left-0 bg-white dark:bg-gray-900 shadow-md transition-all duration-300 ${
+        className={`fixed height_f px-3 pt-2.5 pb-2.5 flex flex-col justify-between z-20 top-0 left-0 bg-white dark:bg-gray-900 shadow-md transition-all duration-300 ${
           isSidebarCollapsed ? "w-14" : "w-56"
         }`}
       >
@@ -313,9 +313,13 @@ export function Sidebar({
             } cursor-pointer rounded-md text-slate-800 text-xs mb-1`}
           >
             {isSidebarCollapsed ? (
-              <ArrowRight width={16} />
+              <CustomTooltip content="Maximize" side="right">
+                <ArrowRight width={16} />
+              </CustomTooltip>
             ) : (
-              <ArrowLeft width={16} />
+              <CustomTooltip content="Minimize" side="right">
+                <ArrowLeft width={16} />
+              </CustomTooltip>
             )}
           </div>
 

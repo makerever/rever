@@ -42,6 +42,8 @@ const Home = () => {
 
   // Loading state for the page
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isBarChartLoading, setIsBarChartLoading] = useState<boolean>(true);
+  const [isPieChartLoading, setIsPieChartLoading] = useState<boolean>(true);
 
   const [billSummaryData, setBillsSummaryData] = useState({
     total: 0,
@@ -66,6 +68,7 @@ const Home = () => {
 
   const getBillsSummaryBarData = useCallback(
     async (filterKey: string | number, retries = 10) => {
+      setIsBarChartLoading(true);
       const response = await getBarGraphDataAPI(filterKey);
 
       if (response.status === 200) {
@@ -89,6 +92,7 @@ const Home = () => {
             ),
           });
           setIsLoading(false);
+          setIsBarChartLoading(false);
         }
       } else {
         setBarGraphData({
@@ -98,9 +102,10 @@ const Home = () => {
           totalBills: [],
         });
         setIsLoading(false);
+        setIsBarChartLoading(false);
       }
     },
-    [setBarGraphData, setIsLoading],
+    [setBarGraphData, setIsLoading, setIsBarChartLoading],
   );
 
   const getBillsSummaryCards = useCallback(
@@ -125,6 +130,7 @@ const Home = () => {
 
   const getBillsSummaryPieData = useCallback(
     async (filterKey: string | number) => {
+      setIsPieChartLoading(true);
       const response = await getBillsSummaryApi(filterKey);
       if (response?.data?.status === "processing") {
         getBillsSummaryPieData(radialChartFilter?.value || "");
@@ -145,6 +151,7 @@ const Home = () => {
           ],
         };
         setPieChartData(result);
+        setIsPieChartLoading(false);
         setIsLoading(false);
       }
     },
@@ -229,6 +236,7 @@ const Home = () => {
               totalBills={barGraphData?.totalBills}
               barChartFilter={barChartFilter}
               setBarChartFilter={setBarChartFilter}
+              isDataLoading={isBarChartLoading}
             />
 
             {/* Radial pie chart for insights */}
@@ -238,6 +246,7 @@ const Home = () => {
               radialSeries={pieChartData.series}
               barChartFilter={radialChartFilter}
               setBarChartFilter={setRadialChartFilter}
+              isDataLoading={isPieChartLoading}
             />
           </div>
         </div>

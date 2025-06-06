@@ -140,7 +140,7 @@ export default function BillLineItemsTable({
                     {formatNumber(rowAmt, orgDetails?.currency)}
                   </p>
                 </td>
-                {index !== 0 ? (
+                {/* {index !== 0 ? (
                   <td className="p-2">
                     <IconWrapper
                       onClick={() => remove(index)}
@@ -150,7 +150,14 @@ export default function BillLineItemsTable({
                   </td>
                 ) : (
                   <td className="p-2"></td>
-                )}
+                )} */}
+                <td className="p-2">
+                  <IconWrapper
+                    onClick={() => remove(index)}
+                    className="hover:bg-red-100 hover:text-red-500"
+                    icon={<Trash width={16} />}
+                  />
+                </td>
               </tr>
             );
           })}

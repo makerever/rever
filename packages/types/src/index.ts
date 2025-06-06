@@ -6,3 +6,4 @@ export * from "./home/type";
 export * from "./settings/type";
 export * from "./store/type";
 export * from "./vendor/type";
+export * from "./purchaseorder/type";

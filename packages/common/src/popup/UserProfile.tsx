@@ -5,17 +5,19 @@
 import { clearAuthToken } from "@rever/services";
 import { useUserStore } from "@rever/stores";
 import { SidebarProps } from "@rever/types";
+import { useLoader } from "@rever/common";
 import { LogOut, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const UserProfile = ({ isSidebarCollapsed }: SidebarProps) => {
   const logoutUser = useUserStore((state) => state.logout);
+  const { setShow } = useLoader();
 
   const router = useRouter();
   const logOut = () => {
-    clearAuthToken();
+    setShow(true);
     logoutUser();
-    router.push("/");
+    clearAuthToken(true);
   };
 
   return (

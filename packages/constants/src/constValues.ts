@@ -19,7 +19,9 @@ export const roleBasedAccess: Record<Role, string[]> = {
     "/home",
     "/vendor/list",
     "/bill/list",
+    "/purchaseorder/list",
     "/settings/general",
+    "/settings/controls",
     "/settings/approvals",
     "/settings/members",
   ],
@@ -27,14 +29,36 @@ export const roleBasedAccess: Record<Role, string[]> = {
     "/home",
     "/vendor/list",
     "/bill/list",
+    "/purchaseorder/list",
     "/settings/general",
+    "/settings/controls",
     "/settings/members",
   ],
   finance_manager: [
     "/home",
     "/vendor/list",
-    "/bill/approvals/list",
+    "/approvals/list/review",
     "/settings/general",
     "/settings/members",
   ],
 };
+
+// Tab options for approvals
+export const approvalTabOptions = ["PO approval", "Bill approval"];
+
+// Table headers for the bill match items
+export const billMatchHeaders = [
+  "Description",
+  "Quantity",
+  "Unit price",
+  "Amount",
+];
+
+// Table headers for the PO match items
+export const poMatchHeaders = [
+  "#",
+  "Description",
+  "Quantity",
+  "Unit price",
+  "Amount",
+];

@@ -1,7 +1,6 @@
 // Constant url's for sidebar links
 
 import { SidebarLinkProps } from "@rever/types";
-import { hasPermission } from "@rever/utils";
 import {
   Bell,
   CirclePlus,
@@ -37,13 +36,28 @@ export const sidebarLinks: SidebarLinkProps[] = [
         url: ["/vendor/list", "/vendor/add", "/vendor/view", "/vendor/update"],
       },
       {
+        name: "Purchase orders", // Purchase Order management routes
+        url: [
+          "/purchaseorder/list",
+          "/purchaseorder/add",
+          "/purchaseorder/view",
+          "/purchaseorder/edit",
+        ],
+      },
+      {
         name: "Bills", // Bill management routes
-        url: ["/bill/list", "/bill/add", "/bill/view", "/bill/edit"],
+        url: [
+          "/bill/list",
+          "/bill/add",
+          "/bill/view",
+          "/bill/edit",
+          "/bill/match",
+        ],
       },
       {
         name: "Approvals", // Approval process routes
-        key: "bill",
-        url: ["/bill/approvals/list", "/bill"],
+        key: "review",
+        url: ["/approvals/list/review", "/bill"],
       },
     ],
   },
@@ -56,6 +70,10 @@ export const sidebarLinks: SidebarLinkProps[] = [
       {
         name: "General", // General settings
         url: ["/settings/general"],
+      },
+      {
+        name: "Controls", // General settings
+        url: ["/settings/controls"],
       },
       {
         name: "Members", // Member management
@@ -98,11 +116,17 @@ export const profileSidebarLinks: SidebarLinkProps[] = [
 ];
 
 // All route paths related to payables for sidebar highlighting
-export const payablePathNameUrl = ["vendor", "bill", "approvals"];
+export const payablePathNameUrl = [
+  "vendor",
+  "purchaseorder",
+  "bill",
+  "approvals",
+];
 
 // All route paths related to settings for sidebar highlighting
 export const settingPathNameUrl = [
   "/settings/general",
+  "/settings/controls",
   "/settings/members",
   "/settings/members/invite",
   "/settings/approvals",
@@ -115,6 +139,13 @@ export const globalSearchRoutes = [
     icon: <Users width={16} />,
     url: "/vendor/list",
     f_name: "vendor",
+    a_name: "view",
+  },
+  {
+    name: "PO's",
+    icon: <ReceiptText width={16} />,
+    url: "/purchaseorder/list",
+    f_name: "purchaseorder",
     a_name: "view",
   },
   {
@@ -136,6 +167,13 @@ export const globalSearchRoutes = [
     icon: <CirclePlus width={16} />,
     url: "/vendor/add",
     f_name: "vendor",
+    a_name: "create",
+  },
+  {
+    name: "Create PO",
+    icon: <CirclePlus width={16} />,
+    url: "/purchaseorder/add",
+    f_name: "purchaseorder",
     a_name: "create",
   },
   {

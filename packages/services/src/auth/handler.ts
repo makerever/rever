@@ -106,6 +106,12 @@ export const updateOrgApi = async (orgData: OrgDataProps) => {
   return response;
 };
 
+// Get organization details
+export const getOrgApi = async () => {
+  const response = await axiosInstance.get(AUTH_API.UPDATE_ORG);
+  return response;
+};
+
 // Update user profile settings
 export const updateProfileApi = async (
   userData: profileSettingSchemaValues,

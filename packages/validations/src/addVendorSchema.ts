@@ -17,7 +17,7 @@ export const addVendorSchema = z.object({
       { message: "Website must start with https://" },
     ),
   country: z.string().optional(),
-  paymentTerms: z.string().optional(),
+  paymentTerms: z.string().nullable().optional(),
   billingAddress: z.object({
     line1: z.string().optional(),
     line2: z.string().optional(),
@@ -25,6 +25,11 @@ export const addVendorSchema = z.object({
     state: z.string().optional(),
     zip_code: z.string().optional(),
     country: z.string().optional(),
+  }),
+  bank_account: z.object({
+    account_holder_name: z.string().optional(),
+    account_number: z.string().optional(),
+    bank_name: z.string().optional(),
   }),
   status: z.string().optional(),
 });

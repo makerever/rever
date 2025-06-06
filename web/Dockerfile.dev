@@ -11,8 +11,7 @@ RUN yarn global add turbo
 # Install dependencies using workspace
 RUN yarn install
 
-# Make sure next is in the path
-ENV PATH=/app/node_modules/.bin:$PATH
-
+# Make sure next is in the path - include both root and web node_modules
+ENV PATH=/app/node_modules/.bin:/app/web/node_modules/.bin:$PATH
 
 CMD ["yarn", "dev"]

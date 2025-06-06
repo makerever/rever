@@ -29,8 +29,13 @@ const VendorList = () => {
   // Structure and set vendor data when API data changes
   useEffect(() => {
     if (vendors) {
-      const structuredData = vendors?.results?.map(
-        (item: VenderDataAPIType) => ({
+      const structuredData = vendors?.results
+        ?.sort(
+          (a: VenderDataAPIType, b: VenderDataAPIType) =>
+            new Date(b?.updated_at ?? 0).getTime() -
+            new Date(a?.updated_at ?? 0).getTime(),
+        )
+        ?.map((item: VenderDataAPIType) => ({
           id: item?.id || "",
           vendorName: item?.vendor_name,
           companyName: item.company_name || "--",
@@ -50,8 +55,7 @@ const VendorList = () => {
             zipCode: item?.billing_address?.zip_code || "",
             country: item?.billing_address?.country || "",
           },
-        }),
-      );
+        }));
       setVendorList(structuredData);
       setIsLoading(false);
     }
@@ -84,7 +88,7 @@ const VendorList = () => {
                 onClick={() =>
                   router.push(`/vendor/view/?id=${row.original.id}`)
                 }
-                className="font-semibold cursor-pointer overflow-hidden text-ellipsis w-60"
+                className="font-semibold cursor-pointer overflow-hidden text-ellipsis"
               >
                 {getValue() as string}
               </span>
@@ -98,7 +102,7 @@ const VendorList = () => {
         cell: ({ getValue }) => {
           return (
             <div className="flex items-center gap-4">
-              <span className="cursor-pointer overflow-hidden text-ellipsis w-60">
+              <span className="cursor-pointer overflow-hidden text-ellipsis">
                 {getValue() as string}
               </span>
             </div>
@@ -111,7 +115,7 @@ const VendorList = () => {
         cell: ({ getValue }) => {
           return (
             <div className="flex items-center gap-4">
-              <span className="cursor-pointer overflow-hidden text-ellipsis w-52">
+              <span className="cursor-pointer overflow-hidden text-ellipsis">
                 {getValue() as string}
               </span>
             </div>
@@ -124,7 +128,7 @@ const VendorList = () => {
         cell: ({ getValue }) => {
           return (
             <div className="flex items-center gap-4">
-              <span className="cursor-pointer overflow-hidden text-ellipsis w-32">
+              <span className="cursor-pointer overflow-hidden text-ellipsis">
                 {getValue() as string}
               </span>
             </div>
@@ -195,6 +199,7 @@ const VendorList = () => {
           setSearch={setSearch}
           search={search}
           clearSearch={() => setSearch("")}
+          flowImageSrc="/images/flowImages/vendorMasterFlow.svg"
         />
       )}
     </>

@@ -30,14 +30,26 @@ class AttachmentUploadAPIView(BaseAPIView, generics.CreateAPIView):
             )
 
         # Delete existing if any
-        Attachment.objects.filter(content_type=content_type, object_id=object_id).delete()
+        existing_attachments = Attachment.objects.filter(
+            content_type=content_type,
+            object_id=object_id,
+        )
 
-        serializer = self.get_serializer(data=request.data, context={"request": request})
+        for attachment in existing_attachments:
+            if attachment.file:
+                attachment.file.delete(save=False)  # Delete from S3
+
+        existing_attachments.delete()
+
+        serializer_data = request.data.copy()
+        serializer_data["object_id"] = object_id
+        serializer_data["content_type"] = content_type.id
+        serializer = self.get_serializer(data=serializer_data, context={"request": request})
         serializer.is_valid(raise_exception=True)
+
         attachment = serializer.save(
             content_type=content_type,
             object_id=object_id,
-            uploaded_by=request.user,
             organization=getattr(content_object, "organization", None),
         )
 
@@ -88,7 +100,7 @@ class AttachmentDeleteAPIView(BaseAPIView, generics.DestroyAPIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        if attachment.file and attachment.file.storage.exists(attachment.file.name):
+        if attachment.file:
             attachment.file.delete(save=False)
 
         attachment.delete()

@@ -70,6 +70,14 @@ export const themeModes = [
   { label: "Dark", value: "Dark" },
 ];
 
+// Bank Type dropdown options
+export const bankTypeOptions = [
+  { label: "Business", value: "business" },
+  { label: "Personal", value: "personal" },
+  { label: "Checking", value: "checking" },
+  { label: "Savings", value: "savings" },
+];
+
 // Currency dropdown options
 export const currencyOptions = [
   { label: "USD – US Dollar ($)", value: "USD" },
@@ -2451,4 +2459,38 @@ export const timezoneList = [
     label: "UTC",
     value: "UTC",
   },
+];
+
+// Bank Type dropdown options
+export const businessTypeOptions = [
+  { label: "Sole Proprietor", value: "sole_proprietor" },
+  { label: "Partnership", value: "partnership" },
+  { label: "LLC", value: "llc" },
+  { label: "S-Corp", value: "s_corp" },
+  { label: "C-Corp", value: "c_corp" },
+  { label: "Nonprofit", value: "nonprofit" },
+  { label: "Government Agency", value: "government_agency" },
+  { label: "Other", value: "other" },
+];
+
+// Bank Type dropdown options
+export const industryOptions = [
+  { label: "Accounting & Bookkeeping", value: "accounting" },
+  { label: "Legal Services", value: "legal" },
+  { label: "Retail", value: "retail" },
+  { label: "E-commerce", value: "ecommerce" },
+  { label: "Real Estate", value: "real_estate" },
+  { label: "Restaurants & Food Services", value: "restaurants" },
+  { label: "Construction & Contracting", value: "construction" },
+  { label: "Healthcare & Medical", value: "healthcare" },
+  { label: "Manufacturing", value: "manufacturing" },
+  { label: "Software/SaaS", value: "software" },
+  { label: "Nonprofit", value: "nonprofit" },
+  { label: "Other", value: "other" },
+];
+
+// Matching dropdown options
+export const matchingOptions = [
+  { label: "None", value: "none" },
+  { label: "2-Way Match", value: "two_way" },
 ];

@@ -10,7 +10,7 @@ services:
     volumes:
       - ./api:/app
     env_file:
-      - ./api/.env
+      - .env
     ports:
       - 8000:8000
     depends_on:
@@ -28,6 +28,7 @@ services:
     volumes:
       - .:/app
       - web_node_modules:/app/web/node_modules
+      - root_node_modules:/app/node_modules
       - web_next_cache:/app/web/.next
     environment:
       - NODE_ENV=development
@@ -52,7 +53,7 @@ services:
     volumes:
       - ./api:/app
     env_file:
-      - ./api/.env
+      - .env
     depends_on:
       - db
       - redis
@@ -114,4 +115,5 @@ volumes:
   redisdata:
   uploads:
   web_node_modules:
+  root_node_modules:
   web_next_cache:

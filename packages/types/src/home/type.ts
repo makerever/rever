@@ -18,6 +18,7 @@ export interface BarChartProps {
   years: number[];
   totalAmount: number[];
   totalBills: number[];
+  isDataLoading: boolean;
   barChartFilter?: SingleValue<Option>;
   setBarChartFilter?: Dispatch<SetStateAction<SingleValue<Option>>>;
 }
@@ -28,6 +29,7 @@ export interface PieChartProps {
   setBarChartFilter?: Dispatch<SetStateAction<SingleValue<Option>>>;
   radialSeries: number[];
   totalAmount: string | number;
+  isDataLoading: boolean;
 }
 
 export interface barGraphDataType {

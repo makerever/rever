@@ -5,12 +5,13 @@
 import { addVendorSchema, addVendorSchemaValues } from "@rever/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import { Label } from "@rever/common";
+import { Label, ToggleSwitch } from "@rever/common";
 import { TextInput } from "@rever/common";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@rever/common";
 import { useRouter } from "next/navigation";
 import {
+  bankTypeOptions,
   cityOptions,
   countryOptions,
   paymentTermsOptions,
@@ -30,6 +31,7 @@ import { showErrorToast, showSuccessToast } from "@rever/common";
 import { AddVendorComponentType } from "@rever/types";
 import { PhoneInputComp } from "@rever/common";
 import { PageLoader } from "@rever/common";
+import { useBreadcrumbStore } from "@rever/stores";
 
 // Main component for adding or editing a vendor
 const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
@@ -55,9 +57,13 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
   const [stateOptionsList, setStateOptionsList] = useState<StateOption[]>([]);
   const [cityOptionsList, setCityOptionsList] = useState<CitiesOption[]>([]);
 
+  const [isOn, setIsOn] = useState<boolean>(true);
+
   // Watch selected country and state for address fields
   const selectedCountry = watch("billingAddress.country");
   const selectedState = watch("billingAddress.state");
+
+  const setDynamicCrumb = useBreadcrumbStore((s) => s.setDynamicCrumb);
 
   // Update state dropdown when country changes
   useEffect(() => {
@@ -86,6 +92,10 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
     const response = await getVendorDetailsAPI(vendorId ?? "");
     if (response?.status === 200) {
       const vendorData = response.data;
+      setDynamicCrumb("/vendor/update", {
+        id: vendorData?.id,
+        name: vendorData?.vendor_name,
+      });
       setValue("vendorName", vendorData?.vendor_name ?? "");
       setValue("companyName", vendorData?.company_name ?? "");
       setValue("mobile", vendorData?.mobile ?? "");
@@ -113,8 +123,26 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
         "billingAddress.zip_code",
         vendorData?.billing_address?.zip_code ?? "",
       );
+      setValue(
+        "bank_account.account_holder_name",
+        vendorData?.bank_account?.account_holder_name ?? "",
+      );
+      setValue(
+        "bank_account.account_number",
+        vendorData?.bank_account?.account_number ?? "",
+      );
+      setValue(
+        "bank_account.bank_name",
+        vendorData?.bank_account?.bank_name ?? "",
+      );
       setValue("paymentTerms", vendorData?.payment_terms ?? "");
       setValue("status", vendorData?.is_active ? "active" : "inactive");
+
+      if (vendorData?.is_active) {
+        setIsOn(true);
+      } else {
+        setIsOn(false);
+      }
       setIsLoading(false);
     }
   }, [setValue, vendorId]);
@@ -178,13 +206,17 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
         zip_code: data.billingAddress.zip_code || "",
         country: data.billingAddress.country || "",
       },
-      is_active: true,
+      bank_account: {
+        account_holder_name: data?.bank_account?.account_holder_name,
+        account_number: data?.bank_account?.account_number,
+        bank_name: data?.bank_account?.bank_name,
+      },
+      is_active: isOn,
     };
     if (vendorId) {
       handleUpdateVendor({
         ...params,
         id: vendorId,
-        is_active: data.status === "active",
       });
     } else {
       handleCreateVendor(params);
@@ -198,206 +230,260 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
         <PageLoader />
       ) : (
         <form onSubmit={handleSubmit(submitForm)}>
-          <div className="lg:w-3/4 w-full">
-            {/* Vendor basic details row */}
-            <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-              <div>
-                <Label htmlFor="vendorName" text="Vendor name" isRequired />
-                <TextInput
-                  register={register("vendorName")}
-                  id="vendorName"
-                  placeholder="Enter vendor name"
-                  error={errors.vendorName}
-                  value={getValues("vendorName")}
-                />
-              </div>
-              <div>
-                <Label htmlFor="companyName" text="Company name" />
-                <TextInput
-                  register={register("companyName")}
-                  id="companyName"
-                  placeholder="Enter company name"
-                  error={errors.companyName}
-                  value={getValues("companyName")}
-                />
-              </div>
-              <div className="phone_input">
-                <Label htmlFor="mobile" text="Mobile" />
-                {/* <TextInput
+          <div className="pr-8 lg:w-3/4 w-full">
+            <div className="w-full">
+              {/* Vendor basic details row */}
+              <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
+                <div>
+                  <Label htmlFor="vendorName" text="Vendor name" isRequired />
+                  <TextInput
+                    register={register("vendorName")}
+                    id="vendorName"
+                    placeholder="Enter vendor name"
+                    error={errors.vendorName}
+                    value={getValues("vendorName")}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="companyName" text="Company name" />
+                  <TextInput
+                    register={register("companyName")}
+                    id="companyName"
+                    placeholder="Enter company name"
+                    error={errors.companyName}
+                    value={getValues("companyName")}
+                  />
+                </div>
+                <div className="phone_input">
+                  <Label htmlFor="mobile" text="Mobile" />
+                  {/* <TextInput
                   register={register("mobile")}
                   id="mobile"
                   placeholder="Enter mobile"
                   error={errors.companyName}
                   value={getValues("mobile")}
                 /> */}
-                <Controller
-                  name="mobile"
-                  control={control}
-                  rules={{ required: "Phone number is required" }}
-                  render={({ field }) => (
-                    <PhoneInputComp
-                      value={field.value || ""}
-                      onChange={field.onChange}
-                      error={errors.mobile?.message}
-                    />
-                  )}
-                />
+                  <Controller
+                    name="mobile"
+                    control={control}
+                    rules={{ required: "Phone number is required" }}
+                    render={({ field }) => (
+                      <PhoneInputComp
+                        value={field.value || ""}
+                        onChange={field.onChange}
+                        error={errors.mobile?.message}
+                      />
+                    )}
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Vendor contact details row */}
-            <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-              <div>
-                <Label htmlFor="email" text="Email" />
-                <TextInput
-                  register={register("email")}
-                  id="email"
-                  placeholder="Enter email"
-                  error={errors.email}
-                  value={getValues("email")}
-                />
-              </div>
-              <div>
-                <Label htmlFor="taxId" text="Tax ID" />
-                <TextInput
-                  register={register("taxId")}
-                  id="taxId"
-                  placeholder="Enter tax id"
-                  error={errors.taxId}
-                  value={getValues("taxId")}
-                />
-              </div>
-              <div>
-                <Label htmlFor="website" text="Website" />
-                <TextInput
-                  register={register("website")}
-                  id="website"
-                  placeholder="Enter website"
-                  error={errors.website}
-                  value={getValues("website") ?? ""}
-                />
-              </div>
-            </div>
-
-            {/* Payment terms and status row */}
-            <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-              <div>
-                <Label htmlFor="paymentTerms" text="Payment terms" />
-                <SelectComponent
-                  name="paymentTerms"
-                  register={register}
-                  trigger={trigger}
-                  error={errors?.paymentTerms}
-                  options={paymentTermsOptions}
-                  placeholder="Select payment terms"
-                  isClearable={true}
-                  getValues={getValues}
-                />
-              </div>
-              {/* Show status dropdown only when editing vendor */}
-              {vendorId && (
+              {/* Vendor contact details row */}
+              <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
                 <div>
-                  <Label htmlFor="status" text="Vendor Status" />
+                  <Label htmlFor="email" text="Email" />
+                  <TextInput
+                    register={register("email")}
+                    id="email"
+                    placeholder="Enter email"
+                    error={errors.email}
+                    value={getValues("email")}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="taxId" text="Tax ID" />
+                  <TextInput
+                    register={register("taxId")}
+                    id="taxId"
+                    placeholder="Enter tax id"
+                    error={errors.taxId}
+                    value={getValues("taxId")}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="website" text="Website" />
+                  <TextInput
+                    register={register("website")}
+                    id="website"
+                    placeholder="Enter website"
+                    error={errors.website}
+                    value={getValues("website") ?? ""}
+                  />
+                </div>
+              </div>
+
+              {/* Payment terms and status row */}
+              <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
+                <div>
+                  <Label htmlFor="paymentTerms" text="Payment terms" />
                   <SelectComponent
-                    name="status"
+                    name="paymentTerms"
                     register={register}
                     trigger={trigger}
-                    error={errors?.status}
-                    options={statusOptions}
-                    placeholder="Select vendor status"
+                    error={errors?.paymentTerms}
+                    options={paymentTermsOptions}
+                    placeholder="Select payment terms"
+                    isClearable={true}
                     getValues={getValues}
                   />
                 </div>
-              )}
-            </div>
-          </div>
+                {/* Show status dropdown only when editing vendor */}
+                {vendorId && (
+                  <div>
+                    <Label htmlFor="status" text="Vendor Status" />
+                    {/* <SelectComponent
+                      name="status"
+                      register={register}
+                      trigger={trigger}
+                      error={errors?.status}
+                      options={statusOptions}
+                      placeholder="Select vendor status"
+                      getValues={getValues}
+                    /> */}
 
-          {/* Vendor address section */}
-          <p className="text-slate-800 text-lg font-semibold mt-8 mb-6">
-            Vendor address
-          </p>
+                    <div className="mt-3 flex items-center">
+                      <ToggleSwitch
+                        isOn={isOn}
+                        setIsOn={() => setIsOn(!isOn)}
+                      />
 
-          <div className="lg:w-3/4 w-full">
-            {/* Address line, country row */}
-            <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-              <div>
-                <Label htmlFor="line1" text="Address line 1" />
-                <TextInput
-                  register={register("billingAddress.line1")}
-                  id="line1"
-                  placeholder="Enter address line 1"
-                  error={errors.billingAddress?.line1}
-                  value={getValues("billingAddress.line1")}
-                />
-              </div>
-              <div>
-                <Label htmlFor="line2" text="Address line 2" />
-                <TextInput
-                  register={register("billingAddress.line2")}
-                  id="line2"
-                  placeholder="Enter address line 2"
-                  error={errors.billingAddress?.line2}
-                  value={getValues("billingAddress.line2")}
-                />
-              </div>
-              <div>
-                <Label htmlFor="country" text="Country" />
-                <SelectComponent
-                  name="billingAddress.country"
-                  register={register}
-                  getValues={getValues}
-                  trigger={trigger}
-                  error={errors.billingAddress?.country}
-                  options={countryOptions}
-                  placeholder="Select country"
-                  isClearable={true}
-                />
+                      <p className="ms-2 text-xs text-slate-800 dark:text-gray-200">
+                        {isOn ? "Active" : "Inactive"}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* State, city, zipcode row */}
+            {/* Vendor address section */}
+            <p className="text-slate-800 text-lg font-semibold mt-8 mb-6">
+              Address
+            </p>
+
+            <div className="w-full">
+              {/* Address line, country row */}
+              <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
+                <div>
+                  <Label htmlFor="line1" text="Address line 1" />
+                  <TextInput
+                    register={register("billingAddress.line1")}
+                    id="line1"
+                    placeholder="Enter address line 1"
+                    error={errors.billingAddress?.line1}
+                    value={getValues("billingAddress.line1")}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="line2" text="Address line 2" />
+                  <TextInput
+                    register={register("billingAddress.line2")}
+                    id="line2"
+                    placeholder="Enter address line 2"
+                    error={errors.billingAddress?.line2}
+                    value={getValues("billingAddress.line2")}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="country" text="Country" />
+                  <SelectComponent
+                    name="billingAddress.country"
+                    register={register}
+                    getValues={getValues}
+                    trigger={trigger}
+                    error={errors.billingAddress?.country}
+                    options={countryOptions}
+                    placeholder="Select country"
+                    isClearable={true}
+                  />
+                </div>
+              </div>
+
+              {/* State, city, zipcode row */}
+              <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
+                <div>
+                  <Label htmlFor="state" text="State" />
+                  <SelectComponent
+                    name="billingAddress.state"
+                    register={register}
+                    trigger={trigger}
+                    getValues={getValues}
+                    error={errors.billingAddress?.state}
+                    options={stateOptionsList}
+                    placeholder="Select state"
+                    isClearable={true}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="city" text="City" />
+                  <SelectComponent
+                    name="billingAddress.city"
+                    register={register}
+                    getValues={getValues}
+                    trigger={trigger}
+                    error={errors.billingAddress?.city}
+                    options={cityOptionsList}
+                    placeholder="Select city"
+                    isClearable={true}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="zip_code" text="Zipcode" />
+                  <TextInput
+                    register={register("billingAddress.zip_code")}
+                    id="zip_code"
+                    placeholder="Enter zipcode"
+                    error={errors.billingAddress?.zip_code}
+                    value={getValues("billingAddress.zip_code")}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Vendor bank details section */}
+            <p className="text-slate-800 text-lg font-semibold mt-8 mb-6">
+              Bank details
+            </p>
+
             <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
               <div>
-                <Label htmlFor="state" text="State" />
-                <SelectComponent
-                  name="billingAddress.state"
-                  register={register}
-                  trigger={trigger}
-                  getValues={getValues}
-                  error={errors.billingAddress?.state}
-                  options={stateOptionsList}
-                  placeholder="Select state"
-                  isClearable={true}
+                <Label
+                  htmlFor="account_holder_name"
+                  text="Account holder name"
                 />
-              </div>
-              <div>
-                <Label htmlFor="city" text="City" />
-                <SelectComponent
-                  name="billingAddress.city"
-                  register={register}
-                  getValues={getValues}
-                  trigger={trigger}
-                  error={errors.billingAddress?.city}
-                  options={cityOptionsList}
-                  placeholder="Select city"
-                  isClearable={true}
-                />
-              </div>
-              <div>
-                <Label htmlFor="zip_code" text="Zipcode" />
                 <TextInput
-                  register={register("billingAddress.zip_code")}
-                  id="zip_code"
-                  placeholder="Enter zipcode"
-                  error={errors.billingAddress?.zip_code}
-                  value={getValues("billingAddress.zip_code")}
+                  register={register("bank_account.account_holder_name")}
+                  id="account_holder_name"
+                  placeholder="Enter account holder name"
+                  error={errors.bank_account?.account_holder_name}
+                  value={getValues("bank_account.account_holder_name")}
+                />
+              </div>
+              <div>
+                <Label htmlFor="account_number" text="Account number" />
+                <TextInput
+                  register={register("bank_account.account_number")}
+                  id="account_number"
+                  placeholder="Enter account number"
+                  error={errors.bank_account?.account_number}
+                  value={getValues("bank_account.account_number")}
+                />
+              </div>
+              <div>
+                <Label htmlFor="bank_name" text="Bank name" />
+                <TextInput
+                  register={register("bank_account.bank_name")}
+                  id="bank_name"
+                  placeholder="Enter bank name"
+                  error={errors.bank_account?.bank_name}
+                  value={getValues("bank_account.bank_name")}
                 />
               </div>
             </div>
           </div>
 
           {/* Save and Cancel buttons */}
-          <div className="grid grid-cols-2 w-fit gap-3 mt-6">
+          <div className="grid grid-cols-2 w-fit gap-3 mt-10">
             <Button
               type="submit"
               text="Save"
@@ -407,9 +493,13 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
 
             <Button
               text="Cancel"
-              onClick={() => router.back()}
+              onClick={() =>
+                vendorId
+                  ? router.push(`/vendor/view?id=${vendorId}`)
+                  : router.push("/vendor/list")
+              }
               disabled={isLoaderFormSubmit}
-              className="bg-transparent text-primary-500 border border-primary-500 disabled:hover:bg-transparent disabled:text-primary-500 hover:bg-primary-500 hover:text-white"
+              className="bg-white text-primary-500 border border-primary-500 disabled:hover:bg-transparent disabled:text-primary-500 hover:bg-primary-500 hover:text-white"
             />
           </div>
         </form>

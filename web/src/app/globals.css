@@ -48,12 +48,12 @@ input::-webkit-credentials-auto-fill-button {
 .custom_scrollbar::-webkit-scrollbar {
   background-color: rgb(245, 245, 245);
   border-radius: 50px;
-  height: 5px;
-  width: 5px;
+  height: 6px;
+  width: 6px;
 }
 
 .custom_scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgb(219, 219, 219);
+  background-color: rgba(219, 219, 219);
   border-radius: 50px;
 }
 
@@ -228,43 +228,7 @@ input[type="checkbox"]:checked::before {
   }
 }
 
-@media (max-width: 1500px) {
-  * {
-    zoom: 0.99;
-  }
-
-  .layout_bg,
-  .bg_linear {
-    height: calc(100vh - (-80px));
-  }
-}
-
-@media (max-width: 1400px) {
-  * {
-    zoom: 0.985;
-  }
-
-  .layout_bg,
-  .bg_linear {
-    height: calc(100vh - (-80px));
-  }
-}
-
-@media (max-width: 1300px) {
-  * {
-    zoom: 0.98;
-  }
-
-  .layout_bg,
-  .bg_linear {
-    height: calc(100vh - (-80px));
-  }
-}
-
 @media (max-width: 450px) {
-  * {
-    zoom: 1 !important;
-  }
   input,
   select,
   textarea {
