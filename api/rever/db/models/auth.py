@@ -9,8 +9,10 @@ from django.utils import timezone
 from django.utils.timezone import get_default_timezone_name
 from django.utils.translation import gettext_lazy as _
 
+from .base import BaseModel
 
-class Organization(models.Model):
+
+class Organization(BaseModel):
     DATE_FORMAT_CHOICES = (
         ("YYYY-MM-DD", _("YYYY-MM-DD")),
         ("DD-MM-YYYY", _("DD-MM-YYYY")),
@@ -30,7 +32,6 @@ class Organization(models.Model):
         ("NZD", "New Zealand Dollar (NZ$)"),
         ("SEK", "Swedish Krona (kr)"),
     ]
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, unique=True)
     date_format = models.CharField(
         max_length=10,
@@ -39,8 +40,6 @@ class Organization(models.Model):
         help_text=_("Date format to use throughout the application"),
     )
     currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default="USD")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "Organization"
