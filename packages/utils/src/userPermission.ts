@@ -50,18 +50,21 @@ export const userPermissions: Record<Role, Record<Resource, Action[]>> = {
   admin: {
     vendor: ["view", "create", "update", "delete"],
     bill: ["view", "create", "update", "delete"],
+    purchaseorder: ["view", "create", "update", "delete"],
     members: ["view", "create", "update", "delete"],
     general: ["view", "create", "update", "delete"],
   },
   member: {
     vendor: ["view", "update", "create"],
     bill: ["view", "create", "update", "delete"],
+    purchaseorder: ["view", "create", "update", "delete"],
     members: ["view"],
     general: ["view"],
   },
   finance_manager: {
     vendor: ["view"],
     bill: [],
+    purchaseorder: [],
     members: ["view"],
     general: ["view"],
   },

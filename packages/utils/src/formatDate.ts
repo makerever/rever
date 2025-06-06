@@ -6,6 +6,7 @@ export function formatDate(
   format: string = "DD/MM/YYYY",
   timeZone?: string,
   fixedFormat?: boolean,
+  includeTime?: boolean,
 ): string {
   if (!input) return "Invalid Date";
 
@@ -62,6 +63,10 @@ export function formatDate(
   } else {
     // fallback to simple space-join
     result = pieces.join(" ");
+  }
+
+  if (includeTime) {
+    result += ` at ${dt.toFormat("HH:mm a")}`;
   }
 
   return result;

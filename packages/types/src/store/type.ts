@@ -7,6 +7,7 @@ type Organization = {
   currency?: string;
   date_format?: string;
   member_count?: number;
+  matching_type?: string;
 };
 
 // Type for logged-in user properties

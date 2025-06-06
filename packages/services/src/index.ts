@@ -8,3 +8,4 @@ export * from "./dashboard/handler";
 export * from "./members/handler";
 export * from "./notification/handler";
 export * from "./vendors/handler";
+export * from "./purchaseorders/handler";

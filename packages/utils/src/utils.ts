@@ -20,13 +20,16 @@ export const getFirstLetter = (str: string | undefined) => {
 
 //Function to format number
 export function formatNumber(
-  value: number | string,
+  value: number | string | undefined,
   currency: string = "USD",
   locale?: string,
   compact?: boolean,
 ): string {
+  if (value === undefined || value === null || value === "") return "";
+
   const num = typeof value === "string" ? parseFloat(value) : value;
-  if (isNaN(num)) return "";
+
+  if (typeof num !== "number" || isNaN(num)) return "";
 
   const currencyLocaleMap: Record<string, string> = {
     USD: "en-US",
@@ -64,7 +67,6 @@ export function formatNumber(
   }).format(num);
 
   if (["AUD", "CAD", "SGD", "NZD"].includes(currency)) {
-    // Replace $ with AU$/CA$/SG$ etc.
     return formatted.replace("$", currencyPrefixMap[currency]);
   }
 
@@ -77,7 +79,7 @@ export const capitalizeFirstLetter = (str: string) =>
 
 // Function to get combine address
 export const getCombineAddress = (str?: AddressTypeProps) => {
-  if (!str) return "-";
+  if (!str) return "--";
 
   return `${str.line1} ${str.line2} ${str.city ? "," + str.city : ""} ${
     str.state ? "," + str.state : ""
@@ -105,6 +107,7 @@ export const billStatusLabels: Record<string, string> = {
   under_approval: "Under approval",
   approved: "Approved",
   rejected: "Rejected",
+  closed: "Closed",
 };
 
 //Function to get labels for bill status
@@ -131,7 +134,7 @@ export const getStatusClass = (status: string = ""): string => {
     case "Pending":
       return "text-yellow-500 bg-yellow-50 border-yellow-200";
     default:
-      return "text-slate-800 bg-slate-50 border-slate-200";
+      return "none";
   }
 };
 
@@ -190,3 +193,7 @@ export const memberStatusLabels: Record<string, string> = {
 //Function to get labels for bill status
 export const getLabelForMemberStatus = (value: string) =>
   memberStatusLabels[value] || "--";
+
+export function convertToPercentage(value: number) {
+  return (value * 100).toFixed(0);
+}

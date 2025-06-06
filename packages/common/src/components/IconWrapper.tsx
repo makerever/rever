@@ -10,8 +10,8 @@ const IconWrapper = ({
 }: IconWrapperProps) => {
   return (
     <div
-      onClick={onClick}
-      className={`flex ${!isDisabled ? "cursor-pointer text-slate-800" : "cursor-not-allowed text-slate-400"} items-center justify-center w-7 h-7 rounded-md duration-300 transition ${
+      onClick={!isDisabled ? onClick : () => {}}
+      className={`flex ${!isDisabled ? "cursor-pointer text-slate-800" : "cursor-not-allowed text-slate-500"} items-center justify-center w-7 h-7 rounded-md duration-300 transition ${
         className ? className : `${!isDisabled ? "hover:bg-slate-100" : ""}`
       }`}
     >

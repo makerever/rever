@@ -22,7 +22,7 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
       <input
         type="checkbox"
         className="sr-only hidden"
-        checked={isOn}
+        checked={!!isOn}
         onChange={toggleSwitch}
         disabled={disabled}
       />

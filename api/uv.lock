@@ -178,6 +178,18 @@ wheels = [
 ]
 
 [[package]]
+name = "django-simple-history"
+version = "3.10.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/16/2b/8d43eed1f9de32e890e0f5780e6d623a5a7e645e0e77a515edd427029f3c/django_simple_history-3.10.1.tar.gz", hash = "sha256:040f0c2286bed730312aa15f0acee9e7e6f839c4bcd721693251aa7ec5b65d95", size = 233649, upload-time = "2025-06-20T20:22:32.722Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/01/c3/d4ba265feb7b8bad3cf0730a3a8d82bb40d14551f8c53c88895ec06fa51c/django_simple_history-3.10.1-py3-none-any.whl", hash = "sha256:e12c27abfcd7e801a9d274d94542549ce8c617b0b384ae69afb161b56cd02ba4", size = 78611, upload-time = "2025-06-20T20:22:30.878Z" },
+]
+
+[[package]]
 name = "django-storages"
 version = "1.14.6"
 source = { registry = "https://pypi.org/simple" }
@@ -453,7 +465,7 @@ wheels = [
 
 [[package]]
 name = "rever"
-version = "0.0.1"
+version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "boto3" },
@@ -461,6 +473,7 @@ dependencies = [
     { name = "django" },
     { name = "django-cors-headers" },
     { name = "django-redis" },
+    { name = "django-simple-history" },
     { name = "django-storages", extra = ["boto3"] },
     { name = "djangorestframework" },
     { name = "djangorestframework-simplejwt" },
@@ -489,6 +502,7 @@ requires-dist = [
     { name = "django", specifier = "==5.2.1" },
     { name = "django-cors-headers", specifier = "==4.7.0" },
     { name = "django-redis", specifier = ">=5.4.0" },
+    { name = "django-simple-history", specifier = ">=3.10.1" },
     { name = "django-storages", extras = ["boto3"], specifier = ">=1.14.6" },
     { name = "djangorestframework", specifier = "==3.16.0" },
     { name = "djangorestframework-simplejwt", specifier = "==5.5.0" },

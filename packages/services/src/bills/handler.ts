@@ -91,3 +91,17 @@ export const acceptRejectBillApi = async (
   );
   return response;
 };
+
+// Delete a specific attachment by its ID
+export const getBillAuditHistoryApi = async (id: number) => {
+  const response = await axiosInstance.get(`/audit/bill/${id}`);
+  return response;
+};
+
+// Delete a specific attachment by its ID
+export const getMatchResultsApi = async (id: string) => {
+  const response = await axiosInstance.get(
+    `${BILL_API.MANAGE_BILLS}${id}${BILL_API.MATCH_RESULTS}`,
+  );
+  return response;
+};

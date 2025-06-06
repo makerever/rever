@@ -85,7 +85,7 @@ const ApprovalList = () => {
               />
               <span
                 onClick={() => router.push(`/bill/${row?.original?.id}/review`)}
-                className="font-semibold cursor-pointer overflow-hidden text-ellipsis w-48"
+                className="font-semibold cursor-pointer overflow-hidden text-ellipsis"
               >
                 {getValue() as string}
               </span>
@@ -100,7 +100,7 @@ const ApprovalList = () => {
         cell: ({ getValue }) => {
           return (
             <div className="flex items-center gap-4">
-              <span className="overflow-hidden text-ellipsis w-40">
+              <span className="overflow-hidden text-ellipsis">
                 {getValue() as string}
               </span>
             </div>
@@ -113,7 +113,7 @@ const ApprovalList = () => {
         cell: ({ getValue }) => {
           return (
             <div className="flex items-center gap-4">
-              <span className="overflow-hidden text-ellipsis w-40">
+              <span className="overflow-hidden text-ellipsis">
                 {getValue() as string}
               </span>
             </div>
@@ -127,7 +127,7 @@ const ApprovalList = () => {
           const vendor = getValue() as { id: string | number; name: string };
           return (
             <div className="flex items-center gap-4">
-              <span className="overflow-hidden text-ellipsis w-40">
+              <span className="overflow-hidden text-ellipsis">
                 {vendor.name}
               </span>
             </div>
@@ -140,7 +140,7 @@ const ApprovalList = () => {
         cell: ({ getValue }) => {
           return (
             <div className="flex items-center gap-4">
-              <span className="overflow-hidden text-ellipsis w-40">
+              <span className="overflow-hidden text-ellipsis">
                 {getValue() as string}
               </span>
             </div>

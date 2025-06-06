@@ -26,8 +26,7 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 2. Create environment files:
 
    ```bash
-   cd api
-   cp .env.example .env
+   cp api/.env.example .env
    ```
 
 3. Update the environment variables in the `.env` files with your configuration.
@@ -50,7 +49,13 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
    - Run `ruff format` and `ruff check --fix` on Python files in the `api` directory
    - Run `yarn format` on TypeScript, TSX, and Markdown files
 
-6. Access the application at http://localhost:3000
+6. Run the migrations
+   ```bash 
+   docker exec -it <api-container-name> python manage.py migrate
+   ```
+   Get api-container-name by running `docker ps`
+
+7. Access the application at http://localhost:3000
 
 ## Project Structure
 

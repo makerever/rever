@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   description:
     "Automated invoicing, accounting, approvals, 3-way matching, vendor management, and more. Simplify your accounting and financial workflows.",
   keywords:
-    "3-way matching software, automated invoicing, vendor management, purchase order management, receipt tracking, Chart of Accounts software, bill posting integration, financial reconciliation, accounting SaaS",
+    "3-way matching software, automated invoicing, vendor management, purchase order management, receipt tracking, Chart of Accounts software, bill posting integrations, financial reconciliation, accounting SaaS",
 };
 
 export default function RootLayout({
@@ -36,7 +36,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#1e40af" />
         <link rel="icon" href="/icons/favicon.ico.svg" />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.className} scale-wrapper`}>
         <SafeHydrate>
           <HydrationLoader>
             <GlobalErrorBoundary>{children}</GlobalErrorBoundary>

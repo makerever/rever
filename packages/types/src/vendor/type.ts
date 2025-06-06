@@ -14,6 +14,7 @@ export interface Vendor {
 
 // Interface for address type
 export interface AddressTypeProps {
+  id?: string | number | null;
   line1: string;
   line2: string;
   country: string;

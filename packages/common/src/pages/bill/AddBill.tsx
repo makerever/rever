@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import { Button, PdfViewer } from "@rever/common";
+import { Button, PdfViewer, TextAreaInput } from "@rever/common";
 import { Label } from "@rever/common";
 import { TextInput } from "@rever/common";
 import { SelectComponent } from "@rever/common";
@@ -17,7 +17,7 @@ import { DatePickerDemo } from "@rever/common";
 import BillItemsTable from "./BillLineItems";
 import { NumberInput } from "@rever/common";
 import { formatNumber } from "@rever/utils";
-import { Option } from "@rever/types";
+import { Option, PurchaseOrder } from "@rever/types";
 import { Download, Paperclip, Trash, Upload } from "lucide-react";
 import { OutsideClickHandler } from "@rever/common";
 import { UploadFileView } from "@rever/common";
@@ -32,12 +32,13 @@ import {
   deleteBillAttachment,
   getBillAttachment,
   getBillDetailsByIdApi,
+  getPoByVendorApi,
   updateBillApi,
 } from "@rever/services";
 import { getVendorsDataAPI } from "@rever/services";
 import { VenderDataAPIType } from "@rever/types";
 import { AttachmentProps, Bill } from "@rever/types";
-import { useUserStore } from "@rever/stores";
+import { useBreadcrumbStore, useUserStore } from "@rever/stores";
 import { PageLoader } from "@rever/common";
 
 // Main Add Bill component with URL params
@@ -85,6 +86,11 @@ const AddBillComponentWithParams = () => {
   // State for vendor dropdown options
   const [vendorOptionList, setVendorOptionList] = useState<Option[]>([]);
 
+  // State for po dropdown options
+  const [purchaseOrderOptionList, setPurchaseOrderOptionList] = useState<
+    Option[]
+  >([]);
+
   // UI and file upload states
   const [isLoaderFormSubmit, setIsLoaderFormSubmit] = useState(false);
   const [fileUrl, setFileUrl] = useState<string | null>(null);
@@ -102,14 +108,24 @@ const AddBillComponentWithParams = () => {
 
   const orgDetails = useUserStore((state) => state.user?.organization);
 
+  const setDynamicCrumb = useBreadcrumbStore((s) => s.setDynamicCrumb);
+
   const billDate = watch("bill_date");
   const dueDate = watch("due_date");
+  const vendor = watch("vendor");
 
   useEffect(() => {
     if (dueDate && new Date(dueDate) < new Date(billDate)) {
       resetField("due_date");
     }
   }, [billDate]);
+
+  useEffect(() => {
+    const vendor_id = getValues("vendor");
+    if (vendor_id) {
+      getPoList(vendor_id);
+    }
+  }, [vendor]);
 
   // Fetch bill details and attachment by ID (for editing)
   const getBillDetailsById = useCallback(
@@ -119,13 +135,19 @@ const AddBillComponentWithParams = () => {
         if (response?.data?.status === "approved") {
           router.back();
         }
+        setDynamicCrumb("/bill/edit", {
+          id: response?.data?.id,
+          name: response?.data?.bill_number,
+        });
         setValue("billNumber", response?.data.bill_number);
         setValue("items", response?.data?.items);
         setValue("bill_date", new Date(response?.data?.bill_date));
         setValue("due_date", new Date(response?.data?.due_date));
         setValue("payment_terms", response?.data?.payment_terms);
         setValue("vendor", response?.data?.vendor.id);
+        setValue("purchase_order", response?.data?.purchase_order?.id);
         setValue("total_tax", response?.data?.tax_percentage);
+        setValue("comments", response?.data?.comments);
         setBillDetails(response?.data);
 
         // Fetch bill attachment (PDF)
@@ -171,6 +193,20 @@ const AddBillComponentWithParams = () => {
     }
   };
 
+  // Fetch po options for dropdown
+  const getPoList = async (id: string) => {
+    const response = await getPoByVendorApi(id);
+    if (response?.status === 200) {
+      const data = response?.data?.map((v: PurchaseOrder) => {
+        return {
+          label: v?.po_number,
+          value: v?.id,
+        };
+      });
+      setPurchaseOrderOptionList(data);
+    }
+  };
+
   // Prevent form submission on Enter except for textarea
   const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
     if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "TEXTAREA") {
@@ -196,6 +232,7 @@ const AddBillComponentWithParams = () => {
     const billDetails = {
       bill_number: data?.billNumber,
       vendor_id: data.vendor,
+      purchase_order_id: data.purchase_order,
       payment_terms: data?.payment_terms,
       bill_date: data?.bill_date
         ? formatDate(data?.bill_date, "yyyy-MM-dd", "", true)
@@ -203,6 +240,7 @@ const AddBillComponentWithParams = () => {
       due_date: data?.due_date
         ? formatDate(data?.due_date, "yyyy-MM-dd", "", true)
         : null,
+      comments: data?.comments,
       status: submitType,
       sub_total: subtotal.toFixed(2) || 0,
       total: total.toFixed(2) || 0,
@@ -392,31 +430,31 @@ const AddBillComponentWithParams = () => {
             <div className="lg:flex gap-10">
               {/* PDF preview section (if file uploaded and showPdf is true) */}
               {fileUrl && showPdf ? (
-                <div className="lg:w-2/5 bg-white shadow-5xl rounded-md overflow-hidden">
-                  <div className="flex justify-end py-1 pr-2">
-                    <IconWrapper
-                      icon={
-                        <a href={fileUrl || "#"} download="bill.pdf">
-                          <Download className="cursor-pointer" width={16} />
-                        </a>
-                      }
-                    />
-
-                    <IconWrapper
-                      onClick={() => {
-                        if (idValue) {
-                          deleteBillAttachmentFunc();
-                        }
-                        setFileUrl(null);
-                      }}
-                      icon={<Trash width={16} />}
-                      className="hover:bg-red-100 hover:text-red-500"
-                    />
-                  </div>
+                <div className="lg:w-2/5">
                   <div
                     // style={{ height: "580px" }}
-                    className="scrollbar_none overflow-auto"
+                    className="scrollbar_none overflow-auto bg-white shadow-5xl rounded-md overflow-hidden"
                   >
+                    <div className="flex justify-end py-1 pr-2">
+                      <IconWrapper
+                        icon={
+                          <a href={fileUrl || "#"} download="bill.pdf">
+                            <Download className="cursor-pointer" width={16} />
+                          </a>
+                        }
+                      />
+
+                      <IconWrapper
+                        onClick={() => {
+                          if (idValue) {
+                            deleteBillAttachmentFunc();
+                          }
+                          setFileUrl(null);
+                        }}
+                        icon={<Trash width={16} />}
+                        className="hover:bg-red-100 hover:text-red-500"
+                      />
+                    </div>
                     <PdfViewer fileUrl={fileUrl} />
                   </div>
                 </div>
@@ -439,11 +477,7 @@ const AddBillComponentWithParams = () => {
                     {/* Bill details fields */}
                     <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
                       <div>
-                        <Label
-                          htmlFor="billNumber"
-                          text="Bill number"
-                          isRequired
-                        />
+                        <Label htmlFor="billNumber" text="Bill number" />
                         <TextInput
                           register={register("billNumber")}
                           id="billNumber"
@@ -466,6 +500,25 @@ const AddBillComponentWithParams = () => {
                           getValues={getValues}
                         />
                       </div>
+
+                      <div>
+                        <Label htmlFor="purchase_order" text="Purchase order" />
+                        <SelectComponent
+                          name="purchase_order"
+                          register={register}
+                          trigger={trigger}
+                          title="Purchase order"
+                          error={errors?.purchase_order}
+                          options={purchaseOrderOptionList}
+                          placeholder="Select purchase order"
+                          isClearable={true}
+                          getValues={getValues}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Bill date and due date fields */}
+                    <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
                       <div>
                         <Label htmlFor="payment_terms" text="Payment terms" />
                         <SelectComponent
@@ -479,10 +532,6 @@ const AddBillComponentWithParams = () => {
                           getValues={getValues}
                         />
                       </div>
-                    </div>
-
-                    {/* Bill date and due date fields */}
-                    <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
                       <div>
                         <Label
                           htmlFor="bill_date"
@@ -517,18 +566,6 @@ const AddBillComponentWithParams = () => {
                           }
                         />
                       </div>
-                      {/*
-                  <div>
-                    <Label htmlFor="dueDate" text="Comments" />
-                    <TextInput
-                      register={register("comments")}
-                      id="comments"
-                      placeholder="Enter comments"
-                      error={errors.comments}
-                      value={getValues("comments")}
-                    />
-                  </div>
-                  */}
                     </div>
                   </div>
 
@@ -578,8 +615,22 @@ const AddBillComponentWithParams = () => {
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-3">
+                    <div>
+                      <Label htmlFor="comments" text="Notes" />
+                      <TextAreaInput
+                        rows={3}
+                        register={register("comments")}
+                        id="comments"
+                        placeholder="Enter notes"
+                        error={errors.comments}
+                        value={getValues("comments")}
+                      />
+                    </div>
+                  </div>
+
                   {/* Form action buttons */}
-                  <div className="flex items-center gap-3 mt-6">
+                  <div className="flex items-center gap-3 mt-10">
                     <div className="w-fit">
                       <Button
                         type="submit"

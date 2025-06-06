@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { PieChartProps } from "@rever/types";
 import { overviewOptions } from "@rever/constants";
-import { SelectComponent } from "@rever/common";
+import { PageLoader, SelectComponent } from "@rever/common";
 import { useSidebarStore } from "@rever/stores";
 import { formatNumber } from "@rever/utils";
 import { useUserStore } from "@rever/stores";
@@ -19,6 +19,7 @@ const PieChart = ({
   setBarChartFilter,
   radialSeries,
   totalAmount = "0",
+  isDataLoading,
 }: PieChartProps) => {
   // Get sidebar collapsed state from store
   const sidebarCollapsed = useSidebarStore((state) => state.isCollapsed);
@@ -189,13 +190,19 @@ const PieChart = ({
             sidebarCollapsed ? "sm:w-[calc(100%-80px)]" : "w-[calc(100%)]"
           }`}
         >
-          <Chart
-            options={radialOptions}
-            series={radialSeries}
-            type="donut"
-            height={350}
-            key={`${radialSeries.join("-")}-${totalAmount}`}
-          />
+          {isDataLoading ? (
+            <PageLoader />
+          ) : (
+            <div className="h-96 min-h-96">
+              <Chart
+                options={radialOptions}
+                series={radialSeries}
+                type="donut"
+                height={350}
+                key={`${radialSeries.join("-")}-${totalAmount}`}
+              />
+            </div>
+          )}
         </div>
       </div>
     </>

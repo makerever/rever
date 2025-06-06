@@ -20,6 +20,14 @@ export const VENDOR_API = {
   MANAGE_VENDORS: "/vendors/",
 };
 
+// Purchase Order API Endpoints
+export const PURCHASE_ORDER_API = {
+  MANAGE_PURCHASE_ORDERS: "/purchase-orders/",
+  SEND_PO_APPROVAL: "/approval/send/purchaseorder/",
+  APPROVE_REJECT_PO: "/approval/action/purchaseorder/",
+  UNDER_APPROVAL_PO: "/approval/assigned/purchaseorder/",
+};
+
 // BIll API Endpoints
 export const BILL_API = {
   MANAGE_BILLS: "/bills/",
@@ -28,6 +36,7 @@ export const BILL_API = {
   APPROVE_REJECT_BILL: "/approval/action/bill/",
   BILL_SUMMARY: "/bills/summary/",
   BARGRAPH_DATA: "/bills/summary/monthly/",
+  MATCH_RESULTS: "/match-results/",
 };
 
 // Attachment API Endpoints
@@ -56,5 +65,5 @@ export const MEMBER_API = {
 
 // Notification API Endpoints
 export const NOTIFICATION_API = {
-  MANAGE_NOTIFICATION: "/notification/settings/",
+  MANAGE_NOTIFICATION: "/users/me/notification-preferences/",
 };

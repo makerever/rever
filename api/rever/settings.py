@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "rever.app",
     "rever.bgtasks",
     "rever.middleware",
+    "simple_history",
 ]
 
 MIDDLEWARE = [
@@ -63,6 +64,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "rever.middleware.logger.RequestLoggerMiddleware",
+    "crum.CurrentRequestUserMiddleware",
+    "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
 REST_FRAMEWORK = {

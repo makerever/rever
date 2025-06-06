@@ -3,6 +3,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
+from .base import BaseModel
+
 ACTION_TYPE_CHOICES = [
     ("under_approval", "Under Approval"),
     ("approved", "Approved"),
@@ -10,31 +12,31 @@ ACTION_TYPE_CHOICES = [
 ]
 
 
-class ApprovalSetting(models.Model):
+class ApprovalConfig(BaseModel):
     organization = models.ForeignKey("Organization", on_delete=models.CASCADE)
     model_name = models.CharField(max_length=100)
     approval_enabled = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ("organization", "model_name")
-        db_table = "approvalsettings"
-        verbose_name = "Approval Setting"
-        verbose_name_plural = "Approval Settings"
+        db_table = "approval_configs"
+        verbose_name = "ApprovalConfig"
+        verbose_name_plural = "ApprovalConfigs"
 
 
-class ApprovalAssignment(models.Model):
+class ApprovalFlow(BaseModel):
     organization = models.ForeignKey("Organization", on_delete=models.CASCADE)
     model_name = models.CharField(max_length=100)
     approver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
 
     class Meta:
         unique_together = ("organization", "model_name")
-        db_table = "approvalassignments"
-        verbose_name = "Approval Assignment"
-        verbose_name_plural = "Approval Assignments"
+        db_table = "approval_flows"
+        verbose_name = "ApprovalFlow"
+        verbose_name_plural = "ApprovalFlows"
 
 
-class ApprovalAction(models.Model):
+class ApprovalLog(BaseModel):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.UUIDField()
     content_object = GenericForeignKey("content_type", "object_id")
@@ -49,7 +51,7 @@ class ApprovalAction(models.Model):
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name="approval_sent_actions",
+        related_name="approval_requests_sent",
     )
     approval_sent_at = models.DateTimeField(null=True, blank=True)
 
@@ -57,10 +59,9 @@ class ApprovalAction(models.Model):
     comment = models.TextField(blank=True)
 
     approved_at = models.DateTimeField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         # unique_together = ('content_type', 'object_id')
-        db_table = "approvalactions"
-        verbose_name = "Approval Action"
-        verbose_name_plural = "Approval Actions"
+        db_table = "approval_logs"
+        verbose_name = "ApprovalLog"
+        verbose_name_plural = "ApprovalLogs"

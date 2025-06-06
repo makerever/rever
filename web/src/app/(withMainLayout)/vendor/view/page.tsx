@@ -16,6 +16,7 @@ import {
   useApi,
   VENDOR_API,
 } from "@rever/services";
+import { useBreadcrumbStore } from "@rever/stores";
 import {
   VenderDataAPIType,
   VendorsAPIData,
@@ -39,6 +40,8 @@ const ViewVendorWithParams = () => {
   const [vendorList, setVendorList] = useState<VendorTableList[]>([]);
   const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
 
+  const setDynamicCrumb = useBreadcrumbStore((s) => s.setDynamicCrumb);
+
   // Fetch all vendors data using custom API hook
   const { data: vendors } = useApi<VendorsAPIData>(
     "vendor",
@@ -49,12 +52,16 @@ const ViewVendorWithParams = () => {
   const handleGetIndividualVendor = useCallback(async () => {
     const response = await getVendorDetailsAPI(idValue ?? "");
     if (response.status === 200) {
-      setIsLoading(false);
+      setDynamicCrumb("/vendor/view", {
+        id: response?.data?.id,
+        name: response?.data?.vendor_name,
+      });
       setVendorData(response.data);
+      setIsLoading(false);
     } else {
       setIsLoading(false);
     }
-  }, [idValue]);
+  }, [idValue, setDynamicCrumb]);
 
   // Effect to redirect if no vendor ID or fetch individual vendor details
   useEffect(() => {

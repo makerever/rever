@@ -4,6 +4,7 @@
 
 import { SearchInputPropos } from "@rever/types";
 import { CircleX, Command, Search } from "lucide-react";
+import { CustomTooltip } from "@rever/common";
 
 export default function SearchInput({
   onlyIcon,
@@ -15,9 +16,11 @@ export default function SearchInput({
 }: SearchInputPropos) {
   // If onlyIcon is true, render just the search icon button
   return onlyIcon ? (
-    <div className="text-slate-800 transition-all hover:bg-slate-50 p-2 rounded-md cursor-pointer flex items-center justify-center">
-      <Search size={14} />
-    </div>
+    <CustomTooltip content="Global search" side="right">
+      <div className="text-slate-800 transition-all hover:bg-slate-50 p-2 rounded-md cursor-pointer flex items-center justify-center">
+        <Search size={14} />
+      </div>
+    </CustomTooltip>
   ) : (
     <>
       {/* Search input with icons */}
@@ -34,7 +37,7 @@ export default function SearchInput({
           readOnly={!clearSearch} // Make input readonly if clearSearch is not provided
           onChange={onChange}
           placeholder={placeholder}
-          className="px-8 disabled:bg-gray-100 rounded-md font-light h-8 border text-2xs w-full transition duration-200 hover:border-slate-400 focus:outline-none focus:border-primary-500 text-slate-800"
+          className="px-8 disabled:bg-gray-100 rounded-md font-light h-8 border border-slate-200 text-2xs w-full transition duration-200 hover:border-slate-400 focus:outline-none focus:border-primary-500 text-slate-800"
         />
         {!noCmdIcon ? (
           <div className="absolute p-1 bg-gray-100 flex text-xs items-center justify-center rounded-sm right-1.5 top-1/2 -translate-y-1/2 text-gray-400">

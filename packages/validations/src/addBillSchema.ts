@@ -3,7 +3,7 @@
 import { z } from "zod";
 
 export const addBillSchema = z.object({
-  billNumber: z.string().min(1, "Bill no is required"),
+  billNumber: z.string().optional(),
   comments: z.string().optional(),
   bill_date: z.date().refine((val) => !!val, {
     message: "Bill date is required",
@@ -11,8 +11,9 @@ export const addBillSchema = z.object({
   due_date: z.date().refine((val) => !!val, {
     message: "Due date is required",
   }),
-  payment_terms: z.string().optional(),
+  payment_terms: z.string().nullable().optional(),
   vendor: z.string().min(1, "Vendor is required"),
+  purchase_order: z.string().optional(),
   total_tax: z.string().optional(),
   sub_total: z.string().optional(),
   total: z.string().optional(),

@@ -8,7 +8,9 @@ import { useSidebarStore } from "@rever/stores";
 import { formatNumber } from "@rever/utils";
 import { useUserStore } from "@rever/stores";
 import { memo } from "react";
+import { PageLoader } from "@rever/common";
 import React from "react";
+import { isMiddlewareFile } from "next/dist/build/utils";
 
 // Dynamically import the Chart component from react-apexcharts (client-side only)
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
@@ -22,6 +24,7 @@ function BarChart({
   totalBills,
   barChartFilter,
   setBarChartFilter,
+  isDataLoading,
 }: BarChartProps) {
   // Get sidebar collapsed state from store
   const sidebarCollapsed = useSidebarStore((state) => state.isCollapsed);
@@ -198,12 +201,18 @@ function BarChart({
             sidebarCollapsed ? "sm:w-[calc(100%-80px)]" : "w-[100%]"
           }`}
         >
-          <Chart
-            options={barOptions}
-            series={barSeries}
-            type="bar"
-            height={350}
-          />
+          {isDataLoading ? (
+            <PageLoader />
+          ) : (
+            <div className="h-96 min-h-96">
+              <Chart
+                options={barOptions}
+                series={barSeries}
+                type="bar"
+                height={350}
+              />
+            </div>
+          )}
         </div>
       </div>
     </>

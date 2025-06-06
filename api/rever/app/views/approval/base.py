@@ -10,22 +10,22 @@ from rever.app.permissions import (
     with_permission_classes,
 )
 from rever.app.serializers import (
-    ApprovalActionLogSerializer,
     ApprovalActionSerializer,
-    ApprovalAssignmentSerializer,
-    ApprovalSettingSerializer,
+    ApprovalConfigSerializer,
+    ApprovalFlowSerializer,
+    ApprovalLogSerializer,
 )
 from rever.app.views.base import BaseAPIView
 from rever.bgtasks import send_approval_email, send_approval_status_email
-from rever.db.models import ApprovalAction, ApprovalAssignment, ApprovalSetting, User
+from rever.db.models import ApprovalConfig, ApprovalFlow, ApprovalLog, User
 from rever.utils.approval_constants import APPROVAL_MODEL_MAP
 from rever.utils.workflows import has_objects_under_approval
 
 
-class ApprovalSettingAPIView(BaseAPIView):
+class ApprovalConfigAPIView(BaseAPIView):
     def get(self, request):
         organization = self.get_organization()
-        approvals = ApprovalSetting.objects.filter(
+        approvals = ApprovalConfig.objects.filter(
             organization=organization, approval_enabled=True
         ).values("model_name", "approval_enabled")
 
@@ -36,9 +36,9 @@ class ApprovalSettingAPIView(BaseAPIView):
         data = request.data.copy()
         data["organization"] = self.get_organization().id
 
-        serializer = ApprovalSettingSerializer(data=data)
+        serializer = ApprovalConfigSerializer(data=data)
         if serializer.is_valid():
-            ApprovalSetting.objects.update_or_create(
+            ApprovalConfig.objects.update_or_create(
                 organization_id=data["organization"],
                 model_name=data["model_name"].lower(),
                 defaults={"approval_enabled": data["approval_enabled"]},
@@ -56,6 +56,7 @@ class ApprovalSettingAPIView(BaseAPIView):
         organization = self.get_organization()
 
         if has_objects_under_approval(model_key, organization):
+            print("Hello", model_key, organization)
             return Response(
                 {
                     "detail": f"Cannot remove approval — some {model_key} records are still under approval."  # noqa: E501
@@ -63,9 +64,9 @@ class ApprovalSettingAPIView(BaseAPIView):
                 status=400,
             )
 
-        ApprovalAssignment.objects.filter(organization=organization, model_name=model_key).delete()
+        ApprovalFlow.objects.filter(organization=organization, model_name=model_key).delete()
 
-        deleted, _ = ApprovalSetting.objects.filter(
+        deleted, _ = ApprovalConfig.objects.filter(
             organization=organization, model_name=model_key
         ).delete()
 
@@ -74,7 +75,7 @@ class ApprovalSettingAPIView(BaseAPIView):
         return Response({"detail": "No approval workflow found"}, status=404)
 
 
-class AssignApproverAPIView(BaseAPIView):
+class ApprovalFlowAPIView(BaseAPIView):
     @with_permission_classes([IsSuperAdmin])
     def post(self, request):
         org = request.user.organization
@@ -95,9 +96,9 @@ class AssignApproverAPIView(BaseAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        serializer = ApprovalAssignmentSerializer(data=data)
+        serializer = ApprovalFlowSerializer(data=data)
         if serializer.is_valid():
-            approval_setting = ApprovalSetting.objects.filter(
+            approval_setting = ApprovalConfig.objects.filter(
                 organization=org,
                 model_name=data["model_name"].lower(),
                 approval_enabled=True,
@@ -109,7 +110,7 @@ class AssignApproverAPIView(BaseAPIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            ApprovalAssignment.objects.update_or_create(
+            ApprovalFlow.objects.update_or_create(
                 organization=org,
                 model_name=data["model_name"].lower(),
                 defaults={"approver_id": data["approver"]},
@@ -126,7 +127,7 @@ class AssignApproverAPIView(BaseAPIView):
                 {"detail": "model_name is required"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        assignment = ApprovalAssignment.objects.filter(
+        assignment = ApprovalFlow.objects.filter(
             organization=request.user.organization, model_name=model_name.lower()
         ).first()
 
@@ -145,7 +146,7 @@ class AssignApproverAPIView(BaseAPIView):
         )
 
 
-class SendForApprovalAPIView(BaseAPIView):
+class ApprovalLogAPIView(BaseAPIView):
     def post(self, request, model_name, object_id):
         org = request.user.organization
         user = request.user
@@ -158,7 +159,7 @@ class SendForApprovalAPIView(BaseAPIView):
         obj = get_object_or_404(model, id=object_id, organization=org)
 
         # Check if approval is enabled
-        if not ApprovalSetting.objects.filter(
+        if not ApprovalConfig.objects.filter(
             organization=org, model_name=model_name.lower(), approval_enabled=True
         ).exists():
             return Response(
@@ -167,7 +168,7 @@ class SendForApprovalAPIView(BaseAPIView):
             )
 
         # Check if an approver is assigned
-        assignment = ApprovalAssignment.objects.filter(
+        assignment = ApprovalFlow.objects.filter(
             organization=org, model_name=model_name.lower()
         ).first()
 
@@ -183,7 +184,7 @@ class SendForApprovalAPIView(BaseAPIView):
             obj.save()
 
         # Create ApprovalAction entry
-        ApprovalAction.objects.create(
+        ApprovalLog.objects.create(
             content_type=ContentType.objects.get_for_model(obj),
             object_id=obj.id,
             content_object=obj,
@@ -195,7 +196,7 @@ class SendForApprovalAPIView(BaseAPIView):
         )
 
         # Notify approver
-        if assignment.approver.notification_settings.notify_on_approval_request:
+        if assignment.approver.user_notification_preference.notify_on_approval_request:
             send_approval_email.delay(
                 recipient_email=assignment.approver.email,
                 recipient_name=assignment.approver.get_full_name(),
@@ -207,7 +208,7 @@ class SendForApprovalAPIView(BaseAPIView):
         return Response({"detail": f"{model_name.title()} sent for approval."}, status=200)
 
 
-class ApproveOrRejectAPIView(BaseAPIView):
+class ApprovalActionAPIView(BaseAPIView):
     @with_permission_classes([IsFinanceManager])
     def post(self, request, model_name, object_id):
         user = request.user
@@ -220,7 +221,7 @@ class ApproveOrRejectAPIView(BaseAPIView):
         model = model_config["model"]
         obj = get_object_or_404(model, id=object_id, organization=org)
 
-        assignment = ApprovalAssignment.objects.filter(
+        assignment = ApprovalFlow.objects.filter(
             organization=org, model_name=model_name.lower()
         ).first()
 
@@ -246,7 +247,7 @@ class ApproveOrRejectAPIView(BaseAPIView):
 
         # Save Approval Action
         content_type = ContentType.objects.get_for_model(obj)
-        ApprovalAction.objects.create(
+        ApprovalLog.objects.create(
             content_type=content_type,
             object_id=obj.id,
             content_object=obj,
@@ -259,7 +260,7 @@ class ApproveOrRejectAPIView(BaseAPIView):
 
         # Notify original sender if needed
         sent_action = (
-            ApprovalAction.objects.filter(
+            ApprovalLog.objects.filter(
                 content_type=content_type,
                 object_id=obj.id,
                 action_type="under_approval",
@@ -271,7 +272,8 @@ class ApproveOrRejectAPIView(BaseAPIView):
         if (
             sent_action
             and sent_action.approval_sent_by
-            and sent_action.approval_sent_by.notification_settings.notify_on_approval_result
+            and hasattr(sent_action.approval_sent_by, "user_notification_preference")
+            and sent_action.approval_sent_by.user_notification_preference.notify_on_approval_result
         ):
             send_approval_status_email.delay(
                 model_name=model_name,
@@ -284,7 +286,7 @@ class ApproveOrRejectAPIView(BaseAPIView):
         return Response({"detail": f"{model_name.title()} {action}d successfully."}, status=200)
 
 
-class AssignedApprovalListAPIView(BaseAPIView):
+class ApprovalFlowListAPIView(BaseAPIView):
     def get(self, request, model_name):
         user = request.user
         org = user.organization
@@ -296,7 +298,7 @@ class AssignedApprovalListAPIView(BaseAPIView):
         model = model_config["model"]
         serializer_class = model_config["serializer"]
 
-        assignment = ApprovalAssignment.objects.filter(
+        assignment = ApprovalFlow.objects.filter(
             organization=org, model_name=model_name.lower(), approver=user
         ).first()
 
@@ -315,7 +317,7 @@ class AssignedApprovalListAPIView(BaseAPIView):
         return Response(serializer.data, status=200)
 
 
-class ApprovalActionListAPIView(BaseAPIView):
+class ApprovalLogListAPIView(BaseAPIView):
     def get(self, request, model_name, object_id):
         user = request.user
         org = user.organization
@@ -344,9 +346,9 @@ class ApprovalActionListAPIView(BaseAPIView):
             )
 
         # Get approval history
-        actions = ApprovalAction.objects.filter(
+        actions = ApprovalLog.objects.filter(
             content_type=content_type, object_id=object_id, organization=org
         ).order_by("-created_at")
 
-        serializer = ApprovalActionLogSerializer(actions, many=True)
+        serializer = ApprovalLogSerializer(actions, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

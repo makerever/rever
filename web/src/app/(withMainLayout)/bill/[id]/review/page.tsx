@@ -7,7 +7,6 @@ import {
   Label,
   Modal,
   PageLoader,
-  showErrorToast,
   showSuccessToast,
   TextAreaInput,
 } from "@rever/common";
@@ -16,8 +15,6 @@ import {
   acceptRejectBillApi,
   getBillAttachment,
   getBillDetailsByIdApi,
-  sendBillForApprovalApi,
-  updateBillApi,
 } from "@rever/services";
 import { Bill } from "@rever/types";
 import { useParams, useRouter } from "next/navigation";
@@ -34,8 +31,6 @@ const ViewBillWithParams = () => {
 
   const [isLoaderFormSubmit, setIsLoaderFormSubmit] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isConfirmRejectPopupOpen, setIsConfirmRejectPopupOpen] =
-    useState<boolean>(false);
   const [fileUrl, setFileUrl] = useState<string>("");
   const [showPdf, setShowPdf] = useState<boolean>(false);
 
@@ -57,7 +52,7 @@ const ViewBillWithParams = () => {
 
         setIsLoading(false);
       } else {
-        router.push("/bill/approvals/list");
+        router.push("/approvals/list/review");
       }
     },
     [router],
@@ -67,51 +62,12 @@ const ViewBillWithParams = () => {
   useEffect(() => {
     if (!idValue) {
       // If no ID, redirect to list page
-      router.push("/bill/approvals/list");
+      router.push("/approvals/list/review");
     } else {
       setIsLoading(true);
       getBillDetailsById(idValue as string);
     }
   }, [getBillDetailsById, idValue, router]);
-
-  // Approve or reject bill (from popup)
-  const handleBillApprovalRejection = async () => {
-    if (idValue) {
-      setIsLoaderFormSubmit(true);
-      const billDetails = {
-        status: isConfirmRejectPopupOpen ? "rejected" : "approved",
-      };
-      const response = await updateBillApi(billDetails, idValue as string);
-      if (response?.status === 200) {
-        setIsConfirmRejectPopupOpen(false);
-        setIsLoaderFormSubmit(false);
-        showSuccessToast(
-          `Bill ${
-            isConfirmRejectPopupOpen ? "rejected" : "approved"
-          } successfully`,
-        );
-        router.push("/bill/approvals/list");
-      } else {
-        if (response?.data?.detail) {
-          showErrorToast(response?.data?.detail);
-        }
-        setIsLoaderFormSubmit(false);
-      }
-    }
-  };
-
-  // Send bill for approval
-  const handleSendBillApproval = async () => {
-    setIsLoaderFormSubmit(true);
-    const response = await sendBillForApprovalApi(idValue as string);
-    if (response?.status === 200) {
-      setIsLoaderFormSubmit(false);
-      showSuccessToast("Bill sent for approval");
-      router.push("/bill/approvals/list");
-    } else {
-      setIsLoaderFormSubmit(false);
-    }
-  };
 
   // Approve bill (for user approval action)
   const handleApprovalAction = async () => {
@@ -121,7 +77,7 @@ const ViewBillWithParams = () => {
     };
     const response = await acceptRejectBillApi(data, idValue as string);
     if (response?.status === 200) {
-      router.push("/bill/approvals/list");
+      router.push("/approvals/list/review");
       showSuccessToast("Bill approved successfully");
       setIsLoaderFormSubmit(false);
     } else {
@@ -138,7 +94,7 @@ const ViewBillWithParams = () => {
     };
     const response = await acceptRejectBillApi(data, idValue as string);
     if (response?.status === 200) {
-      router.push("/bill/approvals/list");
+      router.push("/approvals/list/review");
       showSuccessToast("Bill rejected successfully");
       setIsLoaderFormSubmit(false);
     } else {
@@ -160,12 +116,9 @@ const ViewBillWithParams = () => {
               showPdf={showPdf}
               setShowPdf={(val) => setShowPdf(val)}
               isLoaderFormSubmit={isLoaderFormSubmit}
-              handleRejectBill={() => setIsConfirmRejectPopupOpen(true)}
-              handleApproveBill={handleBillApprovalRejection}
-              handleSendBillApproval={handleSendBillApproval}
-              isUserApproval
               handleApprovalAction={handleApprovalAction}
               handleRejectionAction={() => setConfirmBillReject(true)}
+              isUserApproval
             />
           </div>
         )}
@@ -206,7 +159,7 @@ const ViewBillWithParams = () => {
 };
 
 // Suspense wrapper for async param loading
-const ViewApprovalBIll = () => {
+const ViewApprovalBill = () => {
   return (
     <Suspense>
       <ViewBillWithParams />
@@ -214,4 +167,4 @@ const ViewApprovalBIll = () => {
   );
 };
 
-export default ViewApprovalBIll;
+export default ViewApprovalBill;

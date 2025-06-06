@@ -12,7 +12,7 @@ import {
   UseFormTrigger,
 } from "react-hook-form";
 import { MultiValue, SingleValue } from "react-select";
-import { billingAddress } from "../apiTypes/type";
+import { bankDetailsTypes, billingAddress } from "../apiTypes/type";
 import { LoggedUserProps } from "../store/type";
 
 // Interface for button component props
@@ -157,6 +157,7 @@ export interface checkBoxProps {
 // Interface for table component props
 export interface TableProps<T> {
   tableHeading?: string;
+  exportKey?: string;
   addBtnText?: string;
   onActionBtClick?: () => void;
   tableData: T[];
@@ -174,6 +175,8 @@ export interface TableProps<T> {
   isMembers?: boolean;
   noStatusFilter?: boolean;
   filterHeading?: string;
+  hideExportIcon?: boolean;
+  flowImageSrc?: string;
 }
 
 // Interface for status filter component props
@@ -293,6 +296,7 @@ export interface BillingAddressWithId extends billingAddress {
 export interface VenderDataAPIType {
   id?: string;
   billing_address: BillingAddressWithId;
+  bank_account: bankDetailsTypes;
   vendor_name: string;
   company_name: string;
   email: string;
@@ -302,6 +306,7 @@ export interface VenderDataAPIType {
   payment_terms: string | null;
   website: string;
   is_active: boolean;
+  updated_at?: string;
 }
 
 // Interface for vendor table list
@@ -330,7 +335,12 @@ export interface VendorTableList {
 // Type for user role
 export type Role = "admin" | "member" | "finance_manager";
 // Type for resource
-export type Resource = "vendor" | "bill" | "members" | "general";
+export type Resource =
+  | "vendor"
+  | "bill"
+  | "members"
+  | "general"
+  | "purchaseorder";
 // Type for action
 export type Action = "view" | "create" | "update" | "delete";
 
@@ -394,4 +404,39 @@ export type Step = {
 export type StepperProps = {
   steps: Step[];
   activeStep: number;
+};
+
+//Type for sidepanel
+export interface SidePanelProps {
+  isOpen: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}
+
+// Types for audit history change value
+type ChangeEntry = {
+  field: string;
+  old: string;
+  new: string;
+};
+
+// Types for audit history items
+export interface AuditHistoryItemsProps {
+  changed_on: string;
+  changed_by: string;
+  event: string;
+  field?: string;
+  new_value: Record<string, string>;
+  old_value: Record<string, string>;
+  changes: ChangeEntry[];
+  status: string;
+}
+
+export type AuditHistoryDataProps = {
+  data: AuditHistoryItemsProps[];
+};
+
+export type LoaderContextType = {
+  show: boolean;
+  setShow: (value: boolean) => void;
 };

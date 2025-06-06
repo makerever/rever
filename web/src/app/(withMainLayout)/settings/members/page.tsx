@@ -66,7 +66,7 @@ const MembersList = () => {
                 user?.id !== String(row.original.id)
                   ? "font-semibold cursor-pointer"
                   : ""
-              } overflow-hidden text-ellipsis w-24`}
+              } overflow-hidden text-ellipsis`}
             >
               {getValue() as string}
             </span>
@@ -78,7 +78,7 @@ const MembersList = () => {
         header: "Last name",
         cell: ({ getValue }) => (
           <div className="flex items-center gap-4">
-            <span className="overflow-hidden text-ellipsis w-24">
+            <span className="overflow-hidden text-ellipsis">
               {getValue() as string}
             </span>
           </div>
@@ -89,7 +89,7 @@ const MembersList = () => {
         header: "Email",
         cell: ({ getValue }) => (
           <div className="flex items-center gap-4">
-            <span className="overflow-hidden text-ellipsis w-52">
+            <span className="overflow-hidden text-ellipsis">
               {getValue() as string}
             </span>
           </div>
@@ -100,7 +100,7 @@ const MembersList = () => {
         header: "Role",
         cell: ({ getValue }) => (
           <div className="flex items-center gap-4">
-            <span className="overflow-hidden text-ellipsis w-32">
+            <span className="overflow-hidden text-ellipsis">
               {getLabelForRoles(getValue() as string)}
             </span>
           </div>
@@ -132,7 +132,7 @@ const MembersList = () => {
               checked={row.getIsSelected()}
               onChange={row.getToggleSelectedHandler()}
             />
-            <span className={`overflow-hidden text-ellipsis w-60`}>
+            <span className={`overflow-hidden text-ellipsis`}>
               {getValue() as string}
             </span>
           </div>
@@ -143,7 +143,7 @@ const MembersList = () => {
         header: "Invited by",
         cell: ({ getValue }) => (
           <div className="flex items-center gap-4">
-            <span className="overflow-hidden text-ellipsis w-40">
+            <span className="overflow-hidden text-ellipsis">
               {getValue() as string}
             </span>
           </div>
@@ -154,7 +154,7 @@ const MembersList = () => {
         header: "Organization name",
         cell: ({ getValue }) => (
           <div className="flex items-center gap-4">
-            <span className="overflow-hidden text-ellipsis w-40">
+            <span className="overflow-hidden text-ellipsis">
               {getValue() as string}
             </span>
           </div>
@@ -169,9 +169,7 @@ const MembersList = () => {
 
           return (
             <div className="flex items-center gap-1">
-              <span className="overflow-hidden text-ellipsis w-40">
-                {value}
-              </span>
+              <span className="overflow-hidden text-ellipsis">{value}</span>
             </div>
           );
         },

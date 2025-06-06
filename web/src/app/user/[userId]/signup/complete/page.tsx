@@ -151,7 +151,11 @@ const Invitation = () => {
           </p>
 
           <p className="mt-2 text-xs text-gray-600">
-            Create a Rever account to accept the invitation.
+            Create a Rever account for the email address&nbsp;
+            <span className="font-semibold">
+              {inviteUserDetails?.email}
+            </span>{" "}
+            <br /> to accept the invitation.
           </p>
 
           {/* Signup form */}

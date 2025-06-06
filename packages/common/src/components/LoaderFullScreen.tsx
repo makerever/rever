@@ -2,29 +2,40 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { LoaderContextType } from "@rever/types";
+import { createContext, useContext, useEffect, useState } from "react";
 
-export default function HydrationLoader({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+const LoaderContext = createContext<LoaderContextType>({
+  show: false,
+  setShow: () => {},
+});
+
+export const useLoader = () => useContext(LoaderContext);
+
+export function HydrationLoader({ children }: { children: React.ReactNode }) {
+  const [show, setShow] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
+  // Reset loader on hydration
   useEffect(() => {
     const timeout = setTimeout(() => {
       setHydrated(true);
+      setShow(false);
     }, 300);
+
     return () => clearTimeout(timeout);
   }, []);
 
-  if (!hydrated) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
-        <div className="w-12 h-12 border-4 border-gray-300 border-t-primary-500 rounded-full animate-spin" />
-      </div>
-    );
-  }
+  const shouldShowLoader = !hydrated || show;
 
-  return <>{children}</>;
+  return (
+    <LoaderContext.Provider value={{ show, setShow }}>
+      {shouldShowLoader && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/90 backdrop-blur-sm">
+          <div className="w-12 h-12 border-4 border-gray-300 border-t-primary-500 rounded-full animate-spin" />
+        </div>
+      )}
+      {children}
+    </LoaderContext.Provider>
+  );
 }

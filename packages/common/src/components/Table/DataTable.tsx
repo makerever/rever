@@ -24,7 +24,7 @@ import {
   Download,
 } from "lucide-react";
 import { DataTablePagination } from "./DataTablePagination";
-import { StatusFilter } from "@rever/common";
+import { CustomTooltip, StatusFilter } from "@rever/common";
 
 import Button from "../Button";
 import { TableProps } from "@rever/types";
@@ -39,6 +39,7 @@ export default function DataTable<
   T extends { status: string; id?: string | number },
 >({
   tableHeading = "",
+  exportKey = "",
   addBtnText,
   tableData,
   onActionBtClick,
@@ -55,6 +56,8 @@ export default function DataTable<
   isMembers,
   noStatusFilter,
   filterHeading,
+  hideExportIcon,
+  flowImageSrc,
 }: TableProps<T>) {
   const user = useUserStore((state) => state.user);
 
@@ -138,7 +141,7 @@ export default function DataTable<
   }, [rowSelection, table, columns, tableHeading]);
 
   const handleExport = () => {
-    exportToExcel(selectedRowsData, `${tableHeading}_export_data`);
+    exportToExcel(selectedRowsData, `${tableHeading || exportKey}_export_data`);
   };
 
   return (
@@ -208,33 +211,44 @@ export default function DataTable<
             />
           </div>
 
-          <div>
-            <IconWrapper
-              isDisabled={!selectedRowsData.length}
-              icon={<Download width={16} onClick={handleExport} />}
-            />
-          </div>
+          {!hideExportIcon ? (
+            <div>
+              <IconWrapper
+                isDisabled={!selectedRowsData.length}
+                icon={
+                  <CustomTooltip content="Download" side="left" sideOffset={10}>
+                    <Download width={16} onClick={handleExport} />
+                  </CustomTooltip>
+                }
+              />
+            </div>
+          ) : null}
         </div>
       ) : null}
 
       {!data.length ? (
         <div className="flex flex-col items-center justify-center h-full p-10 text-slate-800 text-sm">
-          <Image
-            alt="Table data not found"
-            src="/images/noDataGif.gif"
-            width={160}
-            height={160}
-          />
-          <p className="text-gray-600 dark:text-gray-400 text-sm mt-6 font-medium">
-            There&apos;s nothing here to display at the moment.
+          <p className="text-gray-600 dark:text-gray-400 text-md font-medium">
+            This section is currently empty.
           </p>
+
           <p className="text-gray-500 dark:text-gray-400 text-2xs mt-1">
             Feel free to explore other sections in the meantime.
           </p>
+          {flowImageSrc ? (
+            <div className="relative w-full mt-4 h-[400px]">
+              <Image
+                alt="Table data not found"
+                src={flowImageSrc}
+                fill
+                className="object-contain" // or "object-cover"
+              />
+            </div>
+          ) : null}
         </div>
       ) : (
         <>
-          <div className="w-[calc(100vw-60px)] md:w-full rounded-md border bg-white shadow-sm block max-h-[536px]">
+          <div className="w-[calc(100vw-60px)] md:w-full rounded-md border bg-white shadow-sm block max-h-[536px] overflow-y-auto custom_scrollbar">
             <div className="overflow-x-auto custom_scrollbar w-full">
               <table className="w-full border-separate border-spacing-0">
                 <thead className="text-xs text-slate-500 hover:bg-slate-50 transition-all duration-200">

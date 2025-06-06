@@ -1,14 +1,13 @@
-import uuid
-
-from django.db import models
+from django.db import models, transaction
 
 from rever.utils.bill_constants import PAYMENT_TERM_CHOICES, STATUS_CHOICES
+from rever.utils.payable_constants import PO_STATUS_CHOICES
 
 from .auth import Organization
+from .base import BaseModel
 
 
-class Address(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class Address(BaseModel):
     line1 = models.CharField(max_length=255, blank=True)
     line2 = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=100, blank=True)
@@ -22,8 +21,18 @@ class Address(models.Model):
         db_table = "addresses"
 
 
-class Vendor(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class BankAccount(BaseModel):
+    account_holder_name = models.CharField(max_length=120, blank=True)
+    bank_name = models.CharField(max_length=120, blank=True)
+    account_number = models.CharField(max_length=60, blank=True)
+
+    class Meta:
+        verbose_name = "Bank Account"
+        verbose_name_plural = "Bank Accounts"
+        db_table = "bank_accounts"
+
+
+class Vendor(BaseModel):
     organization = models.ForeignKey(
         Organization,
         on_delete=models.CASCADE,
@@ -49,11 +58,15 @@ class Vendor(models.Model):
         null=True,
         related_name="billing_address_vendor",
     )
+    bank_account = models.OneToOneField(
+        BankAccount,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="vendor_bank_account",
+    )
 
     is_active = models.BooleanField(default=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ("organization", "vendor_name")
@@ -63,9 +76,53 @@ class Vendor(models.Model):
         ordering = ["vendor_name"]
 
 
-class Bill(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    bill_number = models.CharField(max_length=50, blank=True)
+class BillCounter(models.Model):
+    organization = models.OneToOneField(
+        Organization, on_delete=models.CASCADE, related_name="bill_counter"
+    )
+    last_number = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        db_table = "bill_counters"
+
+    @classmethod
+    def get_next_number(cls, organization):
+        import random
+        import time
+
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                with transaction.atomic():
+                    try:
+                        counter = cls.objects.select_for_update().get(organization=organization)
+                        counter.last_number += 1
+                        counter.save(update_fields=["last_number"])
+                        return counter.last_number
+
+                    except cls.DoesNotExist:
+                        counter = cls.objects.create(organization=organization, last_number=1)
+                        return counter.last_number
+
+            except Exception:
+                if attempt == max_retries - 1:
+                    raise
+                time.sleep(random.uniform(0.01, 0.05))
+
+        raise Exception("Failed to generate Bill number after retries")
+
+    @classmethod
+    def generate_bill_number(cls, organization):
+        next_num = cls.get_next_number(organization)
+        return f"BILL-{next_num:04d}"
+
+
+class Bill(BaseModel):
+    bill_number = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+    )
     organization = models.ForeignKey(
         Organization,
         on_delete=models.CASCADE,
@@ -76,6 +133,13 @@ class Bill(models.Model):
         on_delete=models.PROTECT,
         null=True,
         related_name="vendor_bill",
+    )
+    purchase_order = models.ForeignKey(
+        "PurchaseOrder",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="linked_bills",
     )
     bill_date = models.DateField(db_index=True)
     due_date = models.DateField(db_index=True)
@@ -92,8 +156,7 @@ class Bill(models.Model):
     total_tax = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     total = models.DecimalField(max_digits=12, decimal_places=2)
     is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    is_attachment = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ("organization", "bill_number")
@@ -106,27 +169,12 @@ class Bill(models.Model):
         ordering = ["-bill_date"]
 
     def save(self, *args, **kwargs):
-        # Auto-generate bill_number if blank
-        if not self.bill_number:
-            last = (
-                Bill.objects.filter(organization=self.organization)
-                .exclude(bill_number="")
-                .order_by("-created_at")
-                .first()
-            )
-            if last and last.bill_number.startswith("Bill-"):
-                try:
-                    n = int(last.bill_number.split("-", 1)[1])
-                except ValueError:
-                    n = 0
-            else:
-                n = 0
-            self.bill_number = f"Bill-{n + 1:02d}"
+        if not self.bill_number or not self.bill_number.strip():
+            self.bill_number = BillCounter.generate_bill_number(self.organization)
         super().save(*args, **kwargs)
 
 
-class BillItem(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class BillItem(BaseModel):
     bill = models.ForeignKey(Bill, on_delete=models.CASCADE, related_name="items", db_index=True)
     description = models.TextField()
     quantity = models.DecimalField(max_digits=12, decimal_places=2)
@@ -134,8 +182,6 @@ class BillItem(models.Model):
     uom = models.CharField(max_length=20, blank=True)
     product_code = models.CharField(max_length=50, blank=True)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "BillItem"
@@ -145,6 +191,126 @@ class BillItem(models.Model):
 
     def save(self, *args, **kwargs):
         # Auto-calculate amount if not provided
+        if not self.amount:
+            self.amount = self.quantity * self.unit_price
+        super().save(*args, **kwargs)
+
+
+class PurchaseOrderCounter(models.Model):
+    organization = models.OneToOneField(
+        Organization, on_delete=models.CASCADE, related_name="po_counter"
+    )
+    last_number = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        db_table = "purchase_order_counters"
+
+    @classmethod
+    def get_next_number(cls, organization):
+        import random
+        import time
+
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                with transaction.atomic():
+                    try:
+                        counter = cls.objects.select_for_update().get(organization=organization)
+                        counter.last_number += 1
+                        counter.save(update_fields=["last_number"])
+                        return counter.last_number
+
+                    except cls.DoesNotExist:
+                        counter = cls.objects.create(organization=organization, last_number=1)
+                        return counter.last_number
+
+            except Exception:
+                if attempt == max_retries - 1:
+                    raise
+                time.sleep(random.uniform(0.01, 0.05))
+
+        raise Exception("Failed to generate PO number after retries")
+
+    @classmethod
+    def generate_po_number(cls, organization):
+        next_num = cls.get_next_number(organization)
+        return f"PO-{next_num:04d}"
+
+
+class PurchaseOrder(BaseModel):
+    po_number = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+    )
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        related_name="organization_po",
+    )
+    vendor = models.ForeignKey(
+        Vendor,
+        on_delete=models.PROTECT,
+        null=True,
+        related_name="vendor_po",
+    )
+    po_date = models.DateField(db_index=True)
+    delivery_date = models.DateField(db_index=True)
+    payment_terms = models.CharField(
+        max_length=8,
+        choices=PAYMENT_TERM_CHOICES,
+        blank=True,
+        null=True,
+    )
+    comments = models.TextField(blank=True)
+    sub_total = models.DecimalField(max_digits=12, decimal_places=2)
+    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    total_tax = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total = models.DecimalField(max_digits=12, decimal_places=2)
+    is_active = models.BooleanField(default=True)
+    is_attachment = models.BooleanField(default=False)
+    status = models.CharField(max_length=20, choices=PO_STATUS_CHOICES, default="draft")
+
+    class Meta:
+        unique_together = ("organization", "po_number")
+        indexes = [
+            models.Index(fields=["organization", "po_number"]),
+        ]
+        verbose_name = "Purchase Order"
+        verbose_name_plural = "Purchase Orders"
+        db_table = "purchase_orders"
+        ordering = ["-po_date"]
+
+    def save(self, *args, **kwargs):
+        if not self.po_number or not self.po_number.strip():
+            self.po_number = PurchaseOrderCounter.generate_po_number(self.organization)
+        super().save(*args, **kwargs)
+
+
+class PurchaseOrderItem(BaseModel):
+    purchase_order = models.ForeignKey(
+        PurchaseOrder, on_delete=models.CASCADE, related_name="items", db_index=True
+    )
+    description = models.TextField()
+    quantity = models.DecimalField(max_digits=12, decimal_places=2)
+    received_quantity = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+        help_text="Total quantity received against this line item",
+    )
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2)
+    uom = models.CharField(max_length=20, blank=True)
+    product_code = models.CharField(max_length=50, blank=True)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        verbose_name = "Purchase Order Item"
+        verbose_name_plural = "Purchase Order Items"
+        db_table = "purchase_order_items"
+        ordering = ["-created_at"]
+
+    def save(self, *args, **kwargs):
         if not self.amount:
             self.amount = self.quantity * self.unit_price
         super().save(*args, **kwargs)

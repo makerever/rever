@@ -12,13 +12,14 @@ import { ConfirmationPopup } from "@rever/common";
 import {
   deleteBillAttachment,
   deleteBillByIdApi,
-  getApprovalStatusApi,
+  getAssignApprovalApi,
   getBillAttachment,
   getBillDetailsByIdApi,
   sendBillForApprovalApi,
   updateBillApi,
 } from "@rever/services";
-import { AttachmentProps, Bill, EnableApprovalProps } from "@rever/types";
+import { useBreadcrumbStore } from "@rever/stores";
+import { AttachmentProps, Bill } from "@rever/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, Suspense, useState, useCallback } from "react";
 
@@ -32,7 +33,7 @@ const ViewBillWithParams = () => {
   const [billDetails, setBillDetails] = useState<Partial<Bill>>({});
 
   const [isLoaderFormSubmit, setIsLoaderFormSubmit] = useState(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
   const [isConfirmRejectPopupOpen, setIsConfirmRejectPopupOpen] =
     useState<boolean>(false);
@@ -44,22 +45,18 @@ const ViewBillWithParams = () => {
   const [isApproverAvailable, setIsApproverAvailable] =
     useState<boolean>(false);
 
+  const setDynamicCrumb = useBreadcrumbStore((s) => s.setDynamicCrumb);
+
   // Fetch approval status for the bill model
   const getApprovalStatus = useCallback(async () => {
-    const response = await getApprovalStatusApi();
+    const response = await getAssignApprovalApi("bill");
     if (response?.status === 200) {
-      if (response?.data?.length) {
-        const filterItem = response?.data?.find(
-          (v: EnableApprovalProps) => v.model_name === "bill",
-        );
-        setIsApproverAvailable(filterItem?.approval_enabled);
-      } else {
-        setIsApproverAvailable(false);
-      }
+      setIsApproverAvailable(true);
+      setIsLoading(false);
     } else {
       setIsApproverAvailable(false);
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
 
   // Fetch bill details and attachment by ID
@@ -67,6 +64,10 @@ const ViewBillWithParams = () => {
     async (idValue: string) => {
       const response = await getBillDetailsByIdApi(idValue);
       if (response?.status === 200) {
+        setDynamicCrumb("/bill/view", {
+          id: response?.data?.id,
+          name: response?.data?.bill_number,
+        });
         setBillDetails(response?.data);
         const responseFile = await getBillAttachment(idValue);
         if (responseFile?.status === 200) {
@@ -78,7 +79,7 @@ const ViewBillWithParams = () => {
         router.push("/bill/list");
       }
     },
-    [getApprovalStatus, router],
+    [getApprovalStatus, router, setDynamicCrumb],
   );
 
   // On mount, fetch bill details or redirect if no ID
@@ -86,7 +87,6 @@ const ViewBillWithParams = () => {
     if (!idValue) {
       router.push("/bill/list");
     } else {
-      setIsLoading(true);
       getBillDetailsById(idValue);
     }
   }, [getBillDetailsById, idValue, router]);
@@ -184,6 +184,7 @@ const ViewBillWithParams = () => {
         onClose={() => setIsConfirmRejectPopupOpen(false)}
         onConfirm={handleBillApprovalRejection}
         message="Are you sure you want to reject this bill?"
+        buttonText="Reject"
       />
     </>
   );
