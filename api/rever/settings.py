@@ -63,6 +63,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "rever.middleware.logger.RequestLoggerMiddleware",
+    "crum.CurrentRequestUserMiddleware",
 ]
 
 REST_FRAMEWORK = {

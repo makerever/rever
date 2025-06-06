@@ -1,9 +1,13 @@
 from rest_framework import serializers
 
-from rever.db.models import UserNotificationSetting
+from rever.db.models import UserNotificationPreference
 
 
-class UserNotificationSettingSerializer(serializers.ModelSerializer):
+class UserNotificationPreferenceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserNotificationSetting
-        fields = ["notify_on_approval_request", "notify_on_approval_result"]
+        model = UserNotificationPreference
+        fields = "__all__"
+        read_only_fields = [
+            "created_at",
+            "updated_at",
+        ]

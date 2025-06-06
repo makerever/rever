@@ -1,8 +1,8 @@
 from .approval import (
-    ApprovalActionLogSerializer,
     ApprovalActionSerializer,
-    ApprovalAssignmentSerializer,
-    ApprovalSettingSerializer,
+    ApprovalConfigSerializer,
+    ApprovalFlowSerializer,
+    ApprovalLogSerializer,
 )
 from .attachment import AttachmentSerializer
 from .auth import (
@@ -23,7 +23,7 @@ from .auth import (
     PasswordResetSerializer,
     SignupCompleteSerializer,
 )
-from .notification import UserNotificationSettingSerializer
+from .notification import UserNotificationPreferenceSerializer
 from .payable import (
     AddressSerializer,
     BillItemSerializer,

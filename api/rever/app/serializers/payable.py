@@ -14,7 +14,12 @@ class VendorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Vendor
-        exclude = ["organization", "created_at", "updated_at"]
+        fields = "__all__"
+        read_only_fields = [
+            "created_at",
+            "updated_at",
+            "organization",
+        ]
 
     def create(self, validated):
         addr_data = validated.pop("billing_address", None)
@@ -75,7 +80,12 @@ class BillSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Bill
-        exclude = ["organization", "created_at", "updated_at"]
+        fields = "__all__"
+        read_only_fields = [
+            "created_at",
+            "updated_at",
+            "organization",
+        ]
 
     def validate_vendor(self, vendor):
         """

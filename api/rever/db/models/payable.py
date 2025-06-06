@@ -1,14 +1,12 @@
-import uuid
-
 from django.db import models
 
 from rever.utils.bill_constants import PAYMENT_TERM_CHOICES, STATUS_CHOICES
 
 from .auth import Organization
+from .base import BaseModel
 
 
-class Address(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class Address(BaseModel):
     line1 = models.CharField(max_length=255, blank=True)
     line2 = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=100, blank=True)
@@ -22,8 +20,7 @@ class Address(models.Model):
         db_table = "addresses"
 
 
-class Vendor(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class Vendor(BaseModel):
     organization = models.ForeignKey(
         Organization,
         on_delete=models.CASCADE,
@@ -52,9 +49,6 @@ class Vendor(models.Model):
 
     is_active = models.BooleanField(default=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
     class Meta:
         unique_together = ("organization", "vendor_name")
         verbose_name = "Vendor"
@@ -63,8 +57,7 @@ class Vendor(models.Model):
         ordering = ["vendor_name"]
 
 
-class Bill(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class Bill(BaseModel):
     bill_number = models.CharField(max_length=50, blank=True)
     organization = models.ForeignKey(
         Organization,
@@ -92,8 +85,6 @@ class Bill(models.Model):
     total_tax = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     total = models.DecimalField(max_digits=12, decimal_places=2)
     is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ("organization", "bill_number")
@@ -125,8 +116,7 @@ class Bill(models.Model):
         super().save(*args, **kwargs)
 
 
-class BillItem(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class BillItem(BaseModel):
     bill = models.ForeignKey(Bill, on_delete=models.CASCADE, related_name="items", db_index=True)
     description = models.TextField()
     quantity = models.DecimalField(max_digits=12, decimal_places=2)
@@ -134,8 +124,6 @@ class BillItem(models.Model):
     uom = models.CharField(max_length=20, blank=True)
     product_code = models.CharField(max_length=50, blank=True)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "BillItem"

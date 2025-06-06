@@ -1,10 +1,10 @@
 from .approval.base import (
-    ApprovalActionListAPIView,
-    ApprovalSettingAPIView,
-    ApproveOrRejectAPIView,
-    AssignApproverAPIView,
-    AssignedApprovalListAPIView,
-    SendForApprovalAPIView,
+    ApprovalActionAPIView,
+    ApprovalConfigAPIView,
+    ApprovalFlowAPIView,
+    ApprovalFlowListAPIView,
+    ApprovalLogAPIView,
+    ApprovalLogListAPIView,
 )
 from .attachment.base import (
     AttachmentDeleteAPIView,
@@ -32,7 +32,7 @@ from .auth.base import (
     SignupEmailVerify,
 )
 from .notification.base import (
-    NotificationSettingAPIView,
+    UserNotificationPreferenceAPIView,
 )
 from .payable.base import (
     BillItemViewSet,

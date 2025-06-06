@@ -2,19 +2,29 @@ from typing import ClassVar
 
 from rest_framework import serializers
 
-from rever.db.models import ApprovalAction, ApprovalAssignment, ApprovalSetting
+from rever.db.models import ApprovalConfig, ApprovalFlow, ApprovalLog
 
 
-class ApprovalSettingSerializer(serializers.ModelSerializer):
+class ApprovalConfigSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ApprovalSetting
-        fields = ["organization", "model_name", "approval_enabled"]
+        model = ApprovalConfig
+        fields = "__all__"
+        read_only_fields = [
+            "created_at",
+            "updated_at",
+            "organization",
+        ]
 
 
-class ApprovalAssignmentSerializer(serializers.ModelSerializer):
+class ApprovalFlowSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ApprovalAssignment
-        fields = ["model_name", "approver"]
+        model = ApprovalFlow
+        fields = "__all__"
+        read_only_fields = [
+            "created_at",
+            "updated_at",
+            "organization",
+        ]
 
 
 class ApprovalActionSerializer(serializers.Serializer):
@@ -22,17 +32,15 @@ class ApprovalActionSerializer(serializers.Serializer):
     comment = serializers.CharField(allow_blank=True, required=False)
 
 
-class ApprovalActionLogSerializer(serializers.ModelSerializer):
+class ApprovalLogSerializer(serializers.ModelSerializer):
     approved_by: ClassVar[serializers.StringRelatedField] = serializers.StringRelatedField()
 
     class Meta:
-        model = ApprovalAction
-        fields = [
-            "action_type",
-            "comment",
-            "approval_sent_by",
-            "approval_sent_at",
-            "approved_by",
-            "approved_at",
+        model = ApprovalLog
+        fields = "__all__"
+        read_only_fields = [
             "created_at",
+            "updated_at",
+            "approved_at",
+            "organization",
         ]
