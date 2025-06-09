@@ -238,3 +238,9 @@ class PurchaseOrderSerializer(serializers.ModelSerializer):
             for item in items_data:
                 PurchaseOrderItem.objects.create(purchase_order=instance, **item)
         return instance
+
+
+class PurchaseOrderMinimalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PurchaseOrder
+        fields = ["id", "po_number"]

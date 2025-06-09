@@ -3,6 +3,7 @@ from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError
 from django.db.models import ProtectedError
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
@@ -10,6 +11,7 @@ from rever.app.serializers import (
     BillItemSerializer,
     BillSerializer,
     PurchaseOrderItemSerializer,
+    PurchaseOrderMinimalSerializer,
     PurchaseOrderSerializer,
     VendorSerializer,
 )
@@ -232,6 +234,16 @@ class PurchaseOrderViewSet(BaseModelViewSet):
             qs = qs.filter(status=status_param)
 
         return qs
+
+    @action(detail=False, methods=["get"], url_path="by-vendor/(?P<vendor_id>[^/.]+)")
+    def list_by_vendor(self, request, vendor_id=None):
+        """
+        Return purchase orders filtered by vendor for the current user's organization.
+        """
+        user_org = request.user.organization
+        queryset = self.get_queryset().filter(vendor_id=vendor_id, organization=user_org)
+        serializer = PurchaseOrderMinimalSerializer(queryset, many=True)
+        return Response(serializer.data)
 
     def perform_create(self, serializer):
         serializer.save(organization=self.request.user.organization)

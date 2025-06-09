@@ -30,6 +30,7 @@ from .payable import (
     BillItemSerializer,
     BillSerializer,
     PurchaseOrderItemSerializer,
+    PurchaseOrderMinimalSerializer,
     PurchaseOrderSerializer,
     VendorNestedSerializer,
     VendorSerializer,
