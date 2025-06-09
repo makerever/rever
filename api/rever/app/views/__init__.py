@@ -11,6 +11,9 @@ from .attachment.base import (
     AttachmentListAPIView,
     AttachmentUploadAPIView,
 )
+from .audit.base import (
+    AuditTrailView,
+)
 from .auth.base import (
     InvitedUserDetailView,
     InvitedUserListView,
