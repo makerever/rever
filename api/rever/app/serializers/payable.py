@@ -1,16 +1,24 @@
 from rest_framework import serializers
 
-from rever.db.models import Address, Bill, BillItem, Vendor
+from rever.db.models import Address, Bill, BillItem, Vendor,BankAccount
 
 
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
         fields = "__all__"
+        read_only_fields = ["created_at", "updated_at"]
+
+class BankAccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BankAccount
+        fields = "__all__"
+        read_only_fields = ["created_at", "updated_at"]
 
 
 class VendorSerializer(serializers.ModelSerializer):
     billing_address = AddressSerializer(required=False, allow_null=True)
+    bank_account = BankAccountSerializer(required=False, allow_null=True)
 
     class Meta:
         model = Vendor
@@ -21,14 +29,22 @@ class VendorSerializer(serializers.ModelSerializer):
             "organization",
         ]
 
-    def create(self, validated):
-        addr_data = validated.pop("billing_address", None)
-        if addr_data:
-            validated["billing_address"] = Address.objects.create(**addr_data)
-        return Vendor.objects.create(**validated)
+    def create(self, validated_data):
+        addr_data = validated_data.pop("billing_address", None)
+        bank_data = validated_data.pop("bank_account", None)
 
-    def update(self, instance, validated):
-        addr_data = validated.pop("billing_address", None)
+        if addr_data:
+            validated_data["billing_address"] = Address.objects.create(**addr_data)
+
+        if bank_data:
+            validated_data["bank_account"] = BankAccount.objects.create(**bank_data)
+
+        return Vendor.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        addr_data = validated_data.pop("billing_address", None)
+        bank_data = validated_data.pop("bank_account", None)
+
         if addr_data:
             if instance.billing_address:
                 for k, v in addr_data.items():
@@ -36,7 +52,16 @@ class VendorSerializer(serializers.ModelSerializer):
                 instance.billing_address.save()
             else:
                 instance.billing_address = Address.objects.create(**addr_data)
-        return super().update(instance, validated)
+
+        if bank_data:
+            if instance.bank_account:
+                for k, v in bank_data.items():
+                    setattr(instance.bank_account, k, v)
+                instance.bank_account.save()
+            else:
+                instance.bank_account = BankAccount.objects.create(**bank_data)
+
+        return super().update(instance, validated_data)
 
 
 class VendorNestedSerializer(serializers.ModelSerializer):

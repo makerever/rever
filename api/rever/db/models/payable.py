@@ -19,6 +19,16 @@ class Address(BaseModel):
         verbose_name_plural = "Addresses"
         db_table = "addresses"
 
+class BankAccount(BaseModel):
+    account_holder_name = models.CharField(max_length=120, blank=True)
+    bank_name = models.CharField(max_length=120, blank=True)
+    account_number = models.CharField(max_length=60, blank=True)
+
+    class Meta:
+        verbose_name = "Bank Account"
+        verbose_name_plural = "Bank Accounts"
+        db_table = "bank_accounts"
+
 
 class Vendor(BaseModel):
     organization = models.ForeignKey(
@@ -45,6 +55,13 @@ class Vendor(BaseModel):
         on_delete=models.CASCADE,
         null=True,
         related_name="billing_address_vendor",
+    )
+    bank_account = models.OneToOneField(
+        BankAccount,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="vendor_bank_account",
     )
 
     is_active = models.BooleanField(default=True)
