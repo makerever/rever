@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from rever.db.models import Address, Bill, BillItem, Vendor,BankAccount
+from rever.db.models import Address, BankAccount, Bill, BillItem, Vendor
 
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -8,6 +8,7 @@ class AddressSerializer(serializers.ModelSerializer):
         model = Address
         fields = "__all__"
         read_only_fields = ["created_at", "updated_at"]
+
 
 class BankAccountSerializer(serializers.ModelSerializer):
     class Meta:

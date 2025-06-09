@@ -26,6 +26,7 @@ from .auth import (
 from .notification import UserNotificationPreferenceSerializer
 from .payable import (
     AddressSerializer,
+    BankAccountSerializer,
     BillItemSerializer,
     BillSerializer,
     VendorNestedSerializer,

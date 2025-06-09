@@ -19,6 +19,7 @@ class Address(BaseModel):
         verbose_name_plural = "Addresses"
         db_table = "addresses"
 
+
 class BankAccount(BaseModel):
     account_holder_name = models.CharField(max_length=120, blank=True)
     bank_name = models.CharField(max_length=120, blank=True)
