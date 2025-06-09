@@ -6,8 +6,10 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
 # from django.contrib.auth import get_user_model
-from rever.db.models import Organization, User
+from rever.db.models import Address, Organization, User
 from rever.utils.mixins import OrganizationDateFormatMixin
+
+from .payable import AddressSerializer
 
 # User = get_user_model()
 
@@ -118,6 +120,7 @@ class CompleteSignupSerializer(serializers.Serializer):
 
 class OrganizationSerializer(OrganizationDateFormatMixin, serializers.ModelSerializer):
     member_count = serializers.SerializerMethodField()
+    address = AddressSerializer(required=False, allow_null=True)
 
     class Meta:
         model = Organization
@@ -130,6 +133,11 @@ class OrganizationSerializer(OrganizationDateFormatMixin, serializers.ModelSeria
             "created_by",
             "updated_by",
             "currency",
+            "business_type",
+            "industry",
+            "email",
+            "phone_number",
+            "address",
             "member_count",
         ]
         read_only_fields = ["name", "created_at", "updated_at", "member_count"]
@@ -138,12 +146,27 @@ class OrganizationSerializer(OrganizationDateFormatMixin, serializers.ModelSeria
         return obj.users.count()
 
     def validate_name(self, value):
-        self.context.get("request")
         org_id = self.instance.id if self.instance else None
-
         if Organization.objects.filter(name__iexact=value).exclude(id=org_id).exists():
             raise serializers.ValidationError("An organization with this name already exists.")
         return value
+
+    def create(self, validated_data):
+        address_data = validated_data.pop("address", None)
+        if address_data:
+            validated_data["address"] = Address.objects.create(**address_data)
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        address_data = validated_data.pop("address", None)
+        if address_data:
+            if instance.address:
+                for attr, value in address_data.items():
+                    setattr(instance.address, attr, value)
+                instance.address.save()
+            else:
+                instance.address = Address.objects.create(**address_data)
+        return super().update(instance, validated_data)
 
 
 class MeSerializer(serializers.ModelSerializer):

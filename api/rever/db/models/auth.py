@@ -32,6 +32,33 @@ class Organization(BaseModel):
         ("NZD", "New Zealand Dollar (NZ$)"),
         ("SEK", "Swedish Krona (kr)"),
     ]
+
+    BUSINESS_TYPE_CHOICES = [
+        ("sole_proprietor", "Sole Proprietor"),
+        ("partnership", "Partnership"),
+        ("llc", "LLC"),
+        ("s_corp", "S-Corp"),
+        ("c_corp", "C-Corp"),
+        ("nonprofit", "Nonprofit"),
+        ("government_agency", "Government Agency"),
+        ("other", "Other"),
+    ]
+
+    INDUSTRY_CHOICES = [
+        ("accounting", "Accounting & Bookkeeping"),
+        ("legal", "Legal Services"),
+        ("retail", "Retail"),
+        ("ecommerce", "E-commerce"),
+        ("real_estate", "Real Estate"),
+        ("restaurants", "Restaurants & Food Services"),
+        ("construction", "Construction & Contracting"),
+        ("healthcare", "Healthcare & Medical"),
+        ("manufacturing", "Manufacturing"),
+        ("software", "Software/SaaS"),
+        ("nonprofit", "Nonprofit"),
+        ("other", "Other"),
+    ]
+
     name = models.CharField(max_length=255, unique=True)
     date_format = models.CharField(
         max_length=10,
@@ -40,6 +67,22 @@ class Organization(BaseModel):
         help_text=_("Date format to use throughout the application"),
     )
     currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default="USD")
+
+    business_type = models.CharField(
+        max_length=50, choices=BUSINESS_TYPE_CHOICES, null=True, blank=True
+    )
+    industry = models.CharField(max_length=50, choices=INDUSTRY_CHOICES, null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
+    phone_number = models.CharField(max_length=20, null=True, blank=True)
+
+    address = models.OneToOneField(
+        "Address",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="organization_address",
+        help_text=_("Primary address of the organization"),
+    )
 
     class Meta:
         verbose_name = "Organization"
