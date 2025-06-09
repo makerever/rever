@@ -1,11 +1,7 @@
-import calendar
-from datetime import date, timedelta
-
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError
 from django.db.models import ProtectedError
-from django.utils import timezone
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -13,12 +9,14 @@ from rest_framework.response import Response
 from rever.app.serializers import (
     BillItemSerializer,
     BillSerializer,
+    PurchaseOrderItemSerializer,
+    PurchaseOrderSerializer,
     VendorSerializer,
 )
 from rever.app.views.base import BaseAPIView
 from rever.app.views.base_viewsets import BaseModelViewSet
 from rever.bgtasks import generate_bill_summary, generate_monthly_bill_summary
-from rever.db.models import Bill, BillItem, Vendor
+from rever.db.models import Bill, BillItem, PurchaseOrder, PurchaseOrderItem, Vendor
 from rever.utils.bill_constants import STATUS_CHOICES
 from rever.utils.cache import clear_report_cache
 
@@ -85,57 +83,6 @@ class BillViewSet(BaseModelViewSet):
         status_param = params.get("status")
         if status_param in {c[0] for c in STATUS_CHOICES}:
             qs = qs.filter(status=status_param)
-
-        dr = params.get("date_range")
-
-        if dr:
-            today = timezone.localdate()
-            start = end = None
-
-            if dr == "today":
-                start = end = today
-
-            elif dr == "this_week":
-                start = today - timedelta(days=today.weekday())
-                end = start + timedelta(days=6)
-
-            elif dr == "this_month":
-                start = today.replace(day=1)
-                last_day = calendar.monthrange(today.year, today.month)[1]
-                end = today.replace(day=last_day)
-
-            elif dr == "last_30_days":
-                end = today
-                start = today - timedelta(days=30)
-
-            elif dr == "last_3_months":
-                end = today
-                m = (today.month - 3 - 1) % 12 + 1
-                y = today.year + ((today.month - 3 - 1) // 12)
-                start = date(y, m, 1)
-
-            elif dr == "this_year":
-                start = date(today.year, 1, 1)
-                end = date(today.year, 12, 31)
-
-            elif dr == "last_year":
-                y = today.year - 1
-                start = date(y, 1, 1)
-                end = date(y, 12, 31)
-
-            elif dr == "custom":
-                from_str = params.get("from")
-                to_str = params.get("to")
-                try:
-                    if from_str:
-                        start = date.fromisoformat(from_str)
-                    if to_str:
-                        end = date.fromisoformat(to_str)
-                except ValueError:
-                    return qs.none()
-
-            if start and end:
-                qs = qs.filter(bill_date__range=(start, end))
 
         return qs
 
@@ -262,3 +209,76 @@ class MonthlyBillSummaryAsyncAPIView(BaseAPIView):
                 "message": "Report is being generated. Please try again shortly.",
             }
         )
+
+
+class PurchaseOrderViewSet(BaseModelViewSet):
+    serializer_class = PurchaseOrderSerializer
+
+    def get_queryset(self):
+        qs = (
+            PurchaseOrder.objects.filter(organization=self.request.user.organization)
+            .select_related(
+                "vendor", "vendor__billing_address", "organization", "organization__address"
+            )
+            .prefetch_related("items")
+        )
+
+        params = self.request.query_params
+        if params.get("include_inactive") != "true":
+            qs = qs.filter(is_active=True)
+
+        status_param = params.get("status")
+        if status_param in {c[0] for c in STATUS_CHOICES}:
+            qs = qs.filter(status=status_param)
+
+        return qs
+
+    def perform_create(self, serializer):
+        serializer.save(organization=self.request.user.organization)
+
+    def perform_update(self, serializer):
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        instance.delete()
+
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request, *args, **kwargs)
+        except IntegrityError:
+            return Response(
+                {"detail": "PO number already exists for this organization."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    def update(self, request, *args, **kwargs):
+        try:
+            return super().update(request, *args, **kwargs)
+        except IntegrityError:
+            return Response(
+                {
+                    "detail": "A purchase order with this number already exists in your organization."  # noqa: E501
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
+class PurchaseOrderItemViewSet(BaseModelViewSet):
+    serializer_class = PurchaseOrderItemSerializer
+
+    def get_queryset(self):
+        return PurchaseOrderItem.objects.filter(
+            purchase_order__organization=self.request.user.organization
+        ).select_related("purchase_order")
+
+    def perform_create(self, serializer):
+        po = serializer.validated_data["purchase_order"]
+        if po.organization != self.request.user.organization:
+            raise PermissionDenied("Cannot add item to a foreign purchase order.")
+        serializer.save()
+
+    def perform_update(self, serializer):
+        po = serializer.validated_data.get("purchase_order", serializer.instance.purchase_order)
+        if po.organization != self.request.user.organization:
+            raise PermissionDenied("Cannot modify item of a foreign purchase order.")
+        serializer.save()

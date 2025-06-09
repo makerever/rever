@@ -88,6 +88,13 @@ class Bill(BaseModel):
         null=True,
         related_name="vendor_bill",
     )
+    purchase_order = models.ForeignKey(
+        "PurchaseOrder",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="linked_bills",
+    )
     bill_date = models.DateField(db_index=True)
     due_date = models.DateField(db_index=True)
     payment_terms = models.CharField(
@@ -151,6 +158,87 @@ class BillItem(BaseModel):
 
     def save(self, *args, **kwargs):
         # Auto-calculate amount if not provided
+        if not self.amount:
+            self.amount = self.quantity * self.unit_price
+        super().save(*args, **kwargs)
+
+
+class PurchaseOrder(BaseModel):
+    po_number = models.CharField(max_length=50, blank=True)
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        related_name="organization_po",
+    )
+    vendor = models.ForeignKey(
+        Vendor,
+        on_delete=models.PROTECT,
+        null=True,
+        related_name="vendor_po",
+    )
+    po_date = models.DateField(db_index=True)
+    delivery_date = models.DateField(db_index=True)
+    payment_terms = models.CharField(
+        max_length=8,
+        choices=PAYMENT_TERM_CHOICES,
+        blank=True,
+        null=True,
+    )
+    comments = models.TextField(blank=True)
+    sub_total = models.DecimalField(max_digits=12, decimal_places=2)
+    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    total_tax = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total = models.DecimalField(max_digits=12, decimal_places=2)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ("organization", "po_number")
+        indexes = [
+            models.Index(fields=["organization", "po_number"]),
+        ]
+        verbose_name = "Purchase Order"
+        verbose_name_plural = "Purchase Orders"
+        db_table = "purchase_orders"
+        ordering = ["-po_date"]
+
+    def save(self, *args, **kwargs):
+        # Auto-generate bill_number if blank
+        if not self.po_number:
+            last = (
+                PurchaseOrder.objects.filter(organization=self.organization)
+                .exclude(po_number="")
+                .order_by("-created_at")
+                .first()
+            )
+            if last and last.po_number.startswith("PO-"):
+                try:
+                    n = int(last.po_number.split("-", 1)[1])
+                except ValueError:
+                    n = 0
+            else:
+                n = 0
+            self.po_number = f"PO-{n + 1:02d}"
+        super().save(*args, **kwargs)
+
+
+class PurchaseOrderItem(BaseModel):
+    purchase_order = models.ForeignKey(
+        PurchaseOrder, on_delete=models.CASCADE, related_name="items", db_index=True
+    )
+    description = models.TextField()
+    quantity = models.DecimalField(max_digits=12, decimal_places=2)
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2)
+    uom = models.CharField(max_length=20, blank=True)
+    product_code = models.CharField(max_length=50, blank=True)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        verbose_name = "Purchase Order Item"
+        verbose_name_plural = "Purchase Order Items"
+        db_table = "purchase_order_items"
+        ordering = ["-created_at"]
+
+    def save(self, *args, **kwargs):
         if not self.amount:
             self.amount = self.quantity * self.unit_price
         super().save(*args, **kwargs)

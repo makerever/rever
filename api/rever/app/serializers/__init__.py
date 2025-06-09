@@ -29,6 +29,8 @@ from .payable import (
     BankAccountSerializer,
     BillItemSerializer,
     BillSerializer,
+    PurchaseOrderItemSerializer,
+    PurchaseOrderSerializer,
     VendorNestedSerializer,
     VendorSerializer,
 )
