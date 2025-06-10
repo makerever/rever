@@ -110,6 +110,7 @@ class Bill(BaseModel):
     total_tax = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     total = models.DecimalField(max_digits=12, decimal_places=2)
     is_active = models.BooleanField(default=True)
+    is_attachment = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ("organization", "bill_number")
