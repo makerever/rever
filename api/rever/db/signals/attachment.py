@@ -1,8 +1,8 @@
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
-from django.contrib.contenttypes.models import ContentType
 
-from rever.db.models import Attachment,Bill, PurchaseOrder
+from rever.db.models import Attachment, Bill, PurchaseOrder
+
 
 @receiver([post_save, post_delete], sender=Attachment)
 def update_is_attachment_flag(sender, instance, **kwargs):
@@ -17,8 +17,7 @@ def update_is_attachment_flag(sender, instance, **kwargs):
         return
 
     attachment_count = Attachment.objects.filter(
-        content_type=instance.content_type,
-        object_id=instance.object_id
+        content_type=instance.content_type, object_id=instance.object_id
     ).count()
 
     related_obj.is_attachment = attachment_count > 0
