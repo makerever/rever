@@ -1,6 +1,7 @@
 from django.db import models
 
 from rever.utils.bill_constants import PAYMENT_TERM_CHOICES, STATUS_CHOICES
+from rever.utils.payable_constants import PO_STATUS_CHOICES
 
 from .auth import Organization
 from .base import BaseModel
@@ -192,6 +193,7 @@ class PurchaseOrder(BaseModel):
     total = models.DecimalField(max_digits=12, decimal_places=2)
     is_active = models.BooleanField(default=True)
     is_attachment = models.BooleanField(default=False)
+    status = models.CharField(max_length=20, choices=PO_STATUS_CHOICES, default="draft")
 
     class Meta:
         unique_together = ("organization", "po_number")

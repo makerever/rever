@@ -241,7 +241,9 @@ class PurchaseOrderViewSet(BaseModelViewSet):
         Return purchase orders filtered by vendor for the current user's organization.
         """
         user_org = request.user.organization
-        queryset = self.get_queryset().filter(vendor_id=vendor_id, organization=user_org)
+        queryset = self.get_queryset().filter(
+            vendor_id=vendor_id, organization=user_org, status="approved"
+        )
         serializer = PurchaseOrderMinimalSerializer(queryset, many=True)
         return Response(serializer.data)
 
