@@ -59,6 +59,12 @@ class Organization(BaseModel):
         ("other", "Other"),
     ]
 
+    MATCHING_TYPE_CHOICES = [
+        ("none", "None"),
+        ("two_way", "2-Way Match"),
+        ("three_way", "3-Way Match"),
+    ]
+
     name = models.CharField(max_length=255, unique=True)
     date_format = models.CharField(
         max_length=10,
@@ -82,6 +88,13 @@ class Organization(BaseModel):
         blank=True,
         related_name="organization_address",
         help_text=_("Primary address of the organization"),
+    )
+
+    matching_type = models.CharField(
+        max_length=20,
+        choices=MATCHING_TYPE_CHOICES,
+        default="none",
+        help_text=_("Matching logic enabled for this organization (e.g., 2-way, 3-way)"),
     )
 
     class Meta:

@@ -124,22 +124,7 @@ class OrganizationSerializer(OrganizationDateFormatMixin, serializers.ModelSeria
 
     class Meta:
         model = Organization
-        fields = [
-            "id",
-            "name",
-            "date_format",
-            "created_at",
-            "updated_at",
-            "created_by",
-            "updated_by",
-            "currency",
-            "business_type",
-            "industry",
-            "email",
-            "phone_number",
-            "address",
-            "member_count",
-        ]
+        fields = "__all__"
         read_only_fields = ["name", "created_at", "updated_at", "member_count"]
 
     def get_member_count(self, obj):
