@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 
 from rever.utils.bill_constants import PAYMENT_TERM_CHOICES, STATUS_CHOICES
 from rever.utils.payable_constants import PO_STATUS_CHOICES
@@ -76,8 +76,53 @@ class Vendor(BaseModel):
         ordering = ["vendor_name"]
 
 
+class BillCounter(models.Model):
+    organization = models.OneToOneField(
+        Organization, on_delete=models.CASCADE, related_name="bill_counter"
+    )
+    last_number = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        db_table = "bill_counters"
+
+    @classmethod
+    def get_next_number(cls, organization):
+        import random
+        import time
+
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                with transaction.atomic():
+                    try:
+                        counter = cls.objects.select_for_update().get(organization=organization)
+                        counter.last_number += 1
+                        counter.save(update_fields=["last_number"])
+                        return counter.last_number
+
+                    except cls.DoesNotExist:
+                        counter = cls.objects.create(organization=organization, last_number=1)
+                        return counter.last_number
+
+            except Exception:
+                if attempt == max_retries - 1:
+                    raise
+                time.sleep(random.uniform(0.01, 0.05))
+
+        raise Exception("Failed to generate Bill number after retries")
+
+    @classmethod
+    def generate_bill_number(cls, organization):
+        next_num = cls.get_next_number(organization)
+        return f"BILL-{next_num:04d}"
+
+
 class Bill(BaseModel):
-    bill_number = models.CharField(max_length=50, blank=True)
+    bill_number = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+    )
     organization = models.ForeignKey(
         Organization,
         on_delete=models.CASCADE,
@@ -124,22 +169,8 @@ class Bill(BaseModel):
         ordering = ["-bill_date"]
 
     def save(self, *args, **kwargs):
-        # Auto-generate bill_number if blank
-        if not self.bill_number:
-            last = (
-                Bill.objects.filter(organization=self.organization)
-                .exclude(bill_number="")
-                .order_by("-created_at")
-                .first()
-            )
-            if last and last.bill_number.startswith("Bill-"):
-                try:
-                    n = int(last.bill_number.split("-", 1)[1])
-                except ValueError:
-                    n = 0
-            else:
-                n = 0
-            self.bill_number = f"Bill-{n + 1:02d}"
+        if not self.bill_number or not self.bill_number.strip():
+            self.bill_number = BillCounter.generate_bill_number(self.organization)
         super().save(*args, **kwargs)
 
 
@@ -165,8 +196,53 @@ class BillItem(BaseModel):
         super().save(*args, **kwargs)
 
 
+class PurchaseOrderCounter(models.Model):
+    organization = models.OneToOneField(
+        Organization, on_delete=models.CASCADE, related_name="po_counter"
+    )
+    last_number = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        db_table = "purchase_order_counters"
+
+    @classmethod
+    def get_next_number(cls, organization):
+        import random
+        import time
+
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                with transaction.atomic():
+                    try:
+                        counter = cls.objects.select_for_update().get(organization=organization)
+                        counter.last_number += 1
+                        counter.save(update_fields=["last_number"])
+                        return counter.last_number
+
+                    except cls.DoesNotExist:
+                        counter = cls.objects.create(organization=organization, last_number=1)
+                        return counter.last_number
+
+            except Exception:
+                if attempt == max_retries - 1:
+                    raise
+                time.sleep(random.uniform(0.01, 0.05))
+
+        raise Exception("Failed to generate PO number after retries")
+
+    @classmethod
+    def generate_po_number(cls, organization):
+        next_num = cls.get_next_number(organization)
+        return f"PO-{next_num:04d}"
+
+
 class PurchaseOrder(BaseModel):
-    po_number = models.CharField(max_length=50, blank=True)
+    po_number = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+    )
     organization = models.ForeignKey(
         Organization,
         on_delete=models.CASCADE,
@@ -206,22 +282,8 @@ class PurchaseOrder(BaseModel):
         ordering = ["-po_date"]
 
     def save(self, *args, **kwargs):
-        # Auto-generate bill_number if blank
-        if not self.po_number:
-            last = (
-                PurchaseOrder.objects.filter(organization=self.organization)
-                .exclude(po_number="")
-                .order_by("-created_at")
-                .first()
-            )
-            if last and last.po_number.startswith("PO-"):
-                try:
-                    n = int(last.po_number.split("-", 1)[1])
-                except ValueError:
-                    n = 0
-            else:
-                n = 0
-            self.po_number = f"PO-{n + 1:02d}"
+        if not self.po_number or not self.po_number.strip():
+            self.po_number = PurchaseOrderCounter.generate_po_number(self.organization)
         super().save(*args, **kwargs)
 
 

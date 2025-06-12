@@ -272,7 +272,8 @@ class ApprovalActionAPIView(BaseAPIView):
         if (
             sent_action
             and sent_action.approval_sent_by
-            and sent_action.approval_sent_by.user_notification_preferences.notify_on_approval_result  # noqa: E501
+            and hasattr(sent_action.approval_sent_by, "user_notification_preference")
+            and sent_action.approval_sent_by.user_notification_preference.notify_on_approval_result
         ):
             send_approval_status_email.delay(
                 model_name=model_name,

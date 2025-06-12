@@ -98,6 +98,7 @@ class BillItemSerializer(serializers.ModelSerializer):
 
 class BillSerializer(serializers.ModelSerializer):
     billing_address = AddressSerializer(source="vendor.billing_address", read_only=True)
+    shipping_address = AddressSerializer(source="organization.address", read_only=True)
     items = BillItemSerializer(many=True)
 
     vendor = VendorNestedSerializer(read_only=True)
