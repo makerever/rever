@@ -231,6 +231,12 @@ class PurchaseOrderItem(BaseModel):
     )
     description = models.TextField()
     quantity = models.DecimalField(max_digits=12, decimal_places=2)
+    received_quantity = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+        help_text="Total quantity received against this line item",
+    )
     unit_price = models.DecimalField(max_digits=12, decimal_places=2)
     uom = models.CharField(max_length=20, blank=True)
     product_code = models.CharField(max_length=50, blank=True)
