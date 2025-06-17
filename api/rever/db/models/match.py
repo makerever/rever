@@ -1,8 +1,8 @@
 from django.db import models
 
-from rever.db.models import Bill, BillItem, Organization, PurchaseOrder, PurchaseOrderItem
-
+from .auth import Organization
 from .base import BaseModel
+from .payable import Bill, BillItem, PurchaseOrder, PurchaseOrderItem
 
 
 class MatchResult(BaseModel):
