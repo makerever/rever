@@ -1,2 +1,3 @@
 from .attachment import update_is_attachment_flag
+from .match import trigger_matching_on_billitem_update, trigger_matching_when_po_added
 from .notification import create_user_notification_setting

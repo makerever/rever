@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rever.app.serializers import (
     BillItemSerializer,
     BillSerializer,
+    MatchResultSerializer,
     PurchaseOrderItemSerializer,
     PurchaseOrderMinimalSerializer,
     PurchaseOrderSerializer,
@@ -18,7 +19,7 @@ from rever.app.serializers import (
 from rever.app.views.base import BaseAPIView
 from rever.app.views.base_viewsets import BaseModelViewSet
 from rever.bgtasks import generate_bill_summary, generate_monthly_bill_summary
-from rever.db.models import Bill, BillItem, PurchaseOrder, PurchaseOrderItem, Vendor
+from rever.db.models import Bill, BillItem, MatchResult, PurchaseOrder, PurchaseOrderItem, Vendor
 from rever.utils.bill_constants import STATUS_CHOICES
 from rever.utils.cache import clear_report_cache
 
@@ -87,6 +88,33 @@ class BillViewSet(BaseModelViewSet):
             qs = qs.filter(status=status_param)
 
         return qs
+
+    @action(detail=True, methods=["get"], url_path="match-results")
+    def match_results(self, request, pk=None):
+        """
+        Returns all MatchResult entries for the given Bill ID,
+        along with unmatched PurchaseOrderItems.
+        """
+        bill = self.get_object()
+
+        # Get all match results
+        results = MatchResult.objects.filter(bill=bill)
+
+        # Get matched PO Items
+        matched_po_items = results.values_list("purchase_order_item_id", flat=True)
+
+        # Get unmatched PO Items (only if PO exists)
+        unmatched_po_items = []
+        if bill.purchase_order:
+            all_po_items = bill.purchase_order.items.all()
+            unmatched_po_items = all_po_items.exclude(id__in=matched_po_items)
+
+        return Response(
+            {
+                "billed": MatchResultSerializer(results, many=True).data,
+                "Unbilled": PurchaseOrderItemSerializer(unmatched_po_items, many=True).data,
+            }
+        )
 
     def perform_create(self, serializer):
         serializer.save(organization=self.request.user.organization)

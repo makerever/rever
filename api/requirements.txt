@@ -13,3 +13,4 @@ django-redis==5.4.0
 gunicorn==23.0.0
 django-crum>=0.7.9
 django-simple-history>=3.8.0
+sentence-transformers>=4.1.0

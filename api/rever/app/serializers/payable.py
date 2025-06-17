@@ -82,18 +82,12 @@ class VendorNestedSerializer(serializers.ModelSerializer):
 
 
 class BillItemSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(required=False)
+
     class Meta:
         model = BillItem
-        fields = [
-            "id",
-            "description",
-            "quantity",
-            "unit_price",
-            "uom",
-            "product_code",
-            "amount",
-        ]
-        read_only_fields = ["id", "amount"]
+        fields = "__all__"
+        read_only_fields = ["created_at", "updated_at", "amount", "bill"]
 
 
 class BillSerializer(serializers.ModelSerializer):
@@ -173,15 +167,39 @@ class BillSerializer(serializers.ModelSerializer):
             BillItem.objects.create(bill=bill, **item)
         return bill
 
-    def update(self, instance, validated):
-        # handle top-level field updates
-        items_data = validated.pop("items", None)
-        instance = super().update(instance, validated)
+    def update(self, instance, validated_data):
+        items_data = validated_data.pop("items", None)
+        instance = super().update(instance, validated_data)
+
         if items_data is not None:
-            # simple strategy: delete old items, recreate
-            instance.items.all().delete()
-            for item in items_data:
-                BillItem.objects.create(bill=instance, **item)
+            # Get existing items mapped by ID
+            existing_items = {str(item.id): item for item in instance.items.all()}
+            provided_item_ids = set()
+
+            for item_data in items_data:
+                item_id = item_data.get("id")
+
+                if item_id:
+                    item_id_str = str(item_id)
+                    provided_item_ids.add(item_id_str)
+
+                    if item_id_str in existing_items:
+                        existing_item = existing_items[item_id_str]
+                        for field, value in item_data.items():
+                            if field != "id":
+                                setattr(existing_item, field, value)
+                        existing_item.save()
+                    else:
+                        create_data = {k: v for k, v in item_data.items() if k != "id"}
+                        BillItem.objects.create(bill=instance, **create_data)
+                else:
+                    BillItem.objects.create(bill=instance, **item_data)
+            items_to_delete = set(existing_items.keys()) - provided_item_ids
+            if items_to_delete:
+                BillItem.objects.filter(
+                    id__in=[existing_items[item_id].id for item_id in items_to_delete]
+                ).delete()
+
         return instance
 
 
