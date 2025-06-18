@@ -1,4 +1,4 @@
 from .attachment import update_is_attachment_flag
+from .bill import apply_received_quantity_on_status_change
 from .match import trigger_matching_on_billitem_update, trigger_matching_when_po_added
 from .notification import create_user_notification_setting
-from .bill import apply_received_quantity_on_status_change

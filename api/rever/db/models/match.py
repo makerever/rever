@@ -41,6 +41,7 @@ class MatchResult(BaseModel):
         ],
     )
     is_quantity_posted = models.BooleanField(default=False)
+
     class Meta:
         db_table = "match_results"
         verbose_name = "Match Result"

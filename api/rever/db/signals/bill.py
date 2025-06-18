@@ -1,26 +1,28 @@
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+
 from rever.db.models import Bill, MatchResult
+
 
 @receiver(pre_save, sender=Bill)
 def apply_received_quantity_on_status_change(sender, instance, **kwargs):
     if not instance.pk:
-        return  
-    
-    if not instance.purchase_order:
-        return 
-    
-    from rever.db.models import PurchaseOrderItem
+        return
 
-    previous = Bill.objects.get(pk=instance.pk)
+    if instance.organization.matching_type != "two_way":
+        return
+
+    try:
+        previous = Bill.objects.get(pk=instance.pk)
+    except Bill.DoesNotExist:
+        return
 
     if (
         previous.status == "in_review"
         and instance.status in ["under_approval", "approved"]
+        and instance.purchase_order
     ):
-        match_results = MatchResult.objects.filter(
-            bill=instance, is_quantity_posted=False
-        )
+        match_results = MatchResult.objects.filter(bill=instance, is_quantity_posted=False)
         for match in match_results:
             po_item = match.purchase_order_item
             bill_item = match.bill_item
@@ -33,11 +35,10 @@ def apply_received_quantity_on_status_change(sender, instance, **kwargs):
 
     elif (
         previous.status in ["under_approval", "approved"]
-        and instance.status == "in_review"
+        and instance.status in ["in_review", "rejected"]
+        and instance.purchase_order
     ):
-        match_results = MatchResult.objects.filter(
-            bill=instance, is_quantity_posted=True
-        )
+        match_results = MatchResult.objects.filter(bill=instance, is_quantity_posted=True)
         for match in match_results:
             po_item = match.purchase_order_item
             bill_item = match.bill_item
