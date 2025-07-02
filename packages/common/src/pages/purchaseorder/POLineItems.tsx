@@ -54,17 +54,7 @@ export default function POLineItemsTable({
     });
   }, [poItems.length, getValues, setValue]);
 
-  // Prevent blank row append
   const handleAddItem = () => {
-    const lastItem = poItems[poItems.length - 1];
-    const isLastEmpty =
-      !lastItem?.description &&
-      !lastItem?.product_code &&
-      !lastItem?.quantity &&
-      !lastItem?.unit_price;
-
-    if (isLastEmpty) return;
-
     append({
       description: "",
       product_code: "",

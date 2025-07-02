@@ -59,20 +59,9 @@ export default function BillLineItemsTable({
         });
       }
     });
-  }, [billItems.length, getValues, setValue]); // only depend on length
+  }, [billItems.length, getValues, setValue]);
 
-  // Add handler with safety guard
   const handleAddItem = () => {
-    const lastItem = billItems[billItems.length - 1];
-    const isLastItemEmpty =
-      !lastItem?.description &&
-      !lastItem?.product_code &&
-      !lastItem?.quantity &&
-      !lastItem?.unit_price;
-
-    // Prevent adding another blank row
-    if (isLastItemEmpty) return;
-
     append({
       description: "",
       product_code: "",
