@@ -14,6 +14,7 @@ import {
 } from "@rever/common";
 import {
   Bill,
+  BillItem,
   MatchedLineItem,
   MatchStatus,
   OrgDetails,
@@ -362,6 +363,9 @@ const BillPOMatchUI = () => {
   const [unMatchedLineItems, setUnMatchedLineItems] = useState<
     UnmatchedLineItem[]
   >([]);
+  const [unMatchedBillLineItems, setUnMatchedBillLineItems] = useState<
+    UnmatchedLineItem[]
+  >([]);
 
   // Filter matched items based on toggle
   const filteredLineItems = useMemo(() => {
@@ -384,6 +388,13 @@ const BillPOMatchUI = () => {
             };
           });
         setUnMatchedLineItems(formatUnbilledData || []);
+        const formatExtraBilledItems: UnmatchedLineItem[] =
+          response?.data?.extra_bill_items?.map((v: BillItem) => {
+            return {
+              bill_item: v,
+            };
+          });
+        setUnMatchedBillLineItems(formatExtraBilledItems || []);
       }
     } finally {
       setIsLoading(false);
@@ -564,7 +575,10 @@ const BillPOMatchUI = () => {
 
                   {/* Right: Bill Items */}
                   <BillItemsTable
-                    matchedLineItems={filteredLineItems}
+                    matchedLineItems={[
+                      ...filteredLineItems,
+                      ...unMatchedBillLineItems,
+                    ]}
                     orgDetails={orgDetails}
                   />
 
