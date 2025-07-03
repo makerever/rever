@@ -279,7 +279,8 @@ const ViewBillDetails = ({
                   {isApproverAvailable ? (
                     <>
                       {/* Approver is available */}
-                      {orgDetails?.matching_type !== "none" ? (
+                      {orgDetails?.matching_type !== "none" &&
+                      billDetails?.purchase_order?.id ? (
                         <Button
                           disabled={isLoaderFormSubmit}
                           text="View match"
@@ -304,7 +305,8 @@ const ViewBillDetails = ({
                       {/* Approver not available */}
                       {!isUserApproval && (
                         <>
-                          {orgDetails?.matching_type === "none" ? (
+                          {orgDetails?.matching_type === "none" ||
+                          !billDetails?.purchase_order?.id ? (
                             billDetails?.status === "in_review" && (
                               <Button
                                 disabled={isLoaderFormSubmit}
