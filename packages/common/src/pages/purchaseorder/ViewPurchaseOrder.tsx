@@ -141,7 +141,9 @@ const ViewPODetails = ({
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-5">
               <div>
                 <Label text="Vendor name" />
-                <p className="text-blue-600 text-sm font-medium mb-5">
+                <p
+                  className={`${poDetails?.vendor?.name ? "text-blue-600" : "text-slate-800"} text-sm font-medium mb-5`}
+                >
                   {poDetails?.vendor?.name ? (
                     <Link
                       className="hover:underline"
