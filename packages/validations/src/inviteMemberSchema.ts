@@ -9,7 +9,7 @@ export const createInviteMemberSchema = (adminDomain: string) =>
     email: z
       .string()
       .min(1, "Email is required")
-      .email("Invalid email format")
+      .email("Enter valid email")
       .refine((val) => val.endsWith(`@${adminDomain}`), {
         message: `Email must end with @${adminDomain}`,
       }),
