@@ -18,8 +18,9 @@ import {
   inviteUserApi,
   updateMemberApi,
 } from "@rever/services";
+import { useUserStore } from "@rever/stores";
 import {
-  inviteMemberSchema,
+  createInviteMemberSchema,
   inviteMemberSchemaValues,
 } from "@rever/validations";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -157,6 +158,9 @@ function RoleDescriptions({ role }: RoleDescriptionsProps) {
 
 // Main component for inviting or editing a member
 function InviteMemberWithParams() {
+  const userDetails = useUserStore((state) => state.user);
+  const domain = userDetails?.email?.split("@")[1];
+
   const {
     register,
     handleSubmit,
@@ -166,7 +170,7 @@ function InviteMemberWithParams() {
     trigger,
     watch,
   } = useForm({
-    resolver: zodResolver(inviteMemberSchema),
+    resolver: zodResolver(createInviteMemberSchema(domain ?? "")),
     mode: "onChange",
   });
 
