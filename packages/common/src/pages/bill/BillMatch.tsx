@@ -417,26 +417,32 @@ const BillPOMatchUI = () => {
     async (idValue: string) => {
       try {
         const response = await getBillDetailsByIdApi(idValue);
-        if (response?.status === 200) {
-          if (response?.data?.status === "draft") {
-            router.push("/bill/list");
-            return;
-          }
-
-          setDynamicCrumb("/bill/match", {
-            id: response?.data?.id,
-            name: response?.data?.bill_number,
-          });
-
-          setDynamicCrumb("/approvals/list/review/match", {
-            id: response?.data?.id,
-            name: response?.data?.bill_number,
-          });
-
-          setBillDetails(response?.data);
-          getApprovalStatus();
+        if (response?.data?.matching_progress === "in_progress") {
+          setTimeout(() => {
+            getBillDetailsById(idValue);
+          }, 1000);
         } else {
-          router.push("/bill/list");
+          if (response?.status === 200) {
+            if (response?.data?.status === "draft") {
+              router.push("/bill/list");
+              return;
+            }
+
+            setDynamicCrumb("/bill/match", {
+              id: response?.data?.id,
+              name: response?.data?.bill_number,
+            });
+
+            setDynamicCrumb("/approvals/list/review/match", {
+              id: response?.data?.id,
+              name: response?.data?.bill_number,
+            });
+
+            setBillDetails(response?.data);
+            getApprovalStatus();
+          } else {
+            router.push("/bill/list");
+          }
         }
       } catch (error) {
         router.push("/bill/list");
