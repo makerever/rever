@@ -14,6 +14,7 @@ import {
 } from "@rever/common";
 import {
   Bill,
+  BillItem,
   MatchedLineItem,
   MatchStatus,
   OrgDetails,
@@ -38,7 +39,7 @@ import {
 } from "@rever/utils";
 import { billMatchHeaders, poMatchHeaders } from "@rever/constants";
 import { useBreadcrumbStore, useUserStore } from "@rever/stores";
-import { BadgeAlert, BadgeCheck } from "lucide-react";
+import { BadgeAlert, BadgeCheck, TriangleAlert } from "lucide-react";
 
 // Status icon component to reduce repetition
 const StatusIcon = memo(
@@ -57,7 +58,7 @@ const StatusIcon = memo(
         case "mismatched":
           return <BadgeAlert className="text-red-500" width={16} />;
         case "partial":
-          return <BadgeAlert className="text-red-500" width={16} />;
+          return <BadgeAlert className="text-yellow-500" width={16} />;
         default:
           return null;
       }
@@ -314,7 +315,7 @@ const MatchingStatusTable = memo(
                           : item?.overall_status === "mismatched"
                             ? "Mismatched"
                             : item?.overall_status === "partial"
-                              ? "Mismatched"
+                              ? "Partial matched"
                               : ""
                       }
                       side={
@@ -362,6 +363,9 @@ const BillPOMatchUI = () => {
   const [unMatchedLineItems, setUnMatchedLineItems] = useState<
     UnmatchedLineItem[]
   >([]);
+  const [unMatchedBillLineItems, setUnMatchedBillLineItems] = useState<
+    UnmatchedLineItem[]
+  >([]);
 
   // Filter matched items based on toggle
   const filteredLineItems = useMemo(() => {
@@ -384,6 +388,13 @@ const BillPOMatchUI = () => {
             };
           });
         setUnMatchedLineItems(formatUnbilledData || []);
+        const formatExtraBilledItems: UnmatchedLineItem[] =
+          response?.data?.extra_bill_items?.map((v: BillItem) => {
+            return {
+              bill_item: v,
+            };
+          });
+        setUnMatchedBillLineItems(formatExtraBilledItems || []);
       }
     } finally {
       setIsLoading(false);
@@ -406,26 +417,32 @@ const BillPOMatchUI = () => {
     async (idValue: string) => {
       try {
         const response = await getBillDetailsByIdApi(idValue);
-        if (response?.status === 200) {
-          if (response?.data?.status === "draft") {
-            router.push("/bill/list");
-            return;
-          }
-
-          setDynamicCrumb("/bill/match", {
-            id: response?.data?.id,
-            name: response?.data?.bill_number,
-          });
-
-          setDynamicCrumb("/approvals/list/review/match", {
-            id: response?.data?.id,
-            name: response?.data?.bill_number,
-          });
-
-          setBillDetails(response?.data);
-          getApprovalStatus();
+        if (response?.data?.matching_progress === "in_progress") {
+          setTimeout(() => {
+            getBillDetailsById(idValue);
+          }, 1000);
         } else {
-          router.push("/bill/list");
+          if (response?.status === 200) {
+            if (response?.data?.status === "draft") {
+              router.push("/bill/list");
+              return;
+            }
+
+            setDynamicCrumb("/bill/match", {
+              id: response?.data?.id,
+              name: response?.data?.bill_number,
+            });
+
+            setDynamicCrumb("/approvals/list/review/match", {
+              id: response?.data?.id,
+              name: response?.data?.bill_number,
+            });
+
+            setBillDetails(response?.data);
+            getApprovalStatus();
+          } else {
+            router.push("/bill/list");
+          }
         }
       } catch (error) {
         router.push("/bill/list");
@@ -564,7 +581,10 @@ const BillPOMatchUI = () => {
 
                   {/* Right: Bill Items */}
                   <BillItemsTable
-                    matchedLineItems={filteredLineItems}
+                    matchedLineItems={[
+                      ...filteredLineItems,
+                      ...unMatchedBillLineItems,
+                    ]}
                     orgDetails={orgDetails}
                   />
 

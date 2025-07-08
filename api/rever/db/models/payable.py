@@ -1,6 +1,7 @@
 from django.db import models, transaction
+from simple_history.models import HistoricalRecords
 
-from rever.utils.bill_constants import PAYMENT_TERM_CHOICES, STATUS_CHOICES
+from rever.utils.bill_constants import MATCH_PROGRESS_CHOICES, PAYMENT_TERM_CHOICES, STATUS_CHOICES
 from rever.utils.payable_constants import PO_STATUS_CHOICES
 
 from .auth import Organization
@@ -65,7 +66,7 @@ class Vendor(BaseModel):
         blank=True,
         related_name="vendor_bank_account",
     )
-
+    history = HistoricalRecords(inherit=True, table_name="vendor_history")
     is_active = models.BooleanField(default=True)
 
     class Meta:
@@ -149,6 +150,12 @@ class Bill(BaseModel):
         blank=True,
         null=True,
     )
+    matching_progress = models.CharField(
+        max_length=60,
+        choices=MATCH_PROGRESS_CHOICES,
+        default="not_started",
+        help_text="Status of line-item matching against purchase order",
+    )
     comments = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
     sub_total = models.DecimalField(max_digits=12, decimal_places=2)
@@ -157,6 +164,7 @@ class Bill(BaseModel):
     total = models.DecimalField(max_digits=12, decimal_places=2)
     is_active = models.BooleanField(default=True)
     is_attachment = models.BooleanField(default=False)
+    history = HistoricalRecords(inherit=True, table_name="bill_history")
 
     class Meta:
         unique_together = ("organization", "bill_number")
@@ -183,17 +191,37 @@ class BillItem(BaseModel):
     product_code = models.CharField(max_length=50, blank=True)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
 
+    line_number = models.PositiveIntegerField(null=True, blank=True)
+    history = HistoricalRecords(inherit=True, table_name="bill_item_history")
+
     class Meta:
         verbose_name = "BillItem"
         verbose_name_plural = "BillItems"
         db_table = "bill_items"
-        ordering = ["-created_at"]
+        ordering = ["line_number", "id"]
+
+        indexes = [
+            models.Index(fields=["bill", "line_number"]),
+        ]
 
     def save(self, *args, **kwargs):
         # Auto-calculate amount if not provided
         if not self.amount:
             self.amount = self.quantity * self.unit_price
+
+        # Auto-assign line_number if not provided
+        if self.line_number is None and self.bill_id:
+            self.line_number = self._get_next_line_number()
+
         super().save(*args, **kwargs)
+
+    def _get_next_line_number(self):
+        """Get the next available line number for this bill"""
+        last_item = BillItem.objects.filter(bill=self.bill, line_number__isnull=False).aggregate(
+            max_line=models.Max("line_number")
+        )
+
+        return (last_item["max_line"] or 0) + 1
 
 
 class PurchaseOrderCounter(models.Model):
@@ -270,6 +298,7 @@ class PurchaseOrder(BaseModel):
     is_active = models.BooleanField(default=True)
     is_attachment = models.BooleanField(default=False)
     status = models.CharField(max_length=20, choices=PO_STATUS_CHOICES, default="draft")
+    history = HistoricalRecords(inherit=True, table_name="purchase_order_history")
 
     class Meta:
         unique_together = ("organization", "po_number")
@@ -304,13 +333,33 @@ class PurchaseOrderItem(BaseModel):
     product_code = models.CharField(max_length=50, blank=True)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
 
+    line_number = models.PositiveIntegerField(null=True, blank=True)
+    history = HistoricalRecords(inherit=True, table_name="purchase_order_item_history")
+
     class Meta:
         verbose_name = "Purchase Order Item"
         verbose_name_plural = "Purchase Order Items"
         db_table = "purchase_order_items"
-        ordering = ["-created_at"]
+        ordering = ["line_number", "id"]
+
+        indexes = [
+            models.Index(fields=["purchase_order", "line_number"]),
+        ]
 
     def save(self, *args, **kwargs):
-        if not self.amount:
+        if self.amount is None:
             self.amount = self.quantity * self.unit_price
+
+        # Auto-assign line_number if not provided
+        if self.line_number is None and self.purchase_order_id:
+            self.line_number = self._get_next_line_number()
+
         super().save(*args, **kwargs)
+
+    def _get_next_line_number(self):
+        """Get the next available line number for this purchase order"""
+        last_item = PurchaseOrderItem.objects.filter(
+            purchase_order=self.purchase_order, line_number__isnull=False
+        ).aggregate(max_line=models.Max("line_number"))
+
+        return (last_item["max_line"] or 0) + 1

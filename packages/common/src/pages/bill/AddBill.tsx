@@ -220,6 +220,7 @@ const AddBillComponentWithParams = () => {
     // Prepare bill items for API
     const billItems = data?.items?.map((val) => {
       return {
+        id: val.id || undefined,
         description: val.description,
         product_code: val.product_code,
         quantity: val.quantity,

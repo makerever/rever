@@ -102,6 +102,7 @@ class BillViewSet(BaseModelViewSet):
 
         # Get matched PO Items
         matched_po_items = results.values_list("purchase_order_item_id", flat=True)
+        matched_bill_item_ids = results.values_list("bill_item_id", flat=True)
 
         # Get unmatched PO Items (only if PO exists)
         unmatched_po_items = []
@@ -109,10 +110,13 @@ class BillViewSet(BaseModelViewSet):
             all_po_items = bill.purchase_order.items.all()
             unmatched_po_items = all_po_items.exclude(id__in=matched_po_items)
 
+        unmatched_bill_items = bill.items.exclude(id__in=matched_bill_item_ids)
+
         return Response(
             {
                 "billed": MatchResultSerializer(results, many=True).data,
                 "Unbilled": PurchaseOrderItemSerializer(unmatched_po_items, many=True).data,
+                "extra_bill_items": BillItemSerializer(unmatched_bill_items, many=True).data,
             }
         )
 

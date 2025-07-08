@@ -21,6 +21,7 @@ export const addBillSchema = z.object({
   items: z
     .array(
       z.object({
+        id: z.string().optional(), // Optional ID for existing items
         description: z.string().optional(),
         product_code: z.string().optional(),
         quantity: z.string().optional(),

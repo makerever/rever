@@ -3,14 +3,16 @@
 "use client";
 
 import { useFieldArray, useWatch } from "react-hook-form";
-import { TextInput } from "@rever/common";
-import { TextAreaInput } from "@rever/common";
+import {
+  TextInput,
+  TextAreaInput,
+  NumberInput,
+  IconWrapper,
+} from "@rever/common";
 import { Plus, Trash } from "lucide-react";
 import { BillLineItemsTableProps } from "@rever/types";
-import { NumberInput } from "@rever/common";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { formatNumber } from "@rever/utils";
-import { IconWrapper } from "@rever/common";
 import { useUserStore } from "@rever/stores";
 
 const billItemHeaders = [
@@ -35,33 +37,39 @@ export default function BillLineItemsTable({
     name: "items",
   });
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const billItems =
-    useWatch({
-      control,
-      name: "items",
-    }) || [];
+  // Safer useWatch usage
+  const watchedItems = useWatch({ control, name: "items" });
+  const billItems = useMemo(() => watchedItems || [], [watchedItems]);
 
   const orgDetails = useUserStore((state) => state.user?.organization);
 
-  // Whenever quantity or unitPrice changes, recompute & set amount
+  // Update amount when qty or unit_price changes, avoid extra updates
   useEffect(() => {
     billItems.forEach((item, index) => {
-      const qty = Number(item.quantity) || 0;
-      const up = Number(item.unit_price) || 0;
+      const qty = Number(item.quantity);
+      const up = Number(item.unit_price);
       const newAmt = qty * up;
 
-      // read the _current_ form value
-      const currentAmt = Number(getValues(`items.${index}.amount`)) || 0;
+      const currentAmt = Number(getValues(`items.${index}.amount`));
 
-      if (currentAmt !== newAmt) {
+      if (!Number.isNaN(qty) && !Number.isNaN(up) && currentAmt !== newAmt) {
         setValue(`items.${index}.amount`, String(newAmt), {
           shouldDirty: true,
           shouldValidate: true,
         });
       }
     });
-  }, [billItems, getValues, setValue]);
+  }, [billItems.length, getValues, setValue]);
+
+  const handleAddItem = () => {
+    append({
+      description: "",
+      product_code: "",
+      quantity: "",
+      unit_price: "",
+      amount: "0",
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -140,17 +148,6 @@ export default function BillLineItemsTable({
                     {formatNumber(rowAmt, orgDetails?.currency)}
                   </p>
                 </td>
-                {/* {index !== 0 ? (
-                  <td className="p-2">
-                    <IconWrapper
-                      onClick={() => remove(index)}
-                      className="hover:bg-red-100 hover:text-red-500"
-                      icon={<Trash width={16} />}
-                    />
-                  </td>
-                ) : (
-                  <td className="p-2"></td>
-                )} */}
                 <td className="p-2">
                   <IconWrapper
                     onClick={() => remove(index)}
@@ -165,15 +162,7 @@ export default function BillLineItemsTable({
       </table>
 
       <div
-        onClick={() =>
-          append({
-            description: "",
-            product_code: "",
-            quantity: "",
-            unit_price: "",
-            amount: "0",
-          })
-        }
+        onClick={handleAddItem}
         className="flex items-center w-fit text-xs font-semibold text-primary-500 cursor-pointer"
       >
         <Plus width={16} className="mr-1" /> New bill item

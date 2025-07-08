@@ -5,6 +5,28 @@ from .base import BaseModel
 from .payable import Bill, BillItem, PurchaseOrder, PurchaseOrderItem
 
 
+class MatchMatrix(BaseModel):
+    bill_item = models.ForeignKey(BillItem, on_delete=models.CASCADE, related_name="matrix_rows")
+    purchase_order_item = models.ForeignKey(PurchaseOrderItem, on_delete=models.CASCADE)
+    bill = models.ForeignKey(Bill, on_delete=models.CASCADE)
+    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE)
+
+    description_score = models.FloatField()
+
+    class Meta:
+        db_table = "match_matrix"
+        unique_together = ("bill_item", "purchase_order_item")
+        indexes = [
+            models.Index(fields=["bill_item", "purchase_order_item"]),
+            models.Index(fields=["bill", "purchase_order"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["bill_item", "purchase_order_item"], name="unique_matrix_pair"
+            )
+        ]
+
+
 class MatchResult(BaseModel):
     organization = models.ForeignKey(
         Organization, on_delete=models.CASCADE, related_name="match_results"
@@ -49,4 +71,10 @@ class MatchResult(BaseModel):
         indexes = [
             models.Index(fields=["bill"]),
             models.Index(fields=["purchase_order"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organization", "purchase_order_item", "bill"],
+                name="unique_match_result_per_org_poitem_bill",
+            )
         ]

@@ -13,3 +13,9 @@ STATUS_CHOICES = [
     ("approved", "Approved"),
     ("rejected", "Rejected"),
 ]
+MATCH_PROGRESS_CHOICES = [
+    ("not_started", "Not Started"),
+    ("in_progress", "In Progress"),
+    ("completed", "Completed"),
+    ("error", "Error"),
+]

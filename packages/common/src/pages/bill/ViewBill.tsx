@@ -169,7 +169,9 @@ const ViewBillDetails = ({
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-5">
                 <div>
                   <Label text="Vendor name" />
-                  <p className="text-blue-600 text-sm font-medium mb-5">
+                  <p
+                    className={`${billDetails?.vendor?.name ? "text-blue-600" : "text-slate-800"} text-sm font-medium mb-5`}
+                  >
                     {billDetails?.vendor?.name ? (
                       <Link
                         className="hover:underline"
@@ -199,7 +201,9 @@ const ViewBillDetails = ({
                 </div>
                 <div>
                   <Label text="Purchase order" />
-                  <p className="text-blue-600 text-sm font-medium mb-5">
+                  <p
+                    className={`${billDetails?.purchase_order?.po_number ? "text-blue-600" : "text-slate-800"} text-sm font-medium mb-5`}
+                  >
                     {billDetails?.purchase_order?.po_number ? (
                       <Link
                         className="hover:underline"
@@ -251,17 +255,27 @@ const ViewBillDetails = ({
               {/* Approval actions for users who can approve/reject */}
               {billDetails?.status === "under_approval" && isUserApproval ? (
                 <div className="flex items-center gap-3 w-fit">
-                  <Button
-                    disabled={isLoaderFormSubmit}
-                    text="View match"
-                    onClick={() =>
-                      router.push(
-                        `/approvals/list/review/match?id=${billDetails?.id}`,
-                      )
-                    }
-                    className="text-white whitespace-pre bg-green-500 hover:bg-green-600"
-                    isDefault={false}
-                  />
+                  {billDetails?.purchase_order?.id ? (
+                    <Button
+                      disabled={isLoaderFormSubmit}
+                      text="View match"
+                      onClick={() =>
+                        router.push(
+                          `/approvals/list/review/match?id=${billDetails?.id}`,
+                        )
+                      }
+                      className="text-white whitespace-pre bg-green-500 hover:bg-green-600"
+                      isDefault={false}
+                    />
+                  ) : (
+                    <Button
+                      disabled={isLoaderFormSubmit}
+                      text="Approve"
+                      onClick={handleApprovalAction}
+                      className="text-white whitespace-pre bg-green-500 hover:bg-green-600"
+                      isDefault={false}
+                    />
+                  )}
 
                   <Button
                     disabled={isLoaderFormSubmit}
@@ -279,7 +293,8 @@ const ViewBillDetails = ({
                   {isApproverAvailable ? (
                     <>
                       {/* Approver is available */}
-                      {orgDetails?.matching_type !== "none" ? (
+                      {orgDetails?.matching_type !== "none" &&
+                      billDetails?.purchase_order?.id ? (
                         <Button
                           disabled={isLoaderFormSubmit}
                           text="View match"
@@ -304,7 +319,8 @@ const ViewBillDetails = ({
                       {/* Approver not available */}
                       {!isUserApproval && (
                         <>
-                          {orgDetails?.matching_type === "none" ? (
+                          {orgDetails?.matching_type === "none" ||
+                          !billDetails?.purchase_order?.id ? (
                             billDetails?.status === "in_review" && (
                               <Button
                                 disabled={isLoaderFormSubmit}
