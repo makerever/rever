@@ -184,6 +184,7 @@ const AddPOComponentWithParams = () => {
     // Prepare PO items for API
     const poItems = data?.items?.map((val) => {
       return {
+        id: val.id || undefined,
         description: val.description,
         product_code: val.product_code,
         quantity: val.quantity,
