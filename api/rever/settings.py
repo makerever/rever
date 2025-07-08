@@ -278,5 +278,10 @@ LOGGING = {
             "handlers": ["console", "file"],
             "propagate": False,
         },
+        "rever.match": {
+            "level": "DEBUG",
+            "handlers": ["console", "file"],
+            "propagate": False,
+        },
     },
 }

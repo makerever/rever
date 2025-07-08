@@ -2,6 +2,6 @@ from .approval_email_task import send_approval_email
 from .approval_status_email_task import send_approval_status_email
 from .bill_summary_task import generate_bill_summary
 from .invitation_email_task import send_invitation_email
-from .match_task import async_match_all_items, async_match_single_item
+from .match_task import async_generate_match_results, async_regenerate_matrix_v2
 from .monthly_bill_summary_task import generate_monthly_bill_summary
 from .otp_email_task import send_otp_email

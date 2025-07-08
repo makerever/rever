@@ -1,148 +1,134 @@
+import logging
+
+from django.core.cache import cache
+from django.db import IntegrityError
 from sentence_transformers import util
 
-from rever.db.models import MatchResult
+from rever.bgtasks.match_task import async_generate_match_results
+from rever.db.models import Bill, BillItem, MatchMatrix, MatchResult, PurchaseOrderItem
 
-_model = None
+from .embedding import model
+
+logger = logging.getLogger(__name__)
 
 
 def get_similarity_score(text1, text2):
-    global _model
-    if _model is None:
-        import torch
-        from sentence_transformers import SentenceTransformer
-
-        _model = SentenceTransformer("all-MiniLM-L6-v2")
-        _model.to(torch.device("cpu"))
-
-    emb1 = _model.encode(text1, convert_to_tensor=True)
-    emb2 = _model.encode(text2, convert_to_tensor=True)
+    emb1 = model.encode(text1, convert_to_tensor=True)
+    emb2 = model.encode(text2, convert_to_tensor=True)
     return round(util.pytorch_cos_sim(emb1, emb2).item(), 4)
 
 
-def match_items(bill):
-    if bill.status != "in_review" or not bill.purchase_order:
+def regenerate_matrix(bill):
+    po = bill.purchase_order
+    if not po:
         return
 
-    po_items = list(bill.purchase_order.items.all())
-    matched_po_indices = set()
+    bill_items = BillItem.objects.filter(bill=bill)
+    po_items = PurchaseOrderItem.objects.filter(purchase_order=po)
 
-    for bill_item in bill.items.all():
-        best_match = None
-        best_score = -1
-        best_index = -1
+    # Clear previous entries
+    MatchMatrix.objects.filter(bill=bill).delete()
 
-        for idx, po_item in enumerate(po_items):
-            if idx in matched_po_indices:
-                continue
-
+    matrix_entries = []
+    for bill_item in bill_items:
+        for po_item in po_items:
             score = get_similarity_score(bill_item.description, po_item.description)
+            matrix_entries.append(
+                MatchMatrix(
+                    bill=bill,
+                    bill_item=bill_item,
+                    purchase_order=po,
+                    purchase_order_item=po_item,
+                    description_score=score,
+                )
+            )
 
-            if score > best_score:
-                best_score = score
-                best_match = po_item
-                best_index = idx
+    # Now safe to bulk insert
+    MatchMatrix.objects.bulk_create(matrix_entries)
 
-        if not best_match:
-            continue
 
-        if best_score >= 0.7:
-            description_status = "matched"
-        elif best_score >= 0.4:
-            description_status = "partial"
-        else:
-            description_status = "mismatched"
+def _regenerate_matrix_safely(bill):
+    lock_key = f"lock:matrix:{bill.id}"
+    if cache.add(lock_key, "1", timeout=30):  # lock for 30 seconds .. wait for regeneration
+        try:
+            regenerate_matrix(bill)
+            async_generate_match_results.delay(str(bill.id))
+        except IntegrityError as e:
+            logger.warning(f"Matrix generation failed due to race condition: {e}")
+        finally:
+            cache.delete(lock_key)
+    else:
+        logger.info(f"🔒 Skipping matrix regen for bill {bill.id} - lock in place.")
 
-        unit_price_status = bill_item.unit_price == best_match.unit_price
-        quantity_status = bill_item.quantity <= best_match.quantity
 
-        if description_status == "matched" and unit_price_status and quantity_status:
-            overall_status = "matched"
-        elif description_status == "matched" or (
-            description_status == "partial" and (unit_price_status or quantity_status)
-        ):
-            overall_status = "partial"
-        else:
-            overall_status = "mismatched"
+def generate_match_results(bill):
+    try:
+        organization = bill.organization
+        purchase_order = bill.purchase_order
 
-        MatchResult.objects.update_or_create(
-            bill_item=bill_item,
-            defaults={
-                "bill": bill,
-                "purchase_order": bill.purchase_order,
-                "purchase_order_item": best_match,
-                "match_type": "two_way",
-                "description_score": best_score,
-                "description_status": description_status,
-                "unit_price_status": unit_price_status,
-                "quantity_status": quantity_status,
-                "overall_status": overall_status,
-                "organization": bill.organization,
-            },
+        # Step 1: Delete old match results
+        MatchResult.objects.filter(bill=bill).delete()
+
+        # Step 2: Load and sort matrix
+        matrix = (
+            MatchMatrix.objects.filter(bill=bill, purchase_order=purchase_order)
+            .select_related("bill_item", "purchase_order_item")
+            .order_by("-description_score")
         )
 
-        matched_po_indices.add(best_index)
+        used_bill_items = set()
+        used_po_items = set()
+        results = []
 
+        for row in matrix:
+            bill_item = row.bill_item
+            po_item = row.purchase_order_item
 
-def match_single_item(bill_item):
-    bill = bill_item.bill
+            if bill_item.id in used_bill_items or po_item.id in used_po_items:
+                continue
 
-    if bill.status != "in_review" or not bill.purchase_order:
-        return
+            # Description Score logic
+            desc_score = row.description_score
+            if desc_score >= 0.7:
+                desc_status = "matched"
+            elif desc_score >= 0.4:
+                desc_status = "partial"
+            else:
+                desc_status = "mismatched"
 
-    po_items = list(bill.purchase_order.items.all())
-    already_matched_po_ids = set(
-        MatchResult.objects.filter(bill=bill)
-        .exclude(bill_item=bill_item)
-        .values_list("purchase_order_item_id", flat=True)
-    )
+            # Unit Price Match
+            unit_price_match = bill_item.unit_price == po_item.unit_price
 
-    best_match = None
-    best_score = -1
+            # Quantity match (bill quantity <= po quantity)
+            quantity_match = bill_item.quantity <= po_item.quantity
 
-    for po_item in po_items:
-        if po_item.id in already_matched_po_ids:
-            continue
+            # Overall status logic
+            if desc_status == "matched" and unit_price_match and quantity_match:
+                overall_status = "matched"
+            elif desc_status == "mismatched" or not unit_price_match:
+                overall_status = "mismatched"
+            else:
+                overall_status = "partial"
 
-        score = get_similarity_score(bill_item.description, po_item.description)
+            result = MatchResult(
+                organization=organization,
+                bill=bill,
+                purchase_order=purchase_order,
+                bill_item=bill_item,
+                purchase_order_item=po_item,
+                match_type="two_way",
+                description_score=desc_score,
+                description_status=desc_status,
+                unit_price_status=unit_price_match,
+                quantity_status=quantity_match,
+                overall_status=overall_status,
+            )
 
-        if score > best_score:
-            best_score = score
-            best_match = po_item
+            results.append(result)
+            used_bill_items.add(bill_item.id)
+            used_po_items.add(po_item.id)
 
-    if not best_match:
-        return
-
-    if best_score >= 0.7:
-        description_status = "matched"
-    elif best_score >= 0.4:
-        description_status = "partial"
-    else:
-        description_status = "mismatched"
-
-    unit_price_status = bill_item.unit_price == best_match.unit_price
-    quantity_status = bill_item.quantity <= best_match.quantity
-
-    if description_status == "matched" and unit_price_status and quantity_status:
-        overall_status = "matched"
-    elif description_status == "matched" or (
-        description_status == "partial" and (unit_price_status or quantity_status)
-    ):
-        overall_status = "partial"
-    else:
-        overall_status = "mismatched"
-
-    MatchResult.objects.update_or_create(
-        bill_item=bill_item,
-        defaults={
-            "bill": bill,
-            "purchase_order": bill.purchase_order,
-            "purchase_order_item": best_match,
-            "match_type": "two_way",
-            "description_score": best_score,
-            "description_status": description_status,
-            "unit_price_status": unit_price_status,
-            "quantity_status": quantity_status,
-            "overall_status": overall_status,
-            "organization": bill.organization,
-        },
-    )
+        MatchResult.objects.bulk_create(results)
+        Bill.objects.filter(id=bill.id).update(matching_progress="completed")
+    except Exception:
+        pass

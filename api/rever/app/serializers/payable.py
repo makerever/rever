@@ -204,6 +204,8 @@ class BillSerializer(serializers.ModelSerializer):
 
 
 class PurchaseOrderItemSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(required=False)
+
     class Meta:
         model = PurchaseOrderItem
         fields = "__all__"
