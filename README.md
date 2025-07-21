@@ -1,7 +1,7 @@
 # Rever
 
 <p align="center">
-  <img src="/images/rever-logo-text.svg" alt="Rever Logo" width="200"/>
+  <img src="/images/rever-logo.svg" alt="Rever Logo" width="200"/>
 </p>
 
 <p align="center">
