@@ -44,7 +44,7 @@ const PasswordStrength = ({ password }: { password: string }) => {
           className={`h-1 flex-1 rounded-full transition-all ${level >= 2 ? "bg-yellow-500" : "bg-gray-200"}`}
         />
         <div
-          className={`h-1 flex-1 rounded-full transition-all ${level === 3 ? "bg-green-500" : "bg-gray-200"}`}
+          className={`h-1 flex-1 rounded-full transition-all ${level === 3 ? "bg-primary-500" : "bg-gray-200"}`}
         />
       </div>
       <span className="text-2xs text-slate-600">{label}</span>

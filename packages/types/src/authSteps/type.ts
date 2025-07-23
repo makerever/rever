@@ -51,6 +51,7 @@ export interface OtpStepProps<T extends FieldValues>
   handleContinue?: () => void;
   resendOtp?: () => void;
   isLoaderFormSubmit?: boolean;
+  otpSending?: boolean;
 }
 
 // Interface for register step props

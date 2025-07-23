@@ -7,8 +7,9 @@ import { AuditHistoryDataProps, AuditHistoryItemsProps } from "@rever/types";
 import CheckBox from "./inputFields/checkbox/CheckBox";
 import { formatDate, formatNumber, getStatusClass } from "@rever/utils";
 import { useUserStore } from "@rever/stores";
+import PageLoader from "./Loader";
 
-const AuditHistory = ({ data }: AuditHistoryDataProps) => {
+const AuditHistory = ({ data, isLoading }: AuditHistoryDataProps) => {
   const [search, setSearch] = useState<string>("");
   const orgDetails = useUserStore((state) => state.user?.organization);
 
@@ -179,16 +180,21 @@ const AuditHistory = ({ data }: AuditHistoryDataProps) => {
 
   return (
     <>
-      <DataTable
-        tableData={getFilteredAuditData(data, search)}
-        columns={columns}
-        setSearch={setSearch}
-        search={search}
-        clearSearch={() => setSearch("")}
-        noStatusFilter
-        exportKey="Audit-history"
-        hideExportIcon
-      />
+      {/* Show table only when not loading */}
+      {isLoading ? (
+        <PageLoader />
+      ) : (
+        <DataTable
+          tableData={getFilteredAuditData(data, search)}
+          columns={columns}
+          setSearch={setSearch}
+          search={search}
+          clearSearch={() => setSearch("")}
+          noStatusFilter
+          exportKey="Audit-history"
+          hideExportIcon
+        />
+      )}
     </>
   );
 };

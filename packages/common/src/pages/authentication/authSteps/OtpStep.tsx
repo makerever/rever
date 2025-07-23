@@ -15,6 +15,7 @@ export default function OtpStep<T extends FieldValues>({
   handleContinue,
   resendOtp,
   isLoaderFormSubmit,
+  otpSending,
 }: OtpStepProps<T>) {
   return (
     <div className="w-full">
@@ -35,9 +36,9 @@ export default function OtpStep<T extends FieldValues>({
           </div>
           <div
             onClick={resendOtp}
-            className="text-slate-500 cursor-pointer flex items-center gap-1"
+            className={`${otpSending ? "text-slate-300" : "text-slate-500 cursor-pointer "} flex items-center gap-1`}
           >
-            <span>Resend</span>
+            <span>{otpSending ? "Please wait" : "Resend"}</span>
           </div>
         </div>
       </div>

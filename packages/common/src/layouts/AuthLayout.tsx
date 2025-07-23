@@ -27,7 +27,7 @@ const AuthLayout = ({
       {/* Background - Light: Image, Dark: Color */}
       <div className="absolute inset-0 z-0">
         {/* Light Mode Background Image */}
-        <div className="h-full w-full bg-[url('/images/authBackground2.png')] bg-[length:100%_100%] bg-no-repeat opacity-30 dark:hidden" />
+        <div className="absolute top-0 right-0 h-full w-[40%] bg-[url('/images/authBackground.svg')] bg-no-repeat bg-right bg-cover opacity-20 dark:hidden" />
         {/* Dark Mode Background Color */}
         <div className="h-full w-full hidden dark:block bg-zinc-900" />
       </div>
@@ -37,14 +37,14 @@ const AuthLayout = ({
         <div className="card w-full max-w-[450px] rounded-xl lg:p-10 lg:pb-6 p-4">
           <div className="flex">
             <Image
-              src="/images/reverLogo.svg"
+              src="/images/reverLogoDark2.svg"
               alt="Rever Logo"
-              width={40}
-              height={40}
+              width={48}
+              height={48}
             />
           </div>
 
-          <div className="mt-6 mb-10">
+          <div className="mt-5 mb-10">
             <h3 className="mb-1 text-slate-800 dark:text-slate-100 text-2xl font-semibold">
               {mainTitle}
             </h3>

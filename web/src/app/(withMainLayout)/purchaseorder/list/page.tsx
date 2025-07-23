@@ -180,8 +180,8 @@ const PurchaseOrderList = () => {
       const poData = purchaseOrder?.results
         ?.sort(
           (a: PurchaseOrder, b: PurchaseOrder) =>
-            new Date(b?.updated_at ?? 0).getTime() -
-            new Date(a?.updated_at ?? 0).getTime(),
+            new Date(b?.created_at ?? 0).getTime() -
+            new Date(a?.created_at ?? 0).getTime(),
         )
         ?.map((po: PurchaseOrder) => {
           return {

@@ -51,10 +51,13 @@ const ViewBillDetails = ({
 
   const [auditData, setAuditData] = useState([]);
 
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
   const getBillAuditHistory = useCallback(async (id: number) => {
     const response = await getBillAuditHistoryApi(id);
     if (response?.status === 200) {
       setAuditData(response?.data);
+      setIsLoading(false);
     }
   }, []);
 
@@ -374,7 +377,7 @@ const ViewBillDetails = ({
             />
           </div>
 
-          <AuditHistory data={auditData} />
+          <AuditHistory data={auditData} isLoading={isLoading} />
         </div>
       </SidePanel>
     </>

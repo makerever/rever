@@ -36,6 +36,7 @@ export interface Bill {
   updated_at?: string;
   status: string;
   items?: BillItemTypeProps[];
+  created_at?: string;
 }
 
 export type BillItemTypeProps = {
@@ -82,6 +83,7 @@ export interface ViewBillDetailsProps {
 export interface AttachmentProps {
   file?: string;
   id?: string;
+  file_name?: string;
 }
 
 // Types for matching b/w PO and bill

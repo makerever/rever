@@ -10,8 +10,7 @@ const PUBLIC_ROUTES = [
   "/user",
   "/terms-and-conditions",
   "/privacy-policy",
-  "/eula",
-  "/proxy/cors",
+  "/eula"
 ];
 const MAIN_ROUTES = [
   "/home",

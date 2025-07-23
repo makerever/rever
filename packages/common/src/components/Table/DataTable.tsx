@@ -248,7 +248,7 @@ export default function DataTable<
         </div>
       ) : (
         <>
-          <div className="w-[calc(100vw-60px)] md:w-full rounded-md border bg-white shadow-sm block max-h-[536px] overflow-y-auto custom_scrollbar">
+          <div className="w-[calc(100vw-60px)] md:w-full rounded-md border bg-white shadow-sm block max-h-[506px] overflow-y-auto custom_scrollbar">
             <div className="overflow-x-auto custom_scrollbar w-full">
               <table className="w-full border-separate border-spacing-0">
                 <thead className="text-xs text-slate-500 hover:bg-slate-50 transition-all duration-200">

@@ -9,6 +9,7 @@ interface DataTablePaginationProps<TData> {
   totalRows: number;
   selectedRows: number;
   tableHeading?: string;
+  hideExportIcon?: boolean;
 }
 
 export function DataTablePagination<TData>({
@@ -16,13 +17,19 @@ export function DataTablePagination<TData>({
   totalRows,
   selectedRows,
   tableHeading,
+  hideExportIcon,
 }: DataTablePaginationProps<TData>) {
   return (
     <div className="py-4 font-medium flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500">
-      <div>
-        {selectedRows} of {totalRows} {tableHeading?.toLocaleLowerCase()}{" "}
-        selected
-      </div>
+      {!hideExportIcon ? (
+        <div>
+          {selectedRows} of {totalRows} {tableHeading?.toLocaleLowerCase()}{" "}
+          selected
+        </div>
+      ) : (
+        <div></div>
+      )}
+
       <div className="flex flex-wrap items-center gap-2">
         <span className="hidden sm:inline">Items per page</span>
         <select

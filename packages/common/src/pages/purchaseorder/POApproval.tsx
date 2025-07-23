@@ -180,7 +180,7 @@ const POApproval = () => {
       ) : (
         <>
           <div className="lg:w-5/12 w-full mt-6">
-            <div className="flex items-start justify-between mb-4 bg-gray-100 rounded-md p-3">
+            <div className="flex items-start justify-between mb-4 bg-gray-50 rounded-md p-3">
               <div>
                 <p className="font-semibold text-sm text-slate-800 dark:text-gray-200">
                   Add approver

@@ -206,8 +206,8 @@ const BillList = () => {
       const billData = bill?.results
         ?.sort(
           (a: Bill, b: Bill) =>
-            new Date(b?.updated_at ?? 0).getTime() -
-            new Date(a?.updated_at ?? 0).getTime(),
+            new Date(b?.created_at ?? 0).getTime() -
+            new Date(a?.created_at ?? 0).getTime(),
         )
         ?.map((val: Bill) => {
           return {
