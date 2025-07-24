@@ -1,3 +1,5 @@
+import contextlib
+
 from django.db import models, transaction
 from simple_history.models import HistoricalRecords
 
@@ -9,12 +11,12 @@ from .base import BaseModel
 
 
 class Address(BaseModel):
-    line1 = models.CharField(max_length=255, blank=True)
-    line2 = models.CharField(max_length=255, blank=True)
-    city = models.CharField(max_length=100, blank=True)
-    state = models.CharField(max_length=100, blank=True)
-    zip_code = models.CharField(max_length=20, blank=True)
-    country = models.CharField(max_length=100, blank=True)
+    line1 = models.CharField(max_length=255, blank=True, null=True)
+    line2 = models.CharField(max_length=255, blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    state = models.CharField(max_length=100, blank=True, null=True)
+    zip_code = models.CharField(max_length=20, blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         verbose_name = "Address"
@@ -40,18 +42,18 @@ class Vendor(BaseModel):
         related_name="organization_vendor",
     )
 
-    vendor_name = models.CharField(max_length=120)
-    company_name = models.CharField(max_length=120, blank=True)
-    email = models.EmailField(blank=True)
-    mobile = models.CharField(max_length=30, blank=True)
-    tax_id = models.CharField(max_length=50, blank=True)
-    account_number = models.CharField(max_length=60, blank=True)
+    vendor_name = models.CharField(max_length=120, blank=True, null=True)
+    company_name = models.CharField(max_length=120, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    mobile = models.CharField(max_length=30, blank=True, null=True)
+    tax_id = models.CharField(max_length=50, blank=True, null=True)
+    account_number = models.CharField(max_length=60, blank=True, null=True)
 
     payment_terms = models.CharField(
         max_length=8, choices=PAYMENT_TERM_CHOICES, blank=True, null=True
     )
 
-    website = models.URLField(blank=True)
+    website = models.URLField(blank=True, null=True)
 
     billing_address = models.OneToOneField(
         Address,
@@ -142,8 +144,8 @@ class Bill(BaseModel):
         blank=True,
         related_name="linked_bills",
     )
-    bill_date = models.DateField(db_index=True)
-    due_date = models.DateField(db_index=True)
+    bill_date = models.DateField(db_index=True, blank=True, null=True)
+    due_date = models.DateField(db_index=True, blank=True, null=True)
     payment_terms = models.CharField(
         max_length=8,
         choices=PAYMENT_TERM_CHOICES,
@@ -156,20 +158,28 @@ class Bill(BaseModel):
         default="not_started",
         help_text="Status of line-item matching against purchase order",
     )
-    comments = models.TextField(blank=True)
+    comments = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
-    sub_total = models.DecimalField(max_digits=12, decimal_places=2)
+    sub_total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     total_tax = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    total = models.DecimalField(max_digits=12, decimal_places=2)
+    total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     is_active = models.BooleanField(default=True)
     is_attachment = models.BooleanField(default=False)
     history = HistoricalRecords(inherit=True, table_name="bill_history")
 
+    is_duplicate = models.BooleanField(default=False)
+
+    def update_duplicate_flags(self):
+        bills = Bill.objects.filter(
+            vendor=self.vendor, bill_number=self.bill_number, organization=self.organization
+        )
+        is_duplicate = bills.count() > 1
+        bills.update(is_duplicate=is_duplicate)
+
     class Meta:
-        unique_together = ("organization", "bill_number")
         indexes = [
-            models.Index(fields=["organization", "bill_number"]),
+            models.Index(fields=["vendor", "bill_number", "organization"]),
         ]
         verbose_name = "Bill"
         verbose_name_plural = "Bills"
@@ -177,9 +187,21 @@ class Bill(BaseModel):
         ordering = ["-bill_date"]
 
     def save(self, *args, **kwargs):
+        # Track old values for duplicate logic
+        old = None
+        if self.pk:
+            with contextlib.suppress(Bill.DoesNotExist):
+                old = Bill.objects.get(pk=self.pk)
+        if old:
+            self._old_vendor = old.vendor
+            self._old_bill_number = old.bill_number
+
         if not self.bill_number or not self.bill_number.strip():
             self.bill_number = BillCounter.generate_bill_number(self.organization)
-        super().save(*args, **kwargs)
+
+        # Ensure atomicity
+        with transaction.atomic():
+            super().save(*args, **kwargs)
 
 
 class BillItem(BaseModel):
