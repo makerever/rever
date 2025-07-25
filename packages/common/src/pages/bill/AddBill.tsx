@@ -639,6 +639,7 @@ const AddBillComponentWithParams = () => {
                         disabled={isLoaderFormSubmit}
                         className="text-white"
                         onClick={() => setSubmitType("in_review")}
+                        isLoading={isLoaderFormSubmit}
                       />
                     </div>
 
@@ -650,6 +651,7 @@ const AddBillComponentWithParams = () => {
                           type="submit"
                           disabled={isLoaderFormSubmit}
                           onClick={() => setSubmitType("draft")}
+                          isLoading={isLoaderFormSubmit}
                           className="bg-transparent text-primary-500 border border-primary-500 disabled:hover:bg-transparent disabled:text-primary-500 hover:bg-primary-500 hover:text-white"
                         />
                       </div>

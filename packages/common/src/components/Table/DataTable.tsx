@@ -345,6 +345,7 @@ export default function DataTable<
             tableHeading={tableHeading}
             totalRows={data.length}
             selectedRows={Object.keys(rowSelection).length}
+            hideExportIcon={hideExportIcon}
           />
         </>
       )}

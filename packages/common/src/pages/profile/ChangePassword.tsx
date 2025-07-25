@@ -118,6 +118,7 @@ const ChangePassword = () => {
             disabled={
               isPasswordValid || isConfirmPasswordValid || isLoaderFormSubmit
             }
+            isLoading={isLoaderFormSubmit}
           />
         </div>
       </form>

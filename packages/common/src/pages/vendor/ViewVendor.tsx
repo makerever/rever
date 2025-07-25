@@ -2,20 +2,216 @@
 
 "use client";
 
-import { IconWrapper } from "@rever/common";
+import {
+  DataTable,
+  IconWrapper,
+  PageLoader,
+  PillItem,
+  SidePanel,
+} from "@rever/common";
 import { Label } from "@rever/common";
-import { hasPermission } from "@rever/utils";
+import {
+  formatDate,
+  formatNumber,
+  getLabelForBillStatus,
+  getStatusClass,
+  hasPermission,
+} from "@rever/utils";
 import { getCombineAddress, getLabelForTerm } from "@rever/utils";
-import { ViewVendorDetailsProps } from "@rever/types";
-import { SquarePen, Trash } from "lucide-react";
+import { Bill, ViewVendorDetailsProps } from "@rever/types";
+import { FileSymlink, Paperclip, SquarePen, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { CustomTooltip } from "@rever/common";
+import { useUserStore } from "@rever/stores";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ColumnDef, sortingFns } from "@tanstack/react-table";
+import { getAssociateBillsByVendorIDApi } from "@rever/services";
 
-const ViewVendorDetails = ({
-  vendorData,
-  deleteVendor,
-}: ViewVendorDetailsProps) => {
+const ViewVendorDetails = ({ vendorData }: ViewVendorDetailsProps) => {
   const router = useRouter();
+
+  const orgDetails = useUserStore((state) => state.user?.organization);
+
+  const [associateBillsSidePanel, setAssociateBillsSidePanel] = useState(false);
+
+  const [associateBillsData, setAssociateBillsData] = useState<Bill[]>([]);
+
+  const [isAssociateLoading, setIsAssociateLoading] = useState<boolean>(true);
+
+  const collator = useMemo(
+    () => new Intl.Collator(undefined, { numeric: true, sensitivity: "base" }),
+    [],
+  );
+
+  // Define columns for the DataTable
+  const columns: ColumnDef<Bill>[] = useMemo(
+    () => [
+      {
+        accessorKey: "bill_number",
+        accessorFn: (row) => row.bill_number || "",
+        sortingFn: (rowA, rowB, columnId) => {
+          const a = rowA.getValue(columnId) as string;
+          const b = rowB.getValue(columnId) as string;
+          return collator.compare(a, b);
+        },
+        sortDescFirst: false,
+        header: ({}) => (
+          <div className="flex items-center gap-4">
+            <span>Bill</span>
+          </div>
+        ),
+        cell: ({ row, getValue }) => {
+          return (
+            <div className="flex items-center gap-4">
+              <div className="flex items-center ">
+                <span
+                  onClick={() =>
+                    router.push(`/bill/view/?id=${row.original.id}`)
+                  }
+                  className="font-semibold cursor-pointer overflow-hidden text-ellipsis"
+                >
+                  {getValue() as string}{" "}
+                </span>
+                {row?.original?.is_duplicate ? (
+                  <PillItem
+                    name="Duplicate"
+                    className="text-red-500 bg-red-50"
+                  />
+                ) : null}
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "bill_date",
+        header: "Bill date",
+        accessorFn: (row) => (row.bill_date ? new Date(row.bill_date) : null),
+        sortingFn: sortingFns.datetime,
+        sortDescFirst: false,
+        cell: ({ getValue }) => (
+          <div className="flex items-center gap-4">
+            <span className="overflow-hidden text-ellipsis ">
+              {formatDate(getValue() as Date, orgDetails?.date_format)}
+            </span>
+          </div>
+        ),
+      },
+      {
+        accessorKey: "due_date",
+        header: "Due date",
+        accessorFn: (row) => (row.due_date ? new Date(row.due_date) : null),
+        sortingFn: sortingFns.datetime,
+        sortDescFirst: false,
+        cell: ({ getValue }) => (
+          <div className="flex items-center gap-4">
+            <span className="overflow-hidden text-ellipsis ">
+              {formatDate(getValue() as Date, orgDetails?.date_format)}
+            </span>
+          </div>
+        ),
+      },
+      {
+        accessorKey: "po",
+        header: "PO",
+        accessorFn: (row) => row.purchase_order?.po_number || "",
+        sortingFn: "alphanumeric",
+        sortDescFirst: false,
+        cell: ({ row, getValue }) =>
+          (getValue() as string) ? (
+            <div
+              onClick={() =>
+                router.push(
+                  `/purchaseorder/view?id=${row.original.purchase_order?.id}`,
+                )
+              }
+              className="flex items-center gap-4"
+            >
+              <span className="font-semibold cursor-pointer overflow-hidden text-ellipsis ">
+                {(getValue() as string) || "--"}
+              </span>
+            </div>
+          ) : (
+            "--"
+          ),
+      },
+      {
+        accessorKey: "total",
+        header: "Total amount",
+        accessorFn: (row) => Number(row.total) || 0,
+        sortingFn: "basic",
+        sortDescFirst: false,
+        cell: ({ getValue }) => {
+          const rawAmount = getValue() as number;
+          return (
+            <div className="flex items-center gap-4">
+              <span className="overflow-hidden text-ellipsis ">
+                {formatNumber(rawAmount)}{" "}
+              </span>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        sortDescFirst: false,
+        cell: ({ row, getValue }) => {
+          const value = getValue() as string;
+
+          return (
+            <div className="flex items-center pr-2 justify-between w-32">
+              <span
+                className={`text-2xs border py-1 px-1.5 rounded-md ${getStatusClass(
+                  value,
+                )}`}
+              >
+                {value}
+              </span>
+
+              {row?.original.is_attachment ? (
+                <CustomTooltip content="PDF attached">
+                  <div>
+                    <Paperclip className="text-slate-400" width={14} />
+                  </div>
+                </CustomTooltip>
+              ) : null}
+            </div>
+          );
+        },
+        filterFn: (row, columnId, filterValue: string[]) => {
+          if (!filterValue?.length) return true;
+          return filterValue.includes(row.getValue(columnId) as string);
+        },
+      },
+    ],
+    [collator, orgDetails?.date_format, router],
+  );
+
+  const getAssociateBillsByVendorID = useCallback(async (id: string) => {
+    const response = await getAssociateBillsByVendorIDApi(id);
+    if (response?.status === 200) {
+      setAssociateBillsData(response?.data);
+      setIsAssociateLoading(false);
+    }
+  }, []);
+
+  // Fetch associate bills
+  useEffect(() => {
+    if (vendorData?.id) {
+      getAssociateBillsByVendorID(String(vendorData?.id));
+    }
+  }, [vendorData?.id, getAssociateBillsByVendorID]);
+
+  // Filter bills based on active tab and search input
+  const filteredAssociateBills = useMemo(() => {
+    return associateBillsData.map((bill) => {
+      return {
+        ...bill,
+        status: getLabelForBillStatus(bill?.status),
+      };
+    });
+  }, [associateBillsData]);
 
   return (
     <>
@@ -40,6 +236,14 @@ const ViewVendorDetails = ({
 
             <div className="flex items-center gap-1">
               {/* Edit icon, visible if user has update permission */}
+              <CustomTooltip content="Associate bills">
+                <div>
+                  <IconWrapper
+                    onClick={() => setAssociateBillsSidePanel(true)}
+                    icon={<FileSymlink width={16} />}
+                  />
+                </div>
+              </CustomTooltip>
               {hasPermission("vendor", "update") && (
                 <CustomTooltip content="Edit vendor">
                   <div>
@@ -48,19 +252,6 @@ const ViewVendorDetails = ({
                         router.push("/vendor/update?id=" + vendorData?.id)
                       }
                       icon={<SquarePen width={16} />}
-                    />
-                  </div>
-                </CustomTooltip>
-              )}
-
-              {/* Delete icon, visible if user has delete permission */}
-              {hasPermission("vendor", "delete") && (
-                <CustomTooltip content="Delete vendor">
-                  <div>
-                    <IconWrapper
-                      onClick={deleteVendor}
-                      icon={<Trash width={16} />}
-                      className="hover:bg-red-100 hover:text-red-500"
                     />
                   </div>
                 </CustomTooltip>
@@ -149,6 +340,32 @@ const ViewVendorDetails = ({
           </div>
         </div>
       </div>
+
+      <SidePanel
+        isOpen={associateBillsSidePanel}
+        onClose={() => setAssociateBillsSidePanel(false)}
+      >
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-slate-800 text-lg font-semibold">
+              Associate bills
+            </p>
+            <IconWrapper
+              onClick={() => setAssociateBillsSidePanel(false)}
+              icon={<X width={16} />}
+            />
+          </div>
+          {isAssociateLoading ? (
+            <PageLoader />
+          ) : (
+            <DataTable
+              hideExportIcon
+              tableData={filteredAssociateBills}
+              columns={columns}
+            />
+          )}
+        </div>
+      </SidePanel>
     </>
   );
 };

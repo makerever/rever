@@ -165,6 +165,7 @@ const ProfileSettings = () => {
               text="Save"
               disabled={isLoaderFormSubmit}
               className="text-white"
+              isLoading={isLoaderFormSubmit}
             />
           </div>
         </form>

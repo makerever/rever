@@ -88,3 +88,4 @@ export { default as POApproval } from "./pages/purchaseorder/POApproval";
 export { default as BillApprovalList } from "./pages/bill/BillApprovalList";
 export { default as POApprovalList } from "./pages/purchaseorder/POApprovalList";
 export { default as BillPOMatchUI } from "./pages/bill/BillMatch";
+export { default as PillItem } from "./components/PillItem";

@@ -81,6 +81,7 @@ const Controls = () => {
             disabled={isLoaderFormSubmit}
             className="text-white"
             onClick={saveDetails}
+            isLoading={isLoaderFormSubmit}
           />
         </div>
       )}

@@ -443,3 +443,9 @@ export type LoaderContextType = {
   show: boolean;
   setShow: (value: boolean) => void;
 };
+
+// Type for pill item component props
+export interface PillItemProps {
+  name: string;
+  className: string;
+}

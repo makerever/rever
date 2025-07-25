@@ -37,6 +37,7 @@ export interface Bill {
   status: string;
   items?: BillItemTypeProps[];
   created_at?: string;
+  is_duplicate?: boolean;
 }
 
 export type BillItemTypeProps = {

@@ -489,6 +489,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
               text="Save"
               disabled={isLoaderFormSubmit}
               className="text-white"
+              isLoading={isLoaderFormSubmit}
             />
 
             <Button

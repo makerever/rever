@@ -206,6 +206,7 @@ const Invitation = () => {
                 type="submit"
                 text="Save"
                 className="text-white"
+                isLoading={isLoaderFormSubmit}
               />
             </div>
           </form>

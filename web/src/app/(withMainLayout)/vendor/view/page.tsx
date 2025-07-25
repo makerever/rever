@@ -2,20 +2,9 @@
 
 "use client";
 
-import {
-  ConfirmationPopup,
-  ListSideVendorView,
-  PageLoader,
-  showErrorToast,
-  showSuccessToast,
-} from "@rever/common";
+import { ListSideVendorView, PageLoader } from "@rever/common";
 import { ViewVendorDetails } from "@rever/common";
-import {
-  deleteVendorByIdApi,
-  getVendorDetailsAPI,
-  useApi,
-  VENDOR_API,
-} from "@rever/services";
+import { getVendorDetailsAPI, useApi, VENDOR_API } from "@rever/services";
 import { useBreadcrumbStore } from "@rever/stores";
 import {
   VenderDataAPIType,
@@ -38,7 +27,6 @@ const ViewVendorWithParams = () => {
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [vendorList, setVendorList] = useState<VendorTableList[]>([]);
-  const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
 
   const setDynamicCrumb = useBreadcrumbStore((s) => s.setDynamicCrumb);
 
@@ -107,20 +95,6 @@ const ViewVendorWithParams = () => {
     router.push(`/vendor/view?id=${id}`);
   };
 
-  // Handle vendor deletion and show confirmation popup
-  const handleDelete = async () => {
-    const response = await deleteVendorByIdApi(idValue || "");
-    if (response?.status === 204) {
-      setIsPopupOpen(false);
-      showSuccessToast("Vendor deleted successfully");
-      router.push("/vendor/list");
-    } else {
-      if (response?.data?.detail) {
-        showErrorToast(response?.data?.detail);
-      }
-    }
-  };
-
   // Render vendor details, side list, and confirmation popup
   return (
     <>
@@ -131,7 +105,6 @@ const ViewVendorWithParams = () => {
           <>
             <div className="lg:w-3/4 w-full">
               <ViewVendorDetails
-                deleteVendor={() => setIsPopupOpen(true)}
                 vendorData={vendorData}
                 isLoading={isLoading}
               />
@@ -146,14 +119,6 @@ const ViewVendorWithParams = () => {
           </>
         )}
       </div>
-
-      {/*Show confirmation POPUP */}
-      <ConfirmationPopup
-        isOpen={isPopupOpen}
-        onClose={() => setIsPopupOpen(false)}
-        onConfirm={handleDelete}
-        message="Are you sure you want to delete this vendor?"
-      />
     </>
   );
 };

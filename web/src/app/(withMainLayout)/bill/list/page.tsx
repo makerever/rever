@@ -2,7 +2,13 @@
 
 "use client";
 
-import { CheckBox, CustomTooltip, DataTable, PageLoader } from "@rever/common";
+import {
+  CheckBox,
+  CustomTooltip,
+  DataTable,
+  PageLoader,
+  PillItem,
+} from "@rever/common";
 import { tabOptions } from "@rever/constants";
 import { BILL_API, useApi } from "@rever/services";
 import { useUserStore } from "@rever/stores";
@@ -66,12 +72,22 @@ const BillList = () => {
                 checked={row.getIsSelected()}
                 onChange={row.getToggleSelectedHandler()}
               />
-              <span
-                onClick={() => router.push(`/bill/view/?id=${row.original.id}`)}
-                className="font-semibold cursor-pointer overflow-hidden text-ellipsis"
-              >
-                {getValue() as string}
-              </span>
+              <div className="flex items-center ">
+                <span
+                  onClick={() =>
+                    router.push(`/bill/view/?id=${row.original.id}`)
+                  }
+                  className="font-semibold cursor-pointer overflow-hidden text-ellipsis"
+                >
+                  {getValue() as string}{" "}
+                </span>
+                {row?.original?.is_duplicate ? (
+                  <PillItem
+                    name="Duplicate"
+                    className="text-red-500 bg-red-50"
+                  />
+                ) : null}
+              </div>
             </div>
           );
         },
@@ -219,6 +235,7 @@ const BillList = () => {
             purchase_order: val?.purchase_order,
             total: val?.total || 0,
             is_attachment: val?.is_attachment,
+            is_duplicate: val?.is_duplicate,
             status: getLabelForBillStatus(val?.status),
           };
         });
