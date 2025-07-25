@@ -305,54 +305,56 @@ const ViewPODetails = ({
             {!isUserApproval ? (
               <>
                 <div className="flex items-center gap-1">
-                  <CustomTooltip content="Associate bills">
-                    <div>
-                      <IconWrapper
-                        onClick={() => setAssociateBillsSidePanel(true)}
-                        icon={<FileSymlink width={16} />}
-                      />
-                    </div>
-                  </CustomTooltip>
-                  <CustomTooltip content="Audit history">
-                    <div>
-                      <IconWrapper
-                        onClick={() => setSidePanel(true)}
-                        icon={<FileClock width={16} />}
-                      />
-                    </div>
-                  </CustomTooltip>
-                </div>
-                {poDetails?.status !== "approved" &&
-                poDetails?.status !== "under_approval" ? (
                   <div className="flex items-center gap-1">
-                    {hasPermission("purchaseorder", "update") ? (
-                      <CustomTooltip content="Edit PO">
-                        <div>
-                          <IconWrapper
-                            onClick={() =>
-                              router.push(
-                                `/purchaseorder/edit/?id=${poDetails.id}&showPdf=${showPdf}`,
-                              )
-                            }
-                            icon={<SquarePen width={16} />}
-                          />
-                        </div>
-                      </CustomTooltip>
-                    ) : null}
-
-                    {hasPermission("purchaseorder", "delete") ? (
-                      <CustomTooltip content="Delete PO">
-                        <div>
-                          <IconWrapper
-                            onClick={deletePO}
-                            icon={<Trash width={16} />}
-                            className="hover:bg-red-100 hover:text-red-500"
-                          />
-                        </div>
-                      </CustomTooltip>
-                    ) : null}
+                    <CustomTooltip content="Associate bills">
+                      <div>
+                        <IconWrapper
+                          onClick={() => setAssociateBillsSidePanel(true)}
+                          icon={<FileSymlink width={16} />}
+                        />
+                      </div>
+                    </CustomTooltip>
+                    <CustomTooltip content="Audit history">
+                      <div>
+                        <IconWrapper
+                          onClick={() => setSidePanel(true)}
+                          icon={<FileClock width={16} />}
+                        />
+                      </div>
+                    </CustomTooltip>
                   </div>
-                ) : null}
+                  {poDetails?.status !== "approved" &&
+                  poDetails?.status !== "under_approval" ? (
+                    <div className="flex items-center gap-1">
+                      {hasPermission("purchaseorder", "update") ? (
+                        <CustomTooltip content="Edit PO">
+                          <div>
+                            <IconWrapper
+                              onClick={() =>
+                                router.push(
+                                  `/purchaseorder/edit/?id=${poDetails.id}&showPdf=${showPdf}`,
+                                )
+                              }
+                              icon={<SquarePen width={16} />}
+                            />
+                          </div>
+                        </CustomTooltip>
+                      ) : null}
+
+                      {hasPermission("purchaseorder", "delete") ? (
+                        <CustomTooltip content="Delete PO">
+                          <div>
+                            <IconWrapper
+                              onClick={deletePO}
+                              icon={<Trash width={16} />}
+                              className="hover:bg-red-100 hover:text-red-500"
+                            />
+                          </div>
+                        </CustomTooltip>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
               </>
             ) : null}
           </div>
