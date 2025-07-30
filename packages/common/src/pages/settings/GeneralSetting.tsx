@@ -317,6 +317,7 @@ const GeneralSettings = () => {
                 text="Save"
                 disabled={isLoaderFormSubmit}
                 className="text-white"
+                isLoading={isLoaderFormSubmit}
               />
             </div>
           )}

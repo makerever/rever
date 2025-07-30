@@ -110,7 +110,6 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
       if (response?.status === 200) {
         if (typeof window !== "undefined") {
           sessionStorage.removeItem("registerEmail");
-          setIsLoaderFormSubmit(false);
           setAuthToken(response?.data?.access);
           Cookies.set("token", response?.data?.access, {
             expires: 7,
@@ -122,6 +121,8 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
             });
             setUser(responseUserDetails?.data);
             router.push("/home");
+          } else {
+            setIsLoaderFormSubmit(false);
           }
         }
       } else {

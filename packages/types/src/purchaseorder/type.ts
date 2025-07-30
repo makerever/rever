@@ -43,6 +43,7 @@ export interface PurchaseOrder {
   items?: poItemTypeProps[];
   comments?: string;
   updated_at?: string;
+  created_at?: string;
 }
 
 // Interface for props used in the View PO Details component

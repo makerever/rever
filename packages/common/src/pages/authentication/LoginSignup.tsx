@@ -55,6 +55,7 @@ const LoginSignup = ({ showStep, setShowStep }: LoginStepProps) => {
   const [isMounted, setIsMounted] = useState<boolean>(false); // For SSR/CSR hydration
   const [isLoaderFormSubmit, setIsLoaderFormSubmit] = useState<boolean>(false); // Loader state for form submission
   const [isUserRegistered, setIsUserRegistered] = useState<boolean>(false); // Tracks if user is registered
+  const [otpSending, setOtpSending] = useState<boolean>(false);
 
   // Validation helpers
   const isEmailValid = !Boolean(email) || Boolean(errors.email?.message);
@@ -76,13 +77,13 @@ const LoginSignup = ({ showStep, setShowStep }: LoginStepProps) => {
       email: getValues("email"),
     });
     if (response?.status === 400) {
-      setIsLoaderFormSubmit(false);
       setIsUserRegistered(true);
       setShowStep(STEP.PASSWORD);
-    } else {
       setIsLoaderFormSubmit(false);
+    } else {
       setIsUserRegistered(false);
       setShowStep(STEP.OTP);
+      setIsLoaderFormSubmit(false);
     }
   };
 
@@ -102,8 +103,9 @@ const LoginSignup = ({ showStep, setShowStep }: LoginStepProps) => {
         });
         setUser(responseUserDetails?.data);
         router.push("/home");
+      } else {
+        setIsLoaderFormSubmit(false);
       }
-      setIsLoaderFormSubmit(false);
     } else if (response?.data?.non_field_errors) {
       setIsLoaderFormSubmit(false);
       showErrorToast(response?.data?.non_field_errors[0]);
@@ -180,12 +182,16 @@ const LoginSignup = ({ showStep, setShowStep }: LoginStepProps) => {
     if (isUserRegistered) {
       otpLogin(true);
     } else {
+      setOtpSending(true);
       const response = await checkEmailRegisteredApi({
         email: getValues("email"),
       });
       if (response?.status === 202) {
         showSuccessToast("OTP resent. Check your inbox.");
+        setOtpSending(false);
         setShowStep(STEP.OTP);
+      } else {
+        setOtpSending(false);
       }
     }
   };
@@ -274,6 +280,7 @@ const LoginSignup = ({ showStep, setShowStep }: LoginStepProps) => {
             handleContinue={handleAuthViaOtp}
             resendOtp={resendOtp}
             isLoaderFormSubmit={isLoaderFormSubmit}
+            otpSending={otpSending}
           />
         </>
       ) : null}

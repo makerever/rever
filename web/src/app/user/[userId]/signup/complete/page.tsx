@@ -123,10 +123,10 @@ const Invitation = () => {
         <div className="bg-white lg:w-2/5 mx-4 shadow-lg rounded-lg p-8">
           <div className="lg:w-3/5 w-4/5 flex items-center mb-4">
             <Image
-              src="/images/reverLogo.svg"
+              src="/images/reverLogoDark2.svg"
               alt="Inviting user to Rever"
-              width={28}
-              height={28}
+              width={36}
+              height={36}
             />
             <p
               className={`text-gray-800 font-medium dark:text-gray-400 ms-2 text-xl`}
@@ -206,6 +206,7 @@ const Invitation = () => {
                 type="submit"
                 text="Save"
                 className="text-white"
+                isLoading={isLoaderFormSubmit}
               />
             </div>
           </form>

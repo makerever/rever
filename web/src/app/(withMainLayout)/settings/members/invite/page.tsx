@@ -324,6 +324,7 @@ function InviteMemberWithParams() {
                 type="submit"
                 text="Save"
                 className="text-white"
+                isLoading={isLoaderFormSubmit}
               />
 
               <Button

@@ -71,3 +71,17 @@ export const acceptRejectPOApi = async (
   );
   return response;
 };
+
+// Get audit history for PO
+export const getPOAuditHistoryApi = async (id: string) => {
+  const response = await axiosInstance.get(`/audit/purchaseorder/${id}`);
+  return response;
+};
+
+// Get assiciate bills by PO ID
+export const getAssociateBillsByPoIDApi = async (id: string) => {
+  const response = await axiosInstance.get(
+    `/bills/by-purchase-order/?purchase_order_id=${id}`,
+  );
+  return response;
+};

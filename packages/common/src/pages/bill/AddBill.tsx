@@ -420,7 +420,7 @@ const AddBillComponentWithParams = () => {
                         setFileUrl(null);
                         setShowUploadFileView(false);
                       }}
-                      fileName={fileDetails?.name || "File 1"}
+                      fileName={fileDetails?.name || fileResponse?.file_name}
                     />
                   </div>
                 )}
@@ -639,6 +639,7 @@ const AddBillComponentWithParams = () => {
                         disabled={isLoaderFormSubmit}
                         className="text-white"
                         onClick={() => setSubmitType("in_review")}
+                        isLoading={isLoaderFormSubmit}
                       />
                     </div>
 

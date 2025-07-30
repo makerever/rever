@@ -60,6 +60,7 @@ const SelectComponent = <T extends FieldValues>({
   value,
   onChange,
   isClearable,
+  noErrorIcon,
 }: SelectComponentProps<T>) => {
   const { theme } = useThemeStore();
   const isDarkMode = theme === "light" ? false : true;
@@ -81,15 +82,16 @@ const SelectComponent = <T extends FieldValues>({
           : isDarkMode
             ? "#1f2937"
             : "#ffffff",
-      borderColor: error?.message
-        ? "#f87171"
-        : isDisabled
-          ? isDarkMode
-            ? "#6b7280"
-            : "#d1d5db"
-          : isDarkMode
-            ? "#374151"
-            : "#e5e7eb",
+      borderColor:
+        error?.message || noErrorIcon
+          ? "#f87171"
+          : isDisabled
+            ? isDarkMode
+              ? "#6b7280"
+              : "#d1d5db"
+            : isDarkMode
+              ? "#374151"
+              : "#e5e7eb",
       boxShadow: "none",
       borderRadius: "0.42rem",
       minHeight: "32px",
@@ -124,8 +126,8 @@ const SelectComponent = <T extends FieldValues>({
       ...provided,
       backgroundColor: state.isSelected
         ? isDarkMode
-          ? "#22c55e"
-          : "#22c55e"
+          ? "#01242D"
+          : "#01242D"
         : state.isFocused
           ? isDarkMode
             ? "#374151"
@@ -150,6 +152,9 @@ const SelectComponent = <T extends FieldValues>({
       color: isDarkMode ? "#9ca3af" : "#9ca3af",
       fontSize: ".875rem",
       height: "24px",
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
     }),
     indicatorSeparator: () => ({
       display: "none",
@@ -200,6 +205,8 @@ const SelectComponent = <T extends FieldValues>({
     // If value prop is provided, use it
     if (value) {
       setSelectedOption(value);
+    } else if (!selectedValue) {
+      setSelectedOption(null);
     }
   }, [selectedValue, options, isMulti, value]);
 
@@ -274,14 +281,14 @@ const SelectComponent = <T extends FieldValues>({
           ...theme,
           colors: {
             ...theme.colors,
-            primary: "#22c55e", // selected option & active border
-            // primary25: "#22c55e", // hover color for options
-            primary50: "#EEFFEF", // focused color for options
+            primary: "#01242D", // selected option & active border
+            // primary25: "#01242D", // hover color for options
+            primary50: "#D5E5E8", // focused color for options
           },
         })}
       />
       {/* Error message display */}
-      {error && (
+      {!noErrorIcon && error && (
         <div className="flex items-center gap-1 text-red-500 text-xs mt-1">
           <BadgeInfo width={14} height={14} />
           <span>{title} is required</span>

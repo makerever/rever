@@ -8,7 +8,6 @@ import {
   GlobalErrorBoundary,
   HydrationLoader,
   SafeHydrate,
-  ThemeProvider,
 } from "@rever/common";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -34,14 +33,14 @@ export default function RootLayout({
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
         <meta name="theme-color" content="#1e40af" />
-        <link rel="icon" href="/icons/favicon.ico.svg" />
+        <link rel="icon" href="/icons/favicon.ico.png" />
       </head>
       <body className={`${inter.className} scale-wrapper`}>
         <SafeHydrate>
           <HydrationLoader>
             <GlobalErrorBoundary>{children}</GlobalErrorBoundary>
           </HydrationLoader>
-          <ThemeProvider />
+          {/* <ThemeProvider /> */}
           <Toaster position="bottom-right" duration={2500} />
         </SafeHydrate>
       </body>

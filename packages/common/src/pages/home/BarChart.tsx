@@ -1,3 +1,5 @@
+// This component is used to render chart on the home page
+
 "use client";
 
 import dynamic from "next/dynamic";
@@ -10,13 +12,11 @@ import { useUserStore } from "@rever/stores";
 import { memo } from "react";
 import { PageLoader } from "@rever/common";
 import React from "react";
-import { isMiddlewareFile } from "next/dist/build/utils";
 
-// Dynamically import the Chart component from react-apexcharts (client-side only)
+// Dynamically import the Chart component
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-// Function to display Graphs - based on type ("bar", "radialBar")
-function BarChart({
+function AreaChart({
   heading,
   months,
   years,
@@ -26,11 +26,10 @@ function BarChart({
   setBarChartFilter,
   isDataLoading,
 }: BarChartProps) {
-  // Get sidebar collapsed state from store
   const sidebarCollapsed = useSidebarStore((state) => state.isCollapsed);
   const orgDetails = useUserStore((state) => state.user?.organization);
-  // Data for bar chart
-  const barSeries = [
+
+  const areaSeries = [
     {
       name: "Bills",
       data: totalAmount,
@@ -47,17 +46,17 @@ function BarChart({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // ApexCharts options for bar chart
-  const barOptions: ApexCharts.ApexOptions = {
+  const areaOptions: ApexCharts.ApexOptions = {
     chart: {
-      type: "bar",
+      type: "area",
       height: 350,
       toolbar: {
         show: false,
       },
     },
     grid: {
-      show: false,
+      show: true,
+      borderColor: "#E4E4E7",
     },
     states: {
       hover: {
@@ -71,29 +70,34 @@ function BarChart({
         },
       },
     },
-    plotOptions: {
-      bar: {
-        horizontal: false,
-        // columnWidth: months.length <= 4 ? "35%" : "75%",
-        columnWidth:
-          windowWidth < 450
-            ? "90%" // wider bars for small screens
-            : months.length <= 4
-              ? "35%"
-              : months.length > 4 && months.length <= 6
-                ? "55%"
-                : "75%",
-        borderRadius: 4,
-        barHeight: "100%",
-      },
-    },
     dataLabels: {
       enabled: false,
       style: {
         fontFamily: "Inter",
       },
     },
+    stroke: {
+      curve: "smooth",
+      width: 2,
+    },
+    fill: {
+      type: "gradient",
+      gradient: {
+        shade: "light",
+        type: "vertical",
+        shadeIntensity: 0.5,
+        gradientToColors: ["#916AFC"],
+        inverseColors: false,
+        opacityFrom: 0.8,
+        opacityTo: 0.3,
+        stops: [0, 100],
+      },
+    },
+    colors: ["#916AFC"],
     xaxis: {
+      tooltip: {
+        enabled: false,
+      },
       categories: months.map((_, i) => i),
       labels: {
         formatter: function (val: string) {
@@ -125,24 +129,10 @@ function BarChart({
             orgDetails?.currency,
             undefined,
             true,
-          ); // or use parseInt(val).toString() for whole numbers
+          );
         },
       },
     },
-    fill: {
-      type: "gradient",
-      gradient: {
-        shade: "light",
-        type: "vertical",
-        shadeIntensity: 0.5,
-        gradientToColors: ["#BFD9F6"], // end color
-        inverseColors: false,
-        opacityFrom: 1,
-        opacityTo: 0.9,
-        stops: [0, 100],
-      },
-    },
-    colors: ["#60A8FB"], // start color
     tooltip: {
       custom: function ({ series, seriesIndex, dataPointIndex }) {
         const bills = totalBills[dataPointIndex];
@@ -156,14 +146,7 @@ function BarChart({
             font-size: 14px;
             color: #333;
           ">
-            <div 
-              style="display: flex;
-              align-items: center;
-              flex-direction: column;
-              justify-content: center;
-              justify-items: center;
-              width: 100%;
-            ">
+            <div style="display: flex; align-items: center; flex-direction: column; width: 100%;">
               <div style="padding:8px;background:#f2f3f2;width:100%;text-align:center">${month}, ${year}</div>
               <div style="padding:8px;">
                 <div><strong>Bills:</strong> ${bills}</div>
@@ -180,43 +163,40 @@ function BarChart({
   };
 
   return (
-    <>
-      {/* Card container */}
-      <div className="rounded-md shadow-4xl min-h-96">
-        {/* Header: Title and filter dropdown */}
-        <div className="flex items-center justify-between px-5 sm:pr-5 pt-5">
-          <p className="font-semibold text-slate-800">{heading}</p>
-          <div className="w-40">
-            <SelectComponent
-              options={barChartOptions}
-              value={barChartFilter}
-              onChange={(e) => setBarChartFilter?.(e)}
-            />
-          </div>
-        </div>
-        {/* Render bar chart if type is "bar" */}
-
-        <div
-          className={`transition-all grid sm:place-self-center duration-300 ${windowWidth > 450 ? "px-5" : "pr-5"}  md:pl-5 overflow-x-auto sm:overflow-visible custom_scrollbar ${
-            sidebarCollapsed ? "sm:w-[calc(100%-80px)]" : "w-[100%]"
-          }`}
-        >
-          {isDataLoading ? (
-            <PageLoader />
-          ) : (
-            <div className="h-96 min-h-96">
-              <Chart
-                options={barOptions}
-                series={barSeries}
-                type="bar"
-                height={350}
-              />
-            </div>
-          )}
+    <div className="rounded-md shadow-4xl min-h-96">
+      <div className="flex items-center justify-between px-5 sm:pr-5 pt-5">
+        <p className="font-semibold text-slate-800">{heading}</p>
+        <div className="w-40">
+          <SelectComponent
+            options={barChartOptions}
+            value={barChartFilter}
+            onChange={(e) => setBarChartFilter?.(e)}
+          />
         </div>
       </div>
-    </>
+
+      <div
+        className={`transition-all grid sm:place-self-center duration-300 ${
+          windowWidth > 450 ? "px-5" : "pr-5"
+        } md:pl-5 overflow-x-auto sm:overflow-visible custom_scrollbar ${
+          sidebarCollapsed ? "sm:w-[calc(100%-80px)]" : "w-[100%]"
+        }`}
+      >
+        {isDataLoading ? (
+          <PageLoader />
+        ) : (
+          <div className="h-96 min-h-96">
+            <Chart
+              options={areaOptions}
+              series={areaSeries}
+              type="area"
+              height={350}
+            />
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
-export default memo(BarChart);
+export default memo(AreaChart);

@@ -74,7 +74,7 @@ export function Sidebar({
         ? pathname?.split("/")[1]
         : "";
     if (!isSidebarCollapsed && payablePathNameUrl.includes(activeUrl)) {
-      setOpenItem("Payables");
+      setOpenItem("Expenses");
     } else if (!isSidebarCollapsed && settingPathNameUrl.includes(pathname)) {
       setOpenItem("Settings");
     } else {

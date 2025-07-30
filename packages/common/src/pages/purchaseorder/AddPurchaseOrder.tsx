@@ -546,6 +546,7 @@ const AddPOComponentWithParams = () => {
                         disabled={isLoaderFormSubmit}
                         className="text-white"
                         onClick={() => setSubmitType("in_review")}
+                        isLoading={isLoaderFormSubmit}
                       />
                     </div>
                     {(!idValue || poDetails?.status === "draft") && (

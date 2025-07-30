@@ -24,7 +24,10 @@ const Button = ({
       } h-8 px-3 flex items-center justify-center gap-1 disabled:cursor-not-allowed rounded-md text-xs font-medium ${isDefault ? "bg-primary-500 hover:bg-primary-600 disabled:hover:bg-primary-500 duration-300" : ""} ${className}`}
     >
       {isLoading ? (
-        <Loader width={16} height={16} className="animate-spin text-white" />
+        <div className="flex items-center justify-center gap-1">
+          <Loader width={16} height={16} className="animate-spin text-white" />
+          {text}
+        </div>
       ) : (
         <>
           {" "}
