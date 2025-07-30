@@ -2,16 +2,14 @@ import uuid
 
 from crum import get_current_user
 from django.db import models
-from simple_history.models import HistoricalRecords
 
 from rever.db.mixins import AuditModel
 
 
 class BaseModel(AuditModel):
-    """Base model with UUID, full audit fields, and soft delete"""
+    """Base model with UUID, full audit fields"""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
-    history = HistoricalRecords(inherit=True)
 
     class Meta:
         abstract = True

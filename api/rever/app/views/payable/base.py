@@ -1,7 +1,7 @@
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError
-from django.db.models import ProtectedError
+from django.db.models import Count, ProtectedError, Q
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -9,11 +9,14 @@ from rest_framework.response import Response
 
 from rever.app.serializers import (
     BillItemSerializer,
+    BillListSerializer,
     BillSerializer,
     MatchResultSerializer,
     PurchaseOrderItemSerializer,
+    PurchaseOrderListSerializer,
     PurchaseOrderMinimalSerializer,
     PurchaseOrderSerializer,
+    VendorListSerializer,
     VendorSerializer,
 )
 from rever.app.views.base import BaseAPIView
@@ -35,6 +38,11 @@ class VendorViewSet(BaseModelViewSet):
         if self.request.query_params.get("include_inactive") == "true":
             return qs
         return qs.filter(is_active=True)
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return VendorListSerializer
+        return VendorSerializer
 
     def perform_create(self, serializer):
         serializer.save(organization=self.request.user.organization)
@@ -89,6 +97,11 @@ class BillViewSet(BaseModelViewSet):
 
         return qs
 
+    def get_serializer_class(self):
+        if self.action == "list":
+            return BillListSerializer
+        return super().get_serializer_class()
+
     @action(detail=True, methods=["get"], url_path="match-results")
     def match_results(self, request, pk=None):
         """
@@ -102,6 +115,7 @@ class BillViewSet(BaseModelViewSet):
 
         # Get matched PO Items
         matched_po_items = results.values_list("purchase_order_item_id", flat=True)
+        matched_bill_item_ids = results.values_list("bill_item_id", flat=True)
 
         # Get unmatched PO Items (only if PO exists)
         unmatched_po_items = []
@@ -109,12 +123,79 @@ class BillViewSet(BaseModelViewSet):
             all_po_items = bill.purchase_order.items.all()
             unmatched_po_items = all_po_items.exclude(id__in=matched_po_items)
 
+        unmatched_bill_items = bill.items.exclude(id__in=matched_bill_item_ids)
+
         return Response(
             {
                 "billed": MatchResultSerializer(results, many=True).data,
                 "Unbilled": PurchaseOrderItemSerializer(unmatched_po_items, many=True).data,
+                "extra_bill_items": BillItemSerializer(unmatched_bill_items, many=True).data,
             }
         )
+
+    @action(detail=False, methods=["get"], url_path="by-vendor")
+    def by_vendor(self, request):
+        """
+        List all bills for a given vendor in the current organization.
+        Query param: vendor_id
+        """
+        vendor_id = request.query_params.get("vendor_id")
+        if not vendor_id:
+            return Response({"detail": "vendor_id is required."}, status=400)
+
+        bills = Bill.objects.filter(organization=request.user.organization, vendor_id=vendor_id)
+        serializer = self.get_serializer(bills, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"], url_path="by-purchase-order")
+    def by_purchase_order(self, request):
+        """
+        List all bills for a given purchase order in the current organization.
+        Query param: purchase_order_id
+        """
+        po_id = request.query_params.get("purchase_order_id")
+        if not po_id:
+            return Response({"detail": "purchase_order_id is required."}, status=400)
+
+        bills = Bill.objects.filter(
+            organization=request.user.organization, purchase_order_id=po_id
+        )
+        serializer = self.get_serializer(bills, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"], url_path="duplicates")
+    def duplicates(self, request):
+        org = request.user.organization
+
+        # Get optional filters from query params
+        vendor_id = request.query_params.get("vendor_id")
+        bill_number = request.query_params.get("bill_number")
+
+        # Step 1: Find (vendor, bill_number) pairs with more than one bill in this org
+        dupe_keys_qs = Bill.objects.filter(organization=org)
+        if vendor_id:
+            dupe_keys_qs = dupe_keys_qs.filter(vendor_id=vendor_id)
+        if bill_number:
+            dupe_keys_qs = dupe_keys_qs.filter(bill_number=bill_number)
+
+        dupe_keys = (
+            dupe_keys_qs.values("vendor", "bill_number")
+            .annotate(bill_count=Count("id"))
+            .filter(bill_count__gt=1)
+        )
+
+        # Step 2: Build a Q object for all duplicate pairs
+        q = Q()
+        for item in dupe_keys:
+            if item["bill_number"]:  # skip empty bill numbers if needed
+                q |= Q(vendor=item["vendor"], bill_number=item["bill_number"], organization=org)
+
+        # Step 3: Get all bills matching any duplicate pair
+        duplicate_bills = Bill.objects.filter(q) if q else Bill.objects.none()
+
+        # Step 4: Serialize and return
+        serializer = self.get_serializer(duplicate_bills, many=True)
+        return Response(serializer.data)
 
     def perform_create(self, serializer):
         serializer.save(organization=self.request.user.organization)
@@ -262,6 +343,11 @@ class PurchaseOrderViewSet(BaseModelViewSet):
             qs = qs.filter(status=status_param)
 
         return qs
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return PurchaseOrderListSerializer
+        return super().get_serializer_class()
 
     @action(detail=False, methods=["get"], url_path="by-vendor/(?P<vendor_id>[^/.]+)")
     def list_by_vendor(self, request, vendor_id=None):

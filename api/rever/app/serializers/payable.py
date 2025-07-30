@@ -204,6 +204,8 @@ class BillSerializer(serializers.ModelSerializer):
 
 
 class PurchaseOrderItemSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(required=False)
+
     class Meta:
         model = PurchaseOrderItem
         fields = "__all__"
@@ -263,3 +265,69 @@ class PurchaseOrderMinimalSerializer(serializers.ModelSerializer):
     class Meta:
         model = PurchaseOrder
         fields = ["id", "po_number"]
+
+
+class VendorListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vendor
+        fields = [
+            "id",
+            "vendor_name",
+            "company_name",
+            "email",
+            "mobile",
+            "payment_terms",
+            "website",
+            "is_active",
+            "organization",
+            "created_at",
+        ]
+
+
+class BillListSerializer(serializers.ModelSerializer):
+    vendor = VendorNestedSerializer(read_only=True)
+    purchase_order = PurchaseOrderMinimalSerializer(read_only=True)
+
+    class Meta:
+        model = Bill
+        fields = [
+            "id",
+            "vendor",
+            "purchase_order",
+            "bill_number",
+            "bill_date",
+            "due_date",
+            "status",
+            "sub_total",
+            "tax_percentage",
+            "total_tax",
+            "total",
+            "is_active",
+            "is_attachment",
+            "is_duplicate",
+            "organization",
+            "created_at",
+        ]
+
+
+class PurchaseOrderListSerializer(serializers.ModelSerializer):
+    vendor = VendorNestedSerializer(read_only=True)
+
+    class Meta:
+        model = PurchaseOrder
+        fields = [
+            "id",
+            "vendor",
+            "po_number",
+            "po_date",
+            "delivery_date",
+            "status",
+            "sub_total",
+            "tax_percentage",
+            "total_tax",
+            "total",
+            "is_active",
+            "organization",
+            "is_attachment",
+            "created_at",
+        ]
