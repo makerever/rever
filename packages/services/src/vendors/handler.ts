@@ -38,3 +38,9 @@ export const deleteVendorByIdApi = async (vendorId: string) => {
   );
   return response;
 };
+
+// Get assiciate bills by Vendor ID
+export const getAssociateBillsByVendorIDApi = async (id: string) => {
+  const response = await axiosInstance.get(`/bills/by-vendor/?vendor_id=${id}`);
+  return response;
+};

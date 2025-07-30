@@ -83,9 +83,6 @@ const PDFViewer: React.FC<Props> = ({ fileUrl, maxWidth = 800 }) => {
     };
   }, [numPages, onScroll]);
 
-  const proxyUrl = `/proxy/cors?url=${encodeURIComponent(fileUrl)}`;
-  const actualUrl = fileUrl.startsWith("blob:") ? fileUrl : proxyUrl;
-
   const pdfOptions = useMemo(
     () => ({
       isEvalSupported: false,
@@ -109,7 +106,7 @@ const PDFViewer: React.FC<Props> = ({ fileUrl, maxWidth = 800 }) => {
       >
         {isLoading && <PageLoader />}
         <Document
-          file={actualUrl}
+          file={fileUrl}
           options={pdfOptions}
           onLoadSuccess={onDocumentLoadSuccess}
           onLoadError={(error: any) => console.error("PDF load error:", error)}

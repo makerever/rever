@@ -27,13 +27,19 @@ export const sidebarLinks: SidebarLinkProps[] = [
   },
 
   {
-    name: "Payables", // Payables section with sub-items
+    name: "Expenses", // Expenses section with sub-items
     url: "#",
     icon: <FileText size={16} />,
     subItems: [
       {
-        name: "Vendors", // Vendor management routes
-        url: ["/vendor/list", "/vendor/add", "/vendor/view", "/vendor/update"],
+        name: "Bills", // Bill management routes
+        url: [
+          "/bill/list",
+          "/bill/add",
+          "/bill/view",
+          "/bill/edit",
+          "/bill/match",
+        ],
       },
       {
         name: "Purchase orders", // Purchase Order management routes
@@ -45,14 +51,8 @@ export const sidebarLinks: SidebarLinkProps[] = [
         ],
       },
       {
-        name: "Bills", // Bill management routes
-        url: [
-          "/bill/list",
-          "/bill/add",
-          "/bill/view",
-          "/bill/edit",
-          "/bill/match",
-        ],
+        name: "Vendors", // Vendor management routes
+        url: ["/vendor/list", "/vendor/add", "/vendor/view", "/vendor/update"],
       },
       {
         name: "Approvals", // Approval process routes
@@ -115,7 +115,7 @@ export const profileSidebarLinks: SidebarLinkProps[] = [
   // },
 ];
 
-// All route paths related to payables for sidebar highlighting
+// All route paths related to expenses for sidebar highlighting
 export const payablePathNameUrl = [
   "vendor",
   "purchaseorder",

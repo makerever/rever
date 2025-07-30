@@ -81,8 +81,8 @@ input[type="checkbox"]:focus {
 
 /* Checked state: green background + border */
 input[type="checkbox"]:checked {
-  background-color: #22c55e;
-  border-color: #22c55e;
+  background-color: #01242D;
+  border-color: #01242D;
 }
 
 /* Inject white tick */

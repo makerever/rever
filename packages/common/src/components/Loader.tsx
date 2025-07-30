@@ -2,10 +2,18 @@
 
 "use client";
 
+import Image from "next/image";
+
 export default function PageLoader() {
   return (
     <div className="w-full h-96 min-h-96 flex items-center justify-center bg-white/60 backdrop-blur-sm">
-      <div className="w-8 h-8 border-4 border-gray-300 border-t-primary-500 rounded-full animate-spin" />
+      <Image
+        src="/images/loaderGif.gif"
+        alt="Rever loader"
+        width={200}
+        height={200}
+        unoptimized
+      />
     </div>
   );
 }

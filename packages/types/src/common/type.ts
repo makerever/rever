@@ -208,6 +208,7 @@ export interface SelectComponentProps<T extends FieldValues> {
   value?: SingleValue<Option> | MultiValue<Option> | null;
   onChange?: (value: SingleValue<Option>) => void;
   isClearable?: boolean;
+  noErrorIcon?: boolean;
 }
 
 // Interface for date component props
@@ -307,6 +308,7 @@ export interface VenderDataAPIType {
   website: string;
   is_active: boolean;
   updated_at?: string;
+  created_at?: string;
 }
 
 // Interface for vendor table list
@@ -434,9 +436,16 @@ export interface AuditHistoryItemsProps {
 
 export type AuditHistoryDataProps = {
   data: AuditHistoryItemsProps[];
+  isLoading?: boolean;
 };
 
 export type LoaderContextType = {
   show: boolean;
   setShow: (value: boolean) => void;
 };
+
+// Type for pill item component props
+export interface PillItemProps {
+  name: string;
+  className: string;
+}

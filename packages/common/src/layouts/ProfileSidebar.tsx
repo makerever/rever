@@ -51,10 +51,10 @@ export function ProfileSidebar({
     setOpenItem(null);
   }, [isProfileSidebarCollapsed]);
 
-  // Open "Payables" sub-menu if on a payable path and sidebar is expanded
+  // Open "Expenses" sub-menu if on a payable path and sidebar is expanded
   useEffect(() => {
     if (!isProfileSidebarCollapsed && payablePathNameUrl.includes(pathname)) {
-      setOpenItem("Payables");
+      setOpenItem("Expenses");
     } else {
       setOpenItem(null);
     }

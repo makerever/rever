@@ -7,6 +7,7 @@ import {
   CustomTooltip,
   IconWrapper,
   PdfViewer,
+  PillItem,
   SidePanel,
 } from "@rever/common";
 import { Label } from "@rever/common";
@@ -51,10 +52,13 @@ const ViewBillDetails = ({
 
   const [auditData, setAuditData] = useState([]);
 
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
   const getBillAuditHistory = useCallback(async (id: number) => {
     const response = await getBillAuditHistoryApi(id);
     if (response?.status === 200) {
       setAuditData(response?.data);
+      setIsLoading(false);
     }
   }, []);
 
@@ -76,9 +80,17 @@ const ViewBillDetails = ({
           >
             <div className="flex items-center gap-1">
               {/* Bill number */}
-              <p className="text-slate-800 mr-1 text-lg font-semibold">
-                {billDetails?.bill_number}
-              </p>
+              <div className="flex items-center mr-2">
+                <p className="text-slate-800 text-lg font-semibold">
+                  {billDetails?.bill_number}{" "}
+                </p>
+                {billDetails?.is_duplicate ? (
+                  <PillItem
+                    name="Duplicate"
+                    className="text-red-500 bg-red-50"
+                  />
+                ) : null}
+              </div>
 
               {/* Bill status label */}
               <span
@@ -374,7 +386,7 @@ const ViewBillDetails = ({
             />
           </div>
 
-          <AuditHistory data={auditData} />
+          <AuditHistory data={auditData} isLoading={isLoading} />
         </div>
       </SidePanel>
     </>
