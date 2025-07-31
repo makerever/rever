@@ -24,7 +24,9 @@ const PDFViewer: React.FC<Props> = ({ fileUrl, maxWidth = 800 }) => {
 
   // use relative url for PDF.js to work correctly
   const urlObject = new URL(fileUrl);
-  const relativeUrl = urlObject.pathname + urlObject.search;
+  const relativeUrl = fileUrl.startsWith("blob:")
+    ? fileUrl
+    : urlObject.pathname + urlObject.search;
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);

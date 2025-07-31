@@ -1,10 +1,10 @@
-//This validation is used when create bill
+//This validation is used when create PO
 
 import { z } from "zod";
 
 export const addPurchaseOrderSchema = z.object({
   poNumber: z.string().optional(),
-  comments: z.string().optional(),
+  comments: z.string().nullable().optional(),
   po_date: z.date().refine((val) => !!val, {
     message: "PO date is required",
   }),
