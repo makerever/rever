@@ -4,7 +4,7 @@ import { z } from "zod";
 
 export const addBillSchema = z.object({
   billNumber: z.string().optional(),
-  comments: z.string().optional(),
+  comments: z.string().nullable().optional(),
   bill_date: z.date().refine((val) => !!val, {
     message: "Bill date is required",
   }),
