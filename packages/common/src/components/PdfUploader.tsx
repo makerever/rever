@@ -22,6 +22,10 @@ const PDFViewer: React.FC<Props> = ({ fileUrl, maxWidth = 800 }) => {
 
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // use relative url for PDF.js to work correctly
+  const urlObject = new URL(fileUrl);
+  const relativeUrl = urlObject.pathname + urlObject.search;
+
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
     setIsLoading(false);
@@ -106,7 +110,7 @@ const PDFViewer: React.FC<Props> = ({ fileUrl, maxWidth = 800 }) => {
       >
         {isLoading && <PageLoader />}
         <Document
-          file={fileUrl}
+          file={relativeUrl}
           options={pdfOptions}
           onLoadSuccess={onDocumentLoadSuccess}
           onLoadError={(error: any) => console.error("PDF load error:", error)}
