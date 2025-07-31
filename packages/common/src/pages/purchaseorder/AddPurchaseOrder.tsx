@@ -210,7 +210,7 @@ const AddPOComponentWithParams = () => {
       total_tax: totalTaxamount.toFixed(2) || 0,
       tax_percentage: data?.total_tax || 0,
       items: poItems,
-      comments: data?.comments,
+      comments: data?.comments ?? undefined,
     };
 
     // Update bill if editing, else create new bill
@@ -533,7 +533,7 @@ const AddPOComponentWithParams = () => {
                         id="comments"
                         placeholder="Enter notes"
                         error={errors.comments}
-                        value={getValues("comments")}
+                        value={getValues("comments") ?? undefined}
                       />
                     </div>
                   </div>

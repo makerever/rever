@@ -241,7 +241,7 @@ const AddBillComponentWithParams = () => {
       due_date: data?.due_date
         ? formatDate(data?.due_date, "yyyy-MM-dd", "", true)
         : null,
-      comments: data?.comments,
+      comments: data?.comments ?? undefined,
       status: submitType,
       sub_total: subtotal.toFixed(2) || 0,
       total: total.toFixed(2) || 0,
@@ -625,7 +625,7 @@ const AddBillComponentWithParams = () => {
                         id="comments"
                         placeholder="Enter notes"
                         error={errors.comments}
-                        value={getValues("comments")}
+                        value={getValues("comments") ?? undefined}
                       />
                     </div>
                   </div>
