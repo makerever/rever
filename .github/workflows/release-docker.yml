@@ -36,7 +36,7 @@ jobs:
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
       with:
-        platforms: linux/amd64,linux/arm64
+        platforms: arm64
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -82,12 +82,8 @@ jobs:
           NEXT_PUBLIC_API_BASE_URL=/api
           BUILDKIT_INLINE_CACHE=1
         # Advanced BuildKit caching strategy
-        cache-from: |
-          type=gha
-          type=registry,ref=reverfin/rever-frontend:buildcache
-        cache-to: |
-          type=gha,mode=min
-          type=registry,ref=reverfin/rever-frontend:buildcache,mode=max
+        cache-from: type=registry,ref=reverfin/rever-frontend:buildcache
+        cache-to: type=registry,ref=reverfin/rever-frontend:buildcache,mode=max
         # Enable build attestations for supply chain security
         provenance: true
         sbom: true
@@ -109,12 +105,8 @@ jobs:
         build-args: |
           BUILDKIT_INLINE_CACHE=1
         # Advanced BuildKit caching strategy
-        cache-from: |
-          type=gha
-          type=registry,ref=reverfin/rever-api:buildcache
-        cache-to: |
-          type=gha,mode=min
-          type=registry,ref=reverfin/rever-api:buildcache,mode=max
+        cache-from: type=registry,ref=reverfin/rever-api:buildcache
+        cache-to: type=registry,ref=reverfin/rever-api:buildcache,mode=max
         # Enable build attestations for supply chain security
         provenance: true
         sbom: true
@@ -136,12 +128,8 @@ jobs:
         build-args: |
           BUILDKIT_INLINE_CACHE=1
         # Advanced BuildKit caching strategy
-        cache-from: |
-          type=gha
-          type=registry,ref=reverfin/rever-proxy:buildcache
-        cache-to: |
-          type=gha,mode=min
-          type=registry,ref=reverfin/rever-proxy:buildcache,mode=max
+        cache-from: type=registry,ref=reverfin/rever-proxy:buildcache
+        cache-to: type=registry,ref=reverfin/rever-proxy:buildcache,mode=max
         # Enable build attestations for supply chain security
         provenance: true
         sbom: true
