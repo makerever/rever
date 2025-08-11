@@ -1,7 +1,9 @@
+x-image-tag: &image-tag ${IMAGE_TAG:-latest}
+
 services:
   # API Service
   api:
-    image: reverfin/rever-api:latest
+    image: reverfin/rever-api:*image-tag
     container_name: rever-api
     restart: unless-stopped
     networks:
@@ -17,7 +19,7 @@ services:
     command: gunicorn rever.wsgi:application --bind 0.0.0.0:8000 -w 4 --max-requests 1200 --max-requests-jitter 1000 --access-logfile -
 
   web:
-    image: reverfin/rever-frontend:latest
+    image: reverfin/rever-frontend:*image-tag
     container_name: rever-frontend
     restart: unless-stopped
     ports:
@@ -30,7 +32,7 @@ services:
 
   # Celery Worker
   worker:
-    image: reverfin/rever-api:latest
+    image: reverfin/rever-api:*image-tag
     container_name: rever-worker
     restart: unless-stopped
     networks:
@@ -86,8 +88,8 @@ services:
       - uploads:/export
 
   proxy:
+    image: reverfin/rever-proxy:*image-tag
     container_name: rever-proxy
-    image: reverfin/rever-proxy:latest
     ports:
       - target: 80
         published: ${NGINX_PORT:-80}

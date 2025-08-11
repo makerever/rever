@@ -1,6 +1,6 @@
 name: Build and Push Docker Images
 
-# This workflow builds and pushes Docker images based on the configuration from build.yaml.
+# This workflow builds and pushes Docker images using advanced BuildKit features.
 # It can be triggered either automatically when a new GitHub release is created,
 # or manually via the GitHub Actions UI.
 # 
@@ -9,6 +9,7 @@ name: Build and Push Docker Images
 # - DOCKERHUB_TOKEN: A Docker Hub access token with push permissions
 #
 # The workflow will tag images with both 'latest' and the specific version.
+# Uses BuildKit for enhanced caching, multi-platform builds, and build attestations.
 
 on:
   # release:
@@ -20,24 +21,38 @@ on:
         required: true
         default: 'latest'
 
+env:
+  DOCKER_BUILDKIT: 1
+  BUILDKIT_PROGRESS: plain
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+      with:
+        platforms: linux/amd64,linux/arm64
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-      
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
+      uses: docker/setup-buildx-action@v3
       with:
-        platforms: 'arm64,amd64'
+        # Use docker-container driver for better isolation and caching
+        driver: docker-container
+        driver-opts: |
+          network=host
+          image=moby/buildkit:latest
+        # Configure BuildKit for optimal performance
+        buildkitd-flags: |
+          --allow-insecure-entitlement security.insecure
+          --allow-insecure-entitlement network.host
 
     - name: Login to Docker Hub
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -52,7 +67,7 @@ jobs:
         fi
 
     - name: Build and push web image
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v5
       id: docker_build_web
       with:
         context: .
@@ -64,11 +79,22 @@ jobs:
           reverfin/rever-frontend:${{ steps.set_version.outputs.VERSION }}
         build-args: |
           NEXT_PUBLIC_API_BASE_URL=/api
-        cache-from: type=registry,ref=reverfin/rever-frontend:buildcache
-        cache-to: type=registry,ref=reverfin/rever-frontend:buildcache,mode=max
+          BUILDKIT_INLINE_CACHE=1
+        # Advanced BuildKit caching strategy
+        cache-from: |
+          type=gha
+          type=registry,ref=reverfin/rever-frontend:buildcache
+        cache-to: |
+          type=gha,mode=max
+          type=registry,ref=reverfin/rever-frontend:buildcache,mode=max
+        # Enable build attestations for supply chain security
+        provenance: true
+        sbom: true
+        # BuildKit metadata and annotations
+        outputs: type=image,name=target,annotation-index.org.opencontainers.image.description=Rever Frontend
 
     - name: Build and push API image
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v5
       id: docker_build_api
       with:
         context: ./api
@@ -78,11 +104,23 @@ jobs:
         tags: |
           reverfin/rever-api:latest
           reverfin/rever-api:${{ steps.set_version.outputs.VERSION }}
-        cache-from: type=registry,ref=reverfin/rever-api:buildcache
-        cache-to: type=registry,ref=reverfin/rever-api:buildcache,mode=max
+        build-args: |
+          BUILDKIT_INLINE_CACHE=1
+        # Advanced BuildKit caching strategy
+        cache-from: |
+          type=gha
+          type=registry,ref=reverfin/rever-api:buildcache
+        cache-to: |
+          type=gha,mode=max
+          type=registry,ref=reverfin/rever-api:buildcache,mode=max
+        # Enable build attestations for supply chain security
+        provenance: true
+        sbom: true
+        # BuildKit metadata and annotations
+        outputs: type=image,name=target,annotation-index.org.opencontainers.image.description=Rever API
 
     - name: Build and push proxy image
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v5
       id: docker_build_proxy
       with:
         context: ./nginx
@@ -92,11 +130,37 @@ jobs:
         tags: |
           reverfin/rever-proxy:latest
           reverfin/rever-proxy:${{ steps.set_version.outputs.VERSION }}
-        cache-from: type=registry,ref=reverfin/rever-proxy:buildcache
-        cache-to: type=registry,ref=reverfin/rever-proxy:buildcache,mode=max
+        build-args: |
+          BUILDKIT_INLINE_CACHE=1
+        # Advanced BuildKit caching strategy
+        cache-from: |
+          type=gha
+          type=registry,ref=reverfin/rever-proxy:buildcache
+        cache-to: |
+          type=gha,mode=max
+          type=registry,ref=reverfin/rever-proxy:buildcache,mode=max
+        # Enable build attestations for supply chain security
+        provenance: true
+        sbom: true
+        # BuildKit metadata and annotations
+        outputs: type=image,name=target,annotation-index.org.opencontainers.image.description=Rever Proxy
           
-    - name: Image digest
+    - name: Image digest and metadata
       run: |
         echo "Web image digest: ${{ steps.docker_build_web.outputs.digest }}"
+        echo "Web image metadata: ${{ steps.docker_build_web.outputs.metadata }}"
         echo "API image digest: ${{ steps.docker_build_api.outputs.digest }}"
+        echo "API image metadata: ${{ steps.docker_build_api.outputs.metadata }}"
         echo "Proxy image digest: ${{ steps.docker_build_proxy.outputs.digest }}"
+        echo "Proxy image metadata: ${{ steps.docker_build_proxy.outputs.metadata }}"
+        
+    - name: Generate build summary
+      run: |
+        echo "## 🐳 Docker Build Summary" >> $GITHUB_STEP_SUMMARY
+        echo "| Image | Digest | Size |" >> $GITHUB_STEP_SUMMARY
+        echo "|-------|--------|------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Frontend | \`${{ steps.docker_build_web.outputs.digest }}\` | - |" >> $GITHUB_STEP_SUMMARY
+        echo "| API | \`${{ steps.docker_build_api.outputs.digest }}\` | - |" >> $GITHUB_STEP_SUMMARY
+        echo "| Proxy | \`${{ steps.docker_build_proxy.outputs.digest }}\` | - |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+       
