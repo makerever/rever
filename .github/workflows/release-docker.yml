@@ -69,6 +69,7 @@ jobs:
     - name: Build and push web image
       uses: docker/build-push-action@v5
       id: docker_build_web
+      timeout-minutes: 30
       with:
         context: .
         file: ./web/Dockerfile.web
@@ -85,7 +86,7 @@ jobs:
           type=gha
           type=registry,ref=reverfin/rever-frontend:buildcache
         cache-to: |
-          type=gha,mode=max
+          type=gha,mode=min
           type=registry,ref=reverfin/rever-frontend:buildcache,mode=max
         # Enable build attestations for supply chain security
         provenance: true
@@ -96,6 +97,7 @@ jobs:
     - name: Build and push API image
       uses: docker/build-push-action@v5
       id: docker_build_api
+      timeout-minutes: 30
       with:
         context: ./api
         file: ./api/Dockerfile.api
@@ -111,7 +113,7 @@ jobs:
           type=gha
           type=registry,ref=reverfin/rever-api:buildcache
         cache-to: |
-          type=gha,mode=max
+          type=gha,mode=min
           type=registry,ref=reverfin/rever-api:buildcache,mode=max
         # Enable build attestations for supply chain security
         provenance: true
@@ -122,6 +124,7 @@ jobs:
     - name: Build and push proxy image
       uses: docker/build-push-action@v5
       id: docker_build_proxy
+      timeout-minutes: 15
       with:
         context: ./nginx
         file: ./nginx/Dockerfile
@@ -137,7 +140,7 @@ jobs:
           type=gha
           type=registry,ref=reverfin/rever-proxy:buildcache
         cache-to: |
-          type=gha,mode=max
+          type=gha,mode=min
           type=registry,ref=reverfin/rever-proxy:buildcache,mode=max
         # Enable build attestations for supply chain security
         provenance: true
@@ -163,4 +166,4 @@ jobs:
         echo "| API | \`${{ steps.docker_build_api.outputs.digest }}\` | - |" >> $GITHUB_STEP_SUMMARY
         echo "| Proxy | \`${{ steps.docker_build_proxy.outputs.digest }}\` | - |" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-       
+        echo "### BuildKit Features Used:" >> $GITHUB_STEP_SUMMARY
