@@ -1,4 +1,5 @@
 import contextlib
+from decimal import Decimal
 
 from django.db import models, transaction
 from simple_history.models import HistoricalRecords
@@ -339,24 +340,52 @@ class PurchaseOrder(BaseModel):
 
 
 class PurchaseOrderItem(BaseModel):
+    LINE_STATUS_CHOICES = [
+        ("open", "Open"),
+        ("partially_received", "Partially Received"),
+        ("closed", "Closed"),
+    ]
     purchase_order = models.ForeignKey(
         PurchaseOrder, on_delete=models.CASCADE, related_name="items", db_index=True
     )
     description = models.TextField()
-    quantity = models.DecimalField(max_digits=12, decimal_places=2)
+    quantity = models.DecimalField(
+        max_digits=12, decimal_places=2, help_text="Total quantity ordered in this line item"
+    )
+    pending_approval_quantity = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+        help_text="Quantity pending approval before fulfillment",
+    )
     received_quantity = models.DecimalField(
         max_digits=12,
         decimal_places=2,
         default=0,
-        help_text="Total quantity received against this line item",
+        help_text="Quantity physically received against this line item",
     )
     unit_price = models.DecimalField(max_digits=12, decimal_places=2)
     uom = models.CharField(max_length=20, blank=True)
     product_code = models.CharField(max_length=50, blank=True)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
 
+    line_status = models.CharField(
+        max_length=20,
+        choices=LINE_STATUS_CHOICES,
+        default="open",
+        help_text="Current lifecycle status of this purchase order line item",
+    )
+
     line_number = models.PositiveIntegerField(null=True, blank=True)
     history = HistoricalRecords(inherit=True, table_name="purchase_order_item_history")
+
+    @property
+    def remaining_quantity(self):
+        q = self.quantity or Decimal("0")
+        p = self.pending_approval_quantity or Decimal("0")
+        r = self.received_quantity or Decimal("0")
+        rem = q - p - r
+        return rem if rem > 0 else Decimal("0")
 
     class Meta:
         verbose_name = "Purchase Order Item"
@@ -364,24 +393,58 @@ class PurchaseOrderItem(BaseModel):
         db_table = "purchase_order_items"
         ordering = ["line_number", "id"]
 
+        constraints = [
+            models.UniqueConstraint(
+                fields=["purchase_order", "line_number"], name="uniq_line_per_po"
+            ),
+        ]
         indexes = [
             models.Index(fields=["purchase_order", "line_number"]),
+            models.Index(fields=["purchase_order", "line_status"]),  # filter
         ]
 
-    def save(self, *args, **kwargs):
-        if self.amount is None:
-            self.amount = self.quantity * self.unit_price
+    def _compute_line_status(self) -> str:
+        q = self.quantity or Decimal("0")
+        r = self.received_quantity or Decimal("0")
 
+        if r >= q and q > 0:
+            return "closed"
+        if 0 < r < q:
+            return "partially_received"
+        return "open"
+
+    def recompute_line_status(self):
+        q = self.quantity or Decimal("0")
+        r = self.received_quantity or Decimal("0")
+        if q > 0 and r >= q:
+            self.line_status = "closed"
+        elif r > 0:
+            self.line_status = "partially_received"
+        else:
+            self.line_status = "open"
+
+    def save(self, *args, **kwargs):
+        self.amount = (self.quantity or Decimal("0")) * (self.unit_price or Decimal("0"))
         # Auto-assign line_number if not provided
         if self.line_number is None and self.purchase_order_id:
             self.line_number = self._get_next_line_number()
+        # Auto-update status every time we save
+        self.line_status = self._compute_line_status()
 
         super().save(*args, **kwargs)
 
     def _get_next_line_number(self):
-        """Get the next available line number for this purchase order"""
-        last_item = PurchaseOrderItem.objects.filter(
-            purchase_order=self.purchase_order, line_number__isnull=False
-        ).aggregate(max_line=models.Max("line_number"))
+        with transaction.atomic():
+            qs = PurchaseOrderItem.objects.select_for_update().filter(
+                purchase_order=self.purchase_order, line_number__isnull=False
+            )
+            max_line = qs.aggregate(max_line=models.Max("line_number"))["max_line"] or 0
+            return max_line + 1
 
-        return (last_item["max_line"] or 0) + 1
+    def add_pending(self, qty: Decimal):
+        self.pending_approval_quantity = max(
+            Decimal("0"), (self.pending_approval_quantity or 0) + qty
+        )
+
+    def add_received(self, qty: Decimal):
+        self.received_quantity = max(Decimal("0"), (self.received_quantity or 0) + qty)
