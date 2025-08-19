@@ -90,4 +90,5 @@ export { default as POApprovalList } from "./pages/purchaseorder/POApprovalList"
 export { default as BillPOMatchUI } from "./pages/bill/BillMatch";
 export { default as PillItem } from "./components/PillItem";
 
+export { default as CircularProgressBar } from "./components/CircularProgressBar";
 export { default as InboxPage } from "./pages/inbox/InboxPage";

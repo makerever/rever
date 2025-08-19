@@ -20,6 +20,8 @@ export type poItemTypeProps = {
   description?: string | undefined;
   product_code?: string | undefined;
   quantity?: string | undefined;
+  received_quantity?: string | undefined;
+  pending_approval_quantity?: string | undefined;
   unit_price?: string | undefined;
   amount?: string | undefined;
 };

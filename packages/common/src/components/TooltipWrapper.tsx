@@ -16,18 +16,25 @@ export function CustomTooltip({
   side = "top",
   align = "center",
   sideOffset = 4,
+  className = "",
 }: {
   children: ReactNode;
   content: string | ReactNode;
   side?: "top" | "right" | "bottom" | "left";
   align?: "start" | "center" | "end";
   sideOffset?: number;
+  className?: string;
 }) {
   return (
     <TooltipProvider delayDuration={200}>
       <Tooltip>
         <TooltipTrigger asChild>{children}</TooltipTrigger>
-        <TooltipContent sideOffset={sideOffset} side={side} align={align}>
+        <TooltipContent
+          className={className}
+          sideOffset={sideOffset}
+          side={side}
+          align={align}
+        >
           {content}
         </TooltipContent>
       </Tooltip>

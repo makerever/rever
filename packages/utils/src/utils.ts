@@ -195,5 +195,5 @@ export const getLabelForMemberStatus = (value: string) =>
   memberStatusLabels[value] || "--";
 
 export function convertToPercentage(value: number) {
-  return (value * 100).toFixed(0);
+  return (value * 100).toFixed(1);
 }
