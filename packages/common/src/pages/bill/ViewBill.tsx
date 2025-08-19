@@ -161,7 +161,7 @@ const ViewBillDetails = ({
           <div className="lg:flex lg:gap-8">
             {/* PDF preview section (if enabled) */}
             {fileUrl && showPdf ? (
-              <div className="lg:w-2/5">
+              <div className="lg:w-1/3">
                 <div
                   // style={{ height: "580px" }}
                   className="scrollbar_none overflow-auto bg-white shadow-5xl rounded-md overflow-hidden"
@@ -174,7 +174,7 @@ const ViewBillDetails = ({
             {/* Bill details section */}
             <div
               className={
-                fileUrl && showPdf ? "lg:w-3/5 mt-8 lg:mt-0" : "lg:w-3/4"
+                fileUrl && showPdf ? "lg:w-2/3 mt-8 lg:mt-0" : "lg:w-3/4"
               }
             >
               {/* Vendor, bill date, due date */}

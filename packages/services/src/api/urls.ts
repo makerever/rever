@@ -66,4 +66,8 @@ export const MEMBER_API = {
 // Notification API Endpoints
 export const NOTIFICATION_API = {
   MANAGE_NOTIFICATION: "/users/me/notification-preferences/",
+
+  GET_NOTIFICATION: "/notifications/",
+  GET_NOTIFICATION_COUNT: "/notifications/unread_count/",
+  NOTIFICATION_MARK_ALL_READ: "/notifications/mark_all_read/",
 };

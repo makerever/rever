@@ -7,3 +7,4 @@ export * from "./settings/type";
 export * from "./store/type";
 export * from "./vendor/type";
 export * from "./purchaseorder/type";
+export * from "./inbox/type";

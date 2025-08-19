@@ -14,6 +14,7 @@ const PUBLIC_ROUTES = [
 ];
 const MAIN_ROUTES = [
   "/home",
+  "/inbox",
   "/settings",
   "/vendor",
   "/purchaseorder",
