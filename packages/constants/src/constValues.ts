@@ -61,7 +61,7 @@ export const billMatchHeaders = [
 export const poMatchHeaders = [
   "#",
   "Description",
-  "Quantity",
+  "Available Qty",
   "Unit price",
   "Amount",
 ];

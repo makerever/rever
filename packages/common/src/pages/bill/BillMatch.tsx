@@ -5,6 +5,7 @@
 import { useCallback, useEffect, useState, useMemo, memo } from "react";
 import {
   Button,
+  CircularProgressBar,
   CustomTooltip,
   Label,
   PageLoader,
@@ -19,7 +20,6 @@ import {
   MatchStatus,
   OrgDetails,
   PurchaseOrderItem,
-  TooltipSide,
   UnmatchedLineItem,
 } from "@rever/types";
 import {
@@ -33,23 +33,26 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   cn,
+  convertToPercentage,
   formatNumber,
   getLabelForBillStatus,
   getStatusClass,
 } from "@rever/utils";
 import { billMatchHeaders, poMatchHeaders } from "@rever/constants";
 import { useBreadcrumbStore, useUserStore } from "@rever/stores";
-import { BadgeAlert, BadgeCheck, TriangleAlert } from "lucide-react";
+import { BadgeAlert, BadgeCheck, Info } from "lucide-react";
 
 // Status icon component to reduce repetition
 const StatusIcon = memo(
   ({
     status,
-    tooltipContent,
+    description_score,
+    description_status,
   }: {
     status: MatchStatus | null;
     tooltipContent: string;
-    side?: TooltipSide;
+    description_score?: number;
+    description_status?: string;
   }) => {
     const getIconByStatus = () => {
       switch (status) {
@@ -59,16 +62,40 @@ const StatusIcon = memo(
           return <BadgeAlert className="text-red-500" width={16} />;
         case "partial":
           return <BadgeAlert className="text-yellow-500" width={16} />;
+        case "poNotAvailable":
+          return <BadgeAlert className="text-yellow-500" width={16} />;
         default:
           return null;
       }
     };
 
-    return status ? (
-      <CustomTooltip content={tooltipContent} side="right">
+    return status && status !== "poNotAvailable" ? (
+      <CustomTooltip
+        content={
+          <div className="my-1">
+            <div className="mb-1">Description status: {description_status}</div>
+            <div className="flex items-center">
+              Confidence score:&nbsp;
+              <CircularProgressBar
+                percentage={Number(convertToPercentage(description_score || 0))}
+              />
+            </div>
+          </div>
+        }
+        side="bottom"
+      >
         <div className="w-fit">{getIconByStatus()}</div>
       </CustomTooltip>
-    ) : null;
+    ) : (
+      <CustomTooltip
+        content={<div className="my-1">PO line item missing</div>}
+        side="bottom"
+      >
+        <div>
+          <Info className="text-slate-500" width={16} />
+        </div>
+      </CustomTooltip>
+    );
   },
 );
 
@@ -85,7 +112,7 @@ const POItemsTable = memo(
       <h3 className="text-md font-semibold text-slate-700 mb-4">
         Purchase order items
       </h3>
-      <table className="table-fixed w-full text-left border-r">
+      <table className="table-fixed w-full text-left">
         <colgroup>
           <col className="w-[30px]" />
           <col className="w-[35%]" />
@@ -94,7 +121,7 @@ const POItemsTable = memo(
           <col className="w-[20%]" />
         </colgroup>
 
-        <thead className="bg-gray-50">
+        <thead className="bg-gray-50 border-b">
           <tr>
             {poMatchHeaders.map((h, i) => (
               <th
@@ -117,6 +144,10 @@ const POItemsTable = memo(
               const qty = Number(item.quantity) || 0;
               const unitPrice = Number(item.unit_price) || 0;
               const amount = qty * unitPrice;
+              const balanceQty =
+                Number(item?.quantity) -
+                (Number(item?.received_quantity || 0) +
+                  Number(item?.pending_approval_quantity || 0));
 
               // Type guard to check if it's a MatchedLineItem
               const isMatchedItem = (
@@ -143,11 +174,35 @@ const POItemsTable = memo(
                     </div>
                   </td>
                   <td className="py-1">
-                    <div
-                      className={`p-1 rounded-md w-fit ${matchedItem?.quantity_status ? "" : "border border-transparent"}`}
+                    <CustomTooltip
+                      className="min-w-40"
+                      content={
+                        <div className="my-1">
+                          <div className="mb-1 flex justify-between">
+                            <div>Total:</div> <div>{item?.quantity}</div>
+                          </div>
+                          <div className="mb-1 flex justify-between">
+                            <div>Under approval:</div>{" "}
+                            <div>{item?.pending_approval_quantity}</div>
+                          </div>
+                          <div className="mb-1 flex justify-between">
+                            <div>Consumed:</div>{" "}
+                            <div>{item?.received_quantity}</div>
+                          </div>
+                          <div className="mb-1 flex justify-between">
+                            <div>Available:</div>{" "}
+                            <div>{balanceQty?.toFixed(2)}</div>
+                          </div>
+                        </div>
+                      }
+                      side="right"
                     >
-                      {item.quantity}
-                    </div>
+                      <div
+                        className={`underline cursor-pointer rounded-md w-fit ${matchedItem?.quantity_status ? "" : "border border-transparent"}`}
+                      >
+                        {balanceQty?.toFixed(2)}
+                      </div>
+                    </CustomTooltip>
                   </td>
                   <td className="py-1">
                     <div
@@ -195,7 +250,7 @@ const BillItemsTable = memo(
       <h3 className="ps-4 text-md font-semibold text-slate-700 mb-4">
         Bill items
       </h3>
-      <table className="table-fixed w-full text-left border-r">
+      <table className="table-fixed w-full text-left">
         <colgroup>
           <col className="w-[35%]" />
           <col className="w-[20%]" />
@@ -203,7 +258,7 @@ const BillItemsTable = memo(
           <col className="w-[20%]" />
         </colgroup>
 
-        <thead className="bg-gray-50">
+        <thead className="bg-gray-50 border-b">
           <tr>
             {billMatchHeaders.map((h, i) => (
               <th
@@ -287,10 +342,10 @@ const MatchingStatusTable = memo(
     <div>
       <table className="table-fixed w-full text-left">
         <colgroup>
-          <col className="w-2/12" />
+          <col className="w-full" />
         </colgroup>
 
-        <thead className="bg-gray-50">
+        <thead className="bg-gray-50 border-b">
           <tr>
             <th className="ps-4 pr-2 py-3 text-xs font-medium text-slate-500 whitespace-nowrap">
               Matching status
@@ -298,17 +353,23 @@ const MatchingStatusTable = memo(
           </tr>
         </thead>
 
-        <tbody className="border-b">
+        <tbody>
           {matchedLineItems.length > 0 ? (
             matchedLineItems.map((item, index) => {
               return (
                 <tr
                   key={index}
-                  className="border-t text-xs text-slate-800 hover:bg-slate-50"
+                  className="text-xs text-slate-800 hover:bg-slate-50 border-b"
                 >
                   <td className="p-3 ps-4 grid items-center h-[60px] m-1">
                     <StatusIcon
-                      status={item?.overall_status || null}
+                      status={
+                        item?.overall_status
+                          ? item?.overall_status
+                          : item?.purchase_order_item?.description
+                            ? "poNotAvailable"
+                            : null
+                      }
                       tooltipContent={
                         item?.overall_status === "matched"
                           ? "Matched"
@@ -318,8 +379,15 @@ const MatchingStatusTable = memo(
                               ? "Partial matched"
                               : ""
                       }
-                      side={
-                        item?.overall_status === "mismatched" ? "right" : "top"
+                      description_score={item.description_score}
+                      description_status={
+                        item?.description_status === "matched"
+                          ? "Matched"
+                          : item?.description_status === "mismatched"
+                            ? "Mismatched"
+                            : item?.description_status === "partial"
+                              ? "Partial matched"
+                              : ""
                       }
                     />
                   </td>
@@ -601,7 +669,12 @@ const BillPOMatchUI = () => {
                       </div>
                     </div>
 
-                    <MatchingStatusTable matchedLineItems={filteredLineItems} />
+                    <MatchingStatusTable
+                      matchedLineItems={[
+                        ...filteredLineItems,
+                        ...unMatchedBillLineItems,
+                      ]}
+                    />
                   </div>
                 </div>
               </div>
