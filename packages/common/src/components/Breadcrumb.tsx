@@ -12,6 +12,7 @@ import {
   UsersRound,
   UserRoundCheck,
   FileCheck2,
+  Inbox,
 } from "lucide-react";
 import { useBreadcrumbStore } from "@rever/stores";
 
@@ -122,7 +123,7 @@ const breadcrumbMap: Record<string, Crumb[]> = {
     },
     { label: "Update", href: "" },
   ],
-
+  "/inbox": [{ label: "Inbox", icon: <Inbox size={16} />, href: "/" }],
   "/settings/general": [
     { label: "General settings", icon: <Settings2 size={16} />, href: "/" },
   ],

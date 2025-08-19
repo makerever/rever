@@ -7,6 +7,7 @@ import {
   CircleUserRound,
   FileText,
   Home,
+  Inbox,
   Key,
   KeyRound,
   ReceiptText,
@@ -61,7 +62,12 @@ export const sidebarLinks: SidebarLinkProps[] = [
       },
     ],
   },
-
+  {
+    name: "Inbox", // Inbox page link
+    url: "/inbox",
+    activeUrl: ["/inbox"],
+    icon: <Inbox size={16} />,
+  },
   {
     name: "Settings", // Settings section with sub-items
     url: "#",

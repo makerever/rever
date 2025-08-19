@@ -42,7 +42,10 @@ const ViewBillWithParams = () => {
     async (idValue: string) => {
       setIsLoading(true);
       const response = await getBillDetailsByIdApi(idValue);
-      if (response?.status === 200) {
+      if (
+        response?.status === 200 &&
+        response?.data?.status === "under_approval"
+      ) {
         setBillDetails(response?.data);
 
         const responseFile = await getBillAttachment(idValue);
