@@ -223,8 +223,8 @@ if config("USE_MINIO", cast=bool, default=False):
 
 else:
     AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME")
-    AWS_S3_ENDPOINT_URL = config("AWS_S3_ENDPOINT_URL")
-    AWS_S3_UI_ENDPOINT_URL = config("AWS_S3_UI_ENDPOINT_URL")
+    AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
     AWS_S3_REGION_NAME = config("AWS_S3_REGION_NAME", default="us-east-1")
 
 
