@@ -103,3 +103,20 @@ export interface ManageNotificationProps {
   notify_on_approval_request?: boolean;
   notify_on_approval_result?: boolean;
 }
+
+// For approval llist props
+export interface ApprovalListProps {
+  approver_id?: string;
+  approver_name?: string;
+  level: number;
+}
+
+export interface ApproverAssignment {
+  approver: string | number;
+  level: number;
+}
+
+export interface AssignApproverPayload {
+  model_name: string;
+  assignments: ApproverAssignment[];
+}
