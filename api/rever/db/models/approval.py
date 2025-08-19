@@ -25,12 +25,16 @@ class ApprovalConfig(BaseModel):
 
 
 class ApprovalFlow(BaseModel):
+    LEVEL_CHOICES = [(i, f"L{i}") for i in range(1, 6)]  # L1-L5
+
     organization = models.ForeignKey("Organization", on_delete=models.CASCADE)
     model_name = models.CharField(max_length=100)
     approver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
 
+    level = models.PositiveSmallIntegerField(choices=LEVEL_CHOICES)
+
     class Meta:
-        unique_together = ("organization", "model_name")
+        unique_together = ("organization", "model_name", "level")
         db_table = "approval_flows"
         verbose_name = "ApprovalFlow"
         verbose_name_plural = "ApprovalFlows"
@@ -59,6 +63,7 @@ class ApprovalLog(BaseModel):
     comment = models.TextField(blank=True)
 
     approved_at = models.DateTimeField(null=True, blank=True)
+    level = models.PositiveSmallIntegerField(null=True, blank=True)
 
     class Meta:
         # unique_together = ('content_type', 'object_id')

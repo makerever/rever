@@ -24,7 +24,13 @@ from .auth import (
     SignupCompleteSerializer,
 )
 from .match import MatchResultSerializer
-from .notification import UserNotificationPreferenceSerializer
+from .notification import (
+    NotificationBulkUpdateSerializer,
+    NotificationCreateSerializer,
+    NotificationSerializer,
+    NotificationUpdateSerializer,
+    UserNotificationPreferenceSerializer,
+)
 from .payable import (
     AddressSerializer,
     BankAccountSerializer,

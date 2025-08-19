@@ -2,5 +2,5 @@ from .approval import ApprovalConfig, ApprovalFlow, ApprovalLog
 from .attachment import Attachment
 from .auth import Organization, User, VerificationToken
 from .match import MatchMatrix, MatchResult
-from .notification import UserNotificationPreference
+from .notification import Notification, UserNotificationPreference
 from .payable import Address, BankAccount, Bill, BillItem, PurchaseOrder, PurchaseOrderItem, Vendor

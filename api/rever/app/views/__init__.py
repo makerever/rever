@@ -35,6 +35,7 @@ from .auth.base import (
     SignupEmailVerify,
 )
 from .notification.base import (
+    NotificationViewSet,
     UserNotificationPreferenceAPIView,
 )
 from .payable.base import (

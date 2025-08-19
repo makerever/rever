@@ -43,7 +43,7 @@ class MatchResult(BaseModel):
     )
 
     match_type = models.CharField(max_length=30, default="two_way")
-    description_score = models.FloatField()
+    description_score = models.DecimalField(max_digits=5, decimal_places=4)
     description_status = models.CharField(
         max_length=20,
         choices=[
@@ -62,7 +62,8 @@ class MatchResult(BaseModel):
             ("mismatched", "Mismatched"),
         ],
     )
-    is_quantity_posted = models.BooleanField(default=False)
+    received_qty_applied = models.BooleanField(default=False)
+    reserved_qty_applied = models.BooleanField(default=False)
 
     class Meta:
         db_table = "match_results"
@@ -71,6 +72,7 @@ class MatchResult(BaseModel):
         indexes = [
             models.Index(fields=["bill"]),
             models.Index(fields=["purchase_order"]),
+            models.Index(fields=["purchase_order_item"]),
         ]
         constraints = [
             models.UniqueConstraint(
