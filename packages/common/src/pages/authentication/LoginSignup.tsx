@@ -312,19 +312,22 @@ const LoginSignup = ({ showStep, setShowStep }: LoginStepProps) => {
         <p className="text-slate-500 dark:text-slate-300 font-light text-xs text-center lg:px-3 mt-6">
           By continuing, you acknowledge that you understand and agree to
           the&nbsp;
-          <a href="/terms-and-conditions" target="_blank">
+          <a
+            href="https://reverfin.ai/legal/terms-and-conditions"
+            target="_blank"
+          >
             <span className="underline font-medium cursor-pointer">
               Terms of Service
             </span>
           </a>
           ,&nbsp;
-          <a href="/eula" target="_blank">
+          <a href="https://reverfin.ai/legal/eula" target="_blank">
             <span className="underline font-medium cursor-pointer">
               EULA
             </span>{" "}
           </a>
           and{" "}
-          <a href="/privacy-policy" target="_blank">
+          <a href="https://reverfin.ai/legal/privacy-policy" target="_blank">
             <span className="underline font-medium cursor-pointer">
               Privacy Policy
             </span>
