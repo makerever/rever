@@ -77,11 +77,11 @@ const Notification = () => {
           <div className="flex items-start justify-between mb-4 bg-gray-50 rounded-md p-3">
             <div>
               <p className="font-semibold text-sm text-slate-800 dark:text-gray-200">
-                Notify when transaction is approved
+                Notify when transaction is approved/rejected
               </p>
               <p className="mt-1 font-light text-xs text-slate-500 dark:text-gray-200">
-                Receive a notification as soon as a transaction gets approved
-                successfully.
+                Receive a notification as soon as a transaction gets
+                approved/rejected successfully.
               </p>
             </div>
             <ToggleSwitch

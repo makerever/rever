@@ -219,11 +219,14 @@ const PurchaseOrderList = () => {
       return (
         po.po?.toLowerCase().includes(lowerSearch) ||
         po.vendor?.name.toLowerCase().includes(lowerSearch) ||
+        formatDate(po?.po_date, orgDetails?.date_format)
+          ?.toLowerCase()
+          .includes(lowerSearch) ||
         String(po.total)?.toString().toLowerCase().includes(lowerSearch) ||
         po.status?.toLowerCase().includes(lowerSearch)
       );
     });
-  }, [poData, activeTab, search]);
+  }, [poData, activeTab, search, orgDetails?.date_format]);
 
   return (
     <>
