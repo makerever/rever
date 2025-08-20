@@ -264,11 +264,15 @@ const BillList = () => {
       return (
         bill.bill?.toLowerCase().includes(lowerSearch) ||
         bill.vendor?.name.toLowerCase().includes(lowerSearch) ||
+        formatDate(bill?.bill_date, orgDetails?.date_format)
+          ?.toLowerCase()
+          .includes(lowerSearch) ||
+        bill?.purchase_order?.po_number?.toLowerCase().includes(lowerSearch) ||
         bill.total?.toString().toLowerCase().includes(lowerSearch) ||
         bill.status?.toLowerCase().includes(lowerSearch)
       );
     });
-  }, [billData, activeTab, search]);
+  }, [billData, activeTab, search, orgDetails?.date_format]);
 
   return (
     <>

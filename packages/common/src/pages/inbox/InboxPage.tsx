@@ -190,7 +190,7 @@ export default function Inbox() {
                               : "bg-gray-100 dark:bg-gray-300"
                           }`}
                         >
-                          A
+                          <Bell width={16} className="text-slate-800" />
                         </div>
                       </div>
 

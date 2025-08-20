@@ -177,6 +177,7 @@ const VendorList = () => {
     return vendorList?.filter((vendor) => {
       return (
         vendor.vendorName?.toLowerCase().includes(lowerSearch) ||
+        vendor.companyName?.toLowerCase().includes(lowerSearch) ||
         vendor.email?.toLowerCase().includes(lowerSearch) ||
         vendor.taxId?.toString().toLowerCase().includes(lowerSearch) ||
         vendor.status?.toLowerCase().includes(lowerSearch)

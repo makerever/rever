@@ -236,7 +236,7 @@ const BillApproval = () => {
               {approvers.map((item, index) => (
                 <div
                   key={index}
-                  className="border-t px-3 py-4 grid lg:grid-cols-2 gap-10 items-center"
+                  className="border-t py-4 grid lg:grid-cols-2 gap-10 items-center"
                 >
                   <SelectComponent
                     title="Approver"
