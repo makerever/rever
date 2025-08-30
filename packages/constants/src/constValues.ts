@@ -17,6 +17,7 @@ export const memberTabOptions = ["Active members", "Invited members"];
 export const roleBasedAccess: Record<Role, string[]> = {
   admin: [
     "/home",
+    "/inbox",
     "/vendor/list",
     "/bill/list",
     "/purchaseorder/list",
@@ -27,6 +28,7 @@ export const roleBasedAccess: Record<Role, string[]> = {
   ],
   member: [
     "/home",
+    "/inbox",
     "/vendor/list",
     "/bill/list",
     "/purchaseorder/list",
@@ -36,6 +38,7 @@ export const roleBasedAccess: Record<Role, string[]> = {
   ],
   finance_manager: [
     "/home",
+    "/inbox",
     "/vendor/list",
     "/approvals/list/review",
     "/settings/general",
@@ -58,7 +61,7 @@ export const billMatchHeaders = [
 export const poMatchHeaders = [
   "#",
   "Description",
-  "Quantity",
+  "Available Qty",
   "Unit price",
   "Amount",
 ];

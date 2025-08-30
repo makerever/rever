@@ -5,6 +5,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import PageLoader from "./Loader";
+import { ZoomIn, ZoomOut } from "lucide-react";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
@@ -17,8 +18,9 @@ const PDFViewer: React.FC<Props> = ({ fileUrl, maxWidth = 800 }) => {
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [containerWidth, setContainerWidth] = useState(0);
-
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const [scale, setScale] = useState(1.0);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -33,7 +35,6 @@ const PDFViewer: React.FC<Props> = ({ fileUrl, maxWidth = 800 }) => {
     setIsLoading(false);
   };
 
-  // Scroll handler to find page closest to top inside container
   const onScroll = useCallback(() => {
     if (!containerRef.current || numPages === 0) return;
 
@@ -48,8 +49,6 @@ const PDFViewer: React.FC<Props> = ({ fileUrl, maxWidth = 800 }) => {
       if (!pageEl) continue;
 
       const pageRect = pageEl.getBoundingClientRect();
-
-      // Distance from top of container viewport to vertical midpoint of page
       const pageMidY = pageRect.top + pageRect.height / 2;
       const distance = Math.abs(pageMidY - containerRect.top);
 
@@ -62,27 +61,22 @@ const PDFViewer: React.FC<Props> = ({ fileUrl, maxWidth = 800 }) => {
     setCurrentPage((prev) => (prev !== closestPage ? closestPage : prev));
   }, [numPages]);
 
-  // Update container width on mount and resize
   useEffect(() => {
     const updateWidth = () => {
       if (containerRef.current) {
         setContainerWidth(Math.min(containerRef.current.clientWidth, maxWidth));
       }
     };
-
     updateWidth();
     window.addEventListener("resize", updateWidth);
-
     return () => {
       window.removeEventListener("resize", updateWidth);
     };
   }, [maxWidth]);
 
-  // Attach scroll event
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-
     container.addEventListener("scroll", onScroll);
     return () => {
       container.removeEventListener("scroll", onScroll);
@@ -97,10 +91,7 @@ const PDFViewer: React.FC<Props> = ({ fileUrl, maxWidth = 800 }) => {
   );
 
   return (
-    <div
-      className="pdf_uploader"
-      style={{ maxWidth: maxWidth, margin: "0 auto" }}
-    >
+    <div className="pdf_uploader" style={{ maxWidth, margin: "0 auto" }}>
       <div
         ref={containerRef}
         style={{
@@ -108,7 +99,7 @@ const PDFViewer: React.FC<Props> = ({ fileUrl, maxWidth = 800 }) => {
           overflowY: "scroll",
           width: "100%",
         }}
-        className="custom_scrollbar overflow-hidden"
+        className="custom_scrollbar"
       >
         {isLoading && <PageLoader />}
         <Document
@@ -121,7 +112,8 @@ const PDFViewer: React.FC<Props> = ({ fileUrl, maxWidth = 800 }) => {
             <div id={`page_${index + 1}`} key={`page_${index + 1}`}>
               <Page
                 pageNumber={index + 1}
-                width={containerWidth}
+                scale={scale} // Use scale for zoom
+                width={containerWidth} // still constrains initial size
                 renderTextLayer={false}
                 renderAnnotationLayer={false}
               />
@@ -130,16 +122,38 @@ const PDFViewer: React.FC<Props> = ({ fileUrl, maxWidth = 800 }) => {
         </Document>
       </div>
 
-      <div
-        style={{
-          marginTop: 8,
-          textAlign: "center",
-          fontSize: 12,
-          color: "#555",
-          userSelect: "none",
-        }}
-      >
-        Page {currentPage} of {numPages}
+      <div className="flex justify-between items-center mb-1">
+        <div></div>
+        <div
+          style={{
+            marginTop: 8,
+            textAlign: "center",
+            fontSize: 12,
+            color: "#555",
+            userSelect: "none",
+          }}
+          className="flex justify-end mb-1.5 ms-10"
+        >
+          Page {currentPage} of {numPages}
+        </div>
+        {/* Zoom Controls */}
+        <div
+          style={{ display: "flex", justifyContent: "center" }}
+          className="text-slate-600"
+        >
+          <div
+            onClick={() => setScale((prev) => Math.min(prev + 0.2, 3))}
+            className="cursor-pointer mr-2"
+          >
+            <ZoomIn width={14} />
+          </div>
+          <button
+            onClick={() => setScale((prev) => Math.max(prev - 0.2, 0.5))}
+            className="cursor-pointer mr-4"
+          >
+            <ZoomOut width={14} />
+          </button>
+        </div>
       </div>
     </div>
   );

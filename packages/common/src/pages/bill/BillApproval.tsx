@@ -5,19 +5,15 @@
 import {
   Button,
   ConfirmationPopup,
-  Label,
+  CustomTooltip,
+  IconWrapper,
   PageLoader,
   SelectComponent,
   showErrorToast,
   showSuccessToast,
   ToggleSwitch,
 } from "@rever/common";
-import { addApproverSchema } from "@rever/validations";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useUserStore } from "@rever/stores";
-import { EnableApprovalProps, MemberDataAPIType, Option } from "@rever/types";
-import { useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+
 import {
   assignApproverApi,
   disableApprovalStatusApi,
@@ -26,150 +22,188 @@ import {
   getAssignApprovalApi,
   getMembersListApi,
 } from "@rever/services";
+
+import { useUserStore } from "@rever/stores";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { Minus, Plus } from "lucide-react";
+
+import type {
+  ApprovalListProps,
+  ApproverAssignment,
+  AssignApproverPayload,
+  EnableApprovalProps,
+  MemberDataAPIType,
+  Option,
+} from "@rever/types";
 
 const model_name = "bill";
 
-// Form data interface for approver selection
-interface ApprovalFormData {
-  approver: string;
+interface Approver {
+  approver: Option | null;
+  level?: number;
 }
 
 const BillApproval = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    trigger,
-    setValue,
-    getValues,
-  } = useForm({
-    resolver: zodResolver(addApproverSchema),
-    mode: "onChange",
-  });
-
-  const [isOn, setIsOn] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isConfirmRejectPopupOpen, setIsConfirmRejectPopupOpen] =
-    useState<boolean>(false);
-  const [isApprovalAvailable, setIsApprovalAvailable] =
-    useState<boolean>(false);
-
-  // Get current user from store
   const user = useUserStore((state) => state.user);
-
+  const [isOn, setIsOn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDataSubmitting, setIsDataSubmitting] = useState(false);
+  const [isConfirmRejectPopupOpen, setIsConfirmRejectPopupOpen] =
+    useState(false);
   const [membersList, setMembersList] = useState<Option[]>([]);
+  const [approvers, setApprovers] = useState<Approver[]>([{ approver: null }]);
+  const [isApprovalAvailable, setIsApprovalAvailable] = useState(false);
 
-  // On mount, fetch approval status
-  useEffect(() => {
-    getApprovalStatus();
-  }, []);
-
-  // Fetch currently assigned approver
-  const getAssignApproval = useCallback(async () => {
-    const response = await getAssignApprovalApi(model_name);
-    if (response?.status === 200) {
-      setValue("approver", response?.data?.approver_id);
-      if (response?.data?.approver_id) {
-        setIsApprovalAvailable(true);
-      }
-      setIsLoading(false);
-    } else {
-      setIsApprovalAvailable(false);
-      setIsLoading(false);
-    }
-  }, [setValue]);
-
-  // Fetch list of finance managers (excluding current user)
-  const getMembersList = useCallback(async () => {
-    if (user) {
+  const fetchInitialData = useCallback(async () => {
+    try {
       setIsLoading(true);
-      const response = await getMembersListApi();
-      if (response?.status === 200) {
-        const allData = response?.data
-          ?.filter(
-            (v: MemberDataAPIType) =>
-              v?.first_name && v?.role === "finance_manager",
+
+      // Fetch approval status & current approvers in parallel
+      const [statusRes, membersRes, approversRes] = await Promise.all([
+        getApprovalStatusApi(model_name),
+        getMembersListApi(),
+        getAssignApprovalApi(model_name),
+      ]);
+
+      const approvalEnabled = statusRes?.data?.find(
+        (v: EnableApprovalProps) => v.model_name === model_name,
+      )?.approval_enabled;
+
+      setIsOn(!!approvalEnabled);
+
+      if (membersRes?.status === 200 && user) {
+        const members = membersRes.data
+          .filter(
+            (member: MemberDataAPIType) =>
+              member.first_name &&
+              member.role === "finance_manager" &&
+              String(member.id) !== user.id,
           )
-          ?.filter((v: MemberDataAPIType) => String(v.id) !== user?.id)
-          ?.map((v: MemberDataAPIType) => ({
-            label: `${v?.first_name} ${v?.last_name}`,
-            value: v?.id,
+          .map((v: MemberDataAPIType) => ({
+            label: `${v.first_name} ${v.last_name}`,
+            value: v.id,
           }));
-        setMembersList(allData);
-        getAssignApproval(); // safe now because it's memoized
-      } else {
-        setIsLoading(false);
-      }
-    }
-  }, [user, getAssignApproval]);
 
-  // When user changes, fetch members list
-  useEffect(() => {
-    getMembersList();
-  }, [getMembersList, user]);
+        setMembersList(members);
+      }
 
-  // Handle toggle switch for enabling/disabling approval
-  const handleToggle = async () => {
-    if (isOn) {
-      if (isApprovalAvailable) {
-        setIsConfirmRejectPopupOpen(true);
+      if (approversRes?.status === 200 && approversRes.data.length > 0) {
+        const formatted = approversRes.data.map((v: ApprovalListProps) => ({
+          approver: { label: v.approver_name, value: v.approver_id },
+          level: v.level,
+        }));
+        setApprovers(formatted);
+        setIsApprovalAvailable(true);
       } else {
-        handleDisable();
+        setApprovers([{ approver: null }]);
+        setIsApprovalAvailable(false);
       }
-    } else {
-      // Enable approval
-      const response = await enableApprovalStatusApi({
-        model_name: model_name,
-        approval_enabled: true,
-      });
-      if (response?.status === 200) {
-        getApprovalStatus();
-      }
-    }
-  };
-
-  // Fetch approval status for bill model
-  const getApprovalStatus = async () => {
-    const response = await getApprovalStatusApi("bills");
-    if (response?.status === 200) {
-      if (response?.data && response?.data?.length) {
-        const filterItem = response?.data?.find(
-          (v: EnableApprovalProps) => v.model_name === model_name,
-        );
-        setIsOn(filterItem?.approval_enabled);
-      } else {
-        setIsOn(false);
-      }
-    } else {
+    } catch (err) {
+      console.error("Error fetching initial data", err);
+      showErrorToast("Failed to load approval data");
+    } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
 
-  // Handle form submit to assign approver
-  const handleApproval = async (data: ApprovalFormData) => {
-    const response = await assignApproverApi({
-      ...data,
-      model_name: model_name,
-    });
-    if (response?.status === 200 && response?.data?.detail) {
-      showSuccessToast(response?.data?.detail);
-      getAssignApproval();
+  useEffect(() => {
+    fetchInitialData();
+  }, [fetchInitialData]);
+
+  const handleToggle = async () => {
+    try {
+      if (isOn) {
+        if (isApprovalAvailable) return setIsConfirmRejectPopupOpen(true);
+        await handleDisable();
+      } else {
+        const res = await enableApprovalStatusApi({
+          model_name,
+          approval_enabled: true,
+        });
+        if (res?.status === 200) fetchInitialData();
+      }
+    } catch (err) {
+      showErrorToast("Error toggling approval status");
     }
   };
 
   const handleDisable = async () => {
-    const response = await disableApprovalStatusApi(model_name);
-    if (response?.status === 200) {
-      setIsConfirmRejectPopupOpen(false);
-      setValue("approver", "");
-      getApprovalStatus();
-    } else {
-      if (response?.data?.detail) {
+    try {
+      const res = await disableApprovalStatusApi(model_name);
+      if (res?.status === 200) {
+        setIsConfirmRejectPopupOpen(false);
+        fetchInitialData();
+      } else {
         showErrorToast(
-          "Cannot disable approval, some bills are still under approval.",
+          res?.data?.detail ||
+            "Cannot disable approval; some bills are still under approval.",
         );
       }
+    } catch {
+      showErrorToast("Failed to disable approval");
+    }
+  };
+
+  const handleAdd = () => {
+    if (approvers.length < 5) {
+      setApprovers([...approvers, { approver: null }]);
+    }
+  };
+
+  const handleRemove = (index: number) => {
+    setApprovers((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleChange = (index: number, value: Option | null) => {
+    const updated = [...approvers];
+    updated[index].approver = value ?? null;
+    setApprovers(updated);
+  };
+
+  const getFilteredOptions = (index: number): Option[] => {
+    const selectedValues = approvers
+      .filter((_, i) => i !== index)
+      .map((a) => a.approver?.value);
+
+    return membersList.filter(
+      (option) => !selectedValues.includes(option.value),
+    );
+  };
+
+  const isAnyApproverMissing = useMemo(() => {
+    return approvers.some((a) => !a.approver);
+  }, [approvers]);
+
+  const handleSave = async () => {
+    try {
+      setIsDataSubmitting(true);
+
+      const validAssignments: ApproverAssignment[] = approvers
+        .filter(
+          (v): v is { approver: { value: string | number } } =>
+            v.approver?.value !== undefined,
+        )
+        .map((v, i) => ({
+          approver: v.approver.value,
+          level: i + 1,
+        }));
+
+      const dataObj: AssignApproverPayload = {
+        model_name,
+        assignments: validAssignments,
+      };
+      const response = await assignApproverApi(dataObj);
+
+      if (response?.status === 200) {
+        showSuccessToast("Approver assigned successfully");
+        fetchInitialData();
+      }
+    } catch (err) {
+      setIsDataSubmitting(false);
+      showErrorToast("Failed to assign approvers");
+    } finally {
+      setIsDataSubmitting(false);
     }
   };
 
@@ -178,92 +212,102 @@ const BillApproval = () => {
       {isLoading ? (
         <PageLoader />
       ) : (
-        <>
-          <div className="lg:w-5/12 w-full mt-6">
-            <div className="flex items-start justify-between mb-4 bg-gray-50 rounded-md p-3">
-              <div>
-                <p className="font-semibold text-sm text-slate-800 dark:text-gray-200">
-                  Add approver
-                </p>
-                <p className="mt-1 font-light text-xs text-slate-500 dark:text-gray-200">
-                  Set up approvers to manage and streamline your bill approvals.
-                </p>
-              </div>
-              <ToggleSwitch isOn={isOn} setIsOn={handleToggle} />
+        <div className="w-full mt-6">
+          <div className="lg:w-5/12 w-full flex items-start justify-between mb-4 bg-gray-50 rounded-md p-3">
+            <div>
+              <p className="font-semibold text-sm text-slate-800 dark:text-gray-200">
+                Add approver
+              </p>
+              <p className="mt-1 font-light text-xs text-slate-500 dark:text-gray-200">
+                Set up approvers to manage and streamline your bill order
+                approvals.
+              </p>
             </div>
-            {/* Show form only if approval is enabled */}
-            {isOn && (
-              // <form
-              //   onSubmit={handleSubmit(handleApproval)}
-              //   className="flex flex-col gap-4"
-              // >
-              //   <div className="w-72">
-              //     {/* Approver selection dropdown */}
-              //     <Label htmlFor="approver" text="Approver" isRequired />
-              //     <SelectComponent
-              //       title="Approver"
-              //       name="approver"
-              //       register={register}
-              //       trigger={trigger}
-              //       getValues={getValues}
-              //       error={errors.approver}
-              //       options={membersList}
-              //       placeholder="Select approver"
-              //       // isClearable={true}
-              //     />
-              //   </div>
-              //   {/* Save button */}
-              //   <div className="grid grid-cols-2 w-fit gap-3 mt-2">
-              //     <Button type="submit" text="Save" className="text-white" />
-              //   </div>
-              // </form>
-
-              <>
-                <div className="bg-gray-50 p-3 grid lg:grid-cols-2 md:grid-cols-2 gap-10">
-                  <p className="text-xs text-slate-600 font-semibold">
-                    Approver
-                  </p>
-                  <p className="text-xs text-slate-600 font-semibold">Level</p>
-                </div>
-
-                <form onSubmit={handleSubmit(handleApproval)}>
-                  <div className="border-t px-3 py-4 grid lg:grid-cols-2 md:grid-cols-2 gap-10 items-center">
-                    <div>
-                      <SelectComponent
-                        title="Approver"
-                        name="approver"
-                        register={register}
-                        trigger={trigger}
-                        getValues={getValues}
-                        error={errors.approver}
-                        options={membersList}
-                        placeholder="Select approver"
-                        // isClearable={true}
-                      />
-                    </div>
-
-                    <p className="text-xs text-slate-600">Level 1</p>
-                  </div>
-
-                  <div className="grid grid-cols-2 w-fit gap-3 mt-6">
-                    <Button type="submit" text="Save" className="text-white" />
-                  </div>
-                </form>
-              </>
-            )}
+            <ToggleSwitch isOn={isOn} setIsOn={handleToggle} />
           </div>
 
-          {!isOn ? (
-            <div className="relative w-full mt-4 h-[400px] mt-8">
+          {isOn ? (
+            <div className="lg:w-5/12 w-full">
+              <div className="bg-gray-50 p-3 grid lg:grid-cols-2 gap-10">
+                <p className="text-xs font-semibold text-slate-600">Approver</p>
+                <p className="text-xs font-semibold text-slate-600">Level</p>
+              </div>
+
+              {approvers.map((item, index) => (
+                <div
+                  key={index}
+                  className="border-t py-4 grid lg:grid-cols-2 gap-10 items-center"
+                >
+                  <SelectComponent
+                    title="Approver"
+                    name={`approver_${index}`}
+                    options={getFilteredOptions(index)}
+                    value={item.approver}
+                    placeholder="Select approver"
+                    onChange={(value) => handleChange(index, value)}
+                  />
+
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-slate-600">Level {index + 1}</p>
+                    <div className="flex items-center gap-2">
+                      {approvers.length > 1 && !item.level && (
+                        <CustomTooltip content="Remove">
+                          <IconWrapper
+                            onClick={() => handleRemove(index)}
+                            icon={<Minus className="text-red-500" width={16} />}
+                          />
+                        </CustomTooltip>
+                      )}
+                      {index === approvers.length - 1 && (
+                        <CustomTooltip
+                          content={
+                            approvers.length >= 5
+                              ? "Maximum 5 approvers allowed"
+                              : "Add"
+                          }
+                        >
+                          <IconWrapper
+                            isDisabled={approvers.length >= 5}
+                            onClick={handleAdd}
+                            icon={
+                              <Plus
+                                className={
+                                  approvers.length >= 5
+                                    ? "text-gray-400"
+                                    : "text-green-600"
+                                }
+                                width={16}
+                              />
+                            }
+                          />
+                        </CustomTooltip>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              <div className="grid grid-cols-2 w-fit gap-3 mt-6">
+                <Button
+                  text="Save"
+                  className="text-white disabled:bg-primary-400 hover:disabled:bg-primary-400"
+                  onClick={handleSave}
+                  disabled={isAnyApproverMissing || isDataSubmitting}
+                  isLoading={isDataSubmitting}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="relative w-full mt-4 h-[400px]">
               <Image
-                alt="Table data not found"
+                alt="Bill Approval Flow"
                 src="/images/flowImages/billApprovalFlow.svg"
                 fill
                 className="object-contain"
               />
             </div>
-          ) : null}
-        </>
+          )}
+        </div>
       )}
 
       <ConfirmationPopup
@@ -272,7 +316,7 @@ const BillApproval = () => {
         onClose={() => setIsConfirmRejectPopupOpen(false)}
         onConfirm={handleDisable}
         buttonText="Disable"
-        message="Disabling this may impact bills under approval, if any"
+        message="Disabling this may impact bill under approval, if any"
       />
     </>
   );

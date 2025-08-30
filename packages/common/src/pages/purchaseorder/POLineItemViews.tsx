@@ -4,12 +4,14 @@
 import { formatNumber } from "@rever/utils";
 import { useUserStore } from "@rever/stores";
 import { POLineItemsProps } from "@rever/types";
+import { CustomTooltip } from "@rever/common";
 
 // Table headers for the read-only bill items table
 const billItemHeaders = [
   "#",
   "Description",
   "Quantity",
+  "Available quantity",
   "Unit price",
   "Amount",
 ];
@@ -27,8 +29,9 @@ export default function poLineItemsReadOnly({
         {/* Set column widths */}
         <colgroup>
           <col className="w-10" />
-          <col className="w-5/12" />
+          <col className="w-4/12" />
           <col className="w-2/12" />
+          <col className="w-1/5" />
           <col className="w-2/12" />
           <col className="w-2/12" />
         </colgroup>
@@ -54,6 +57,10 @@ export default function poLineItemsReadOnly({
               const qty = Number(item.quantity) || 0;
               const unitPrice = Number(item.unit_price) || 0;
               const amount = qty * unitPrice;
+              const balanceQty =
+                Number(item?.quantity) -
+                (Number(item?.received_quantity || 0) +
+                  Number(item?.pending_approval_quantity || 0));
 
               return (
                 <tr
@@ -68,6 +75,38 @@ export default function poLineItemsReadOnly({
                   </td>
                   {/* Quantity */}
                   <td className="p-2">{item.quantity}</td>
+                  {/* Available quantity */}
+                  <td className="p-2">
+                    <CustomTooltip
+                      className="min-w-40"
+                      content={
+                        <div className="my-1">
+                          <div className="mb-1 flex justify-between">
+                            <div>Total Qty:</div> <div>{item?.quantity}</div>
+                          </div>
+                          <div className="mb-1 flex justify-between">
+                            <div>Committed Qty:</div>{" "}
+                            <div>{item?.pending_approval_quantity}</div>
+                          </div>
+                          <div className="mb-1 flex justify-between">
+                            <div>Consumed Qty:</div>{" "}
+                            <div>{item?.received_quantity}</div>
+                          </div>
+                          <div className="mb-1 flex justify-between">
+                            <div>Available Qty:</div>{" "}
+                            <div>{balanceQty?.toFixed(2)}</div>
+                          </div>
+                        </div>
+                      }
+                      side="right"
+                    >
+                      <div
+                        className={`underline cursor-pointer rounded-md w-fit`}
+                      >
+                        {balanceQty?.toFixed(2)}
+                      </div>
+                    </CustomTooltip>
+                  </td>
                   {/* Unit price */}
                   <td className="p-2">
                     {formatNumber(item.unit_price || 0, orgDetails?.currency)}

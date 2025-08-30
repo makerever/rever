@@ -32,14 +32,14 @@ export function Header() {
                   onClick={() => setShowSupport(!showSupport)}
                   icon={<CircleHelp width={16} />}
                 />
-
-                {showSupport && (
-                  <div className="transition-all duration-300 ease-out">
-                    <HelpSupport />
-                  </div>
-                )}
               </div>
             </CustomTooltip>
+
+            {showSupport && (
+              <div className="transition-all duration-300 ease-out">
+                <HelpSupport />
+              </div>
+            )}
           </OutsideClickHandler>
           <CustomTooltip content="Star us on GitHub">
             <a href="https://github.com/makerever/rever" target="_blank">

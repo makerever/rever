@@ -90,6 +90,8 @@ export interface AttachmentProps {
 // Types for matching b/w PO and bill
 export interface PurchaseOrderItem {
   quantity: string | number;
+  received_quantity?: string | number;
+  pending_approval_quantity?: string | number;
   unit_price: string | number;
   description: string;
 }
@@ -103,6 +105,7 @@ export interface BillItem {
 export interface MatchedLineItem {
   purchase_order_item: PurchaseOrderItem;
   bill_item?: BillItem;
+  description_score?: number;
   description_status?: string;
   quantity_status?: boolean;
   unit_price_status?: boolean;
@@ -117,5 +120,9 @@ export interface OrgDetails {
   currency?: string;
 }
 
-export type MatchStatus = "matched" | "mismatched" | "partial";
+export type MatchStatus =
+  | "matched"
+  | "mismatched"
+  | "partial"
+  | "poNotAvailable";
 export type TooltipSide = "right" | "top" | "bottom" | "left";

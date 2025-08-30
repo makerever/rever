@@ -431,7 +431,7 @@ const AddBillComponentWithParams = () => {
             <div className="lg:flex gap-10">
               {/* PDF preview section (if file uploaded and showPdf is true) */}
               {fileUrl && showPdf ? (
-                <div className="lg:w-2/5">
+                <div className="lg:w-1/3">
                   <div
                     // style={{ height: "580px" }}
                     className="scrollbar_none overflow-auto bg-white shadow-5xl rounded-md overflow-hidden"
@@ -464,7 +464,7 @@ const AddBillComponentWithParams = () => {
               {/* Bill form section */}
               <form
                 className={
-                  fileUrl && showPdf ? "lg:w-3/5 mt-8 lg:mt-0" : "w-full"
+                  fileUrl && showPdf ? "lg:w-2/3 mt-8 lg:mt-0" : "w-full"
                 }
                 onKeyDown={handleKeyDown}
                 onSubmit={handleSubmit(submitForm)}
