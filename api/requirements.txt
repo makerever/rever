@@ -1,6 +1,6 @@
 Django==5.2.4
 djangorestframework==3.16.0
-djangorestframework_simplejwt==5.5.0
+djangorestframework_simplejwt==5.5.1
 django-cors-headers==4.7.0
 celery==5.5.1
 redis==5.2.1
