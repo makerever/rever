@@ -34,9 +34,9 @@ Rever was born to fix this, an AI-enabled Finance Copilot that simplifies, strea
 
 Getting started is easy:
 
-### **🔹 Rever Cloud (coming soon)**
+### **🔹 Rever Cloud**
 
-Our fastest deployment option. Full-featured, secure, and hosted for you.
+Get started with [Rever Cloud](https://app.reverfin.ai) for free and focus on your workflow while we handle all the backend infrastructure.
 
 ### **🔹 Self-Hosted**
 
