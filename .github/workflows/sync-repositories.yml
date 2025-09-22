@@ -39,9 +39,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: |
-          TARGET_REPO="${{ vars.SYNC_TARGET_REPO }}"
-          TARGET_BRANCH="${{ vars.SYNC_TARGET_BRANCH_NAME }}"
-          SOURCE_BRANCH="${{ env.SOURCE_BRANCH_NAME }}"
+          # Use workflow inputs if provided, otherwise fall back to repository variables
+          TARGET_REPO="${{ github.event.inputs.target_repo || vars.SYNC_TARGET_REPO }}"
+          TARGET_BRANCH="${{ github.event.inputs.target_branch || vars.SYNC_TARGET_BRANCH_NAME }}"
+          SOURCE_BRANCH="${{ github.event.inputs.source_branch || env.SOURCE_BRANCH_NAME }}"
 
           git checkout $SOURCE_BRANCH
           git remote add target-origin-a "https://$GH_TOKEN@github.com/$TARGET_REPO.git"
