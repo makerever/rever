@@ -1,6 +1,6 @@
 name: Build and Push Docker Images
 
-# This workflow builds and pushes Docker images based on the configuration from build.yaml.
+# This workflow builds and pushes Docker images in parallel for improved performance.
 # It can be triggered either automatically when a new GitHub release is created,
 # or manually via the GitHub Actions UI.
 # 
@@ -21,26 +21,15 @@ on:
         default: 'latest'
 
 jobs:
-  build-and-push:
+  # Build web image in parallel
+  build-web:
     runs-on: ubuntu-latest
-    
+    outputs:
+      digest: ${{ steps.docker_build_web.outputs.digest }}
+      version: ${{ steps.set_version.outputs.VERSION }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-      
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-      with:
-        platforms: 'arm64,amd64'
-
-    - name: Login to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+      uses: actions/checkout@v4
 
     - name: Set version
       id: set_version
@@ -51,8 +40,22 @@ jobs:
           echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
         fi
 
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+      with:
+        platforms: linux/arm64,linux/amd64
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
     - name: Build and push web image
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v5
       id: docker_build_web
       with:
         context: .
@@ -67,8 +70,40 @@ jobs:
         cache-from: type=registry,ref=reverfin/rever-frontend:buildcache
         cache-to: type=registry,ref=reverfin/rever-frontend:buildcache,mode=max
 
+  # Build API image in parallel
+  build-api:
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.docker_build_api.outputs.digest }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set version
+      id: set_version
+      run: |
+        if [ "${{ github.event_name }}" = "release" ]; then
+          echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        else
+          echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+      with:
+        platforms: linux/arm64,linux/amd64
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
     - name: Build and push API image
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v5
       id: docker_build_api
       with:
         context: ./api
@@ -81,8 +116,40 @@ jobs:
         cache-from: type=registry,ref=reverfin/rever-api:buildcache
         cache-to: type=registry,ref=reverfin/rever-api:buildcache,mode=max
 
+  # Build proxy image in parallel
+  build-proxy:
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.docker_build_proxy.outputs.digest }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set version
+      id: set_version
+      run: |
+        if [ "${{ github.event_name }}" = "release" ]; then
+          echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        else
+          echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+      with:
+        platforms: linux/arm64,linux/amd64
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
     - name: Build and push proxy image
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v5
       id: docker_build_proxy
       with:
         context: ./nginx
@@ -94,9 +161,25 @@ jobs:
           reverfin/rever-proxy:${{ steps.set_version.outputs.VERSION }}
         cache-from: type=registry,ref=reverfin/rever-proxy:buildcache
         cache-to: type=registry,ref=reverfin/rever-proxy:buildcache,mode=max
-          
-    - name: Image digest
+
+  # Summary job that runs after all builds complete
+  build-summary:
+    runs-on: ubuntu-latest
+    needs: [build-web, build-api, build-proxy]
+    if: always()
+    steps:
+    - name: Build Summary
       run: |
-        echo "Web image digest: ${{ steps.docker_build_web.outputs.digest }}"
-        echo "API image digest: ${{ steps.docker_build_api.outputs.digest }}"
-        echo "Proxy image digest: ${{ steps.docker_build_proxy.outputs.digest }}"
+        echo "🚀 Docker image build process completed!"
+        echo ""
+        echo "📦 Image Digests:"
+        echo "Web image digest: ${{ needs.build-web.outputs.digest }}"
+        echo "API image digest: ${{ needs.build-api.outputs.digest }}"
+        echo "Proxy image digest: ${{ needs.build-proxy.outputs.digest }}"
+        echo ""
+        echo "🏷️ Version: ${{ needs.build-web.outputs.version }}"
+        echo ""
+        echo "📊 Job Status:"
+        echo "Web build: ${{ needs.build-web.result }}"
+        echo "API build: ${{ needs.build-api.result }}"
+        echo "Proxy build: ${{ needs.build-proxy.result }}"
