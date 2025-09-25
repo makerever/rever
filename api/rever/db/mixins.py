@@ -19,6 +19,7 @@ class UserAuditModel(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
         related_name="%(class)s_created_by",
         verbose_name="Created By",
     )
@@ -26,6 +27,7 @@ class UserAuditModel(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
         related_name="%(class)s_updated_by",
         verbose_name="Last Modified By",
     )

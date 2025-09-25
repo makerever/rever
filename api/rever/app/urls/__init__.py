@@ -4,6 +4,7 @@ from .audit import urlpatterns as audit_urls
 from .auth import urlpatterns as auth_urls
 from .notification import urlpatterns as notification_urls
 from .payable import urlpatterns as payable_urls
+from .receipt import urlpatterns as receipt_urls
 
 urlpatterns = [
     *auth_urls,
@@ -12,4 +13,5 @@ urlpatterns = [
     *approval_urls,
     *notification_urls,
     *audit_urls,
+    *receipt_urls,
 ]
