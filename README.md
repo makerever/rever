@@ -34,11 +34,11 @@ Rever was born to fix this, an AI-enabled Finance Copilot that simplifies, strea
 
 Getting started is easy:
 
-### **🔹 Rever Cloud**
+### **📢 Rever Cloud**
 
 Get started with [Rever Cloud](https://app.reverfin.ai) for free and focus on your workflow while we handle all the backend infrastructure.
 
-### **🔹 Self-Hosted**
+### **✅ Self-Hosted**
 
 Deploy Rever on your infrastructure. Full control, full compliance.
 
@@ -46,7 +46,7 @@ For self hosting Rever on your server please check [Self-Hosting Rever](INSTALL_
 
 ## **Core Features:**
 
-### 🔹 **Key Features of Rever**
+### 🎯 **Key Features of Rever**
 
 1. **Vendor Management**: Create, view, and manage vendor records in a centralized Vendor Master.
    Maintain critical details such as contact info, bank details, and audit history. Designed to eliminate duplicates and ensure consistent data across all transactions.
@@ -57,12 +57,11 @@ For self hosting Rever on your server please check [Self-Hosting Rever](INSTALL_
 3. **Bill Management & Two-Way Matching** Create bills manually or ingest them via automation (in future versions).
    Bills can be associated with vendor records and compared against POs through a two-way match, verifying quantities and amounts between bill and PO. This improves accuracy and prevents overbilling or mismatched invoices.
 
-4. **Approval Workflows** Integrated approval flows across both bills and POs, allowing teams to route documents 
-   for review and sign-off before execution. 
+4. **Approval Workflows** Integrated approval flows across both bills and POs, allowing teams to route documents
+   for review and sign-off before execution.
 
 5. **Audit History** Every action on a bill: creation, updates, approvals are logged in a detailed audit trail.
    This ensures traceability, supports compliance requirements, and aids in internal or external audits.
-
 
 ## **Built With**
 
@@ -102,7 +101,7 @@ For self hosting Rever on your server please check [Self-Hosting Rever](INSTALL_
   <img src="images/2way-match.svg" alt="Rever 2 Way Match" width="700"/>
 </p>
 
-### 🔹 **Upcoming Features**
+### 🎯 **Upcoming Features**
 
 1. **Document Management System (DMS)**
    A module to upload, tag, and manage supporting documents like contracts, invoices, and receipts: all linked to POs and bills.
@@ -115,7 +114,6 @@ For self hosting Rever on your server please check [Self-Hosting Rever](INSTALL_
 
 4. **Advanced Analytics**
    Dashboards and insights to visualize spend patterns, approval cycle times, vendor performance, and more.
-
 
 ## **Documentation**
 
