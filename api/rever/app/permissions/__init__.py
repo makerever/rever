@@ -5,4 +5,5 @@ from .organization import (
     IsOrganizationMember,
     IsSuperAdmin,
     IsSuperAdminOrReadOnly,
+    IsLiteUser,
 )

@@ -96,7 +96,11 @@ class Organization(BaseModel):
         default="none",
         help_text=_("Matching logic enabled for this organization (e.g., 2-way, 3-way)"),
     )
-
+    # Whether to enable the Lite User receipt request/confirmation workflow
+    receipt_confirmation_enabled = models.BooleanField(
+        default=False,
+        help_text="Enable Lite User receipt request/confirmation workflow for this organization.",
+    )
     class Meta:
         verbose_name = "Organization"
         verbose_name_plural = "Organizations"
@@ -114,6 +118,7 @@ class User(AbstractUser):
         SUPER_ADMIN = "admin", "Admin"
         MEMBER = "member", "Member"
         FINANCE_MANAGER = "finance_manager", "Finance Manager"
+        LITE_USER = "lite_user", "Lite User"
 
     role = models.CharField(
         max_length=20,

@@ -3,4 +3,4 @@ from .attachment import Attachment
 from .auth import Organization, User, VerificationToken
 from .match import MatchMatrix, MatchResult
 from .notification import Notification, UserNotificationPreference
-from .payable import Address, BankAccount, Bill, BillItem, PurchaseOrder, PurchaseOrderItem, Vendor
+from .payable import Address, BankAccount, Bill, BillItem, PurchaseOrder, PurchaseOrderItem, Vendor,ReceiptConfirmationTask

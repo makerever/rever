@@ -19,3 +19,9 @@ MATCH_PROGRESS_CHOICES = [
     ("completed", "Completed"),
     ("error", "Error"),
 ]
+RECEIPT_STATUS_CHOICES = [
+    ("draft", "Draft"),  # initial state, default
+    ("requested", "Requested"),  # request sent
+    ("confirmed", "Confirmed"),  # receipt confirmed
+    ("revoked", "Revoked"),  # receipt revoked
+]

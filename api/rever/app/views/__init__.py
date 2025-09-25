@@ -47,3 +47,10 @@ from .payable.base import (
     PurchaseOrderViewSet,
     VendorViewSet,
 )
+from .receipt.base import (
+    ReceiptApprovedListAPIView,
+    ReceiptHistoryListAPIView,
+    ReceiptRequestedListAPIView,
+    ReceiptRevokedListAPIView,
+    ReceiptViewSet,
+)

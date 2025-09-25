@@ -1,10 +1,14 @@
 import contextlib
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models, transaction
+from django.db.models import Q
+from django.utils import timezone
 from simple_history.models import HistoricalRecords
 
-from rever.utils.bill_constants import MATCH_PROGRESS_CHOICES, PAYMENT_TERM_CHOICES, STATUS_CHOICES
+from rever.utils.bill_constants import MATCH_PROGRESS_CHOICES, PAYMENT_TERM_CHOICES, STATUS_CHOICES,RECEIPT_STATUS_CHOICES
 from rever.utils.payable_constants import PO_STATUS_CHOICES
 
 from .auth import Organization
@@ -159,6 +163,17 @@ class Bill(BaseModel):
         default="not_started",
         help_text="Status of line-item matching against purchase order",
     )
+    receipt_status = models.CharField(
+        max_length=16,
+        choices=RECEIPT_STATUS_CHOICES,
+        default="draft",
+        db_index=True,
+        help_text="Lifecycle of the external receipt confirmation request.",
+    )
+    receipt_comment = models.TextField(
+        blank=True, help_text="Comment or note provided by the assigned receipt confirmer."
+    )
+
     comments = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
     sub_total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
@@ -186,13 +201,59 @@ class Bill(BaseModel):
         verbose_name_plural = "Bills"
         db_table = "bills"
         ordering = ["-bill_date"]
+    
+    def revoke_receipt_if_needed(self, revoked_by_user=None):
+        """
+        Revoke receipt confirmation if bill is moving to approval states
+        and receipt_status is 'requested'
+        """
+
+        # Only revoke if bill is in approval states and receipt was requested
+        if (
+            self.status in ["under_approval", "approved", "rejected"]
+            and self.receipt_status == "requested"
+        ):
+            # Update receipt status to revoked
+            self.receipt_status = "revoked"
+            revoker = revoked_by_user or getattr(self, "updated_by", None)
+            # Revoke any active receipt confirmation tasks
+            active_tasks = self.confirmation_tasks.filter(status="active")
+            if active_tasks.exists():
+                active_tasks.update(
+                    status="revoked",
+                    revoked_at=timezone.now(),
+                    revoked_by=revoker,
+                )
+
+            return True
+        return False
+
+    def approve_bill(self, approved_by_user):
+        """Convenience method for approving a bill"""
+        self._revoked_by_user = approved_by_user
+        self.status = "approved"
+        self.save()
+
+    def reject_bill(self, rejected_by_user):
+        """Convenience method for rejecting a bill"""
+        self._revoked_by_user = rejected_by_user
+        self.status = "rejected"
+        self.save()
+
+    def send_for_approval(self, sent_by_user):
+        """Convenience method for sending bill for approval"""
+        self._revoked_by_user = sent_by_user
+        self.status = "under_approval"
+        self.save()
 
     def save(self, *args, **kwargs):
         # Track old values for duplicate logic
         old = None
+        old_status = None
         if self.pk:
             with contextlib.suppress(Bill.DoesNotExist):
                 old = Bill.objects.get(pk=self.pk)
+                old_status = old.status if old else None
         if old:
             self._old_vendor = old.vendor
             self._old_bill_number = old.bill_number
@@ -204,6 +265,12 @@ class Bill(BaseModel):
         with transaction.atomic():
             super().save(*args, **kwargs)
 
+            # Check if status changed to approval states and revoke receipt if needed
+            if old_status and old_status != self.status:
+                revoked_by = getattr(self, "_revoked_by_user", None)
+                if self.revoke_receipt_if_needed(revoked_by):
+                    # Save again to update receipt_status if it was changed
+                    super().save(update_fields=["receipt_status"])
 
 class BillItem(BaseModel):
     bill = models.ForeignKey(Bill, on_delete=models.CASCADE, related_name="items", db_index=True)
@@ -214,6 +281,14 @@ class BillItem(BaseModel):
     product_code = models.CharField(max_length=50, blank=True)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
 
+    confirmed_quantity = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+        help_text="Quantity confirmed by Lite User; must be <= quantity.",
+    )
     line_number = models.PositiveIntegerField(null=True, blank=True)
     history = HistoricalRecords(inherit=True, table_name="bill_item_history")
 
@@ -448,3 +523,66 @@ class PurchaseOrderItem(BaseModel):
 
     def add_received(self, qty: Decimal):
         self.received_quantity = max(Decimal("0"), (self.received_quantity or 0) + qty)
+
+
+class ReceiptConfirmationTask(BaseModel):
+    bill = models.ForeignKey("Bill", on_delete=models.CASCADE, related_name="confirmation_tasks")
+    organization = models.ForeignKey(
+        "Organization",
+        on_delete=models.CASCADE,
+        related_name="receipt_confirmation_tasks",
+        db_index=True,
+        help_text="Must match the bill's organization.",
+    )
+    assignee = models.ForeignKey(
+        "User", on_delete=models.PROTECT, related_name="receipt_confirmation_tasks"
+    )
+    status = models.CharField(
+        max_length=12,
+        choices=[("active", "Active"), ("revoked", "Revoked"), ("completed", "Completed")],
+        default="active",
+        db_index=True,
+    )
+    assigned_at = models.DateTimeField(auto_now_add=True)
+    revoked_at = models.DateTimeField(null=True, blank=True)
+    revoked_by = models.ForeignKey(
+        "User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="revoked_receipt_confirmation_tasks",
+    )
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    last_reminded_at = models.DateTimeField(null=True, blank=True)
+    remind_count = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["bill"],
+                condition=Q(status="active"),
+                name="unique_active_receipt_confirmer_per_bill",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["organization", "status", "assigned_at"]),
+            models.Index(fields=["bill", "status"]),
+            models.Index(fields=["assignee", "status"]),
+        ]
+        ordering = ["-assigned_at", "-id"]
+        db_table = "receipt_confirmation_tasks"
+
+    def clean(self):
+        # org consistency
+        if self.bill and self.organization and self.bill.organization_id != self.organization_id:
+            raise ValidationError("Task organization must match the bill's organization.")
+        # role enforcement
+        from rever.db.models.auth import User as AuthUser
+
+        if self.assignee and self.assignee.role != AuthUser.Role.LITE_USER:
+            raise ValidationError("Assignee must have role Lite User.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)

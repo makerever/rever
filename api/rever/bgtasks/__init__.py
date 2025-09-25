@@ -5,3 +5,8 @@ from .invitation_email_task import send_invitation_email
 from .match_task import async_generate_match_results, async_regenerate_matrix_v2
 from .monthly_bill_summary_task import generate_monthly_bill_summary
 from .otp_email_task import send_otp_email
+from .receipt_tasks import (
+    receipt_assignment_email,
+    receipt_confirmation_email,
+    receipt_reminder_email,
+)

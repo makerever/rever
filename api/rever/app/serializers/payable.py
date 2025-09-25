@@ -302,6 +302,7 @@ class BillListSerializer(serializers.ModelSerializer):
             "tax_percentage",
             "total_tax",
             "total",
+            "receipt_status",
             "is_active",
             "is_attachment",
             "is_duplicate",
