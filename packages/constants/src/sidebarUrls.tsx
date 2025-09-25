@@ -60,6 +60,14 @@ export const sidebarLinks: SidebarLinkProps[] = [
         key: "review",
         url: ["/approvals/list/review", "/bill"],
       },
+      {
+        name: "Confirmations", // Request receipt routes
+        url: [
+          "/request-receipt/list",
+          "/request-receipt/view",
+          "/request-receipt/",
+        ],
+      },
     ],
   },
   {
@@ -127,6 +135,7 @@ export const payablePathNameUrl = [
   "purchaseorder",
   "bill",
   "approvals",
+  "request-receipt",
 ];
 
 // All route paths related to settings for sidebar highlighting

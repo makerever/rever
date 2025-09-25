@@ -15,6 +15,7 @@ export const memberRoleOptions = [
   { label: "Admin", value: "admin" },
   { label: "Member", value: "member" },
   { label: "Finance manager", value: "finance_manager" },
+  { label: "Lite user", value: "lite_user" },
 ];
 
 // Overview filter options for analytics or dashboard
@@ -2491,6 +2492,22 @@ export const industryOptions = [
 
 // Matching dropdown options
 export const matchingOptions = [
-  { label: "None", value: "none" },
-  { label: "2-Way Match", value: "two_way" },
+  {
+    label: "None",
+    value: "none",
+    description:
+      "Bills are processed without comparing them against PO's or receipts.",
+  },
+  {
+    label: "2-Way match",
+    value: "two_way",
+    description:
+      "Compare bills against PO's to ensure quantities and amounts match.",
+  },
+  {
+    label: "3-Way match",
+    value: "three_way",
+    description:
+      "Compare bills against PO's and receipts to ensure quantities and amounts match.",
+  },
 ];

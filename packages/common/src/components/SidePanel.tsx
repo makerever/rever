@@ -9,6 +9,7 @@ export default function SidePanel({
   isOpen,
   onClose,
   children,
+  className,
 }: SidePanelProps) {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -30,7 +31,7 @@ export default function SidePanel({
 
       {/* Panel */}
       <div
-        className={`absolute rounded-md right-0 top-[80px] overflow-auto h-[calc(100%-50px)] bg-white w-full lg:w-[70vw] md:w-[70vw] sm:w-[70vw] shadow-xl transform transition-transform duration-400 ${
+        className={`absolute rounded-md right-0 overflow-auto h-[calc(100%-0px)] bg-white ${className ? className : "w-full lg:w-[70vw] md:w-[70vw] sm:w-[70vw]"} shadow-xl transform transition-transform duration-400 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >

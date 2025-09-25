@@ -1,7 +1,7 @@
 // Component for bill line items UI ReadOnly
 "use client";
 
-import { formatNumber } from "@rever/utils";
+import { formatNumber, formatPlainNumber } from "@rever/utils";
 import { useUserStore } from "@rever/stores";
 import { BillLineItemsProps } from "@rever/types";
 
@@ -41,7 +41,7 @@ export default function BillLineItemsReadOnly({
             {billItemHeaders.map((h, i) => (
               <th
                 key={i}
-                className="px-2 py-4 text-xs text-slate-500 font-medium"
+                className={`px-2 py-4 text-xs text-slate-500 font-medium ${i < 3 ? "" : "text-right"}`}
               >
                 {h}
               </th>
@@ -71,13 +71,15 @@ export default function BillLineItemsReadOnly({
                   {/* Product code */}
                   <td className="p-2">{item.product_code || "-"}</td>
                   {/* Quantity */}
-                  <td className="p-2">{item.quantity}</td>
+                  <td className="p-2 text-right">
+                    {formatPlainNumber(item?.quantity)}
+                  </td>
                   {/* Unit price */}
-                  <td className="p-2">
+                  <td className="p-2 text-right">
                     {formatNumber(item.unit_price || 0, orgDetails?.currency)}
                   </td>
                   {/* Amount (computed) */}
-                  <td className="p-2">
+                  <td className="p-2 text-right">
                     {formatNumber(amount, orgDetails?.currency)}
                   </td>
                 </tr>
@@ -102,7 +104,7 @@ export default function BillLineItemsReadOnly({
         <div className="p-3 w-72 font-medium text-slate-600 text-sm bg-gray-50 rounded-md">
           <div className="grid grid-cols-2">
             <p>Sub total:</p>
-            <p>
+            <p className="text-right">
               {formatNumber(billDetails?.sub_total || 0, orgDetails?.currency)}
             </p>
           </div>
@@ -116,11 +118,15 @@ export default function BillLineItemsReadOnly({
                 )}
               </span>
             </div>
-            <div>{billDetails?.tax_percentage || 0}%</div>
+            <div className="text-right">
+              {billDetails?.tax_percentage || 0}%
+            </div>
           </div>
           <div className="grid grid-cols-2 text-slate-800 font-semibold">
             <p>Total:</p>
-            <p>{formatNumber(billDetails?.total || 0, orgDetails?.currency)}</p>
+            <p className="text-right">
+              {formatNumber(billDetails?.total || 0, orgDetails?.currency)}
+            </p>
           </div>
         </div>
       </div>

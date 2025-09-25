@@ -6,9 +6,14 @@ import {
   AuditHistory,
   CustomTooltip,
   IconWrapper,
+  Modal,
+  OutsideClickHandler,
   PdfViewer,
   PillItem,
+  ReceiptConfirmPopup,
+  RequestConfirmationModal,
   SidePanel,
+  VersionHistory,
 } from "@rever/common";
 import { Label } from "@rever/common";
 import { ToggleSwitch } from "@rever/common";
@@ -20,13 +25,23 @@ import {
   getStatusClass,
 } from "@rever/utils";
 import { ViewBillDetailsProps } from "@rever/types";
-import { FileCheck2, FileClock, SquarePen, Trash, X } from "lucide-react";
+import {
+  ClipboardCheck,
+  FileCheck2,
+  FileClock,
+  SquarePen,
+  Trash,
+  X,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import BillLineItemsReadOnly from "./BillLineItemViews";
 import { Button } from "@rever/common";
 import { useUserStore } from "@rever/stores";
 import { useCallback, useEffect, useState } from "react";
-import { getBillAuditHistoryApi } from "@rever/services";
+import {
+  getBillAuditHistoryApi,
+  getRequestConfirmationHistoryApi,
+} from "@rever/services";
 import Link from "next/link";
 
 // Main component to display bill details in view mode
@@ -54,6 +69,13 @@ const ViewBillDetails = ({
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const [showReceiptConfirm, setShowReceiptConfirm] = useState(false);
+  const [versionHistorySidePanel, setVersionHistorySidePanel] = useState(false);
+
+  const [reqConfirmationModal, setReqConfirmationModal] = useState(false);
+
+  const [confirmationHistoryList, setConfirmationHistoryList] = useState([]);
+
   const getBillAuditHistory = useCallback(async (id: number) => {
     const response = await getBillAuditHistoryApi(id);
     if (response?.status === 200) {
@@ -67,6 +89,22 @@ const ViewBillDetails = ({
       getBillAuditHistory(billDetails.id);
     }
   }, [billDetails?.id, getBillAuditHistory]);
+
+  const getRequestConfirmationHistory = useCallback(async () => {
+    if (!billDetails?.id) return;
+    const response = await getRequestConfirmationHistoryApi(
+      String(billDetails.id),
+    );
+    if (response?.status === 200) {
+      setConfirmationHistoryList(response.data);
+    } else {
+      setConfirmationHistoryList([]);
+    }
+  }, [billDetails?.id]);
+
+  useEffect(() => {
+    getRequestConfirmationHistory();
+  }, []);
 
   return (
     <>
@@ -121,6 +159,42 @@ const ViewBillDetails = ({
                   />
                 </div>
               </CustomTooltip>
+
+              {orgDetails?.receipt_confirmation_enabled &&
+              billDetails?.status === "in_review" ? (
+                <OutsideClickHandler
+                  onClose={() => setShowReceiptConfirm(false)}
+                >
+                  <CustomTooltip content="Request confirmation">
+                    <div>
+                      <IconWrapper
+                        onClick={() =>
+                          setShowReceiptConfirm(!showReceiptConfirm)
+                        }
+                        icon={<ClipboardCheck width={16} />}
+                      />
+                    </div>
+                  </CustomTooltip>
+                  {showReceiptConfirm && (
+                    <div className="relative">
+                      <div className="transition-all duration-300 ease-out">
+                        <ReceiptConfirmPopup
+                          handleReqConfirmation={() =>
+                            setReqConfirmationModal(true)
+                          }
+                          handleVersionHistory={() =>
+                            setVersionHistorySidePanel(true)
+                          }
+                          reqConfirmStatus={billDetails?.receipt_status || ""}
+                          confirmHistoryAvailable={
+                            confirmationHistoryList.length ? true : false
+                          }
+                        />
+                      </div>
+                    </div>
+                  )}
+                </OutsideClickHandler>
+              ) : null}
 
               {/* Edit and Delete icons (not shown for approval users or approved bills) */}
               {!isUserApproval ? (
@@ -389,6 +463,44 @@ const ViewBillDetails = ({
           <AuditHistory data={auditData} isLoading={isLoading} />
         </div>
       </SidePanel>
+
+      <SidePanel
+        isOpen={versionHistorySidePanel}
+        onClose={() => setVersionHistorySidePanel(false)}
+        className="w-full lg:w-96 md:w-96 sm:w-96"
+      >
+        <div className="py-6">
+          <div className="px-6 flex justify-between items-center">
+            <p className="text-slate-800 text-lg font-semibold">
+              Confirmation history
+            </p>
+            <IconWrapper
+              onClick={() => setVersionHistorySidePanel(false)}
+              icon={<X width={16} />}
+            />
+          </div>
+          <p className="px-6 text-slate-600 text-xs mt-2 mb-5">
+            Track all confirmations requests for this bill
+          </p>
+
+          <VersionHistory confirmationHistoryList={confirmationHistoryList} />
+        </div>
+      </SidePanel>
+
+      <Modal
+        isOpen={reqConfirmationModal}
+        onClose={() => setReqConfirmationModal(false)}
+        className="lg:w-2/6 md:2/6 w-5/6"
+      >
+        <RequestConfirmationModal
+          onClose={() => setReqConfirmationModal(false)}
+          billDetails={billDetails}
+          reqConfirmed={() => {
+            setReqConfirmationModal(false);
+            getRequestConfirmationHistory();
+          }}
+        />
+      </Modal>
     </>
   );
 };

@@ -20,6 +20,7 @@ const MAIN_ROUTES = [
   "/purchaseorder",
   "/bill",
   "/approvals",
+  "/request-receipt",
   "/404",
   "/not-access",
 ];
@@ -46,11 +47,17 @@ const IGNORED_PATH_PREFIXES = [
 
 // Role restrictions: define routes that are *restricted* per role
 const ROLE_BASED_RESTRICTIONS: Record<string, string[]> = {
-  admin: ["/approvals/list/review", "/approvals/list/review/match"],
+  admin: [
+    "/approvals/list/review",
+    "/approvals/list/review/match",
+    "/request-receipt/list",
+  ],
   member: [
     "/approvals/list/review",
     "/approvals/list/review/match",
+    "/settings/approvals",
     "/settings/members/invite",
+    "/request-receipt/list",
   ],
   finance_manager: [
     "/vendor/add",
@@ -65,6 +72,33 @@ const ROLE_BASED_RESTRICTIONS: Record<string, string[]> = {
     "/bill/edit",
     "/settings/approvals",
     "/settings/members/invite",
+    "/request-receipt/list",
+  ],
+  lite_user: [
+    "/home",
+    "/vendor/list",
+    "/vendor/view",
+    "/vendor/add",
+    "/vendor/update",
+    "/purchaseorder/list",
+    "/purchaseorder/view",
+    "/purchaseorder/add",
+    "/purchaseorder/edit",
+    "/bill/list",
+    "/bill/view",
+    "/bill/add",
+    "/bill/edit",
+    "/coa/list",
+    "/approvals/list/review",
+    "/approvals/list/review/match",
+    "/settings/general",
+    "/settings/controls",
+    "/settings/approvals",
+    "/settings/members",
+    "/settings/members/invite",
+    "/settings/integrations",
+    "/settings/subscriptions",
+    "/settings/usage",
   ],
 };
 
@@ -84,6 +118,7 @@ export function middleware(req: NextRequest) {
     | "admin"
     | "member"
     | "finance_manager"
+    | "lite_user"
     | undefined;
 
   // 1. Allow internal/static files
@@ -98,7 +133,9 @@ export function middleware(req: NextRequest) {
 
   // 3. Redirect authenticated user from root to dashboard
   if (pathname === "/" && token) {
-    return NextResponse.redirect(new URL("/home", req.url));
+    return role === "lite_user"
+      ? NextResponse.redirect(new URL("/request-receipt/list", req.url))
+      : NextResponse.redirect(new URL("/home", req.url));
   }
 
   // 4. Role-based access restriction (if role is defined)

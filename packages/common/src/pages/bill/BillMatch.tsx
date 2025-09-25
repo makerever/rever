@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useCallback, useEffect, useState, useMemo, memo } from "react";
+import { useCallback, useEffect, useState, useMemo, memo, useRef } from "react";
 import {
   Button,
   CircularProgressBar,
@@ -16,8 +16,10 @@ import {
 import {
   Bill,
   BillItem,
+  BillItemsTableProps,
   MatchedLineItem,
   MatchStatus,
+  OrgDataProps,
   OrgDetails,
   PurchaseOrderItem,
   UnmatchedLineItem,
@@ -35,12 +37,13 @@ import {
   cn,
   convertToPercentage,
   formatNumber,
+  formatPlainNumber,
   getLabelForBillStatus,
   getStatusClass,
 } from "@rever/utils";
 import { billMatchHeaders, poMatchHeaders } from "@rever/constants";
 import { useBreadcrumbStore, useUserStore } from "@rever/stores";
-import { BadgeAlert, BadgeCheck, Info } from "lucide-react";
+import { CircleCheck, CircleX, Info, TriangleAlert } from "lucide-react";
 
 // Status icon component to reduce repetition
 const StatusIcon = memo(
@@ -48,22 +51,24 @@ const StatusIcon = memo(
     status,
     description_score,
     description_status,
+    overall_status,
   }: {
     status: MatchStatus | null;
     tooltipContent: string;
     description_score?: number;
     description_status?: string;
+    overall_status?: string | null;
   }) => {
     const getIconByStatus = () => {
       switch (status) {
-        case "matched":
-          return <BadgeCheck className="text-green-600" width={16} />;
-        case "mismatched":
-          return <BadgeAlert className="text-red-500" width={16} />;
-        case "partial":
-          return <BadgeAlert className="text-yellow-500" width={16} />;
+        case "Matched":
+          return <CircleCheck className="text-green-600" width={16} />;
+        case "Mismatched":
+          return <CircleX className="text-red-500" width={16} />;
+        case "Partial matched":
+          return <Info className="text-yellow-500" width={16} />;
         case "poNotAvailable":
-          return <BadgeAlert className="text-yellow-500" width={16} />;
+          return <Info className="text-yellow-500" width={16} />;
         default:
           return null;
       }
@@ -73,13 +78,17 @@ const StatusIcon = memo(
       <CustomTooltip
         content={
           <div className="my-1">
-            <div className="mb-1">Description status: {description_status}</div>
-            <div className="flex items-center">
+            <div className="mb-0.5">
+              Description status: {description_status}
+            </div>
+            <div className="flex items-center mb-1.5">
               Confidence score:&nbsp;
               <CircularProgressBar
                 percentage={Number(convertToPercentage(description_score || 0))}
               />
             </div>
+
+            <div className="mb-1">Overall status: {overall_status}</div>
           </div>
         }
         side="bottom"
@@ -127,6 +136,7 @@ const POItemsTable = memo(
               <th
                 key={i}
                 className={cn(
+                  `${i < 2 ? "" : "text-right"}`,
                   "text-xs pr-4 py-3 font-medium text-slate-500 whitespace-nowrap",
                   i === 0 ? "ps-2 w-[30px]" : "",
                 )}
@@ -137,7 +147,7 @@ const POItemsTable = memo(
           </tr>
         </thead>
 
-        <tbody className="border-b">
+        <tbody>
           {matchedLineItems.length > 0 ? (
             matchedLineItems.map((poItem, index) => {
               const item = poItem?.purchase_order_item;
@@ -165,7 +175,7 @@ const POItemsTable = memo(
               return (
                 <tr
                   key={index}
-                  className="border-t text-xs text-slate-800 hover:bg-slate-50"
+                  className="text-xs text-slate-800 hover:bg-slate-50 border-b"
                 >
                   <td className="p-2.5">{index + 1}</td>
                   <td className="p-1 ps-0 grid items-center h-[60px] m-1 overflow-auto scrollbar_none">
@@ -173,50 +183,57 @@ const POItemsTable = memo(
                       {item.description || "-"}
                     </div>
                   </td>
-                  <td className="py-1">
+                  <td className="py-1 text-right pr-4">
                     <CustomTooltip
                       className="min-w-40"
                       content={
                         <div className="my-1">
-                          <div className="mb-1 flex justify-between">
-                            <div>Total:</div> <div>{item?.quantity}</div>
+                          <div className="mb-1 flex justify-between gap-2">
+                            <div>Total:</div>{" "}
+                            <div>{formatPlainNumber(item.quantity)}</div>
                           </div>
-                          <div className="mb-1 flex justify-between">
+                          <div className="mb-1 flex justify-between gap-2">
                             <div>Under approval:</div>{" "}
-                            <div>{item?.pending_approval_quantity}</div>
+                            <div>
+                              {formatPlainNumber(
+                                item.pending_approval_quantity,
+                              )}
+                            </div>
                           </div>
-                          <div className="mb-1 flex justify-between">
+                          <div className="mb-1 flex justify-between gap-2">
                             <div>Consumed:</div>{" "}
-                            <div>{item?.received_quantity}</div>
+                            <div>
+                              {formatPlainNumber(item.received_quantity)}
+                            </div>
                           </div>
-                          <div className="mb-1 flex justify-between">
+                          <div className="mb-1 flex justify-between gap-2">
                             <div>Available:</div>{" "}
-                            <div>{balanceQty?.toFixed(2)}</div>
+                            <div>{formatPlainNumber(balanceQty)}</div>
                           </div>
                         </div>
                       }
                       side="right"
                     >
-                      <div
+                      <span
                         className={`underline cursor-pointer rounded-md w-fit ${matchedItem?.quantity_status ? "" : "border border-transparent"}`}
                       >
-                        {balanceQty?.toFixed(2)}
-                      </div>
+                        {formatPlainNumber(balanceQty)}
+                      </span>
                     </CustomTooltip>
                   </td>
-                  <td className="py-1">
-                    <div
-                      className={`p-1 rounded-md w-fit ${matchedItem?.unit_price_status ? "" : ""}`}
+                  <td className="py-1 text-right pr-4">
+                    <span
+                      className={`rounded-md w-fit ${matchedItem?.unit_price_status ? "" : ""}`}
                     >
                       {formatNumber(item.unit_price, orgDetails?.currency)}
-                    </div>
+                    </span>
                   </td>
-                  <td className="py-1">
-                    <div
-                      className={`p-1 rounded-md w-fit ${matchedItem?.quantity_status && matchedItem?.unit_price_status ? "" : "border border-transparent"}`}
+                  <td className="py-1 text-right pr-4">
+                    <span
+                      className={`rounded-md w-fit ${matchedItem?.quantity_status && matchedItem?.unit_price_status ? "" : "border border-transparent"}`}
                     >
                       {formatNumber(amount, orgDetails?.currency)}
-                    </div>
+                    </span>
                   </td>
                 </tr>
               );
@@ -237,118 +254,22 @@ const POItemsTable = memo(
   ),
 );
 
-// Bill Items Table component
-const BillItemsTable = memo(
-  ({
-    matchedLineItems,
-    orgDetails,
-  }: {
-    matchedLineItems: MatchedLineItem[];
-    orgDetails: OrgDetails | undefined;
-  }) => (
-    <div className="w-1/2">
-      <h3 className="ps-4 text-md font-semibold text-slate-700 mb-4">
-        Bill items
-      </h3>
-      <table className="table-fixed w-full text-left">
-        <colgroup>
-          <col className="w-[35%]" />
-          <col className="w-[20%]" />
-          <col className="w-[20%]" />
-          <col className="w-[20%]" />
-        </colgroup>
-
-        <thead className="bg-gray-50 border-b">
-          <tr>
-            {billMatchHeaders.map((h, i) => (
-              <th
-                key={i}
-                className={cn(
-                  "text-xs py-3 font-medium text-slate-500 whitespace-nowrap",
-                  i === 0 ? "ps-4" : "pr-2",
-                )}
-              >
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-
-        <tbody className="border-b">
-          {matchedLineItems.length > 0 ? (
-            matchedLineItems.map((billItem, index) => {
-              const item = billItem?.bill_item;
-              if (!item) return null;
-
-              const qty = Number(item.quantity) || 0;
-              const unitPrice = Number(item.unit_price) || 0;
-              const amount = qty * unitPrice;
-
-              return (
-                <tr
-                  key={index}
-                  className="border-t text-xs text-slate-800 hover:bg-slate-50"
-                >
-                  <td className="p-1 ps-2 grid items-center h-[60px] m-1 overflow-auto scrollbar_none">
-                    <div
-                      className={`flex items-center gap-2 p-1 rounded-md w-fit ${billItem?.description_status !== "mismatched" ? "" : "text-red-500"}`}
-                    >
-                      {item.description || "-"}
-                    </div>
-                  </td>
-                  <td className="py-1">
-                    <div
-                      className={`p-1 rounded-md w-fit ${billItem?.quantity_status ? "" : "border border-red-500 text-red-500"}`}
-                    >
-                      {item.quantity}
-                    </div>
-                  </td>
-                  <td className="py-1">
-                    <div
-                      className={`p-1 rounded-md w-fit ${billItem?.unit_price_status ? "" : "border border-red-500 text-red-500"}`}
-                    >
-                      {formatNumber(item.unit_price, orgDetails?.currency)}
-                    </div>
-                  </td>
-                  <td className="py-1">
-                    <div
-                      className={`p-1 rounded-md w-fit ${billItem?.quantity_status && billItem?.unit_price_status ? "" : "border border-red-500 text-red-500"}`}
-                    >
-                      {formatNumber(amount, orgDetails?.currency)}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })
-          ) : (
-            <tr>
-              <td
-                colSpan={4}
-                className="p-6 h-[60px] text-center text-slate-400 text-sm"
-              >
-                No Bill items to display.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
-  ),
-);
-
 // Matching Status Table component
-const MatchingStatusTable = memo(
+const ReceiptStatusTable = memo(
   ({ matchedLineItems }: { matchedLineItems: MatchedLineItem[] }) => (
     <div>
-      <table className="table-fixed w-full text-left">
+      <h3 className="text-right text-md font-semibold text-slate-700 mb-4 mr-4">
+        Confirmed Qty
+      </h3>
+      <table className="table-fixed w-36 text-center">
         <colgroup>
-          <col className="w-full" />
+          <col className="w-3/12" />
         </colgroup>
 
         <thead className="bg-gray-50 border-b">
           <tr>
-            <th className="ps-4 pr-2 py-3 text-xs font-medium text-slate-500 whitespace-nowrap">
-              Matching status
+            <th className="pr-4 py-3 text-xs font-medium text-slate-500 whitespace-nowrap text-right">
+              Qty
             </th>
           </tr>
         </thead>
@@ -361,11 +282,268 @@ const MatchingStatusTable = memo(
                   key={index}
                   className="text-xs text-slate-800 hover:bg-slate-50 border-b"
                 >
+                  <td
+                    className={`p-3 grid items-center justify-end h-[60px] m-1`}
+                  >
+                    <div className="flex items-center">
+                      {item?.bill_item?.confirmed_quantity &&
+                      item?.bill_item?.quantity !==
+                        item?.bill_item?.confirmed_quantity ? (
+                        <span>
+                          <TriangleAlert
+                            className="text-yellow-500"
+                            width={14}
+                          />
+                        </span>
+                      ) : null}
+
+                      <span className={`p-1 rounded-md w-fit`}>
+                        {formatPlainNumber(
+                          item?.bill_item?.confirmed_quantity,
+                        ) || "--"}
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })
+          ) : (
+            <tr>
+              <td
+                colSpan={4}
+                className="p-6 h-[60px] text-center text-slate-400 text-sm border-b"
+              >
+                --
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  ),
+);
+
+// Bill Items Table component
+const BillItemsTable = ({
+  matchedLineItems,
+  orgDetails,
+  billDetails,
+}: BillItemsTableProps) => {
+  const [items, setItems] = useState(matchedLineItems);
+  const [tableWidth, setTableWidth] = useState(0);
+  const [columnWidths, setColumnWidths] = useState<number[]>([]); // Add this state
+  const tableRef = useRef<HTMLTableElement | null>(null);
+
+  const userDetails = useUserStore((state) => state.user);
+
+  useEffect(() => {
+    setItems(matchedLineItems);
+  }, [matchedLineItems]);
+
+  useEffect(() => {
+    const calculateDimensions = () => {
+      if (tableRef.current) {
+        setTableWidth(tableRef.current.offsetWidth);
+
+        // Calculate actual column widths from the first row
+        const firstRow = tableRef.current.querySelector("tbody tr:first-child");
+        if (firstRow) {
+          const cells = firstRow.querySelectorAll("td");
+          const widths = Array.from(cells).map((cell) => cell.offsetWidth);
+          setColumnWidths(widths);
+        }
+      }
+    };
+
+    // Calculate on mount and when items change
+    setTimeout(calculateDimensions, 100);
+
+    // Recalculate on window resize
+    const handleResize = () => {
+      setTimeout(calculateDimensions, 100);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [items]); // Add items dependency
+
+  return (
+    <div className="w-1/2">
+      <h3 className="ps-4 text-md font-semibold text-slate-700 mb-4">
+        Bill items
+      </h3>
+
+      <div>
+        <table ref={tableRef} className="table-fixed w-full text-left">
+          <colgroup>
+            <col className="w-[35%]" />
+            <col className="w-[20%]" />
+            <col className="w-[20%]" />
+            <col className="w-[20%]" />
+          </colgroup>
+          <thead className="bg-gray-50 border-b">
+            <tr>
+              {billMatchHeaders.map((h, i) => (
+                <th
+                  key={i}
+                  className={cn(
+                    `${i < 1 ? "" : "text-right"}`,
+                    "text-xs py-3 font-medium text-slate-500 whitespace-nowrap",
+                    i === 0 ? "ps-4" : "pr-4",
+                  )}
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+
+          <tbody>
+            {items && items.length > 0 ? (
+              <>
+                {items?.map((billItem, index) => {
+                  const item = billItem?.bill_item;
+                  if (!item) return null;
+
+                  const qty = Number(item.quantity) || 0;
+                  const unitPrice = Number(item.unit_price) || 0;
+                  const amount = qty * unitPrice;
+
+                  return (
+                    <tr
+                      key={index}
+                      className={`text-xs text-slate-800 hover:bg-slate-50 border-b relative ${billDetails?.status === "in_review" ? "" : ""} `}
+                    >
+                      <td className="p-1 ps-2 grid items-center h-[60px] m-1 overflow-auto scrollbar_none">
+                        {/* {billDetails?.status === "in_review" ? (
+                                  <GripVertical
+                                    width={12}
+                                    className="text-slate-600 absolute left-0"
+                                  />
+                                ) : null} */}
+                        <div
+                          className={`flex items-center gap-2 p-1 rounded-md w-fit ${
+                            billItem?.description_status !== "mismatched"
+                              ? ""
+                              : "text-red-500"
+                          }`}
+                        >
+                          {item.description || "-"}
+                        </div>
+                      </td>
+                      <td className="py-1 text-right pr-4">
+                        <span
+                          className={`p-1 rounded-md w-fit ${
+                            billItem?.quantity_status
+                              ? ""
+                              : "border border-red-500 text-red-500"
+                          }`}
+                        >
+                          {formatPlainNumber(item.quantity)}
+                        </span>
+                      </td>
+                      <td className="py-1 text-right pr-4">
+                        <span
+                          className={`p-1 rounded-md w-fit ${
+                            billItem?.unit_price_status
+                              ? ""
+                              : "border border-red-500 text-red-500"
+                          }`}
+                        >
+                          {formatNumber(item.unit_price, orgDetails?.currency)}
+                        </span>
+                      </td>
+                      <td className="py-1 text-right pr-4">
+                        <span
+                          className={`p-1 rounded-md w-fit ${
+                            billItem?.quantity_status &&
+                            billItem?.unit_price_status
+                              ? ""
+                              : "border border-red-500 text-red-500"
+                          }`}
+                        >
+                          {formatNumber(amount, orgDetails?.currency)}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </>
+            ) : (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="p-6 h-[60px] text-center text-slate-400 text-sm"
+                >
+                  No bill items to display.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+// Matching Status Table component
+const MatchingStatusTable = memo(
+  ({
+    matchedLineItems,
+    orgDetails,
+  }: {
+    matchedLineItems: MatchedLineItem[];
+    orgDetails?: OrgDataProps;
+  }) => (
+    <div>
+      <table className="table-fixed w-full text-left">
+        <colgroup>
+          <col className="w-full" />
+        </colgroup>
+
+        <thead className="bg-gray-50 border-b">
+          <tr>
+            <th className="ps-4 pr-2 py-3 text-xs font-medium text-slate-500 whitespace-nowrap">
+              Match status
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {matchedLineItems.length > 0 ? (
+            matchedLineItems.map((item, index) => {
+              function getOverallStatus() {
+                const isConfirmedQtyMismatched =
+                  item?.bill_item?.confirmed_quantity &&
+                  item?.bill_item?.quantity !==
+                    item?.bill_item?.confirmed_quantity;
+
+                if (
+                  orgDetails?.receipt_confirmation_enabled &&
+                  isConfirmedQtyMismatched
+                ) {
+                  return "Mismatched";
+                } else if (item?.overall_status === "matched") {
+                  return "Matched";
+                } else if (item?.overall_status === "mismatched") {
+                  return "Mismatched";
+                } else if (item?.overall_status === "partial") {
+                  return "Partial matched";
+                } else {
+                  return null;
+                }
+              }
+
+              return (
+                <tr
+                  key={index}
+                  className="text-xs text-slate-800 hover:bg-slate-50 border-b"
+                >
                   <td className="p-3 ps-4 grid items-center h-[60px] m-1">
                     <StatusIcon
                       status={
                         item?.overall_status
-                          ? item?.overall_status
+                          ? getOverallStatus()
                           : item?.purchase_order_item?.description
                             ? "poNotAvailable"
                             : null
@@ -389,6 +567,7 @@ const MatchingStatusTable = memo(
                               ? "Partial matched"
                               : ""
                       }
+                      overall_status={getOverallStatus()}
                     />
                   </td>
                 </tr>
@@ -579,9 +758,8 @@ const BillPOMatchUI = () => {
     };
     const response = await acceptRejectBillApi(data, idValue as string);
     if (response?.status === 200) {
-      router.push("/approvals/list/review");
       showSuccessToast("Bill approved successfully");
-      setIsLoaderFormSubmit(false);
+      router.push("/approvals/list/review");
     } else {
       setIsLoaderFormSubmit(false);
     }
@@ -635,9 +813,18 @@ const BillPOMatchUI = () => {
               </div>
             </div>
 
-            <div className="w-full overflow-x-auto mt-8">
+            <div className="w-full overflow-x-auto mt-5">
               <div className="w-full overflow-x-auto">
-                <div className="flex h-[calc(100vh-300px)] overflow-auto min-w-[900px] custom_scrollbar">
+                <div className="flex items-center mb-4">
+                  <ToggleSwitch
+                    isOn={hideMatchItems}
+                    setIsOn={setHideMatchItems}
+                  />
+                  <p className="whitespace-pre mr-2 ms-1 text-xs text-slate-800 dark:text-gray-200">
+                    Hide matched items
+                  </p>
+                </div>
+                <div className="flex h-[calc(100vh-320px)] overflow-auto min-w-[900px] custom_scrollbar">
                   {/* Left: PO Items */}
                   <POItemsTable
                     matchedLineItems={[
@@ -654,22 +841,34 @@ const BillPOMatchUI = () => {
                       ...unMatchedBillLineItems,
                     ]}
                     orgDetails={orgDetails}
+                    billDetails={billDetails}
                   />
 
-                  <div className="w-52">
-                    <div className="ps-4 text-md font-semibold text-slate-700 mb-4 mt-2">
-                      <div className="flex items-center">
+                  {/* Center: Receipt Items */}
+                  {orgDetails?.receipt_confirmation_enabled && (
+                    <ReceiptStatusTable
+                      matchedLineItems={[
+                        ...filteredLineItems,
+                        ...unMatchedBillLineItems,
+                      ]}
+                    />
+                  )}
+
+                  <div className="w-40">
+                    <div className="text-md font-semibold text-slate-700 mb-4 mt-2">
+                      <div className="flex items-center opacity-0">
                         <ToggleSwitch
                           isOn={hideMatchItems}
                           setIsOn={setHideMatchItems}
                         />
-                        <p className="ms-2 text-xs text-slate-800 dark:text-gray-200">
+                        <p className="whitespace-pre mr-2 ms-1 text-xs text-slate-800 dark:text-gray-200">
                           Hide matched items
                         </p>
                       </div>
                     </div>
 
                     <MatchingStatusTable
+                      orgDetails={orgDetails}
                       matchedLineItems={[
                         ...filteredLineItems,
                         ...unMatchedBillLineItems,
@@ -688,6 +887,7 @@ const BillPOMatchUI = () => {
                   onClick={handleApprovalAction}
                   className="text-white whitespace-pre bg-green-500 hover:bg-green-600"
                   isDefault={false}
+                  isLoading={isLoaderFormSubmit}
                 />
               </div>
             ) : (
@@ -701,6 +901,7 @@ const BillPOMatchUI = () => {
                         onClick={handleSendBillApproval}
                         className="text-white whitespace-pre bg-green-500 hover:bg-green-600"
                         isDefault={false}
+                        isLoading={isLoaderFormSubmit}
                       />
                     ) : (
                       <Button
@@ -709,6 +910,7 @@ const BillPOMatchUI = () => {
                         onClick={handleBillApprovalRejection}
                         className="text-white whitespace-pre bg-green-500 hover:bg-green-600"
                         isDefault={false}
+                        isLoading={isLoaderFormSubmit}
                       />
                     )}
                   </div>

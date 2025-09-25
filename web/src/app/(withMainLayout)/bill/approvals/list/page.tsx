@@ -140,7 +140,7 @@ const ApprovalList = () => {
         cell: ({ getValue }) => {
           return (
             <div className="flex items-center gap-4">
-              <span className="overflow-hidden text-ellipsis">
+              <span className="overflow-hidden text-ellipsis w-full">
                 {getValue() as string}
               </span>
             </div>

@@ -94,7 +94,6 @@ const Invitation = () => {
       setIsLoaderFormSubmit(true); // Show loader
       const response = await completeInviteUserApi(userId, data); // Submit form data
       if (response?.status === 200) {
-        setIsLoaderFormSubmit(false);
         setAuthToken(response?.data?.access);
         Cookies.set("token", response?.data?.access, {
           expires: 7,
@@ -105,7 +104,13 @@ const Invitation = () => {
             expires: 7,
           });
           setUser(responseUserDetails?.data);
-          router.push("/home");
+          if (responseUserDetails?.data?.role === "lite_user") {
+            router.push("/request-receipt/list");
+          } else {
+            router.push("/home");
+          }
+        } else {
+          setIsLoaderFormSubmit(false);
         }
       } else {
         if (response?.data?.detail) {

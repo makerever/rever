@@ -52,6 +52,11 @@ const NumberInput = <T extends FieldValues>({
       "ArrowRight",
       "Delete",
     ];
+
+    if (e.ctrlKey || e.metaKey) {
+      return;
+    }
+
     if (e.key === "Enter") {
       onEnterPress?.();
       return;
@@ -70,9 +75,35 @@ const NumberInput = <T extends FieldValues>({
 
   // Paste: restrict to digits and at most one dot
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    const paste = e.clipboardData.getData("text");
-    const pattern = allowDecimal ? /^\d*\.?\d*$/ : /^\d*$/;
-    if (!pattern.test(paste)) e.preventDefault();
+    // let the paste happen first, then sanitize
+    setTimeout(() => {
+      if (!inputRef.current) return;
+
+      let val = inputRef.current.value;
+
+      if (allowDecimal) {
+        val = val.replace(/[^0-9.]/g, "");
+        const parts = val.split(".");
+        if (parts.length > 2) {
+          val = parts[0] + "." + parts.slice(1).join("");
+        }
+        if (parts[1] && parts[1].length > 2) {
+          val = parts[0] + "." + parts[1].slice(0, 2);
+        }
+      } else {
+        val = val.replace(/[^0-9]/g, "");
+      }
+
+      inputRef.current.value = val;
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLInputElement.prototype,
+        "value",
+      )?.set;
+      nativeInputValueSetter?.call(inputRef.current, val);
+
+      const event = new Event("input", { bubbles: true });
+      inputRef.current.dispatchEvent(event);
+    }, 0);
   };
 
   // Change: strip non-allowed chars and collapse extra dots

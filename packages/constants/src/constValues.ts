@@ -44,18 +44,14 @@ export const roleBasedAccess: Record<Role, string[]> = {
     "/settings/general",
     "/settings/members",
   ],
+  lite_user: ["/inbox", "/request-receipt/list"],
 };
 
 // Tab options for approvals
 export const approvalTabOptions = ["PO approval", "Bill approval"];
 
 // Table headers for the bill match items
-export const billMatchHeaders = [
-  "Description",
-  "Quantity",
-  "Unit price",
-  "Amount",
-];
+export const billMatchHeaders = ["Description", "Qty", "Unit price", "Amount"];
 
 // Table headers for the PO match items
 export const poMatchHeaders = [
@@ -65,3 +61,14 @@ export const poMatchHeaders = [
   "Unit price",
   "Amount",
 ];
+
+// Tab options for receipt confirmation
+export const tabOptionsReceiptConfirm = ["Open", "Closed", "Revoked"];
+
+export type TaskStatus = "active" | "completed" | "revoked";
+
+export const requestReceiptListStatus: Record<TaskStatus, string> = {
+  active: "requested",
+  completed: "confirmed",
+  revoked: "revoked",
+};

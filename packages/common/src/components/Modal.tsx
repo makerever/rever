@@ -10,6 +10,7 @@ export default function Modal({
   onClose,
   children,
   title,
+  className,
 }: ModalProps) {
   // Add Escape key handler to close modal when open
   useEffect(() => {
@@ -29,7 +30,7 @@ export default function Modal({
 
       {/* MODAL CARD */}
       <div
-        className={`${title ? "p-5" : ""} relative z-10 w-[90vw] sm:w-full max-w-xl rounded-2xl bg-white shadow-lg transform transition-all duration-300 scale-100 opacity-100 animate-fadeIn`}
+        className={`${title ? "p-5" : ""} relative z-10 ${className ? className : "w-[150vw] sm:w-full max-w-2xl"} rounded-2xl bg-white shadow-lg transform transition-all duration-300 scale-100 opacity-100 animate-fadeIn`}
         onClick={(e) => e.stopPropagation()}
       >
         {title ? (

@@ -36,13 +36,12 @@ const Notification = () => {
     const data: ManageNotificationProps = {};
     if (key === "1") {
       data.notify_on_approval_request = val;
+      setNotiPreferenceApp1(val);
     } else if (key === "2") {
       data.notify_on_approval_result = val;
+      setNotiPreferenceApp2(val);
     }
-    const response = await updateNotificationStatusApi(data);
-    if (response?.status === 200) {
-      getNotificationStatus();
-    }
+    await updateNotificationStatusApi(data);
   };
 
   return (

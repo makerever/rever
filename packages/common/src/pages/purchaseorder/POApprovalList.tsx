@@ -161,7 +161,7 @@ const POApprovalList = () => {
           const rawAmount = Number(getValue()) || 0;
           return (
             <div className="flex items-center gap-4 py-1">
-              <span className="overflow-hidden text-ellipsis">
+              <span className="overflow-hidden text-ellipsis w-full">
                 {formatNumber(rawAmount, orgDetails?.currency)}
               </span>
             </div>

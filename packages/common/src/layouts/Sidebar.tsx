@@ -87,14 +87,31 @@ export function Sidebar({
     setOpenItem(openItem === index ? null : index);
   };
 
+  const stripTrailing = (s: string) => (s !== "/" ? s.replace(/\/+$/, "") : s);
+
   // Check if a sidebar link is active based on current pathname
   const isActive = (url: string | string[], name?: string) => {
+    const current = stripTrailing(pathname);
+
     if (Array.isArray(url)) {
       return name
         ? pathname.split("/").includes(name)
-        : url.some((u) => pathname === u);
+        : url.some((u) => {
+            const prefixMode = u.endsWith("/");
+            const base = stripTrailing(u);
+
+            if (prefixMode) {
+              return current === base || current.startsWith(base + "/");
+            }
+            return current === base;
+          });
     }
-    return pathname === url;
+
+    const prefixMode = url.endsWith("/");
+    const base = stripTrailing(url);
+    return prefixMode
+      ? current === base || current.startsWith(base + "/")
+      : current === base;
   };
 
   // Redirect to a route and close global search modal

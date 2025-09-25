@@ -102,7 +102,11 @@ const LoginSignup = ({ showStep, setShowStep }: LoginStepProps) => {
           expires: 7,
         });
         setUser(responseUserDetails?.data);
-        router.push("/home");
+        if (responseUserDetails?.data?.role === "lite_user") {
+          router.push("/request-receipt/list");
+        } else {
+          router.push("/home");
+        }
       } else {
         setIsLoaderFormSubmit(false);
       }
@@ -135,7 +139,11 @@ const LoginSignup = ({ showStep, setShowStep }: LoginStepProps) => {
             expires: 7,
           });
           setUser(responseUserDetails?.data);
-          router.push("/home");
+          if (responseUserDetails?.data?.role === "lite_user") {
+            router.push("/request-receipt/list");
+          } else {
+            router.push("/home");
+          }
         }
       } else {
         setIsLoaderFormSubmit(false);

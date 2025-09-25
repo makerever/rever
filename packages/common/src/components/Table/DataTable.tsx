@@ -21,10 +21,9 @@ import {
   Plus,
   Trash,
   MailPlus,
-  Download,
 } from "lucide-react";
 import { DataTablePagination } from "./DataTablePagination";
-import { CustomTooltip, StatusFilter } from "@rever/common";
+import { StatusFilter } from "@rever/common";
 
 import Button from "../Button";
 import { TableProps } from "@rever/types";
@@ -58,6 +57,7 @@ export default function DataTable<
   filterHeading,
   hideExportIcon,
   flowImageSrc,
+  perPageItemCount = [10, 20, 50, 100],
 }: TableProps<T>) {
   const user = useUserStore((state) => state.user);
 
@@ -71,6 +71,11 @@ export default function DataTable<
     }
   }, [tableData]);
 
+  const [pagination, setPagination] = React.useState({
+    pageIndex: 0,
+    pageSize: perPageItemCount?.[0] ?? 10,
+  });
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
@@ -82,6 +87,8 @@ export default function DataTable<
   const [selectedRowsData, setSelectedRowsData] = React.useState<Partial<T>[]>(
     [],
   );
+
+  const [showBtnPopup, setShowBtnPopup] = React.useState<Boolean>(false);
 
   React.useEffect(() => {
     setColumnFilters(
@@ -96,7 +103,9 @@ export default function DataTable<
       columnFilters,
       sorting,
       rowSelection,
+      pagination,
     },
+    onPaginationChange: setPagination,
     onSortingChange: setSorting,
     onRowSelectionChange: setRowSelection,
     onColumnFiltersChange: setColumnFilters,
@@ -147,7 +156,7 @@ export default function DataTable<
   return (
     <>
       <div className="mb-2 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-        <p className="text-slate-800 text-lg font-semibold">{tableHeading}</p>
+        <p className="text-slate-800 text-lg font-bold">{tableHeading}</p>
 
         <div className="flex items-center gap-3">
           {tableHeading === "Bills" && activeTab === "Overview" ? (
@@ -210,19 +219,6 @@ export default function DataTable<
               noCmdIcon
             />
           </div>
-
-          {!hideExportIcon ? (
-            <div>
-              <IconWrapper
-                isDisabled={!selectedRowsData.length}
-                icon={
-                  <CustomTooltip content="Download" side="left" sideOffset={10}>
-                    <Download width={16} onClick={handleExport} />
-                  </CustomTooltip>
-                }
-              />
-            </div>
-          ) : null}
         </div>
       ) : null}
 
@@ -248,7 +244,7 @@ export default function DataTable<
         </div>
       ) : (
         <>
-          <div className="w-[calc(100vw-60px)] md:w-full rounded-md border bg-white shadow-sm block max-h-[506px] overflow-y-auto custom_scrollbar">
+          <div className="w-[calc(100vw-60px)] xl:w-full rounded-md border bg-white shadow-sm block max-h-[506px] overflow-y-auto custom_scrollbar">
             <div className="overflow-x-auto custom_scrollbar w-full">
               <table className="w-full border-separate border-spacing-0">
                 <thead className="text-xs text-slate-500 hover:bg-slate-50 transition-all duration-200">
@@ -260,7 +256,7 @@ export default function DataTable<
                           className={`px-3 py-2 font-medium text-left whitespace-nowrap ${
                             (header.column.columnDef.meta as { width?: string })
                               ?.width || "min-w-[100px] sm:min-w-[140px]"
-                          }`}
+                          } ${header.column.columnDef.header === "Total amount" ? "flex justify-end ps-3 pr-10" : ""}`}
                         >
                           <div className="flex items-center gap-1">
                             {flexRender(
@@ -304,12 +300,14 @@ export default function DataTable<
                       {row.getVisibleCells().map((cell) => (
                         <td
                           key={cell.id}
-                          className={`px-3 py-2.5 border-t whitespace-nowrap`}
+                          className={`${cell.column.columnDef.header === "Total amount" ? "text-right ps-3 pr-12" : "px-3 "} py-2.5 border-t whitespace-nowrap`}
                         >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
+                          <span>
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </span>
                         </td>
                       ))}
 
@@ -343,7 +341,7 @@ export default function DataTable<
           <DataTablePagination
             table={table}
             tableHeading={tableHeading}
-            totalRows={data.length}
+            totalRows={table.getFilteredRowModel().rows.length}
             selectedRows={Object.keys(rowSelection).length}
             hideExportIcon={hideExportIcon}
           />

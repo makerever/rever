@@ -1,7 +1,7 @@
 // Component for bill line items UI ReadOnly
 "use client";
 
-import { formatNumber } from "@rever/utils";
+import { formatNumber, formatPlainNumber } from "@rever/utils";
 import { useUserStore } from "@rever/stores";
 import { POLineItemsProps } from "@rever/types";
 import { CustomTooltip } from "@rever/common";
@@ -10,8 +10,8 @@ import { CustomTooltip } from "@rever/common";
 const billItemHeaders = [
   "#",
   "Description",
-  "Quantity",
-  "Available quantity",
+  "Qty",
+  "Available Qty",
   "Unit price",
   "Amount",
 ];
@@ -42,7 +42,7 @@ export default function poLineItemsReadOnly({
             {billItemHeaders.map((h, i) => (
               <th
                 key={i}
-                className="px-2 py-4 text-xs text-slate-500 font-medium"
+                className={`px-2 py-4 text-xs text-slate-500 font-medium ${i < 2 ? "" : "text-right"}`}
               >
                 {h}
               </th>
@@ -73,46 +73,55 @@ export default function poLineItemsReadOnly({
                   <td className="p-2 whitespace-pre-wrap">
                     {item.description || "-"}
                   </td>
-                  {/* Quantity */}
-                  <td className="p-2">{item.quantity}</td>
+                  {/* Qty */}
+                  <td className="p-2 text-right">
+                    {formatPlainNumber(item?.quantity)}
+                  </td>
                   {/* Available quantity */}
-                  <td className="p-2">
+                  <td className="p-2 text-right">
                     <CustomTooltip
                       className="min-w-40"
                       content={
                         <div className="my-1">
-                          <div className="mb-1 flex justify-between">
-                            <div>Total Qty:</div> <div>{item?.quantity}</div>
+                          <div className="mb-1 flex justify-between gap-2">
+                            <div>Total:</div>{" "}
+                            <div>{formatPlainNumber(item?.quantity)}</div>
                           </div>
-                          <div className="mb-1 flex justify-between">
-                            <div>Committed Qty:</div>{" "}
-                            <div>{item?.pending_approval_quantity}</div>
+                          <div className="mb-1 flex justify-between gap-2">
+                            <div>Under approval:</div>{" "}
+                            <div>
+                              {formatPlainNumber(
+                                item?.pending_approval_quantity,
+                              )}
+                            </div>
                           </div>
-                          <div className="mb-1 flex justify-between">
-                            <div>Consumed Qty:</div>{" "}
-                            <div>{item?.received_quantity}</div>
+                          <div className="mb-1 flex justify-between gap-2">
+                            <div>Consumed:</div>{" "}
+                            <div>
+                              {formatPlainNumber(item?.received_quantity)}
+                            </div>
                           </div>
-                          <div className="mb-1 flex justify-between">
-                            <div>Available Qty:</div>{" "}
-                            <div>{balanceQty?.toFixed(2)}</div>
+                          <div className="mb-1 flex justify-between gap-2">
+                            <div>Available:</div>{" "}
+                            <div>{formatPlainNumber(balanceQty)}</div>
                           </div>
                         </div>
                       }
                       side="right"
                     >
-                      <div
+                      <span
                         className={`underline cursor-pointer rounded-md w-fit`}
                       >
-                        {balanceQty?.toFixed(2)}
-                      </div>
+                        {formatPlainNumber(balanceQty)}
+                      </span>
                     </CustomTooltip>
                   </td>
                   {/* Unit price */}
-                  <td className="p-2">
+                  <td className="p-2 text-right">
                     {formatNumber(item.unit_price || 0, orgDetails?.currency)}
                   </td>
                   {/* Amount (computed) */}
-                  <td className="p-2">
+                  <td className="p-2 text-right">
                     {formatNumber(amount, orgDetails?.currency)}
                   </td>
                 </tr>
@@ -137,7 +146,7 @@ export default function poLineItemsReadOnly({
         <div className="p-3 w-72 font-medium text-slate-600 text-sm bg-gray-50 rounded-md">
           <div className="grid grid-cols-2">
             <p>Sub total:</p>
-            <p>
+            <p className="text-right">
               {formatNumber(poDetails?.sub_total || 0, orgDetails?.currency)}
             </p>
           </div>
@@ -148,11 +157,13 @@ export default function poLineItemsReadOnly({
                 {formatNumber(poDetails?.total_tax || 0, orgDetails?.currency)}
               </span>
             </div>
-            <div>{poDetails?.tax_percentage || 0}%</div>
+            <div className="text-right">{poDetails?.tax_percentage || 0}%</div>
           </div>
           <div className="grid grid-cols-2 text-slate-800 font-semibold">
             <p>Total:</p>
-            <p>{formatNumber(poDetails?.total || 0, orgDetails?.currency)}</p>
+            <p className="text-right">
+              {formatNumber(poDetails?.total || 0, orgDetails?.currency)}
+            </p>
           </div>
         </div>
       </div>

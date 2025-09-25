@@ -154,6 +154,13 @@ export interface checkBoxProps {
   onChange: (value: unknown) => void;
 }
 
+// Interface for checkbox component props
+export interface RadioBtnProps {
+  checked: boolean | undefined;
+  onChange: (value: unknown) => void;
+  isDisable?: boolean;
+}
+
 // Interface for table component props
 export interface TableProps<T> {
   tableHeading?: string;
@@ -177,6 +184,7 @@ export interface TableProps<T> {
   filterHeading?: string;
   hideExportIcon?: boolean;
   flowImageSrc?: string;
+  perPageItemCount?: number[];
 }
 
 // Interface for status filter component props
@@ -335,14 +343,15 @@ export interface VendorTableList {
 }
 
 // Type for user role
-export type Role = "admin" | "member" | "finance_manager";
+export type Role = "admin" | "member" | "finance_manager" | "lite_user";
 // Type for resource
 export type Resource =
   | "vendor"
   | "bill"
   | "members"
   | "general"
-  | "purchaseorder";
+  | "purchaseorder"
+  | "inbox";
 // Type for action
 export type Action = "view" | "create" | "update" | "delete";
 
@@ -389,6 +398,7 @@ export type ModalProps = {
   onClose: () => void;
   children: React.ReactNode;
   title?: string;
+  className?: string;
 };
 
 // Interface for PDF viewer props
@@ -413,6 +423,7 @@ export interface SidePanelProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  className?: string;
 }
 
 // Types for audit history change value

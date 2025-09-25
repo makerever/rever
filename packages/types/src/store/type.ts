@@ -8,6 +8,7 @@ type Organization = {
   date_format?: string;
   member_count?: number;
   matching_type?: string;
+  receipt_confirmation_enabled?: boolean | string;
 };
 
 // Type for logged-in user properties
