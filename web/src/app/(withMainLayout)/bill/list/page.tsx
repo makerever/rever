@@ -173,7 +173,7 @@ const BillList = () => {
           const rawAmount = getValue() as number;
           return (
             <div className="flex items-center gap-4">
-              <span className="overflow-hidden text-ellipsis ">
+              <span className="overflow-hidden text-ellipsis w-full">
                 {formatNumber(rawAmount)}{" "}
               </span>
             </div>

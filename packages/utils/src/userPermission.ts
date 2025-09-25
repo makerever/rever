@@ -53,6 +53,7 @@ export const userPermissions: Record<Role, Record<Resource, Action[]>> = {
     purchaseorder: ["view", "create", "update", "delete"],
     members: ["view", "create", "update", "delete"],
     general: ["view", "create", "update", "delete"],
+    inbox: ["view", "create", "update", "delete"],
   },
   member: {
     vendor: ["view", "update", "create"],
@@ -60,6 +61,7 @@ export const userPermissions: Record<Role, Record<Resource, Action[]>> = {
     purchaseorder: ["view", "create", "update", "delete"],
     members: ["view"],
     general: ["view"],
+    inbox: ["view", "create", "update", "delete"],
   },
   finance_manager: {
     vendor: ["view"],
@@ -67,6 +69,15 @@ export const userPermissions: Record<Role, Record<Resource, Action[]>> = {
     purchaseorder: [],
     members: ["view"],
     general: ["view"],
+    inbox: ["view", "create", "update", "delete"],
+  },
+  lite_user: {
+    vendor: [],
+    bill: [],
+    purchaseorder: [],
+    members: [],
+    general: [],
+    inbox: ["view", "create", "update", "delete"],
   },
 };
 
@@ -74,7 +85,7 @@ export const userPermissions: Record<Role, Record<Resource, Action[]>> = {
 const isValidRole = (role: unknown): role is Role => {
   return (
     typeof role === "string" &&
-    ["admin", "member", "finance_manager"].includes(role as Role)
+    ["admin", "member", "finance_manager", "lite_user"].includes(role as Role)
   );
 };
 

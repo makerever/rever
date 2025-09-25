@@ -71,3 +71,11 @@ export const NOTIFICATION_API = {
   GET_NOTIFICATION_COUNT: "/notifications/unread_count/",
   NOTIFICATION_MARK_ALL_READ: "/notifications/mark_all_read/",
 };
+
+// Request Confirmation API Endpoints
+export const REQ_CONFIRMATION_API = {
+  REQ_CONFIRMATION: "/receipt/",
+  REQ_LIST: "/receipt/my/requested/",
+  REQ_CONFIRMED_LIST: "/receipt/my/confirmed/",
+  REQ_REVOKED_LIST: "/receipt/my/revoked/",
+};

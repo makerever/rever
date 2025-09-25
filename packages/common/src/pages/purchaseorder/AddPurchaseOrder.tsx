@@ -497,7 +497,9 @@ const AddPOComponentWithParams = () => {
                     <div className="p-3 w-72 font-medium text-slate-600 text-sm bg-gray-50 rounded-md">
                       <div className="grid grid-cols-2">
                         <p>Sub total:</p>
-                        <p>{formatNumber(subtotal, orgDetails?.currency)}</p>
+                        <p className="text-right">
+                          {formatNumber(subtotal, orgDetails?.currency)}
+                        </p>
                       </div>
                       <div className="grid items-center grid-cols-2 pb-2 mt-4 mb-3 border-b">
                         <div>
@@ -514,13 +516,16 @@ const AddPOComponentWithParams = () => {
                             value={getValues("total_tax")}
                             onEnterPress={() => {}}
                             allowDecimal
+                            className="text-right"
                           />
                           %
                         </div>
                       </div>
                       <div className="grid grid-cols-2 text-slate-800 font-semibold">
                         <p>Total:</p>
-                        <p>{formatNumber(total, orgDetails?.currency)}</p>
+                        <p className="text-right">
+                          {formatNumber(total, orgDetails?.currency)}
+                        </p>
                       </div>
                     </div>
                   </div>

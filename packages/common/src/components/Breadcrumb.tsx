@@ -74,6 +74,20 @@ const breadcrumbMap: Record<string, Crumb[]> = {
     },
     { label: "View match", href: "" },
   ],
+  "/request-receipt/list": [
+    { label: "Confirmations", icon: <ReceiptText size={16} />, href: "" },
+  ],
+  "/request-receipt/view": [
+    {
+      label: "Confirmations",
+      icon: <ReceiptText size={16} />,
+      href: "/request-receipt/list",
+    },
+    {
+      label: (data) => data?.name || "",
+      href: "",
+    },
+  ],
   "/approvals/list/review": [
     { label: "Approvals", icon: <FileCheck2 size={16} />, href: "" },
   ],

@@ -33,7 +33,7 @@ export default function RootLayout({
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
         <meta name="theme-color" content="#1e40af" />
-        <link rel="icon" href="/icons/favicon.ico.png" />
+        <link rel="icon" href="/icons/favicon.ico.svg" />
       </head>
       <body className={`${inter.className} scale-wrapper`}>
         <SafeHydrate>

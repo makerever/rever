@@ -8,6 +8,7 @@ import {
   UseFormSetValue,
 } from "react-hook-form";
 import { AddressTypeProps } from "../vendor/type";
+import { OrgDataProps } from "../apiTypes/type";
 
 export type BillLineItemsProps = {
   billItems?: BillItemTypeProps[];
@@ -35,15 +36,19 @@ export interface Bill {
   is_attachment?: boolean;
   updated_at?: string;
   status: string;
+  receipt_status?: string;
+  receipt_comment?: string;
   items?: BillItemTypeProps[];
   created_at?: string;
   is_duplicate?: boolean;
 }
 
 export type BillItemTypeProps = {
+  id?: string;
   description?: string | undefined;
   product_code?: string | undefined;
   quantity?: string | undefined;
+  confirmed_quantity?: string | undefined;
   unit_price?: string | undefined;
   amount?: string | undefined;
 };
@@ -100,6 +105,7 @@ export interface BillItem {
   quantity: string | number;
   unit_price: string | number;
   description: string;
+  confirmed_quantity: string | number;
 }
 
 export interface MatchedLineItem {
@@ -120,9 +126,15 @@ export interface OrgDetails {
   currency?: string;
 }
 
+export type BillItemsTableProps = {
+  matchedLineItems: MatchedLineItem[];
+  orgDetails?: OrgDataProps;
+  billDetails: Partial<Bill>;
+};
+
 export type MatchStatus =
-  | "matched"
-  | "mismatched"
-  | "partial"
+  | "Matched"
+  | "Mismatched"
+  | "Partial matched"
   | "poNotAvailable";
 export type TooltipSide = "right" | "top" | "bottom" | "left";

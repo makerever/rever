@@ -76,7 +76,7 @@ export default function POLineItemsTable({
             {poItemHeaders.map((h, i) => (
               <th
                 key={i}
-                className="px-2 py-4 text-xs text-slate-500 font-medium"
+                className={`px-2 py-4 text-xs text-slate-500 font-medium ${i < 2 ? "" : "text-right"}`}
               >
                 {h}
               </th>
@@ -117,6 +117,7 @@ export default function POLineItemsTable({
                       showItemsDescription &&
                       !getValues(`items.${index}.quantity`)
                     }
+                    className="text-right"
                   />
                 </td>
                 <td className="p-2">
@@ -128,19 +129,22 @@ export default function POLineItemsTable({
                       showItemsDescription &&
                       !getValues(`items.${index}.unit_price`)
                     }
+                    className="text-right"
                   />
                 </td>
-                <td className="p-2">
+                <td className="p-2 text-right">
                   <p className="text-slate-600 text-sm">
                     {formatNumber(rowAmt, orgDetails?.currency)}
                   </p>
                 </td>
                 <td className="p-2">
-                  <IconWrapper
-                    onClick={() => remove(index)}
-                    className="hover:bg-red-100 hover:text-red-500"
-                    icon={<Trash width={16} />}
-                  />
+                  <div className="flex justify-end">
+                    <IconWrapper
+                      onClick={() => remove(index)}
+                      className="hover:bg-red-100 hover:text-red-500"
+                      icon={<Trash width={16} />}
+                    />
+                  </div>
                 </td>
               </tr>
             );

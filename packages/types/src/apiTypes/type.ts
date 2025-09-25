@@ -77,6 +77,7 @@ export interface OrgDataProps {
   date_format?: string;
   currency?: string;
   matching_type?: string | number;
+  receipt_confirmation_enabled?: boolean | string;
 }
 
 // For enabling approval
@@ -119,4 +120,16 @@ export interface ApproverAssignment {
 export interface AssignApproverPayload {
   model_name: string;
   assignments: ApproverAssignment[];
+}
+
+export interface ReqConfirmationApiType {
+  assignee_id: string | number;
+}
+
+export interface ReqConfirmedApiType {
+  items: {
+    id: string;
+    confirmed_quantity: string;
+  }[];
+  comment: string;
 }

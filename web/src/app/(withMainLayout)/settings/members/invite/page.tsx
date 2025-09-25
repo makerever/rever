@@ -14,6 +14,7 @@ import {
 } from "@rever/common";
 import { memberRoleOptions } from "@rever/constants";
 import {
+  getLoggedInUserDetails,
   getMembersListByIdApi,
   inviteUserApi,
   updateMemberApi,
@@ -152,6 +153,45 @@ function RoleDescriptions({ role }: RoleDescriptionsProps) {
           </ul>
         </div>
       ) : null}
+
+      {/* Lite User */}
+      {role === "lite_user" ? (
+        <div className="mt-4">
+          <h3 className="text-sm font-semibold text-slate-600">- Lite User</h3>
+          <h3 className="text-xs font-medium text-slate-600 mt-2 mb-3">
+            # Can do
+          </h3>
+          <ul className="text-xs text-slate-500 mt-1 space-y-0.5">
+            <li>
+              - Can confirm Request Receipt Confirmations, serving as an
+              acknowledgment that a bill or invoice has been received by the
+              relevant department or stakeholder.
+            </li>
+            <li>
+              - Can view the specific documents or transactions assigned to them
+              for confirmation, ensuring transparency in the receipt lifecycle.
+            </li>
+          </ul>
+          <h3 className="text-xs font-medium text-slate-600 mt-3 mb-3">
+            # Cannot do
+          </h3>
+          <ul className="text-xs text-slate-500 mt-1">
+            <li>
+              - Cannot create, review, approve, or reject bills to ensure this
+              role is limited to acknowledgment duties only.
+            </li>
+            <li>
+              - No access to financial dashboards, advanced reports, or
+              decision-making tools to maintain appropriate access boundaries.
+            </li>
+            <li>
+              - Cannot access or manage vendors, users, or organizational
+              settings to preserve strict data governance and minimize risk
+              exposure.
+            </li>
+          </ul>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -185,6 +225,8 @@ function InviteMemberWithParams() {
   // Watch form fields for validation
   const first_name = watch("first_name");
   const last_name = watch("last_name");
+
+  const setUser = useUserStore((state) => state.setUser);
 
   // Disable Save button if required fields are missing or submitting
   const isBtnDisabled = idValue
@@ -233,9 +275,14 @@ function InviteMemberWithParams() {
       // Invite new member
       const response = await inviteUserApi(data);
       if (response?.status === 202) {
-        setIsLoaderFormSubmit(false);
+        const response = await getLoggedInUserDetails();
         showSuccessToast("Invitation request sent");
-        router.push("/settings/members");
+        if (response?.status === 200) {
+          setUser(response?.data);
+          router.push("/settings/members");
+        } else {
+          router.push("/settings/members");
+        }
       } else {
         if (response?.data?.detail) {
           setIsLoaderFormSubmit(false);

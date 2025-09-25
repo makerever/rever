@@ -73,6 +73,25 @@ export function formatNumber(
   return formatted;
 }
 
+// For plain numbers only (no currency, just commas)
+export function formatPlainNumber(
+  value: number | string | undefined,
+  compact?: boolean,
+  minFractionDigits: number = 2,
+  maxFractionDigits: number = 2,
+): string {
+  if (value === undefined || value === null || value === "") return "";
+
+  const num = typeof value === "string" ? parseFloat(value) : value;
+  if (typeof num !== "number" || isNaN(num)) return "";
+
+  return new Intl.NumberFormat("en-US", {
+    notation: compact ? "compact" : "standard",
+    minimumFractionDigits: minFractionDigits,
+    maximumFractionDigits: maxFractionDigits,
+  }).format(num);
+}
+
 //Function to make first letter capital
 export const capitalizeFirstLetter = (str: string) =>
   str.charAt(0).toUpperCase() + str.slice(1);
@@ -108,6 +127,11 @@ export const billStatusLabels: Record<string, string> = {
   approved: "Approved",
   rejected: "Rejected",
   closed: "Closed",
+  active: "Active",
+  revoked: "Revoked",
+  requested: "Pending",
+  confirmed: "Confirmed",
+  completed: "Completed",
 };
 
 //Function to get labels for bill status
@@ -118,21 +142,27 @@ export const getLabelForBillStatus = (value: string) =>
 export const getStatusClass = (status: string = ""): string => {
   switch (status) {
     case "Approved":
-      return "text-green-600 bg-green-50 border-green-200";
     case "Active":
+    case "Confirmed":
+    case "done":
+    case "completed":
       return "text-green-600 bg-green-50 border-green-200";
     case "Rejected":
-      return "text-red-500 bg-red-50 border-red-200";
     case "Inactive":
+    case "failed":
+    case "Revoked":
       return "text-red-500 bg-red-50 border-red-200";
     case "Under review":
       return "text-purple-500 bg-purple-50 border-purple-200";
     case "Under approval":
       return "text-orange-400 bg-orange-50 border-orange-200";
     case "Draft":
-      return "text-yellow-500 bg-yellow-50 border-yellow-200";
     case "Pending":
+    case "Assigned":
+    case "active":
       return "text-yellow-500 bg-yellow-50 border-yellow-200";
+    case "Ledger entry":
+      return "text-teal-500 bg-teal-50 border-teal-200";
     default:
       return "none";
   }
@@ -175,9 +205,11 @@ export const RolesLabels: Record<string, string> = {
   admin: "Admin",
   member: "Member",
   finance_manager: "Finance manager",
+  lite_user: "Lite user",
   Admin: "Admin",
   Member: "Member",
   "Finance manager": "Finance manager",
+  "Lite user": "Lite user",
 };
 
 //Function to get labels for payment terms

@@ -69,15 +69,27 @@ export function ProfileSidebar({
       {/* Top section: Back to home and navigation links */}
       <div>
         {/* Back to home button */}
-        <div
-          onClick={() => router.push("/home")}
-          className={`${!isProfileSidebarCollapsed ? "justify-normal" : "justify-center"} cursor-pointer flex items-center mb-4 text-sm text-slate-800 font-medium`}
-        >
-          <ChevronLeft width={16} />
-          <p className={`${isProfileSidebarCollapsed ? "hidden" : ""}`}>
-            Back to home
-          </p>
-        </div>
+        {user?.role === "lite_user" ? (
+          <div
+            onClick={() => router.push("/request-receipt/list")}
+            className={`${!isProfileSidebarCollapsed ? "justify-normal" : "justify-center"} cursor-pointer flex items-center mb-4 text-sm text-slate-800 font-medium`}
+          >
+            <ChevronLeft width={16} />
+            <p className={`${isProfileSidebarCollapsed ? "hidden" : ""}`}>
+              Back to confirmations
+            </p>
+          </div>
+        ) : (
+          <div
+            onClick={() => router.push("/home")}
+            className={`${!isProfileSidebarCollapsed ? "justify-normal" : "justify-center"} cursor-pointer flex items-center mb-4 text-sm text-slate-800 font-medium`}
+          >
+            <ChevronLeft width={16} />
+            <p className={`${isProfileSidebarCollapsed ? "hidden" : ""}`}>
+              Back to home
+            </p>
+          </div>
+        )}
         {/* Navigation links */}
         <nav>
           <ul>
