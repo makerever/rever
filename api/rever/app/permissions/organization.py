@@ -81,6 +81,7 @@ class IsFinanceManagerOrSuperAdmin(permissions.BasePermission):
             and request.user.role in [User.Role.FINANCE_MANAGER, User.Role.SUPER_ADMIN]
         )
 
+
 class IsLiteUser(permissions.BasePermission):
     def has_permission(self, request, view):
         from rever.db.models.auth import User

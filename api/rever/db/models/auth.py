@@ -101,6 +101,7 @@ class Organization(BaseModel):
         default=False,
         help_text="Enable Lite User receipt request/confirmation workflow for this organization.",
     )
+
     class Meta:
         verbose_name = "Organization"
         verbose_name_plural = "Organizations"
