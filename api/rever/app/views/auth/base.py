@@ -273,7 +273,7 @@ class InviteUserView(BaseAPIView):
             )
 
         # create (or reuse) an inactive invitation record
-        invited, created = User.objects.update_or_create(
+        invited, _ = User.objects.update_or_create(
             email=email,
             defaults={
                 "username": email,

@@ -8,7 +8,12 @@ from django.db.models import Q
 from django.utils import timezone
 from simple_history.models import HistoricalRecords
 
-from rever.utils.bill_constants import MATCH_PROGRESS_CHOICES, PAYMENT_TERM_CHOICES, STATUS_CHOICES,RECEIPT_STATUS_CHOICES
+from rever.utils.bill_constants import (
+    MATCH_PROGRESS_CHOICES,
+    PAYMENT_TERM_CHOICES,
+    RECEIPT_STATUS_CHOICES,
+    STATUS_CHOICES,
+)
 from rever.utils.payable_constants import PO_STATUS_CHOICES
 
 from .auth import Organization
@@ -201,7 +206,7 @@ class Bill(BaseModel):
         verbose_name_plural = "Bills"
         db_table = "bills"
         ordering = ["-bill_date"]
-    
+
     def revoke_receipt_if_needed(self, revoked_by_user=None):
         """
         Revoke receipt confirmation if bill is moving to approval states
@@ -271,6 +276,7 @@ class Bill(BaseModel):
                 if self.revoke_receipt_if_needed(revoked_by):
                     # Save again to update receipt_status if it was changed
                     super().save(update_fields=["receipt_status"])
+
 
 class BillItem(BaseModel):
     bill = models.ForeignKey(Bill, on_delete=models.CASCADE, related_name="items", db_index=True)
