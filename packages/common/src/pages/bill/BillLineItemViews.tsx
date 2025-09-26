@@ -11,6 +11,7 @@ const billItemHeaders = [
   "Description",
   "Product code",
   "Quantity",
+  "Confirmed Qty",
   "Unit price",
   "Amount",
 ];
@@ -29,6 +30,7 @@ export default function BillLineItemsReadOnly({
         <colgroup>
           <col className="w-10" />
           <col className="w-5/12" />
+          <col className="w-2/12" />
           <col className="w-2/12" />
           <col className="w-2/12" />
           <col className="w-2/12" />
@@ -73,6 +75,10 @@ export default function BillLineItemsReadOnly({
                   {/* Quantity */}
                   <td className="p-2 text-right">
                     {formatPlainNumber(item?.quantity)}
+                  </td>
+                  {/* Confirmed quantity */}
+                  <td className="p-2 text-right">
+                    {formatPlainNumber(item?.confirmed_quantity) || "-"}
                   </td>
                   {/* Unit price */}
                   <td className="p-2 text-right">
