@@ -3,7 +3,7 @@
   "description": "Invioce and payment management system",
   "private": true,
   "repository": "https://github.com/makerever/rever.git",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "license": "AGPL-3.0",
   "scripts": {
     "check-types": "tsc --noEmit",
