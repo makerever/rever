@@ -18,6 +18,7 @@ dependencies = [
     "python-decouple==3.8",
     "pytz==2025.2",
     "redis==5.2.1",
+    "python-json-logger==4.0.0"
 ]
 
 [dependency-groups]

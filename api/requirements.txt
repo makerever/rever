@@ -15,3 +15,4 @@ django-crum==0.7.9
 django-simple-history==3.8.0
 sentence-transformers==4.1.0
 django-filter == 25.1
+python-json-logger == 4.0.0

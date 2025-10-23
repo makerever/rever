@@ -23,7 +23,7 @@ from .auth import (
     PasswordResetSerializer,
     SignupCompleteSerializer,
 )
-from .match import MatchResultSerializer
+from .match import DragDropSerializer, MatchResultSerializer
 from .notification import (
     NotificationBulkUpdateSerializer,
     NotificationCreateSerializer,

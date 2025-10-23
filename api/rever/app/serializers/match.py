@@ -22,3 +22,9 @@ class MatchResultSerializer(serializers.ModelSerializer):
             "unit_price_status",
             "overall_status",
         ]
+
+
+class DragDropSerializer(serializers.Serializer):
+    bill_id = serializers.UUIDField()
+    bill_item_id = serializers.UUIDField()
+    po_item_id = serializers.UUIDField()

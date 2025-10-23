@@ -25,3 +25,12 @@ RECEIPT_STATUS_CHOICES = [
     ("confirmed", "Confirmed"),  # receipt confirmed
     ("revoked", "Revoked"),  # receipt revoked
 ]
+
+MATCH_STATUS_CHOICES = [
+    ("pending", "Pending"),  # Not yet matched
+    ("matched", "Matched"),  # Fully matched
+    ("partial", "Partial Match"),  # Partially matched
+    ("mismatch", "Mismatch"),  # Doesn't match PO
+    ("no_po", "No PO"),  # Bill without purchase order
+    ("exception", "Exception"),  # Requires manual review
+]

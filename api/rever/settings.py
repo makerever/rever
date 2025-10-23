@@ -228,6 +228,10 @@ if config("USE_MINIO", cast=bool, default=False):
 
 APP_URL = config("APP_URL", "http://localhost:3000")
 
+MATCH_THRESHOLD = config("MATCH_THRESHOLD", default=0.7, cast=float)
+
+# Logging Configuration
+
 
 LOG_DIR = Path(BASE_DIR, "logs")
 
@@ -238,52 +242,42 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {name} {message}",
-            "style": "{",
+        "json": {
+            "()": "pythonjsonlogger.json.JsonFormatter",
+            "format": "%(asctime)s %(name)s %(levelname)s %(message)s",
         },
     },
     "handlers": {
         "console": {
+            "level": "DEBUG",
             "class": "logging.StreamHandler",
-            "formatter": "verbose",
-        },
-        "file": {
-            "class": "logging.FileHandler",
-            "filename": BASE_DIR / "logs/rever.log",
-            "formatter": "verbose",
+            "formatter": "json",
         },
     },
+    "root": {
+        "level": "INFO",
+        "handlers": ["console"],
+    },
     "loggers": {
-        "rever.api.request": {
-            "level": "INFO",
-            "handlers": ["console", "file"],
-            "propagate": False,
-        },
         "rever.api": {
             "level": "INFO",
-            "handlers": ["console", "file"],
+            "handlers": ["console"],
             "propagate": False,
         },
         "rever.worker": {
             "level": "INFO",
-            "handlers": ["console", "file"],
+            "handlers": ["console"],
             "propagate": False,
         },
         "rever.exception": {
             "level": "ERROR",
-            "handlers": ["console", "file"],
-            "propagate": False,
-        },
-        "rever.external": {
-            "level": "INFO",
-            "handlers": ["console", "file"],
-            "propagate": False,
-        },
-        "rever.match": {
-            "level": "DEBUG",
-            "handlers": ["console", "file"],
+            "handlers": ["console"],
             "propagate": False,
         },
     },
 }
+
+
+# Embedding model settings
+EMBED_MODEL = config("EMBED_MODEL", default="all-MiniLM-L6-v2")
+EMBED_DEVICE = config("EMBED_DEVICE", default="cpu")
