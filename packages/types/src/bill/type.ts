@@ -99,6 +99,8 @@ export interface PurchaseOrderItem {
   pending_approval_quantity?: string | number;
   unit_price: string | number;
   description: string;
+  id?: string;
+  line_number?: number;
 }
 
 export interface BillItem {
@@ -106,6 +108,10 @@ export interface BillItem {
   unit_price: string | number;
   description: string;
   confirmed_quantity: string | number;
+  bill?: string;
+  id?: string;
+  line_number: number;
+  extra_bill_item?: boolean;
 }
 
 export interface MatchedLineItem {
@@ -130,11 +136,13 @@ export type BillItemsTableProps = {
   matchedLineItems: MatchedLineItem[];
   orgDetails?: OrgDataProps;
   billDetails: Partial<Bill>;
+  triggerGetMatchResults: () => void;
 };
 
 export type MatchStatus =
   | "Matched"
   | "Mismatched"
   | "Partial matched"
-  | "poNotAvailable";
+  | "poNotAvailable"
+  | "none";
 export type TooltipSide = "right" | "top" | "bottom" | "left";

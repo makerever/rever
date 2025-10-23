@@ -1,6 +1,6 @@
 //File for all the Bill API's
 
-import { Bill } from "@rever/types";
+import { Bill, DragNDropMatchProps } from "@rever/types";
 import axiosInstance from "../api/axios";
 import { ATTACHMENT_API, BILL_API } from "../api/urls";
 import { ApproveRejectBillProps } from "@rever/types";
@@ -103,5 +103,11 @@ export const getMatchResultsApi = async (id: string) => {
   const response = await axiosInstance.get(
     `${BILL_API.MANAGE_BILLS}${id}${BILL_API.MATCH_RESULTS}`,
   );
+  return response;
+};
+
+// Drag and Drop Match API
+export const dragNDropMatchApi = async (billData: DragNDropMatchProps) => {
+  const response = await axiosInstance.post(`${BILL_API.MATCH_DND}`, billData);
   return response;
 };

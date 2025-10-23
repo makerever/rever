@@ -37,6 +37,7 @@ export const BILL_API = {
   BILL_SUMMARY: "/bills/summary/",
   BARGRAPH_DATA: "/bills/summary/monthly/",
   MATCH_RESULTS: "/match-results/",
+  MATCH_DND: "/matching/dnd/assign/",
 };
 
 // Attachment API Endpoints

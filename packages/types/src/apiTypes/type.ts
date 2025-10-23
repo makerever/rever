@@ -133,3 +133,10 @@ export interface ReqConfirmedApiType {
   }[];
   comment: string;
 }
+
+// Drag and Drop Match API props
+export interface DragNDropMatchProps {
+  bill_id: string;
+  bill_item_id: string;
+  po_item_id: string;
+}
