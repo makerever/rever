@@ -306,6 +306,7 @@ class BillListSerializer(serializers.ModelSerializer):
             "is_active",
             "is_attachment",
             "is_duplicate",
+            "match_status",
             "organization",
             "created_at",
         ]
