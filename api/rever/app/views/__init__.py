@@ -42,6 +42,7 @@ from .payable.base import (
     BillItemViewSet,
     BillSummaryAsyncAPIView,
     BillViewSet,
+    MatchResultDnDViewSet,
     MonthlyBillSummaryAsyncAPIView,
     PurchaseOrderItemViewSet,
     PurchaseOrderViewSet,

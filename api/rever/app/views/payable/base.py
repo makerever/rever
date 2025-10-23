@@ -1,3 +1,5 @@
+import logging
+
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError
@@ -11,6 +13,7 @@ from rever.app.serializers import (
     BillItemSerializer,
     BillListSerializer,
     BillSerializer,
+    DragDropSerializer,
     MatchResultSerializer,
     PurchaseOrderItemSerializer,
     PurchaseOrderListSerializer,
@@ -23,8 +26,11 @@ from rever.app.views.base import BaseAPIView
 from rever.app.views.base_viewsets import BaseModelViewSet
 from rever.bgtasks import generate_bill_summary, generate_monthly_bill_summary
 from rever.db.models import Bill, BillItem, MatchResult, PurchaseOrder, PurchaseOrderItem, Vendor
+from rever.services.matching.drag_drop import pair_bill_item_with_po_item
 from rever.utils.bill_constants import STATUS_CHOICES
 from rever.utils.cache import clear_report_cache
+
+logger = logging.getLogger(__name__)
 
 
 class VendorViewSet(BaseModelViewSet):
@@ -410,3 +416,105 @@ class PurchaseOrderItemViewSet(BaseModelViewSet):
         if po.organization != self.request.user.organization:
             raise PermissionDenied("Cannot modify item of a foreign purchase order.")
         serializer.save()
+
+
+class MatchResultDnDViewSet(BaseModelViewSet):
+    serializer_class = MatchResultSerializer
+
+    def get_queryset(self):
+        return MatchResult.objects.filter(
+            organization=self.request.user.organization
+        ).select_related("bill", "purchase_order", "bill_item", "purchase_order_item")
+
+    def create(self, request, *args, **kwargs):
+        return Response(
+            {"detail": "Use POST /api/matching/dnd/assign for drag & drop."},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
+    def get_serializer_class(self):
+        if getattr(self, "action", None) == "assign":
+            return DragDropSerializer
+        return super().get_serializer_class()
+
+    def _serialize_match_context(self, bill, request):
+        results = (
+            MatchResult.objects.filter(bill=bill)
+            .select_related("bill_item", "purchase_order_item")
+            .order_by("bill_item__line_number", "purchase_order_item__line_number")
+        )
+
+        if bill.purchase_order_id:
+            unbilled_po = bill.purchase_order.items.exclude(
+                id__in=MatchResult.objects.filter(bill=bill).values_list(
+                    "purchase_order_item_id", flat=True
+                )
+            ).order_by("line_number")
+        else:
+            unbilled_po = PurchaseOrderItem.objects.none()
+
+        extra_bill_items = bill.items.exclude(
+            id__in=MatchResult.objects.filter(bill=bill).values_list("bill_item_id", flat=True)
+        ).order_by("line_number")
+
+        return {
+            "billed": MatchResultSerializer(results, many=True, context={"request": request}).data,
+            "unbilled": PurchaseOrderItemSerializer(
+                unbilled_po, many=True, context={"request": request}
+            ).data,
+            "extra_bill_items": BillItemSerializer(
+                extra_bill_items, many=True, context={"request": request}
+            ).data,
+        }
+
+    @action(detail=False, methods=["post"], url_path="assign")
+    def assign(self, request):
+        try:
+            s = DragDropSerializer(data=request.data)
+            s.is_valid(raise_exception=True)
+            data = s.validated_data
+            user = request.user
+
+            bill = (
+                Bill.objects.select_related("purchase_order")
+                .prefetch_related("items", "purchase_order__items")
+                .get(id=data["bill_id"], organization=user.organization)
+            )
+            if not bill.purchase_order_id:
+                return Response({"detail": "Bill has no Purchase Order."}, status=400)
+
+            bill_item = bill.items.get(id=data["bill_item_id"])
+            po_item = bill.purchase_order.items.get(id=data["po_item_id"])
+        except Bill.DoesNotExist:
+            return Response({"detail": "Bill not found."}, status=404)
+        except BillItem.DoesNotExist:
+            return Response({"detail": "Bill item not found on this bill."}, status=400)
+        except PurchaseOrderItem.DoesNotExist:
+            return Response({"detail": "PO item not found on this PO."}, status=400)
+        except Exception:
+            logger.exception("DnD assign: validation/scoping error")
+            return Response({"detail": "Invalid request."}, status=400)
+
+        # Perform DnD
+        try:
+            pair_bill_item_with_po_item(
+                bill_id=str(bill.id),
+                bill_item_id=str(bill_item.id),
+                po_item_id=str(po_item.id),
+                user=user,
+            )
+        except IntegrityError:
+            logger.exception("DnD unique constraint conflict")
+            return Response({"detail": "Conflict while swapping. Please retry."}, status=409)
+        except Exception:
+            logger.exception("DnD assign failed")
+            return Response({"detail": "Unable to assign now."}, status=500)
+
+        # Build response context safely
+        try:
+            payload = self._serialize_match_context(bill, request)
+            return Response(payload, status=200)
+        except Exception:
+            logger.exception("DnD assign: serialization error")
+            # Always return a Response to avoid None
+            return Response({"detail": "Assigned, but failed to serialize context."}, status=200)

@@ -1,4 +1,5 @@
 import contextlib
+import logging
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
@@ -10,6 +11,7 @@ from simple_history.models import HistoricalRecords
 
 from rever.utils.bill_constants import (
     MATCH_PROGRESS_CHOICES,
+    MATCH_STATUS_CHOICES,
     PAYMENT_TERM_CHOICES,
     RECEIPT_STATUS_CHOICES,
     STATUS_CHOICES,
@@ -18,6 +20,8 @@ from rever.utils.payable_constants import PO_STATUS_CHOICES
 
 from .auth import Organization
 from .base import BaseModel
+
+logger = logging.getLogger(__name__)
 
 
 class Address(BaseModel):
@@ -178,6 +182,13 @@ class Bill(BaseModel):
     receipt_comment = models.TextField(
         blank=True, help_text="Comment or note provided by the assigned receipt confirmer."
     )
+    match_status = models.CharField(
+        max_length=20,
+        choices=MATCH_STATUS_CHOICES,
+        default="no_po",
+        db_index=True,
+        help_text="Status of bill matching against purchase order",
+    )
 
     comments = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
@@ -255,27 +266,50 @@ class Bill(BaseModel):
         # Track old values for duplicate logic
         old = None
         old_status = None
+        old_purchase_order_id = None
         if self.pk:
             with contextlib.suppress(Bill.DoesNotExist):
                 old = Bill.objects.get(pk=self.pk)
                 old_status = old.status if old else None
+                old_purchase_order_id = old.purchase_order_id if old else None
         if old:
             self._old_vendor = old.vendor
             self._old_bill_number = old.bill_number
+            self._old_matching_progress = old.matching_progress
 
         if not self.bill_number or not self.bill_number.strip():
             self.bill_number = BillCounter.generate_bill_number(self.organization)
 
-        # Ensure atomicity
+        if self.purchase_order_id and self.match_status == "no_po":
+            self.match_status = "pending"
+        elif not self.purchase_order_id and old_purchase_order_id:
+            self.match_status = "no_po"
+            self.matching_progress = "not_started"
+
         with transaction.atomic():
             super().save(*args, **kwargs)
 
-            # Check if status changed to approval states and revoke receipt if needed
             if old_status and old_status != self.status:
                 revoked_by = getattr(self, "_revoked_by_user", None)
                 if self.revoke_receipt_if_needed(revoked_by):
-                    # Save again to update receipt_status if it was changed
                     super().save(update_fields=["receipt_status"])
+
+            try:
+                if old_purchase_order_id and not self.purchase_order_id:
+                    Bill.objects.filter(pk=self.pk).update(
+                        matching_progress="not_started",
+                        match_status="no_po",
+                    )
+                    logger.info(
+                        "Bill(%s): purchase_order removed -> "
+                        "set matching_progress=not_started, match_status=no_po",
+                        self.pk,
+                    )
+            except Exception:
+                logger.exception(
+                    "Failed to set no_po state for Bill %s after PO removal",
+                    getattr(self, "pk", None),
+                )
 
 
 class BillItem(BaseModel):
