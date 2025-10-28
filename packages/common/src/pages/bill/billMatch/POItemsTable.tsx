@@ -35,7 +35,7 @@ const POItemsTable = memo(
                 className={cn(
                   `${i < 2 ? "" : "text-right"}`,
                   "text-xs pr-4 py-3 font-medium text-slate-500 whitespace-nowrap",
-                  i === 0 ? "ps-2 w-[30px]" : ""
+                  i === 0 ? "ps-2 w-[30px]" : "",
                 )}
               >
                 {h}
@@ -58,7 +58,7 @@ const POItemsTable = memo(
 
               // Type guard to check if it's a MatchedLineItem
               const isMatchedItem = (
-                item: MatchedLineItem | UnmatchedLineItem
+                item: MatchedLineItem | UnmatchedLineItem,
               ): item is MatchedLineItem => {
                 return (
                   "description_status" in item ||
@@ -93,7 +93,7 @@ const POItemsTable = memo(
                             <div>Under approval:</div>{" "}
                             <div>
                               {formatPlainNumber(
-                                item.pending_approval_quantity
+                                item.pending_approval_quantity,
                               )}
                             </div>
                           </div>
@@ -148,7 +148,7 @@ const POItemsTable = memo(
         </tbody>
       </table>
     </div>
-  )
+  ),
 );
 
 export default POItemsTable;

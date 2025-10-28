@@ -58,6 +58,7 @@ export default function DataTable<
   hideExportIcon,
   flowImageSrc,
   perPageItemCount = [10, 20, 50, 100],
+  statusFilterLabel,
 }: TableProps<T>) {
   const user = useUserStore((state) => state.user);
 
@@ -165,6 +166,7 @@ export default function DataTable<
               selected={statusFilter}
               onChange={setStatusFilter}
               statusList={statusList}
+              filterHeading={statusFilterLabel}
             />
           ) : null}
 

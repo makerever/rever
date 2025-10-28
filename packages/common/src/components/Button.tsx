@@ -13,6 +13,7 @@ const Button = ({
   isLoading = false,
   width,
   isDefault = true,
+  isLoaderDark,
 }: ButtonProps) => {
   return (
     <button
@@ -25,7 +26,11 @@ const Button = ({
     >
       {isLoading ? (
         <div className="flex items-center justify-center gap-1">
-          <Loader width={16} height={16} className="animate-spin text-white" />
+          <Loader
+            width={16}
+            height={16}
+            className={`animate-spin ${isLoaderDark ? "text-slate-800" : "text-white"}`}
+          />
           {text}
         </div>
       ) : (

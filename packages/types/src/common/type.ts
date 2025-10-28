@@ -26,6 +26,7 @@ export interface ButtonProps {
   isLoading?: boolean;
   width?: string;
   isDefault?: boolean;
+  isLoaderDark?: boolean;
 }
 
 // Interface for label component props
@@ -185,6 +186,7 @@ export interface TableProps<T> {
   hideExportIcon?: boolean;
   flowImageSrc?: string;
   perPageItemCount?: number[];
+  statusFilterLabel?: string;
 }
 
 // Interface for status filter component props

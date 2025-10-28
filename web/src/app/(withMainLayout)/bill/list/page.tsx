@@ -182,9 +182,9 @@ const BillList = () => {
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: "Stages",
         sortDescFirst: false,
-        cell: ({ row, getValue }) => {
+        cell: ({ getValue }) => {
           const value = getValue() as string;
 
           return (
@@ -196,14 +196,36 @@ const BillList = () => {
               >
                 {value}
               </span>
-
-              {row?.original.is_attachment ? (
+            </div>
+          );
+        },
+        filterFn: (row, columnId, filterValue: string[]) => {
+          if (!filterValue?.length) return true;
+          return filterValue.includes(row.getValue(columnId) as string);
+        },
+      },
+      {
+        accessorKey: "match_status",
+        header: "Status",
+        sortDescFirst: false,
+        cell: ({ row, getValue }) => {
+          const value = getLabelForBillStatus(getValue() as string);
+          return (
+            <div className="flex items-center pr-2 justify-between">
+              <span
+                className={`text-2xs border py-1 px-1.5 rounded-md ${getStatusClass(
+                  value,
+                )}`}
+              >
+                {value}
+              </span>
+              {row?.original.is_attachment && (
                 <CustomTooltip content="PDF attached">
                   <div>
                     <Paperclip className="text-slate-400" width={14} />
                   </div>
                 </CustomTooltip>
-              ) : null}
+              )}
             </div>
           );
         },
@@ -237,6 +259,7 @@ const BillList = () => {
             is_attachment: val?.is_attachment,
             is_duplicate: val?.is_duplicate,
             status: getLabelForBillStatus(val?.status),
+            match_status: val?.match_status,
           };
         });
       setBillData(billData);
@@ -293,6 +316,7 @@ const BillList = () => {
           search={search}
           clearSearch={() => setSearch("")}
           flowImageSrc="/images/flowImages/billMasterFlow.svg"
+          statusFilterLabel="Stages"
         />
       )}
     </>

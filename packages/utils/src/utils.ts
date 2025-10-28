@@ -132,40 +132,64 @@ export const billStatusLabels: Record<string, string> = {
   requested: "Pending",
   confirmed: "Confirmed",
   completed: "Completed",
+  matched: "Exact match",
+  partial: "Partial match",
+  mismatched: "Mismatch",
+  no_po: "No PO",
+  pending: "Pending",
 };
 
 //Function to get labels for bill status
 export const getLabelForBillStatus = (value: string) =>
   billStatusLabels[value] || "Unknown";
 
-//Function to get bill status pills
+type StatusClassMap = Record<string, string>;
+
+const statusClassMap: StatusClassMap = {
+  // Green
+  Active: "text-green-800 bg-green-100 border-green-400 font-medium",
+  active: "text-green-800 bg-green-100 border-green-400 font-medium",
+  Confirmed: "text-green-800 bg-green-100 border-green-400 font-medium",
+  done: "text-green-800 bg-green-100 border-green-400 font-medium",
+  completed: "text-green-800 bg-green-100 border-green-400 font-medium",
+  Approved: "text-lime-800 bg-lime-100 border-lime-400 font-medium",
+
+  // Red
+  Inactive: "text-red-800 bg-red-100 border-red-400 font-medium",
+  inactive: "text-red-800 bg-red-100 border-red-400 font-medium",
+  failed: "text-red-800 bg-red-100 border-red-400 font-medium",
+  Revoked: "text-red-800 bg-red-100 border-red-400 font-medium",
+  Mismatch: "text-red-800 bg-red-100 border-red-400 font-medium",
+  Rejected: "text-pink-800 bg-pink-100 border-pink-400 font-medium",
+
+  // Yellow
+  Pending: "text-yellow-800 bg-yellow-100 border-yellow-400 font-medium",
+  Assigned: "text-yellow-800 bg-yellow-100 border-yellow-400 font-medium",
+  "Under review": "text-yellow-800 bg-yellow-100 border-yellow-400 font-medium",
+
+  // Sky
+  "Under approval": "text-sky-800 bg-sky-100 border-sky-400 font-medium",
+
+  // Slate
+  Draft: "text-slate-800 bg-slate-100 border-slate-400 font-medium",
+
+  // Indigo
+  "Ledger entry": "text-indigo-800 bg-indigo-100 border-indigo-400 font-medium",
+
+  // Teal
+  "Exact match": "text-teal-800 bg-teal-100 border-teal-400 font-medium",
+
+  // Orange
+  "Partial match":
+    "text-orange-800 bg-orange-100 border-orange-400 font-medium",
+
+  // Zinc
+  "No PO": "text-zinc-800 bg-zinc-100 border-zinc-400 font-medium",
+};
+
+// Function to get bill status pills
 export const getStatusClass = (status: string = ""): string => {
-  switch (status) {
-    case "Approved":
-    case "Active":
-    case "Confirmed":
-    case "done":
-    case "completed":
-      return "text-green-600 bg-green-50 border-green-200";
-    case "Rejected":
-    case "Inactive":
-    case "failed":
-    case "Revoked":
-      return "text-red-500 bg-red-50 border-red-200";
-    case "Under review":
-      return "text-purple-500 bg-purple-50 border-purple-200";
-    case "Under approval":
-      return "text-orange-400 bg-orange-50 border-orange-200";
-    case "Draft":
-    case "Pending":
-    case "Assigned":
-    case "active":
-      return "text-yellow-500 bg-yellow-50 border-yellow-200";
-    case "Ledger entry":
-      return "text-teal-500 bg-teal-50 border-teal-200";
-    default:
-      return "none";
-  }
+  return statusClassMap[status] || "none";
 };
 
 // Function to export data as excel

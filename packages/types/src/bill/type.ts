@@ -37,6 +37,7 @@ export interface Bill {
   updated_at?: string;
   status: string;
   receipt_status?: string;
+  match_status?: string;
   receipt_comment?: string;
   items?: BillItemTypeProps[];
   created_at?: string;
