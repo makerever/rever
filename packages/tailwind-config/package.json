@@ -1,6 +1,6 @@
 {
   "name": "@rever/tailwind-config",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "license": "AGPL-3.0",
   "description": "common tailwind configuration across monorepo",
   "main": "tailwind.config.js",

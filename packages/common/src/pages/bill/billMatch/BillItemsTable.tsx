@@ -124,7 +124,7 @@ const BillItemsTable = ({
                   className={cn(
                     `${i < 1 ? "" : "text-right"}`,
                     "text-xs py-3 font-medium text-slate-500 whitespace-nowrap",
-                    i === 0 ? "ps-4" : "pr-4"
+                    i === 0 ? "ps-4" : "pr-4",
                   )}
                 >
                   {h}
@@ -269,7 +269,7 @@ const BillItemsTable = ({
                                 >
                                   {formatNumber(
                                     item.unit_price,
-                                    orgDetails?.currency
+                                    orgDetails?.currency,
                                   )}
                                 </span>
                               </td>
@@ -300,7 +300,7 @@ const BillItemsTable = ({
                                     ? ""
                                     : formatNumber(
                                         amount,
-                                        orgDetails?.currency
+                                        orgDetails?.currency,
                                       )}
                                 </span>
                               </td>
@@ -333,7 +333,7 @@ const BillItemsTable = ({
                                       {item?.extra_bill_item
                                         ? ""
                                         : formatPlainNumber(
-                                            item?.confirmed_quantity
+                                            item?.confirmed_quantity,
                                           ) || "--"}
                                     </span>
                                   </div>

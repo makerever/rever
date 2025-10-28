@@ -103,7 +103,7 @@ const MatchingStatusTable = memo(
         </tbody>
       </table>
     </div>
-  )
+  ),
 );
 
 export default MatchingStatusTable;

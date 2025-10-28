@@ -68,7 +68,7 @@ const StatusIcon = memo(
         </div>
       </CustomTooltip>
     );
-  }
+  },
 );
 
 export default StatusIcon;
