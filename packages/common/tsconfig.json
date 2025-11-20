@@ -1,10 +1,14 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": "src",
     "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
     "paths": {
-      "@rever/common": ["../common/src"]
-    },
-    "jsx": "react-jsx"
-  }
+      "@rever/common": ["."],
+      "@rever/common/*": ["*"]
+    }
+  },
+  "include": ["src"]
 }

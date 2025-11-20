@@ -1,17 +1,21 @@
-FROM node:20-alpine
-RUN apk add --no-cache libc6-compat 
+FROM node:24-alpine
+RUN apk add --no-cache libc6-compat
 
-# Set working directory
+# Enable Corepack + pnpm before copying code
+RUN corepack enable \
+    && corepack prepare pnpm@latest --activate
+
+# Working directory
 WORKDIR /app
 
-# Copy the entire monorepo structure
+# Copy monorepo
 COPY . .
 
-RUN yarn global add turbo
-# Install dependencies using workspace
-RUN yarn install
+# Install dependencies for monorepo
+RUN pnpm install --frozen-lockfile
 
-# Make sure next is in the path - include both root and web node_modules
+# Add node_modules bin to PATH for dev commands
 ENV PATH=/app/node_modules/.bin:/app/web/node_modules/.bin:$PATH
 
-CMD ["yarn", "dev"]
+# Use turbo via pnpm dlx, not global
+CMD ["pnpm", "dlx", "turbo", "dev", "--filter=web"]

@@ -1,7 +1,7 @@
 {
   "name": "@rever/constants",
-  "version": "0.6.0",
-  "license": "AGPL-3.0",  
+  "version": "0.1.0",
+  "license": "AGPL-3.0",
   "private": true,
   "main": "src/index.ts",
   "types": "src/index.ts",
@@ -9,5 +9,9 @@
     "src"
   ],
   "description": "Constant values across the monorepo",
-  "dependencies": {}
+  "dependencies": {
+    "@rever/types": "workspace:*",
+    "country-state-city": "^3.2.1",
+    "lucide-react": "^0.513.0"
+  }
 }
