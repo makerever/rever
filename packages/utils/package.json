@@ -1,6 +1,6 @@
 {
   "name": "@rever/utils",
-  "version": "0.1.0",
+  "version": "0.6.0",
   "license": "AGPL-3.0",
   "private": true,
   "main": "src/index.ts",

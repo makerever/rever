@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "0.1.0",
+  "version": "0.6.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -30,7 +30,17 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/file-saver": "^2.0.7",
     "@types/js-cookie": "^3.0.6",
-    "@types/react": "19.1.5"
+    "@types/luxon": "^3.6.2",
+    "@types/node": "22.15.21",
+    "@types/react": "19.1.5",
+    "@types/react-dom": "^18",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.1",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-config-turbo": "^2.5.3",
+    "typescript": "5.8.3",
+    "webpack": "^5.0.0"
   }
 }
