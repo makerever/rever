@@ -14,14 +14,20 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18'
-        cache: 'yarn'
+        node-version: '24'
+        check-latest: true
         
-    - name: Install yarn dependencies
-      run: yarn install --frozen-lockfile
-      
-    - name: Run yarn lint
-      run: yarn lint
+    - name: Enable Corepack and pnpm
+      run: |
+        corepack enable
+        corepack prepare pnpm@latest --activate
+        pnpm -v
+        
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Run lint
+      run: pnpm lint
       
     - name: Set up Python
       uses: actions/setup-python@v4

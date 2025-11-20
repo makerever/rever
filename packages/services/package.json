@@ -1,13 +1,22 @@
 {
   "name": "@rever/services",
-  "version": "0.6.0",
-  "license": "AGPL-3.0",  
+  "version": "0.1.0",
+  "license": "AGPL-3.0",
   "private": true,
   "main": "src/index.ts",
   "types": "src/index.ts",
   "files": [
     "src"
   ],
-  "description": "API services across the monorepo",
-  "dependencies": {}
+  "description": "Service layer across the monorepo",
+  "dependencies": {
+    "@rever/types": "workspace:*",
+    "@rever/validations": "workspace:*",
+    "axios": "^1.12.0",
+    "js-cookie": "^3.0.5",
+    "swr": "^2.3.3"
+  },
+  "devDependencies": {
+    "@types/js-cookie": "^3.0.6"
+  }
 }

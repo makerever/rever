@@ -26,19 +26,19 @@ fi
 
 # Check if there are any TypeScript/TSX/Markdown files
 if echo "$STAGED_FILES" | grep -q "\.ts$\|\.tsx$\|\.md$"; then
-    echo "Running yarn format..."
+    echo "Running pnpm format..."
     # Save current directory if not already saved
     if [ -z "$CURRENT_DIR" ]; then
         CURRENT_DIR=$(pwd)
     fi
     
-    # Run yarn format
-    yarn format
+    # Run pnpm format
+    pnpm format
     
     # Stage the formatted files
     git add $(echo "$STAGED_FILES" | grep "\.ts$\|\.tsx$\|\.md$")
     
-    echo "Yarn format completed."
+    echo "pnpm format completed."
 fi
 
 echo "Pre-commit hook completed successfully."

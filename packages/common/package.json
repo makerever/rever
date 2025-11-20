@@ -1,6 +1,6 @@
 {
   "name": "@rever/common",
-  "version": "0.6.0",
+  "version": "0.1.0",
   "license": "AGPL-3.0",
   "private": true,
   "main": "src/index.ts",
@@ -9,5 +9,39 @@
     "src"
   ],
   "description": "Common components across the monorepo",
-  "dependencies": {}
+  "dependencies": {
+    "@rever/constants": "workspace:*",
+    "@rever/services": "workspace:*",
+    "@rever/stores": "workspace:*",
+    "@rever/types": "workspace:*",
+    "@rever/utils": "workspace:*",
+    "@rever/validations": "workspace:*",
+    "@hello-pangea/dnd": "^18.0.1",
+    "@hookform/resolvers": "^5.0.1",
+    "@radix-ui/react-dialog": "^1.1.13",
+    "@radix-ui/react-popover": "^1.1.11",
+    "@radix-ui/react-slot": "^1.2.2",
+    "@radix-ui/react-tooltip": "^1.2.7",
+    "@tanstack/react-table": "^8.21.3",
+    "apexcharts": "^4.7.0",
+    "class-variance-authority": "^0.7.1",
+    "cmdk": "^1.1.1",
+    "date-fns": "^3.6.0",
+    "js-cookie": "^3.0.5",
+    "lucide-react": "^0.513.0",
+    "next": "15.4.7",
+    "react": "^18.3.1",
+    "react-apexcharts": "^1.7.0",
+    "react-day-picker": "^8.10.1",
+    "react-error-boundary": "^6.0.0",
+    "react-hook-form": "^7.56.1",
+    "react-phone-input-2": "^2.15.1",
+    "react-pdf": "9.0.0",
+    "react-select": "^5.10.1",
+    "sonner": "^2.0.3"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.5",
+    "@types/js-cookie": "^3.0.6"
+  }
 }

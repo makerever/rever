@@ -1,7 +1,6 @@
-import type { Config } from "tailwindcss";
 import sharedConfig from "@rever/tailwind-config";
 
-const config: Config = {
+const config = {
   // Use the shared config as a base
   ...sharedConfig,
   // Override the content property to include the web project's files

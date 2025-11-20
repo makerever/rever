@@ -47,7 +47,7 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
    This will configure Git to use our custom hooks directory. The pre-commit hook will:
 
    - Run `ruff format` and `ruff check --fix` on Python files in the `api` directory
-   - Run `yarn format` on TypeScript, TSX, and Markdown files
+   - Run `pnpm format` on TypeScript, TSX, and Markdown files
 
 6. Run the migrations
    ```bash 

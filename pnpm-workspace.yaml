@@ -1,0 +1,9 @@
+packages:
+  - web
+  - packages/*
+
+ignoredBuiltDependencies:
+  - canvas
+  - core-js
+  - sharp
+  - unrs-resolver
