@@ -27,14 +27,18 @@ def custom_attachment_upload_path(instance, filename):
     model_name = instance.content_type.model
     ext = filename.split(".")[-1]
     unique_filename = f"{Path(filename).stem}_{uuid.uuid4().hex}.{ext}"
-    return Path("organizations", organization_id, model_name, year, month, unique_filename)
+    # Return a string path (not a Path object) and allow longer filenames
+    return str(Path("organizations", organization_id, model_name, year, month, unique_filename))
 
 
 class Attachment(BaseModel):
     organization = models.ForeignKey(
         Organization, on_delete=models.CASCADE, related_name="attachments"
     )
-    file = models.FileField(upload_to=custom_attachment_upload_path, storage=S3MediaStorage())
+    # Increase max_length to accommodate long generated S3 object keys
+    file = models.FileField(
+        upload_to=custom_attachment_upload_path, storage=S3MediaStorage(), max_length=1024
+    )
     file_name = models.CharField(max_length=255)
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
