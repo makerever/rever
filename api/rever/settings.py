@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "rever.bgtasks",
     "rever.middleware",
     "simple_history",
+    "rever.intellidocs",
 ]
 
 MIDDLEWARE = [

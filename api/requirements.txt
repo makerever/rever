@@ -1,18 +1,45 @@
+# --- Core framework ---
 Django==5.2.7
 djangorestframework==3.16.0
+
+# --- Authentication & Authorization ---
 djangorestframework_simplejwt==5.5.1
+
+# --- Configuration ---
+python-decouple==3.8
+
+# --- CORS ---
 django-cors-headers==4.7.0
+
+# --- Async / Task Queue ---
 celery==5.5.1
 redis==5.2.1
-python-decouple==3.8
+django-redis==5.4.0
+
+# --- Database ---
 psycopg2-binary==2.9.10
+
+# --- Storage / AWS S3 ---
 django-storages[boto3]==1.14.6
 boto3==1.38.20
+
+# --- Time / Localization ---
 pytz==2025.2
-django-redis==5.4.0
+
+# --- Deployment / WSGI ---
 gunicorn==23.0.0
+
+# --- Request utilities / auditing ---
 django-crum==0.7.9
+
+# History / change-tracking for models
 django-simple-history==3.8.0
+
+# --- Machine learning / embeddings ---
 sentence-transformers==4.1.0
-django-filter == 25.1
-python-json-logger == 4.0.0
+
+# --- Filtering / Query helpers ---
+django-filter==25.1
+
+# --- Logging ---
+python-json-logger==4.0.0
