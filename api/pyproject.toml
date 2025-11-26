@@ -5,20 +5,30 @@ description = "api for rever app"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "boto3>=1.38.20",
-    "celery==5.5.1",
-    "django==5.2.7",
-    "django-cors-headers==4.7.0",
-    "django-redis>=5.4.0",
-    "django-simple-history>=3.10.1",
-    "django-storages[boto3]>=1.14.6",
-    "djangorestframework==3.16.0",
+    "boto3==1.41.2",
+    "celery==5.5.3",
+    "django==5.2.8",
+    "django-cors-headers==4.9.0",
+    "django-crum==0.7.9",
+    "django-filter==25.2",
+    "django-redis==6.0.0",
+    "django-simple-history==3.10.1",
+    "django-storages[boto3]==1.14.6",
+    "djangorestframework==3.16.1",
     "djangorestframework-simplejwt==5.5.1",
-    "psycopg2-binary==2.9.10",
+    "easyocr==1.7.2",
+    "pdf2image==1.17.0",
+    "pdfplumber==0.11.8",
+    "Pillow==12.0.0",
+    "psycopg2-binary==2.9.11",
     "python-decouple==3.8",
+    "python-json-logger==4.0.0",
+    "pytesseract==0.3.13",
     "pytz==2025.2",
-    "redis==5.2.1",
-    "python-json-logger==4.0.0"
+    "rapidfuzz==3.14.3",
+    "redis==7.1.0",
+    "requests==2.32.5",
+    "sentence-transformers==5.1.2",
 ]
 
 [dependency-groups]

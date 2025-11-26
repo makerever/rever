@@ -21,4 +21,5 @@ from django.urls import include, path
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("rever.app.urls")),
+    path("api/", include("rever.intellidocs.urls")),  # OCR and Document Intelligence
 ]
