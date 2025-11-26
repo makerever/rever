@@ -6,12 +6,12 @@ from .notification import urlpatterns as notification_urls
 from .payable import urlpatterns as payable_urls
 from .receipt import urlpatterns as receipt_urls
 
-urlpatterns = [
-    *auth_urls,
-    *payable_urls,
-    *attachment_urls,
-    *approval_urls,
-    *notification_urls,
-    *audit_urls,
-    *receipt_urls,
-]
+urlpatterns = (
+    auth_urls
+    + payable_urls
+    + notification_urls
+    + audit_urls
+    + attachment_urls
+    + receipt_urls
+    + approval_urls
+)

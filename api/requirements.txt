@@ -12,6 +12,7 @@ python-decouple==3.8
 django-cors-headers==4.9.0
 
 # --- Async / Task Queue ---
+requests==2.32.5
 celery==5.5.3
 redis==7.1.0
 django-redis==6.0.0
@@ -37,9 +38,21 @@ django-simple-history==3.10.1
 
 # --- Machine learning / embeddings ---
 sentence-transformers==5.1.2
+rapidfuzz==3.14.3
 
 # --- Filtering / Query helpers ---
 django-filter==25.2
 
 # --- Logging ---
 python-json-logger==4.0.0
+
+# --- OCR Engines ---
+pytesseract==0.3.13
+easyocr==1.7.2
+
+# --- Image Processing ---
+Pillow==12.0.0
+pdf2image==1.17.0
+pdfplumber==0.11.8
+
+

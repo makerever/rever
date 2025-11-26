@@ -211,20 +211,29 @@ STATIC_ROOT = Path(BASE_DIR, "staticfiles")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-DEFAULT_FILE_STORAGE = config("DEFAULT_FILE_STORAGE")
-
+# AWS/MinIO Storage Configuration
 AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
-
 AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME")
 AWS_S3_REGION_NAME = config("AWS_S3_REGION_NAME", default="us-east-1")
 
-
+# MinIO-specific settings
 if config("USE_MINIO", cast=bool, default=False):
-    # Custom storage settings for MinIO
     AWS_S3_ENDPOINT_URL = config("AWS_S3_ENDPOINT_URL")
     AWS_S3_FILE_OVERWRITE = config("AWS_S3_FILE_OVERWRITE", default=False, cast=bool)
     AWS_S3_VERIFY = config("AWS_S3_VERIFY", default=False, cast=bool)
+
+# Django 4.2+ Storage Configuration
+STORAGES = {
+    "default": {
+        "BACKEND": config(
+            "DEFAULT_FILE_STORAGE", default="storages.backends.s3boto3.S3Boto3Storage"
+        ),
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 
 APP_URL = config("APP_URL", "http://localhost:3000")
@@ -282,3 +291,7 @@ LOGGING = {
 # Embedding model settings
 EMBED_MODEL = config("EMBED_MODEL", default="all-MiniLM-L6-v2")
 EMBED_DEVICE = config("EMBED_DEVICE", default="cpu")
+
+# Ollama Configuration
+OLLAMA_URL = config("OLLAMA_URL", default="http://localhost:11434/api/generate")
+OLLAMA_MODEL = config("OLLAMA_MODEL", default="qwen2.5vl:7b")
