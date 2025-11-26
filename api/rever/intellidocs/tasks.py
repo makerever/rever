@@ -124,7 +124,7 @@ def clean_decimal(value: Any) -> Decimal:
     if not value:
         return Decimal("0")
 
-    if isinstance(value, (int, float, Decimal)):
+    if isinstance(value, int | float | Decimal):
         return Decimal(str(value))
 
     # Remove currency symbols, commas, percentage signs, and spaces
