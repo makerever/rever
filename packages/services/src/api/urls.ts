@@ -38,6 +38,8 @@ export const BILL_API = {
   BARGRAPH_DATA: "/bills/summary/monthly/",
   MATCH_RESULTS: "/match-results/",
   MATCH_DND: "/matching/dnd/assign/",
+  UPLOAD_DOCUMENT: "/bills/ocr/upload/",
+  GET_DOCUMENT: "/bills/ocr/status/",
 };
 
 // Attachment API Endpoints

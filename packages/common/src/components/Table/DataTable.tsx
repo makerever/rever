@@ -21,9 +21,10 @@ import {
   Plus,
   Trash,
   MailPlus,
+  FilePlus,
 } from "lucide-react";
 import { DataTablePagination } from "./DataTablePagination";
-import { StatusFilter } from "@rever/common";
+import { ButtonPopup, OutsideClickHandler, StatusFilter } from "@rever/common";
 
 import Button from "../Button";
 import { TableProps } from "@rever/types";
@@ -59,6 +60,8 @@ export default function DataTable<
   flowImageSrc,
   perPageItemCount = [10, 20, 50, 100],
   statusFilterLabel,
+  btnPopupItems,
+  onBtnPopupItemsClick,
 }: TableProps<T>) {
   const user = useUserStore((state) => state.user);
 
@@ -184,7 +187,7 @@ export default function DataTable<
             </>
           ) : null}
 
-          {addBtnText ? (
+          {addBtnText && !btnPopupItems ? (
             <Button
               width="w-auto"
               icon={isMembers ? <MailPlus width={16} /> : <Plus width={16} />}
@@ -192,6 +195,49 @@ export default function DataTable<
               className="text-white"
               onClick={onActionBtClick}
             />
+          ) : null}
+
+          {addBtnText && btnPopupItems ? (
+            <div className="relative">
+              <OutsideClickHandler onClose={() => setShowBtnPopup(false)}>
+                <div className="px-1 flex items-center bg-primary-500 text-white rounded-md cursor-pointer hover:bg-primary-600 transition-colors">
+                  <div onClick={onActionBtClick} className="flex items-center">
+                    <IconWrapper
+                      icon={<FilePlus width={16} />}
+                      className="text-white"
+                    />
+
+                    <div className="pr-2 border-r flex items-center">
+                      <p className="py-2 text-xs font-medium">{addBtnText}</p>
+                    </div>
+                  </div>
+
+                  <IconWrapper
+                    onClick={() => setShowBtnPopup(true)}
+                    icon={<ChevronDown width={16} />}
+                    className="text-white"
+                  />
+                </div>
+
+                {showBtnPopup && (
+                  <div className="transition-all duration-300 ease-out">
+                    <ButtonPopup
+                      handleClick={(value) => {
+                        if (value === btnPopupItems[0] && onActionBtClick) {
+                          onActionBtClick();
+                        } else if (
+                          value === btnPopupItems[1] &&
+                          onBtnPopupItemsClick
+                        ) {
+                          onBtnPopupItemsClick(btnPopupItems[1]);
+                        }
+                      }}
+                      actions={btnPopupItems}
+                    />
+                  </div>
+                )}
+              </OutsideClickHandler>
+            </div>
           ) : null}
         </div>
       </div>

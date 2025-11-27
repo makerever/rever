@@ -81,8 +81,8 @@ input[type="checkbox"]:focus {
 
 /* Checked state: green background + border */
 input[type="checkbox"]:checked {
-  background-color: #01242D;
-  border-color: #01242D;
+  background-color: #01242d;
+  border-color: #01242d;
 }
 
 /* Inject white tick */
@@ -141,6 +141,10 @@ input[type="checkbox"]:checked::before {
 
 .pdf_uploader .react-pdf__message {
   display: none !important;
+}
+
+.custom_box_shadow {
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
 }
 
 @layer base {

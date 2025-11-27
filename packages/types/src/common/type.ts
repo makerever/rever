@@ -187,6 +187,8 @@ export interface TableProps<T> {
   flowImageSrc?: string;
   perPageItemCount?: number[];
   statusFilterLabel?: string;
+  btnPopupItems?: string[];
+  onBtnPopupItemsClick?: (value: string) => void;
 }
 
 // Interface for status filter component props
@@ -461,4 +463,12 @@ export type LoaderContextType = {
 export interface PillItemProps {
   name: string;
   className: string;
+}
+
+// Type for Upload files modal props
+export interface UploadFilesModalProps extends Omit<ModalProps, "children"> {
+  onFileSelect?: (files: File[]) => void;
+  maxFiles?: number;
+  acceptedFormats?: string;
+  document_type?: string;
 }

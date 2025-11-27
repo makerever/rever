@@ -8,7 +8,7 @@ export function formatDate(
   fixedFormat?: boolean,
   includeTime?: boolean,
 ): string {
-  if (!input) return "Invalid Date";
+  if (!input) return "--";
 
   // 1. Build a Luxon DateTime (in zone if provided)
   const dt = DateTime.fromJSDate(
