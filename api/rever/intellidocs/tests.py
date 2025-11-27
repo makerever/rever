@@ -4,6 +4,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from django.test import TestCase
+from django.urls import reverse
 from django.utils import timezone
 
 from rever.db.models.payable import Bill, BillItem, Organization, PurchaseOrder, Vendor
@@ -615,3 +616,33 @@ class BillParserTest(TestCase):
             print(f"  '{text}' -> '{result}'")
             # Note: The parser extracts the string, normalization happens in task
             assert expected in (result if result else "")
+
+
+class BillAPIURLTest(TestCase):
+    """
+    Test URL configuration for Intellidocs API.
+    Verifies that named routes resolve to the correct paths.
+    """
+
+    def test_bill_ocr_upload_url(self):
+        url = reverse("bill-ocr-upload")
+        assert url == "/api/intellidocs/bills/upload/"
+
+    def test_bill_ocr_status_url(self):
+        task_id = uuid.uuid4()
+        url = reverse("bill-ocr-status", args=[task_id])
+        assert url == f"/api/intellidocs/bills/status/{task_id}/"
+
+    def test_bill_ocr_result_url(self):
+        task_id = uuid.uuid4()
+        url = reverse("bill-ocr-result", args=[task_id])
+        assert url == f"/api/intellidocs/bills/result/{task_id}/"
+
+    def test_bill_extraction_list_url(self):
+        url = reverse("bill-extraction-list")
+        assert url == "/api/intellidocs/bills/extractions/"
+
+    def test_bill_extraction_detail_url(self):
+        pk = uuid.uuid4()
+        url = reverse("bill-extraction-detail", args=[pk])
+        assert url == f"/api/intellidocs/bills/extractions/{pk}/"
