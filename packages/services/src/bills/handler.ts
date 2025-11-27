@@ -111,3 +111,23 @@ export const dragNDropMatchApi = async (billData: DragNDropMatchProps) => {
   const response = await axiosInstance.post(`${BILL_API.MATCH_DND}`, billData);
   return response;
 };
+
+// Upload a bill file
+export const uploadDocument = async (data: FormData) => {
+  const response = await axiosInstance.post(
+    `${BILL_API.UPLOAD_DOCUMENT}`,
+    data,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
+  );
+  return response;
+};
+
+// Get uploaded bill document
+export const getDocument = async (id: string) => {
+  const response = await axiosInstance.get(`${BILL_API.GET_DOCUMENT}${id}/`);
+  return response;
+};

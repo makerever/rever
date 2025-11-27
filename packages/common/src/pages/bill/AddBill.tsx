@@ -8,7 +8,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import { Button, PdfViewer, TextAreaInput } from "@rever/common";
+import {
+  billExtractAnimation,
+  Button,
+  CustomTooltip,
+  PdfViewer,
+  TextAreaInput,
+} from "@rever/common";
 import { Label } from "@rever/common";
 import { TextInput } from "@rever/common";
 import { SelectComponent } from "@rever/common";
@@ -16,13 +22,21 @@ import { paymentTermsOptions } from "@rever/constants";
 import { DatePickerDemo } from "@rever/common";
 import BillItemsTable from "./BillLineItems";
 import { NumberInput } from "@rever/common";
-import { formatNumber } from "@rever/utils";
+import { formatNumber, getStatusLabelForExtraction } from "@rever/utils";
 import { Option, PurchaseOrder } from "@rever/types";
-import { Download, Paperclip, Trash, Upload } from "lucide-react";
+import {
+  CircleAlert,
+  CircleCheck,
+  CircleDashed,
+  Download,
+  Loader,
+  Paperclip,
+  Trash,
+  Upload,
+} from "lucide-react";
 import { OutsideClickHandler } from "@rever/common";
 import { UploadFileView } from "@rever/common";
 import { ToggleSwitch } from "@rever/common";
-import dynamic from "next/dynamic";
 import { IconWrapper } from "@rever/common";
 import { formatDate } from "@rever/utils";
 import { showErrorToast, showSuccessToast } from "@rever/common";
@@ -32,14 +46,52 @@ import {
   deleteBillAttachment,
   getBillAttachment,
   getBillDetailsByIdApi,
+  getDocument,
   getPoByVendorApi,
   updateBillApi,
+  uploadDocument,
 } from "@rever/services";
 import { getVendorsDataAPI } from "@rever/services";
 import { VenderDataAPIType } from "@rever/types";
 import { AttachmentProps, Bill } from "@rever/types";
 import { useBreadcrumbStore, useUserStore } from "@rever/stores";
 import { PageLoader } from "@rever/common";
+import Lottie from "lottie-react";
+
+const getStatusIcon = (status: string, error_message?: string) => {
+  switch (status) {
+    case "uploading":
+      return <Loader className="animate-spin text-slate-800" size={20} />;
+    case "processing":
+      return <Loader className="animate-spin text-blue-500" size={20} />;
+    case "extracting":
+      return (
+        <CircleDashed className="animate-spin text-purple-500" size={20} />
+      );
+    case "enriched":
+      return <CircleCheck className="text-green-600" size={20} />;
+    case "failed":
+      return (
+        <CustomTooltip
+          content={
+            error_message
+              ? error_message
+              : "File must be under 5MB and limited to 5 pages"
+          }
+          side="right"
+        >
+          <div>
+            <CircleAlert className="text-red-500" size={20} />
+          </div>
+        </CustomTooltip>
+      );
+    default:
+      return null;
+  }
+};
+
+const MAX_ATTEMPTS = 20;
+const DELAY_MS = 2000;
 
 // Main Add Bill component with URL params
 const AddBillComponentWithParams = () => {
@@ -72,7 +124,7 @@ const AddBillComponentWithParams = () => {
 
   // Get bill ID from URL if present
   const searchParams = useSearchParams();
-  const idValue = searchParams.get("id");
+  const id = searchParams.get("id");
   const showPdfValue = searchParams.get("showPdf");
   const router = useRouter();
 
@@ -105,6 +157,14 @@ const AddBillComponentWithParams = () => {
 
   const [showItemsDescription, setShowItemsDescription] =
     useState<boolean>(false);
+
+  const [idValue, setIdValue] = useState<string | null>(id);
+  const [files, setFiles] = useState<{
+    file?: File;
+    status?: string;
+    id?: string;
+    error_message?: string;
+  }>({});
 
   const orgDetails = useUserStore((state) => state.user?.organization);
 
@@ -144,7 +204,7 @@ const AddBillComponentWithParams = () => {
         setValue("bill_date", new Date(response?.data?.bill_date));
         setValue("due_date", new Date(response?.data?.due_date));
         setValue("payment_terms", response?.data?.payment_terms);
-        setValue("vendor", response?.data?.vendor.id);
+        setValue("vendor", response?.data?.vendor?.id);
         setValue("purchase_order", response?.data?.purchase_order?.id);
         setValue("total_tax", response?.data?.tax_percentage);
         setValue("comments", response?.data?.comments);
@@ -317,18 +377,17 @@ const AddBillComponentWithParams = () => {
     }
   };
 
-  // Calculate subtotal, tax, and total for bill summary
-  const subtotal = billItems.reduce((sum, item) => {
-    const qty = Number(item.quantity) || 0;
-    const up = Number(item.unit_price) || 0;
-    return sum + qty * up;
-  }, 0);
-
+  // Bill Calculation
+  const subtotal = billItems.reduce(
+    (sum, item) =>
+      (Number(item.quantity) || 0) * (Number(item.unit_price) || 0) + sum,
+    0,
+  );
   const totalTax = useWatch({ control, name: "total_tax" }) || 0;
   const totalTaxamount = (subtotal * Number(totalTax)) / 100;
-  const total = subtotal + (subtotal * Number(totalTax)) / 100;
+  const total = subtotal + totalTaxamount;
 
-  // Handle PDF file upload and preview
+  // PDF upload/preview handlers
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = e.target.files?.[0];
     if (uploadedFile && uploadedFile.type === "application/pdf") {
@@ -337,32 +396,82 @@ const AddBillComponentWithParams = () => {
       setFileUrl(url);
       e.target.value = "";
       setShowPdf(true);
-      // // If editing, upload file immediately
-      // if (idValue && !fileUrl) {
-      //   const formData = new FormData();
-      //   formData.append("file", uploadedFile);
 
-      //   const responseFile = await addBillAttachment(formData, idValue);
-      //   if (responseFile?.status === 201) {
-      //     setShowPdf(true);
-      //     showSuccessToast("Bill attachment added");
-      //   }
-      // }
+      // If new (not edit), poll for status after upload
+      if (!idValue) {
+        setFiles({ status: "uploading" });
+        const formData = new FormData();
+        formData.append("file", uploadedFile);
+        formData.append("document_type", "bill");
+        const uploadRes = await uploadDocument(formData);
+        if (uploadRes?.status === 202) {
+          const { task_id } = uploadRes.data;
+          await pollDocumentStatus(task_id);
+        } else {
+          if (
+            uploadRes &&
+            uploadRes?.data[0] ===
+              "Your subscription has expired. Please renew to continue."
+          ) {
+            showErrorToast(uploadRes?.data[0]);
+            setShowPdf(false);
+            setFileUrl(null);
+            setFileDetails(null);
+          } else {
+            setShowPdf(false);
+            setFileUrl(null);
+            setFileDetails(null);
+            showErrorToast("File must be under 5MB and limited to 5 pages");
+          }
+        }
+      }
     } else {
       alert("Please upload a valid PDF file.");
     }
   };
 
-  // Delete bill attachment (PDF)
-  const deleteBillAttachmentFunc = async () => {
-    const response = await deleteBillAttachment(fileResponse?.id || "");
-    if (response?.status === 204) {
-      if (idValue) {
-        showSuccessToast("Bill attachment deleted");
-        getBillDetailsById(idValue);
+  // Polling document extraction status
+  const pollDocumentStatus = async (id: string) => {
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      try {
+        const fileRes = await getDocument(id);
+        if (fileRes.status !== 200) throw new Error("Fetch failed");
+        const responseData = fileRes.data;
+
+        setFiles({ status: responseData?.status });
+        if (["completed"].includes(responseData?.status)) {
+          if (responseData?.status === "completed" && responseData?.bill_id) {
+            setIdValue(responseData?.bill_id);
+            setShowPdf(true);
+          }
+          break;
+        }
+        if (["failed"].includes(responseData?.status)) {
+          setShowPdf(false);
+          setFileUrl(null);
+          setFileDetails(null);
+          showErrorToast(
+            responseData?.message
+              ? responseData?.message
+              : "File must be under 5MB and limited to 5 pages",
+          );
+          break;
+        }
+      } catch (err) {
+        console.error("Polling error:", err);
       }
+      await new Promise((r) => setTimeout(r, DELAY_MS));
     }
   };
+
+  // Delete attachment
+  async function deleteBillAttachmentFunc() {
+    const response = await deleteBillAttachment(fileResponse?.id || "");
+    if (response?.status === 204 && idValue) {
+      showSuccessToast("Bill attachment deleted");
+      getBillDetailsById(idValue);
+    }
+  }
 
   // Render UI
   return (
@@ -387,7 +496,7 @@ const AddBillComponentWithParams = () => {
               ) : null}
             </div>
 
-            {/* File upload or file preview actions */}
+            {/* File upload or attachment actions */}
             {!fileUrl ? (
               <label>
                 <input
@@ -397,69 +506,103 @@ const AddBillComponentWithParams = () => {
                   accept="application/pdf"
                 />
                 <div className="bg-transparent flex items-center text-xs rounded-md transition duration-300 px-3 py-1 cursor-pointer text-primary-500 border border-primary-500 disabled:hover:bg-transparent disabled:text-primary-500 hover:bg-primary-500 hover:text-white">
-                  <Upload width={16} className="mr-1" /> Upload PDF
+                  <Upload width={16} className="mr-1" /> Extract PDF
                 </div>
               </label>
             ) : (
-              <OutsideClickHandler onClose={() => setShowUploadFileView(false)}>
-                <div
-                  onClick={() => setShowUploadFileView(!showUploadFileView)}
-                  className="flex items-center text-primary-500 hover:text-primary-600 cursor-pointer text-sm"
+              files.status === "completed" && (
+                <OutsideClickHandler
+                  onClose={() => setShowUploadFileView(false)}
                 >
-                  <Paperclip width={16} className="mr-1" />1 file
-                </div>
-
-                {/* Popup for file actions (delete, etc.) */}
-                {showUploadFileView && (
-                  <div className="transition-allpdduration-300 ease-out">
-                    <UploadFileView
-                      removeFile={() => {
-                        if (idValue) {
-                          deleteBillAttachmentFunc();
-                        }
-                        setFileUrl(null);
-                        setShowUploadFileView(false);
-                      }}
-                      fileName={fileDetails?.name || fileResponse?.file_name}
-                    />
+                  <div
+                    onClick={() => setShowUploadFileView(!showUploadFileView)}
+                    className="flex items-center text-primary-500 hover:text-primary-600 cursor-pointer text-sm"
+                  >
+                    <Paperclip width={16} className="mr-1" />1 file
                   </div>
-                )}
-              </OutsideClickHandler>
+                  {showUploadFileView && (
+                    <div>
+                      <UploadFileView
+                        removeFile={() => {
+                          if (idValue) deleteBillAttachmentFunc();
+                          setFileUrl(null);
+                          setShowUploadFileView(false);
+                        }}
+                        fileName={
+                          fileDetails?.name ||
+                          fileResponse?.file_name ||
+                          "File 1"
+                        }
+                      />
+                    </div>
+                  )}
+                </OutsideClickHandler>
+              )
             )}
           </div>
           <div>
             <div className="lg:flex gap-10">
-              {/* PDF preview section (if file uploaded and showPdf is true) */}
-              {fileUrl && showPdf ? (
-                <div className="lg:w-1/3">
-                  <div
-                    // style={{ height: "580px" }}
-                    className="scrollbar_none overflow-auto bg-white shadow-5xl rounded-md overflow-hidden"
-                  >
-                    <div className="flex justify-end py-1 pr-2">
-                      <IconWrapper
-                        icon={
-                          <a href={fileUrl || "#"} download="bill.pdf">
-                            <Download className="cursor-pointer" width={16} />
-                          </a>
-                        }
-                      />
-
-                      <IconWrapper
-                        onClick={() => {
-                          if (idValue) {
-                            deleteBillAttachmentFunc();
+              {/* PDF Preview */}
+              {fileUrl && showPdf && (
+                <div className="lg:w-1/3 scrollbar_none overflow-auto bg-white shadow-5xl rounded-md overflow-hidden h-fit">
+                  {files.status === "completed" ? (
+                    <>
+                      <div className="flex justify-end py-1 pr-2">
+                        <IconWrapper
+                          icon={
+                            <a href={fileUrl || "#"} download="bill.pdf">
+                              <Download className="cursor-pointer" width={16} />
+                            </a>
                           }
-                          setFileUrl(null);
+                        />
+                        <IconWrapper
+                          onClick={() => {
+                            if (idValue) deleteBillAttachmentFunc();
+                            setFileUrl(null);
+                          }}
+                          icon={<Trash width={16} />}
+                          className="hover:bg-red-100 hover:text-red-500"
+                        />
+                      </div>
+                      <PdfViewer fileUrl={fileUrl} />
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-[580px]">
+                      <div
+                        style={{
+                          position: "relative",
+                          width: "100%",
+                          height: "90%",
                         }}
-                        icon={<Trash width={16} />}
-                        className="hover:bg-red-100 hover:text-red-500"
-                      />
+                        className="mb-2"
+                      >
+                        <Lottie
+                          animationData={billExtractAnimation}
+                          loop
+                          autoplay
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                        />
+                      </div>
+                      <div className="mb-4 flex items-center gap-2 justify-center">
+                        <h2 className="capitalize text-slate-800 text-sm font-medium text-center">
+                          {getStatusLabelForExtraction(files.status || "")}
+                        </h2>
+                        {getStatusIcon(
+                          getStatusLabelForExtraction(files.status || ""),
+                          files.error_message,
+                        )}
+                      </div>
                     </div>
-                    <PdfViewer fileUrl={fileUrl} />
-                  </div>
+                  )}
                 </div>
-              ) : null}
+              )}
 
               {/* Bill form section */}
               <form

@@ -253,3 +253,23 @@ export const getLabelForMemberStatus = (value: string) =>
 export function convertToPercentage(value: number) {
   return (value * 100).toFixed(1);
 }
+
+// Function to get status label for extraction process
+export const getStatusLabelForExtraction = (status: string) => {
+  switch (status) {
+    case "uploaded":
+      return "processing";
+    case "uploading":
+      return "uploading";
+    case "modeling":
+      return "extracting";
+    case "done":
+      return "enriched";
+    case "completed":
+      return "enriched";
+    case "failed":
+      return "failed";
+    default:
+      return status;
+  }
+};

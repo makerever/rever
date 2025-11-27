@@ -8,6 +8,7 @@ import {
   DataTable,
   PageLoader,
   PillItem,
+  UploadFilesModal,
 } from "@rever/common";
 import { tabOptions } from "@rever/constants";
 import { BILL_API, useApi } from "@rever/services";
@@ -35,9 +36,14 @@ const BillList = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Fetch bills from SWR
-  const { data: bill } = useApi<BillApiResponse>("bill", BILL_API.MANAGE_BILLS);
+  const { data: bill, mutate } = useApi<BillApiResponse>(
+    "bill",
+    BILL_API.MANAGE_BILLS,
+  );
 
   const orgDetails = useUserStore((state) => state.user?.organization);
+
+  const [isFileUploadModal, setIsFileUploadModal] = useState(false);
 
   const collator = useMemo(
     () => new Intl.Collator(undefined, { numeric: true, sensitivity: "base" }),
@@ -317,8 +323,28 @@ const BillList = () => {
           clearSearch={() => setSearch("")}
           flowImageSrc="/images/flowImages/billMasterFlow.svg"
           statusFilterLabel="Stages"
+          btnPopupItems={["Create bill", "Upload bills"]}
+          onBtnPopupItemsClick={(value) => {
+            if (value === "Upload bills") {
+              setIsFileUploadModal(true);
+            }
+          }}
         />
       )}
+
+      {isFileUploadModal ? (
+        <UploadFilesModal
+          isOpen={isFileUploadModal}
+          onClose={() => {
+            setIsLoading(true);
+            mutate();
+            setIsFileUploadModal(false);
+          }}
+          maxFiles={50}
+          acceptedFormats="application/pdf"
+          document_type="bill"
+        />
+      ) : null}
     </>
   );
 };

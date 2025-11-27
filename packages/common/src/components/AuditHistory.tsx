@@ -116,7 +116,9 @@ const AuditHistory = ({ data, isLoading }: AuditHistoryDataProps) => {
               <ul>
                 {changes
                   ?.filter((v) => v.field !== "updated_by")
-                  .map((c, i) => <li key={i}>{c.field}</li>)}
+                  .map((c, i) => (
+                    <li key={i}>{c.field}</li>
+                  ))}
               </ul>
             </div>
           );
