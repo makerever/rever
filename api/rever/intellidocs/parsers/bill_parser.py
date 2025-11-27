@@ -11,11 +11,42 @@ import re
 import requests
 from django.conf import settings
 
+from rever.intellidocs.utils import clean_decimal, normalize_payment_terms
+
 logger = logging.getLogger(__name__)
 
 
 class BillParser:
     """Parse bill data using local Ollama LLM with fallback to regex"""
+
+    # Pre-compiled regex patterns
+
+    # 1. Complex Pattern (Description Qty Price Discount Tax Amount)
+    # Matches: ... 1.00 238.98 15.00% TaxExempt 203.13
+    # Group 1: Description
+    # Group 2: Quantity (float)
+    # Group 3: Unit Price (float)
+    # Group 4: Amount (float)
+    COMPLEX_ITEM_PATTERN = re.compile(
+        r"(.*?)\s+(\d+(?:\.\d+)?)\s+[\$€£]?\s*([\d,]+\.?\d{2})\s+.*?[\$€£]?\s*([\d,]+\.?\d{2})$"
+    )
+
+    # 2. Standard Pattern (Description Qty Price Amount)
+    # Matches: Description ... Qty ... Price ... Amount
+    STANDARD_ITEM_PATTERN = re.compile(
+        r"(.*?)\s+(\d+(?:\.\d+)?)\s+[\$€£]?\s*([\d,]+\.?\d{0,2})\s+[\$€£]?\s*([\d,]+\.?\d{0,2})$"
+    )
+
+    # 3. Dell Transaction Pattern: Date Description Amount
+    DELL_ITEM_PATTERN = re.compile(
+        r"(\d{2}-\d{2}-\d{2})\s+(.*?)\s+((?:-|\+)?\s*[\$€£]?\s*[\d,]+\.?\d{2})"
+    )
+
+    # 4. Flexible Pattern (Last Resort)
+    # Matches lines ending in numbers when other patterns fail
+    FLEXIBLE_ITEM_PATTERN = re.compile(
+        r"(.*?)\s+(\d+)\s+[\$€£]?\s*([\d,]+\.?\d{0,2})\s+[\$€£]?\s*([\d,]+\.?\d{0,2})$"
+    )
 
     def __init__(self):
         self.ollama_url = settings.OLLAMA_URL
@@ -157,7 +188,14 @@ IMPORTANT RULES:
         return text.strip()
 
     def _validate_and_clean(self, data: dict) -> dict:
-        """Validate and clean parsed data"""
+        """
+        Validate and clean parsed data.
+        Acts as a firewall between LLM output and the application.
+        Ensures:
+        1. Numbers are actual Decimals.
+        2. Structure is consistent (no missing keys).
+        3. Garbage data is filtered out.
+        """
         result = {
             "bill_number": data.get("bill_number"),
             "bill_date": data.get("bill_date"),
@@ -195,7 +233,7 @@ IMPORTANT RULES:
         }
 
         if result["payment_terms"]:
-            result["payment_terms"] = self._standardize_payment_terms(result["payment_terms"])
+            result["payment_terms"] = normalize_payment_terms(result["payment_terms"])
 
         # Clean and validate line items with safe None handling
         cleaned_items = []
@@ -215,9 +253,9 @@ IMPORTANT RULES:
                         "description": desc_val.strip()
                         if desc_val and isinstance(desc_val, str)
                         else "",
-                        "quantity": self._to_decimal(qty_val) or 0,
-                        "unit_price": self._to_decimal(price_val) or 0,
-                        "amount": self._to_decimal(amt_val) or 0,
+                        "quantity": clean_decimal(qty_val) or 0,
+                        "unit_price": clean_decimal(price_val) or 0,
+                        "amount": clean_decimal(amt_val) or 0,
                         "uom": uom_val.strip() if uom_val and isinstance(uom_val, str) else "",
                         "product_code": code_val.strip()
                         if code_val and isinstance(code_val, str)
@@ -233,72 +271,15 @@ IMPORTANT RULES:
 
         return result
 
-    def _standardize_payment_terms(self, terms: str) -> str:
-        """Standardize payment terms to match choices"""
-        if not terms:
-            return None
-
-        terms_upper = str(terms).upper().strip()
-
-        # Map common variations to standard choices
-        if (
-            "NET 30" in terms_upper
-            or "NET30" in terms_upper
-            or "30 DAYS" in terms_upper
-            or terms_upper == "30"
-        ):
-            return "NET30"
-        elif (
-            "NET 60" in terms_upper
-            or "NET60" in terms_upper
-            or "60 DAYS" in terms_upper
-            or terms_upper == "60"
-        ):
-            return "NET60"
-        elif (
-            "NET 90" in terms_upper
-            or "NET90" in terms_upper
-            or "90 DAYS" in terms_upper
-            or terms_upper == "90"
-        ):
-            return "NET90"
-        elif (
-            "DUE ON RECEIPT" in terms_upper
-            or "IMMEDIATE" in terms_upper
-            or "UPON RECEIPT" in terms_upper
-        ):
-            return "DUE_ON_RECEIPT"
-        elif (
-            "NET 45" in terms_upper
-            or "NET45" in terms_upper
-            or "45 DAYS" in terms_upper
-            or terms_upper == "45"
-        ):
-            return "NET45"
-
-        return terms[:8]  # Truncate to max field length
-
-    def _to_decimal(self, value) -> float | None:
-        """Convert value to decimal/float, return None if invalid"""
-        if value is None:
-            return None
-        try:
-            # Remove commas and currency symbols
-            if isinstance(value, str):
-                value = (
-                    value.replace(",", "")
-                    .replace("$", "")
-                    .replace("€", "")
-                    .replace("£", "")
-                    .replace("₹", "")
-                    .strip()
-                )
-            return float(value)
-        except (ValueError, TypeError):
-            return None
-
     def _fallback_parse(self, text: str) -> dict:
-        """Fallback regex-based parsing when Ollama is not available"""
+        """
+        Fallback regex-based parsing when Ollama is not available.
+        Acts as a safety net if:
+        1. Ollama is offline.
+        2. API errors occur.
+        3. LLM returns invalid JSON.
+        Uses strict pattern matching instead of AI.
+        """
         logger.info("Using fallback regex parser for bill")
 
         text_lower = text.lower()
@@ -454,12 +435,12 @@ IMPORTANT RULES:
             r"(?:payment\s+terms|terms)\s*:?\s*([\w \t\d]+)", text, re.IGNORECASE
         )
         if terms_match:
-            return self._standardize_payment_terms(terms_match.group(1))
+            return normalize_payment_terms(terms_match.group(1))
 
         # Also look for standalone numbers like "45" days
         days_match = re.search(r"(\d{1,2})\s*days?", text, re.IGNORECASE)
         if days_match:
-            return self._standardize_payment_terms(days_match.group(1))
+            return normalize_payment_terms(days_match.group(1))
 
         return None
 
@@ -538,24 +519,14 @@ IMPORTANT RULES:
 
         # 1. Complex Pattern (Description Qty Price Discount Tax Amount)
         # Matches: ... 1.00 238.98 15.00% TaxExempt 203.13
-        # Group 1: Description
-        # Group 2: Quantity (float) - Relaxed to allow 1.5, 10, 10.00
-        # Group 3: Unit Price (float)
-        # Group 4: Amount (float)
-        complex_pattern = re.compile(
-            r"(.*?)\s+(\d+(?:\.\d+)?)\s+[\$€£]?\s*([\d,]+\.?\d{2})\s+.*?[\$€£]?\s*([\d,]+\.?\d{2})$"
-        )
+        # Uses self.COMPLEX_ITEM_PATTERN
 
         # 2. Standard Pattern (Description Qty Price Amount)
         # Matches: Description ... Qty ... Price ... Amount
-        item_pattern = re.compile(
-            r"(.*?)\s+(\d+(?:\.\d+)?)\s+[\$€£]?\s*([\d,]+\.?\d{0,2})\s+[\$€£]?\s*([\d,]+\.?\d{0,2})$"
-        )
+        # Uses self.STANDARD_ITEM_PATTERN
 
         # 3. Dell Transaction Pattern: Date Description Amount
-        dell_pattern = re.compile(
-            r"(\d{2}-\d{2}-\d{2})\s+(.*?)\s+((?:-|\+)?\s*[\$€£]?\s*[\d,]+\.?\d{2})"
-        )
+        # Uses self.DELL_ITEM_PATTERN
 
         for i in range(start_index, len(lines)):
             line = lines[i].strip()
@@ -573,7 +544,7 @@ IMPORTANT RULES:
                 continue
 
             # Check for Dell pattern first
-            dell_match = dell_pattern.search(line)
+            dell_match = self.DELL_ITEM_PATTERN.search(line)
             if dell_match:
                 if current_item:
                     line_items.append(current_item)
@@ -595,7 +566,7 @@ IMPORTANT RULES:
                 continue
 
             # Check complex pattern first (more specific)
-            match = complex_pattern.search(line)
+            match = self.COMPLEX_ITEM_PATTERN.search(line)
             if match:
                 if current_item:
                     line_items.append(current_item)
@@ -609,7 +580,7 @@ IMPORTANT RULES:
                 continue
 
             # Check standard pattern
-            match = item_pattern.search(line)
+            match = self.STANDARD_ITEM_PATTERN.search(line)
             if match:
                 if current_item:
                     line_items.append(current_item)
@@ -646,10 +617,7 @@ IMPORTANT RULES:
                 current_item["description"] += " " + line
             else:
                 # Try a more flexible pattern for lines ending in numbers (last resort)
-                flexible_match = re.search(
-                    r"(.*?)\s+(\d+)\s+[\$€£]?\s*([\d,]+\.?\d{0,2})\s+[\$€£]?\s*([\d,]+\.?\d{0,2})$",
-                    line,
-                )
+                flexible_match = self.FLEXIBLE_ITEM_PATTERN.search(line)
                 if flexible_match:
                     if current_item:
                         line_items.append(current_item)

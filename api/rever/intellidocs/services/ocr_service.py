@@ -1,16 +1,24 @@
 """
-OCR Service - Using olmOCR for superior document understanding
+OCR Service - Using Tesseract for document understanding
 """
 
 import logging
+import shutil
+import tempfile
 import time
 from pathlib import Path
+
+import pdfplumber
+import pytesseract
+from django.core.files.storage import default_storage
+from pdf2image import convert_from_path
+from PIL import Image
 
 logger = logging.getLogger(__name__)
 
 
 class OCRService:
-    """OCR Service using Tesseract and EasyOCR"""
+    """OCR Service using Tesseract"""
 
     def __init__(self, use_preprocessing=True):
         self.use_preprocessing = use_preprocessing
@@ -41,10 +49,6 @@ class OCRService:
 
         try:
             # Download file from storage to temporary location if using cloud storage
-            import shutil
-            import tempfile
-
-            from django.core.files.storage import default_storage
 
             if not default_storage.exists(file_path):
                 raise FileNotFoundError(f"File not found in storage: {file_path}")
@@ -77,11 +81,6 @@ class OCRService:
         logger.debug("Processing with fallback OCR")
 
         try:
-            import pdfplumber
-            import pytesseract
-            from pdf2image import convert_from_path
-            from PIL import Image
-
             file_ext = Path(file_path).suffix.lower()
 
             if file_ext == ".pdf":
@@ -116,16 +115,40 @@ class OCRService:
                 except Exception as e:
                     logger.warning(f"PDF text extraction failed: {e}")
 
-                # Convert PDF to images for OCR
+                # Convert PDF to images for OCR (Iterative to save memory)
                 logger.debug("Converting PDF to images for OCR")
-                images = convert_from_path(file_path, dpi=300)
+
+                # Get page count first
+                from pdf2image import pdfinfo_from_path
+
+                try:
+                    info = pdfinfo_from_path(file_path)
+                    page_count = info["Pages"]
+                except Exception:
+                    # Fallback if info fails
+                    images = convert_from_path(file_path)
+                    page_count = len(images)
 
                 all_text = []
-                for i, image in enumerate(images):
-                    logger.debug(f"Processing PDF page {i + 1}/{len(images)}")
-                    # Use Tesseract on each page
-                    page_text = pytesseract.image_to_string(image)
-                    all_text.append(page_text)
+                # Process 5 pages at a time to balance memory and speed
+                chunk_size = 5
+
+                for i in range(1, page_count + 1, chunk_size):
+                    last_page = min(i + chunk_size - 1, page_count)
+                    logger.debug(f"Processing PDF pages {i} to {last_page} of {page_count}")
+
+                    images = convert_from_path(
+                        file_path, first_page=i, last_page=last_page, dpi=300
+                    )
+
+                    for image in images:
+                        page_text = pytesseract.image_to_string(image)
+                        all_text.append(page_text)
+                        # Help GC
+                        image.close()
+
+                    # Clear images list
+                    del images
 
                 text = "\n\n--- PAGE BREAK ---\n\n".join(all_text)
 

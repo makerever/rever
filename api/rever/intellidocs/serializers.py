@@ -6,7 +6,7 @@ Handles serialization for bill document upload and OCR results
 from rest_framework import serializers
 
 from rever.db.models.payable import Bill, BillItem
-from rever.intellidocs.models import BillExtraction
+from rever.intellidocs.models import BillExtraction, ProcessingStatus
 
 
 class BillOCRUploadSerializer(serializers.Serializer):
@@ -19,7 +19,7 @@ class BillOCRStatusSerializer(serializers.Serializer):
     """Serializer for OCR status response"""
 
     task_id = serializers.UUIDField()
-    status = serializers.ChoiceField(choices=["pending", "processing", "completed", "failed"])
+    status = serializers.ChoiceField(choices=ProcessingStatus.choices)
     bill_id = serializers.UUIDField(required=False)
     bill_number = serializers.CharField(required=False)
     vendor_name = serializers.CharField(required=False)
