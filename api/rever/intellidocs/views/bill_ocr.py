@@ -4,13 +4,17 @@ Handles bill document upload, OCR processing, and status tracking
 """
 
 import logging
+import uuid
+from datetime import datetime
 
+from django.core.files.storage import default_storage
 from rest_framework import status
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 
 from rever.app.views.base import BaseAPIView
 from rever.db.models.payable import Bill
+from rever.intellidocs.models import OCRLog, ProcessingStatus
 from rever.intellidocs.serializers import (
     BillOCRResultSerializer,
     BillOCRUploadSerializer,
@@ -36,10 +40,6 @@ class BillOCRUploadAPIView(BaseAPIView):
         try:
             # Save file to storage without creating Attachment record yet
             # The Celery task will create both Bill and Attachment after processing
-            import uuid
-            from datetime import datetime
-
-            from django.core.files.storage import default_storage
 
             now = datetime.now()
             year = now.strftime("%Y")
@@ -74,7 +74,7 @@ class BillOCRUploadAPIView(BaseAPIView):
                 {
                     "task_id": task_id,
                     "celery_task_id": task.id,
-                    "status": "processing",
+                    "status": ProcessingStatus.PROCESSING,
                     "message": "Bill upload successful, OCR processing started",
                     "file_name": uploaded_file.name,
                 },
@@ -100,8 +100,6 @@ class BillOCRStatusAPIView(BaseAPIView):
         """Get OCR processing status"""
         organization = self.get_organization()
 
-        from rever.intellidocs.models import OCRLog
-
         try:
             # Convert UUID to string for JSON query
             task_id_str = str(task_id)
@@ -113,29 +111,29 @@ class BillOCRStatusAPIView(BaseAPIView):
                 return Response(
                     {
                         "task_id": task_id,
-                        "status": "processing",
+                        "status": ProcessingStatus.PROCESSING,
                         "message": "OCR processing in progress",
                     }
                 )
 
-            if latest_log.status == "failed":
+            if latest_log.status == ProcessingStatus.FAILED:
                 return Response(
                     {
                         "task_id": task_id,
-                        "status": "failed",
+                        "status": ProcessingStatus.FAILED,
                         "error": latest_log.error_details,
                         "message": "OCR processing failed",
                     }
                 )
 
-            elif latest_log.status == "completed":
+            elif latest_log.status == ProcessingStatus.COMPLETED:
                 bill_id = latest_log.document_id
                 try:
                     bill = Bill.objects.get(id=bill_id, organization=organization)
                     return Response(
                         {
                             "task_id": task_id,
-                            "status": "completed",
+                            "status": ProcessingStatus.COMPLETED,
                             "bill_id": str(bill.id),
                             "bill_number": bill.bill_number,
                             "vendor_name": bill.vendor.vendor_name if bill.vendor else None,
@@ -147,7 +145,7 @@ class BillOCRStatusAPIView(BaseAPIView):
                     return Response(
                         {
                             "task_id": task_id,
-                            "status": "completed",
+                            "status": ProcessingStatus.COMPLETED,
                             "message": "Processing completed but bill not found",
                         },
                         status=status.HTTP_404_NOT_FOUND,
@@ -156,7 +154,7 @@ class BillOCRStatusAPIView(BaseAPIView):
             return Response(
                 {
                     "task_id": task_id,
-                    "status": "processing",
+                    "status": ProcessingStatus.PROCESSING,
                     "message": "OCR processing in progress",
                 }
             )
@@ -180,13 +178,13 @@ class BillOCRResultAPIView(BaseAPIView):
         """Get processed bill data"""
         organization = self.get_organization()
 
-        from rever.intellidocs.models import OCRLog
-
         try:
             # Convert UUID to string for JSON query
             task_id_str = str(task_id)
             latest_log = (
-                OCRLog.objects.filter(details__task_id=task_id_str, status="completed")
+                OCRLog.objects.filter(
+                    details__task_id=task_id_str, status=ProcessingStatus.COMPLETED
+                )
                 .order_by("-created_at")
                 .first()
             )

@@ -1,25 +1,28 @@
+from django.core.files.storage import default_storage
 from django.db import models
 from django.db.models import JSONField
 
 from rever.db.models.base import BaseModel
 
 
+class ProcessingStatus(models.TextChoices):
+    PENDING = "pending", "Pending"
+    PROCESSING = "processing", "Processing"
+    COMPLETED = "completed", "Completed"
+    FAILED = "failed", "Failed"
+
+
 class BaseDocument(BaseModel):
     """Base model for all document types"""
-
-    PROCESSING_STATUS = [
-        ("pending", "Pending"),
-        ("processing", "Processing"),
-        ("completed", "Completed"),
-        ("failed", "Failed"),
-    ]
 
     file = models.FileField(upload_to="documents/%Y/%m/%d/", max_length=500)
     file_name = models.CharField(max_length=255)
     file_type = models.CharField(max_length=50)
     file_size = models.IntegerField()
 
-    status = models.CharField(max_length=20, choices=PROCESSING_STATUS, default="pending")
+    status = models.CharField(
+        max_length=20, choices=ProcessingStatus.choices, default=ProcessingStatus.PENDING
+    )
 
     raw_text = models.TextField(blank=True, null=True)
     extracted_data = JSONField(default=dict, blank=True)
@@ -35,8 +38,6 @@ class BaseDocument(BaseModel):
     def file_url(self):
         """Generate accessible URL for the file"""
         if self.file:
-            from django.core.files.storage import default_storage
-
             return default_storage.url(self.file.name)
         return None
 
@@ -52,7 +53,7 @@ class OCRLog(BaseModel):
     document_id = models.UUIDField(null=True, blank=True)
 
     operation = models.CharField(max_length=100)
-    status = models.CharField(max_length=20)
+    status = models.CharField(max_length=20, choices=ProcessingStatus.choices)
 
     processing_time = models.FloatField(null=True, blank=True)
     ocr_engine = models.CharField(max_length=50, blank=True)

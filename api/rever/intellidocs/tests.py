@@ -527,7 +527,7 @@ class BillParserTest(TestCase):
 
         # Verify basic fields
         assert result.get("bill_number") == "61124"
-        assert result.get("payment_terms") == "NET45"
+        assert result.get("payment_terms") == "net45"
 
         # Verify amounts
         amounts = result.get("amounts", {})

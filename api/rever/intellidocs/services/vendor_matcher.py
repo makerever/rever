@@ -4,6 +4,8 @@ import re
 from django.conf import settings
 from rapidfuzz import fuzz
 
+from rever.db.models.payable import Vendor
+
 logger = logging.getLogger(__name__)
 
 
@@ -134,9 +136,6 @@ class VendorMatcher:
         if threshold is None:
             threshold = self.default_threshold
 
-        # Import here to avoid circular imports
-        from rever.db.models.payable import Vendor
-
         cleaned_query = self.normalize_vendor_name(extracted_vendor_name)
         if not cleaned_query:
             return None, 0.0, "Vendor name normalized to empty string"
@@ -165,32 +164,22 @@ class VendorMatcher:
                 f"Falling back to full scan."
             )
             # Fallback: scan all vendors (slower but more thorough)
-            first_word_matches = list(vendors)
+            # Use iterator to avoid loading all vendors into memory at once
+            first_word_matches = vendors.iterator()
 
-        # Check for unique match by word containment
-        all_words_matches = [
-            v
-            for v in first_word_matches
-            if self.name_contains_all_words(v.vendor_name, search_words)
-        ]
-
-        if len(all_words_matches) == 1:
-            vendor = all_words_matches[0]
-            # Still calculate score for logging
-            score = self.calculate_fuzzy_score(
-                cleaned_query, self.normalize_vendor_name(vendor.vendor_name)
-            )
-            logger.info(
-                f"✅ Unique vendor found by word containment: '{vendor.vendor_name}' "
-                f"(Score: {score:.1f})"
-            )
-            return vendor, score / 100.0, "Unique word containment match"
-
-        # Fuzzy matching on all first-word matches
+        # Iterate once over candidates to find best match
         best_score = 0.0
         best_match = None
+        unique_match = None
+        unique_match_count = 0
 
         for vendor in first_word_matches:
+            # Check for unique match by word containment
+            if self.name_contains_all_words(vendor.vendor_name, search_words):
+                unique_match = vendor
+                unique_match_count += 1
+
+            # Calculate fuzzy score
             cleaned_vendor = self.normalize_vendor_name(vendor.vendor_name)
             score = self.calculate_fuzzy_score(cleaned_query, cleaned_vendor)
 
@@ -202,6 +191,18 @@ class VendorMatcher:
             if score > best_score:
                 best_score = score
                 best_match = vendor
+
+        if unique_match_count == 1:
+            vendor = unique_match
+            # Still calculate score for logging
+            score = self.calculate_fuzzy_score(
+                cleaned_query, self.normalize_vendor_name(vendor.vendor_name)
+            )
+            logger.info(
+                f"✅ Unique vendor found by word containment: '{vendor.vendor_name}' "
+                f"(Score: {score:.1f})"
+            )
+            return vendor, score / 100.0, "Unique word containment match"
 
         if best_match and best_score >= threshold:
             logger.info(
