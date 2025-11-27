@@ -15,7 +15,7 @@ class ProcessingStatus(models.TextChoices):
 class BaseDocument(BaseModel):
     """Base model for all document types"""
 
-    file = models.FileField(upload_to="documents/%Y/%m/%d/", max_length=500)
+    file = models.FileField(upload_to="documents/%Y/%m/%d/", max_length=1024)
     file_name = models.CharField(max_length=255)
     file_type = models.CharField(max_length=50)
     file_size = models.IntegerField()
