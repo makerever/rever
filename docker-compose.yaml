@@ -85,6 +85,49 @@ services:
     volumes:
       - uploads:/export
 
+  # Ollama LLM Service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: rever-ollama
+    restart: unless-stopped
+    networks:
+      - rever_dev
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # Ollama Model Loader - pulls qwen2.5vl:7b model on startup
+  ollama-loader:
+    image: ollama/ollama:latest
+    container_name: rever-ollama-loader
+    networks:
+      - rever_dev
+    depends_on:
+      ollama:
+        condition: service_healthy
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=ollama:11434
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "Waiting for Ollama service to be ready..."
+        sleep 10
+        echo "Pulling qwen2.5-vl:7b model..."
+        ollama pull qwen2.5-vl:7b
+        echo "Model pulled successfully!"
+    restart: "no"
+
   proxy:
     container_name: rever-proxy
     image: reverfin/rever-proxy:latest
@@ -115,3 +158,4 @@ volumes:
   pgdata:
   redisdata:
   uploads:
+  ollama_data:
