@@ -10,7 +10,7 @@ Install the following dependencies if you dont have them.
 
 1. GIT
 2. Docker Desktop
-3. Node.js (v18)
+3. Node.js (v24)
 4. Yarn
 
 ## Download

@@ -1,4 +1,9 @@
-FROM node:20-alpine AS base
+FROM node:24-alpine AS base
+
+# Add Corepack + pnpm activation (only once for all stages)
+RUN corepack enable \
+    && corepack prepare pnpm@latest --activate
+
 
 # BUILD
 FROM base AS builder
@@ -6,10 +11,11 @@ RUN apk add --no-cache libc6-compat
 # Set working directory
 WORKDIR /app
 
-RUN yarn global add turbo
+# Install Turbo CLI globally
+
 COPY . .
 
-RUN turbo prune --scope=web --docker
+RUN pnpm dlx turbo prune --scope=web --docker
 
 
 
@@ -21,8 +27,10 @@ WORKDIR /app
 # First install the dependencies (as they change less often)
 COPY .gitignore .gitignore
 COPY --from=builder /app/out/json/ .
-COPY --from=builder /app/out/yarn.lock ./yarn.lock
-RUN yarn install --network-timeout 500000
+COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+
+# Install dependencies with pnpm
+RUN pnpm install --frozen-lockfile
 
 # Build the project
 COPY --from=builder /app/out/full/ .
@@ -35,7 +43,7 @@ ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV TURBO_TELEMETRY_DISABLED=1
 
-RUN yarn turbo run build --filter=web
+RUN pnpm dlx turbo run build --filter=web
 
 
 
@@ -56,11 +64,12 @@ COPY --from=installer /app/web/package.json ./web/package.json
 COPY --from=installer /app/web/.next ./web/.next
 COPY --from=installer /app/web/public ./web/public
 COPY --from=installer /app/node_modules ./node_modules
+COPY --from=installer /app/web/node_modules ./web/node_modules
 
 # Set the correct working directory
 WORKDIR /app/web
 
 # Start the Next.js application
-CMD ["npm", "start"]
+CMD ["pnpm", "start"]
 
 EXPOSE 3000

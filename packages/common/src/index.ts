@@ -49,6 +49,7 @@ export { default as ConfirmationPopup } from "./popup/ConfirmDeletion";
 export { default as HelpSupport } from "./popup/HelpSupport";
 export { default as OrganizationProfile } from "./popup/OrganizationProfile";
 export { default as ReceiptConfirmPopup } from "./popup/ReceiptConfirmPopup";
+export { default as ButtonPopup } from "./popup/ButtonPopup";
 
 export * from "./popup/StatusFilter";
 export { default as UploadFileView } from "./popup/UploadFileView";
@@ -100,3 +101,9 @@ export { default as VersionHistory } from "./pages/receipt/VersionHistory";
 export { default as RequestConfirmationModal } from "./pages/receipt/RequestConfirmation";
 
 export { default as RequestReceiptView } from "./components/RequestReceiptView";
+
+// Upload Files Modal
+export { default as UploadFilesModal } from "./components/UploadFilesModal";
+
+// Extraction animations
+export { default as billExtractAnimation } from "./components/animations/billExtraction.json";

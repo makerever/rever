@@ -18,8 +18,17 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@rever/common": ["../packages/common/src"],
+      "@rever/constants": ["../packages/constants/src"],
+      "@rever/services": ["../packages/services/src"],
+      "@rever/stores": ["../packages/stores/src"],
+      "@rever/types": ["../packages/types/src"],
+      "@rever/utils": ["../packages/utils/src"],
+      "@rever/validations": ["../packages/validations/src"],
+      "@rever/tailwind-config": ["../packages/tailwind-config/src"]
     }
   },
   "include": [

@@ -8,6 +8,9 @@
   "files": [
     "src"
   ],
-  "description": "Global store across the monorepo",
-  "dependencies": {}
+  "description": "Global state stores across the monorepo",
+  "dependencies": {
+    "@rever/types": "workspace:*",
+    "zustand": "^5.0.4"
+  }
 }
