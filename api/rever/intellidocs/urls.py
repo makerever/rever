@@ -5,12 +5,12 @@ All OCR and Document Intelligence endpoints
 
 from django.urls import path
 
-from rever.intellidocs.views.bill_ocr import (
+from rever.intellidocs.views import (
+    BillExtractionViewSet,
     BillOCRResultAPIView,
     BillOCRStatusAPIView,
     BillOCRUploadAPIView,
 )
-from rever.intellidocs.views.extraction import BillExtractionViewSet
 
 urlpatterns = [
     # Bill OCR Upload and Processing
