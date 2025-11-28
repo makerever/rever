@@ -15,7 +15,7 @@ class ProcessingStatus(models.TextChoices):
 class BaseDocument(BaseModel):
     """Base model for all document types"""
 
-    file = models.FileField(upload_to="documents/%Y/%m/%d/", max_length=1024)
+    file = models.CharField(max_length=1024)
     file_name = models.CharField(max_length=255)
     file_type = models.CharField(max_length=50)
     file_size = models.IntegerField()
@@ -38,7 +38,7 @@ class BaseDocument(BaseModel):
     def file_url(self):
         """Generate accessible URL for the file"""
         if self.file:
-            return default_storage.url(self.file.name)
+            return default_storage.url(self.file)
         return None
 
     class Meta:
