@@ -7,7 +7,7 @@ import { Document, Page, pdfjs } from "react-pdf";
 import PageLoader from "./Loader";
 import { ZoomIn, ZoomOut } from "lucide-react";
 
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 type Props = {
   fileUrl: string;
