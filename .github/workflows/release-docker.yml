@@ -25,11 +25,31 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    - name: Free Disk Space (Ubuntu)
+      uses: jlumbroso/free-disk-space@main
+      with:
+        # this might remove tools that are actually needed,
+        # if set to "true" but frees about 6 GB
+        tool-cache: false
+        
+        # all of these default to true, but feel free to set to
+        # "false" if necessary for your workflow
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: true
+        docker-images: true
+        swap-storage: true
+
     - name: Checkout code
       uses: actions/checkout@v3
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
+      with:
+        driver-opts: |
+          image=moby/buildkit:latest
+          network=host
       
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
@@ -51,6 +71,9 @@ jobs:
           echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
         fi
 
+    - name: Check disk space before builds
+      run: df -h
+
     - name: Build and push web image
       uses: docker/build-push-action@v4
       id: docker_build_web
@@ -66,6 +89,14 @@ jobs:
           NEXT_PUBLIC_API_BASE_URL=/api
         cache-from: type=registry,ref=reverfin/rever-frontend:buildcache
         cache-to: type=registry,ref=reverfin/rever-frontend:buildcache,mode=max
+        outputs: type=image,push=true
+        provenance: false
+
+    - name: Clean up after web build
+      run: |
+        docker buildx prune -f
+        docker system prune -af --volumes
+        df -h
 
     - name: Build and push API image
       uses: docker/build-push-action@v4
@@ -80,6 +111,14 @@ jobs:
           reverfin/rever-api:${{ steps.set_version.outputs.VERSION }}
         cache-from: type=registry,ref=reverfin/rever-api:buildcache
         cache-to: type=registry,ref=reverfin/rever-api:buildcache,mode=max
+        outputs: type=image,push=true
+        provenance: false
+
+    - name: Clean up after API build
+      run: |
+        docker buildx prune -f
+        docker system prune -af --volumes
+        df -h
 
     - name: Build and push proxy image
       uses: docker/build-push-action@v4
@@ -94,6 +133,8 @@ jobs:
           reverfin/rever-proxy:${{ steps.set_version.outputs.VERSION }}
         cache-from: type=registry,ref=reverfin/rever-proxy:buildcache
         cache-to: type=registry,ref=reverfin/rever-proxy:buildcache,mode=max
+        outputs: type=image,push=true
+        provenance: false
           
     - name: Image digest
       run: |
