@@ -126,7 +126,7 @@ IMPORTANT RULES:
                     "temperature": 0.1,
                     "options": {"num_predict": 2000},
                 },
-                timeout=60,
+                timeout=300,
             )
 
             if response.status_code != 200:
@@ -159,7 +159,7 @@ IMPORTANT RULES:
         try:
             # Derive tags URL from generate URL (e.g. .../api/generate -> .../api/tags)
             tags_url = self.ollama_url.replace("/api/generate", "/api/tags")
-            response = requests.get(tags_url, timeout=2)
+            response = requests.get(tags_url, timeout=300)
             return response.status_code == 200
         except Exception:
             return False
