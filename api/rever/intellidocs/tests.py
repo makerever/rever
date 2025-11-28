@@ -617,6 +617,33 @@ class BillParserTest(TestCase):
             # Note: The parser extracts the string, normalization happens in task
             assert expected in (result if result else "")
 
+    @patch("rever.intellidocs.parsers.bill_parser.requests.post")
+    @patch("rever.intellidocs.parsers.bill_parser.requests.get")
+    def test_ollama_prompt_structure(self, mock_get, mock_post):
+        """Test that the prompt sent to Ollama matches the simplified structure"""
+        print("\n--- Test: Ollama Prompt Structure ---")
+
+        # Mock check_ollama to return success (200 OK)
+        mock_get.return_value.status_code = 200
+
+        # Setup mock response for generation
+        mock_response = mock_post.return_value
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"response": "{}"}
+
+        # Call parse
+        self.parser.parse("Test Invoice Text")
+
+        # Verify call args
+        _, kwargs = mock_post.call_args
+        json_body = kwargs["json"]
+        prompt = json_body["prompt"]
+
+        # Check for key phrases in the new prompt
+        assert "Extract bill data from the text below into JSON." in prompt
+        assert "Required JSON Structure:" in prompt
+        assert "Vendor is the SELLER" in prompt
+
 
 class BillAPIURLTest(TestCase):
     """

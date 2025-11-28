@@ -9,7 +9,7 @@ from rever.db.mixins import AuditModel
 class BaseModel(AuditModel):
     """Base model with UUID, full audit fields"""
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     class Meta:
         abstract = True

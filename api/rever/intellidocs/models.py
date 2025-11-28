@@ -21,7 +21,10 @@ class BaseDocument(BaseModel):
     file_size = models.IntegerField()
 
     status = models.CharField(
-        max_length=20, choices=ProcessingStatus.choices, default=ProcessingStatus.PENDING
+        max_length=20,
+        choices=ProcessingStatus.choices,
+        default=ProcessingStatus.PENDING,
+        db_index=True,
     )
 
     raw_text = models.TextField(blank=True, null=True)
@@ -50,7 +53,7 @@ class OCRLog(BaseModel):
     """Log for OCR operations"""
 
     document_type = models.CharField(max_length=50)
-    document_id = models.UUIDField(null=True, blank=True)
+    document_id = models.UUIDField(null=True, blank=True, db_index=True)
 
     operation = models.CharField(max_length=100)
     status = models.CharField(max_length=20, choices=ProcessingStatus.choices)

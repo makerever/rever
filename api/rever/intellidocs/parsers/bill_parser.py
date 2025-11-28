@@ -62,58 +62,49 @@ class BillParser:
                 return self._fallback_parse(text)
 
             prompt = f"""
-Extract bill/invoice data from this text and return ONLY a valid JSON object.
+Extract bill data from the text below into JSON.
 
-Bill text:
+Text:
 {text}
 
-Extract and return this exact JSON structure:
+Required JSON Structure:
 {{
-    "bill_number": "actual bill/invoice number",
-    "bill_date": "YYYY-MM-DD format or null",
-    "due_date": "YYYY-MM-DD format or null",
-    "purchase_order": "PO number if present (e.g., PO-12345)",
+    "bill_number": "string or null",
+    "bill_date": "YYYY-MM-DD or null",
+    "due_date": "YYYY-MM-DD or null",
+    "purchase_order": "string or null",
     "vendor": {{
-        "name": "vendor/seller company name ONLY",
-        "address": "full vendor address",
-        "tax_id": "VAT/GST/EIN/TIN number",
-        "email": "vendor email if present",
-        "phone": "vendor phone if present"
+        "name": "string",
+        "address": "string",
+        "tax_id": "string",
+        "email": "string",
+        "phone": "string"
     }},
-    "customer": {{
-        "name": "customer/buyer name",
-        "address": "customer address"
-    }},
-    "payment_terms": "NET30, NET60, DUE_ON_RECEIPT, etc.",
+    "customer": {{ "name": "string", "address": "string" }},
+    "payment_terms": "string or null",
     "amounts": {{
-        "subtotal": "number only, no currency",
-        "tax": "number only",
-        "tax_percentage": "tax percentage if available",
-        "total": "number only"
+        "subtotal": "number",
+        "tax": "number",
+        "tax_percentage": "number",
+        "total": "number"
     }},
     "line_items": [
         {{
-            "line_number": "line number if present",
-            "description": "product/service description",
+            "description": "string",
             "quantity": "number",
             "unit_price": "number",
-            "uom": "unit of measure (pcs, kg, hours, etc.)",
-            "product_code": "product/SKU code if present",
-            "amount": "number (quantity * unit_price)"
+            "amount": "number",
+            "product_code": "string"
         }}
     ],
-    "currency": "USD/INR/EUR/GBP",
-    "comments": "any additional notes or terms"
+    "currency": "USD/EUR/etc",
+    "comments": "string"
 }}
 
-IMPORTANT RULES:
-1. Extract ONLY the company name for vendor.name, NOT the entire invoice
-2. Parse dates in YYYY-MM-DD format (e.g., "2025-06-30")
-3. Vendor is FROM/SELLER, Customer is BILL TO/BUYER - don't mix them
-4. All amounts must be numbers only (no currency symbols, commas)
-5. Line items should be actual products/services with proper descriptions
-6. For each line item, ensure quantity, unit_price and amount are numbers
-7. Return ONLY valid JSON, no explanations or markdown
+Rules:
+- Dates in YYYY-MM-DD.
+- Amounts as numbers (no symbols).
+- Vendor is the SELLER. Customer is the BUYER.
 """
 
             response = requests.post(
@@ -126,7 +117,7 @@ IMPORTANT RULES:
                     "temperature": 0.1,
                     "options": {"num_predict": 2000},
                 },
-                timeout=300,
+                timeout=600,
             )
 
             if response.status_code != 200:

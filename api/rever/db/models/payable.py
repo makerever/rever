@@ -313,7 +313,7 @@ class Bill(BaseModel):
 
 
 class BillItem(BaseModel):
-    bill = models.ForeignKey(Bill, on_delete=models.CASCADE, related_name="items", db_index=True)
+    bill = models.ForeignKey(Bill, on_delete=models.CASCADE, related_name="items", db_index=False)
     description = models.TextField()
     quantity = models.DecimalField(max_digits=12, decimal_places=2)
     unit_price = models.DecimalField(max_digits=12, decimal_places=2)
@@ -441,7 +441,7 @@ class PurchaseOrder(BaseModel):
     class Meta:
         unique_together = ("organization", "po_number")
         indexes = [
-            models.Index(fields=["organization", "po_number"]),
+            # models.Index(fields=["organization", "po_number"]),  # Covered by unique_together
         ]
         verbose_name = "Purchase Order"
         verbose_name_plural = "Purchase Orders"
@@ -461,7 +461,7 @@ class PurchaseOrderItem(BaseModel):
         ("closed", "Closed"),
     ]
     purchase_order = models.ForeignKey(
-        PurchaseOrder, on_delete=models.CASCADE, related_name="items", db_index=True
+        PurchaseOrder, on_delete=models.CASCADE, related_name="items", db_index=False
     )
     description = models.TextField()
     quantity = models.DecimalField(
@@ -514,7 +514,8 @@ class PurchaseOrderItem(BaseModel):
             ),
         ]
         indexes = [
-            models.Index(fields=["purchase_order", "line_number"]),
+            # models.Index(fields=["purchase_order", "line_number"]),
+            # Covered by unique constraint
             models.Index(fields=["purchase_order", "line_status"]),  # filter
         ]
 
@@ -566,16 +567,18 @@ class PurchaseOrderItem(BaseModel):
 
 
 class ReceiptConfirmationTask(BaseModel):
-    bill = models.ForeignKey("Bill", on_delete=models.CASCADE, related_name="confirmation_tasks")
+    bill = models.ForeignKey(
+        "Bill", on_delete=models.CASCADE, related_name="confirmation_tasks", db_index=False
+    )
     organization = models.ForeignKey(
         "Organization",
         on_delete=models.CASCADE,
         related_name="receipt_confirmation_tasks",
-        db_index=True,
+        db_index=False,
         help_text="Must match the bill's organization.",
     )
     assignee = models.ForeignKey(
-        "User", on_delete=models.PROTECT, related_name="receipt_confirmation_tasks"
+        "User", on_delete=models.PROTECT, related_name="receipt_confirmation_tasks", db_index=False
     )
     status = models.CharField(
         max_length=12,
