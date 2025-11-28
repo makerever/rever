@@ -1,17 +1,11 @@
-from .approval import urlpatterns as approval_urls
-from .attachment import urlpatterns as attachment_urls
-from .audit import urlpatterns as audit_urls
-from .auth import urlpatterns as auth_urls
-from .notification import urlpatterns as notification_urls
-from .payable import urlpatterns as payable_urls
-from .receipt import urlpatterns as receipt_urls
+from django.urls import include, path
 
-urlpatterns = (
-    auth_urls
-    + payable_urls
-    + notification_urls
-    + audit_urls
-    + attachment_urls
-    + receipt_urls
-    + approval_urls
-)
+urlpatterns = [
+    path("", include("rever.app.urls.auth")),
+    path("", include("rever.app.urls.payable")),
+    path("", include("rever.app.urls.notification")),
+    path("", include("rever.app.urls.audit")),
+    path("", include("rever.app.urls.attachment")),
+    path("", include("rever.app.urls.receipt")),
+    path("", include("rever.app.urls.approval")),
+]
