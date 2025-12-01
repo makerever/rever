@@ -22,8 +22,36 @@ curl -fsSL https://get.docker.com | bash
 ```bash
 DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
 mkdir -p $DOCKER_CONFIG/cli-plugins
-curl -SL https://github.com/docker/compose/releases/download/v2.2.3/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/cli-plugins/docker-compose
+curl -SL https://github.com/docker/compose/releases/download/v2.40.3/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/cli-plugins/docker-compose
 chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
+```
+
+### Setup cloud GPU (Need g4dn class instance or any instance with nvidia t4 for dnd functionality)
+*skip these steps if you dont have a gpu instance.
+
+```bash
+sudo apt update
+sudo apt install -y ubuntu-drivers-common
+sudo ubuntu-drivers --gpgpu install
+
+sudo reboot
+
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+  && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+
+
+sudo apt-get update
+
+# Install the NVIDIA Container Toolkit package
+sudo apt-get install -y nvidia-container-toolkit
+
+# Configure the container runtime
+sudo nvidia-ctk runtime configure --runtime=docker
+
+# Restart Docker daemon
+sudo systemctl restart docker
 ```
 
 ### 3. Create Rever directory

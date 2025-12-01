@@ -98,8 +98,17 @@ services:
       - ollama_data:/root/.ollama
     environment:
       - OLLAMA_HOST=0.0.0.0:11434
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      test: ["CMD-SHELL", "ollama list || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -123,8 +132,8 @@ services:
       - |
         echo "Waiting for Ollama service to be ready..."
         sleep 10
-        echo "Pulling qwen2.5-vl:7b model..."
-        ollama pull qwen2.5-vl:7b
+        echo "Pulling ollama model..."
+        ollama pull ${OLLAMA_MODEL:-qwen2.5-vl:3b}
         echo "Model pulled successfully!"
     restart: "no"
 
