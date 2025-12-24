@@ -8,28 +8,28 @@ import logging
 from rest_framework.response import Response
 
 from rever.app.views.base_viewsets import BaseModelViewSet
-from rever.intellidocs.models import BillExtraction
+from rever.intellidocs.models import DocumentExtraction
 from rever.intellidocs.serializers import (
-    BillExtractionDetailSerializer,
-    BillExtractionListSerializer,
+    DocumentExtractionDetailSerializer,
+    DocumentExtractionListSerializer,
 )
 
 logger = logging.getLogger(__name__)
 
 
-class BillExtractionViewSet(BaseModelViewSet):
+class DocumentExtractionViewSet(BaseModelViewSet):
     """
-    ViewSet for viewing bill extractions.
+    ViewSet for viewing document extractions.
     Supports listing and detailed retrieval with analysis.
     """
 
-    queryset = BillExtraction.objects.all()
+    queryset = DocumentExtraction.objects.all()
     http_method_names = ["get"]
 
     def get_serializer_class(self):
         if self.action == "retrieve":
-            return BillExtractionDetailSerializer
-        return BillExtractionListSerializer
+            return DocumentExtractionDetailSerializer
+        return DocumentExtractionListSerializer
 
     def get_queryset(self):
         """
@@ -37,7 +37,7 @@ class BillExtractionViewSet(BaseModelViewSet):
         """
         queryset = super().get_queryset()
         if self.action == "list":
-            return queryset.select_related("bill").order_by("-created_at")
+            return queryset.select_related("bill", "purchase_order").order_by("-created_at")
         return queryset
 
     def retrieve(self, request, *args, **kwargs):

@@ -3,12 +3,16 @@ Intellidocs Views Package
 Contains all OCR and document intelligence views
 """
 
-from .bill_ocr import BillOCRResultAPIView, BillOCRStatusAPIView, BillOCRUploadAPIView
-from .extraction import BillExtractionViewSet
+from .document_views import (
+    DocumentOCRResultAPIView,
+    DocumentOCRStatusAPIView,
+    DocumentOCRUploadAPIView,
+)
+from .extraction import DocumentExtractionViewSet
 
 __all__ = [
-    "BillExtractionViewSet",
-    "BillOCRResultAPIView",
-    "BillOCRStatusAPIView",
-    "BillOCRUploadAPIView",
+    "DocumentExtractionViewSet",
+    "DocumentOCRResultAPIView",
+    "DocumentOCRStatusAPIView",
+    "DocumentOCRUploadAPIView",
 ]

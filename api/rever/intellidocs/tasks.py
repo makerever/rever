@@ -9,15 +9,17 @@ from typing import Any
 from celery import shared_task
 from django.contrib.contenttypes.models import ContentType
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db import transaction
+from django.db import models, transaction
+from django.utils import timezone
 
 from rever.db.models.attachment import Attachment
 from rever.db.models.auth import Organization
-from rever.db.models.payable import Bill, BillItem, PurchaseOrder
-from rever.intellidocs.models import BillExtraction, ProcessingStatus
+from rever.db.models.payable import Bill, BillItem, PurchaseOrder, PurchaseOrderItem
+from rever.intellidocs.constants import ProcessingStatus
+from rever.intellidocs.models import DocumentExtraction
 
 from .models import OCRLog
-from .parsers.bill_parser import BillParser
+from .parsers.factory import DocumentParserFactory
 from .services.ocr_service import OCRService
 from .services.vendor_matcher import VendorMatcher
 from .utils import (
@@ -29,20 +31,6 @@ from .utils import (
 )
 
 logger = logging.getLogger(__name__)
-
-
-def convert_decimals_to_string(data: Any) -> Any:
-    """
-    Recursively convert Decimal objects to strings for JSON serialization
-    """
-    if isinstance(data, dict):
-        return {key: convert_decimals_to_string(value) for key, value in data.items()}
-    elif isinstance(data, list):
-        return [convert_decimals_to_string(item) for item in data]
-    elif isinstance(data, Decimal):
-        return str(data)
-    else:
-        return data
 
 
 def validate_amounts(subtotal: Decimal, tax: Decimal, total: Decimal) -> tuple[bool, Decimal]:
@@ -77,36 +65,37 @@ def _perform_ocr(file_path: str | Path, engine: str) -> tuple[str, float, dict]:
     return cleaned_text, ocr_time, ocr_result
 
 
-def _parse_bill_text(text: str) -> tuple[dict, float]:
-    """Parse bill text using BillParser"""
-    logger.info("Parsing bill data with BillParser")
+def _parse_document(text: str, document_type: str = "bill") -> tuple[dict, float]:
+    """Parse document text using factory-provided parser"""
+    logger.info(f"Parsing {document_type} data")
     start_time = time.time()
 
-    bill_parser = BillParser()
-    parsed_data = bill_parser.parse(text)
+    parser = DocumentParserFactory.get_parser(document_type)
+    parsed_data = parser.parse(text)
 
     parse_time = time.time() - start_time
-    logger.info(f"Parsed bill data: {len(parsed_data.get('line_items', []))} line items")
+    logger.info(f"Parsed {document_type} data: {len(parsed_data.get('line_items', []))} items")
 
     return parsed_data, parse_time
 
 
-def _create_bill_extraction(
+def _create_document_extraction(
     organization_id: str | int,
     file_path: str | Path,
     file_name: str,
     text: str,
     parsed_data: dict,
     timings: dict,
-) -> BillExtraction:
-    """Create BillExtraction record (Staging)"""
+    document_type: str = "bill",
+) -> DocumentExtraction:
+    """Create DocumentExtraction record (Staging)"""
     try:
         file_size = Path(file_path).stat().st_size
     except OSError:
         file_size = 0
 
     ext_bill_number = parsed_data.get("bill_number")
-    ext_po_number = parsed_data.get("purchase_order")
+    ext_po_number = parsed_data.get("purchase_order") or parsed_data.get("po_number")
     ext_vendor_name = parsed_data.get("vendor", {}).get("name")
     ext_total = parsed_data.get("amounts", {}).get("total")
 
@@ -117,7 +106,7 @@ def _create_bill_extraction(
     # Convert Decimal objects to strings for JSON serialization
     json_safe_data = json.loads(json.dumps(parsed_data, cls=DjangoJSONEncoder))
 
-    return BillExtraction.objects.create(
+    return DocumentExtraction.objects.create(
         organization_id=organization_id,
         file=str(file_path),
         file_name=file_name,
@@ -128,6 +117,7 @@ def _create_bill_extraction(
         extracted_data=json_safe_data,
         processing_time=timings.get("ocr_time", 0) + timings.get("parse_time", 0),
         extraction_engine="ollama",
+        document_type=document_type,
         bill_number=ext_bill_number,
         po_number=ext_po_number,
         vendor_name=ext_vendor_name,
@@ -240,14 +230,81 @@ def _create_bill_record(
     return bill
 
 
-def _create_bill_items(bill: Bill, line_items: list) -> list[BillItem]:
-    """Create bill items from parsed data"""
+def _create_po_record(
+    organization: Organization,
+    matched_vendor: Any | None,
+    parsed_data: dict,
+) -> tuple[PurchaseOrder, bool]:
+    """
+    Create PurchaseOrder from extracted data.
+    If a PO with the same number already exists for this organization, returns the existing one.
+    
+    Returns:
+        Tuple of (PurchaseOrder, is_new) where is_new is True if PO was created, False if existing.
+    """
+    po_date = parse_date(parsed_data.get("po_date")) or timezone.now().date()
+    delivery_date = parse_date(parsed_data.get("delivery_date")) or timezone.now().date()
+
+    amounts = parsed_data.get("amounts", {}) or {}
+    total = clean_decimal(amounts.get("total")) or Decimal("0")
+    sub_total = clean_decimal(amounts.get("subtotal")) or total
+    tax_amount = clean_decimal(amounts.get("tax")) or Decimal("0")
+    
+    ocr_po_number = clean_string(truncate_string(parsed_data.get("po_number"), 50))
+    
+    # Check for duplicate PO
+    if ocr_po_number:
+        existing_po = PurchaseOrder.objects.filter(
+            organization=organization,
+            po_number__iexact=ocr_po_number,
+        ).first()
+        
+        if existing_po:
+            logger.warning(
+                f"Duplicate PO detected: {ocr_po_number} already exists (ID: {existing_po.id}). "
+                f"Returning existing PO instead of creating new one."
+            )
+            return existing_po, False  # Return existing, not new
+    
+    po = PurchaseOrder.objects.create(
+        organization=organization,
+        vendor=matched_vendor,
+        po_number=ocr_po_number,  # Will auto-generate if empty
+        po_date=po_date,
+        delivery_date=delivery_date,
+        sub_total=sub_total,
+        total_tax=tax_amount,
+        total=total,
+        status="draft",
+        is_attachment=True,
+    )
+    
+    logger.info(f"Created PO: {po.po_number} (ID: {po.id})")
+    return po, True  # Return new PO
+
+
+def _create_line_items(
+    parent_object: Bill | PurchaseOrder,
+    item_model: type[BillItem] | type[PurchaseOrderItem],
+    line_items: list,
+    parent_field_name: str,
+) -> list[BillItem | PurchaseOrderItem]:
+    """
+    Generic function to create line items for Bill or PurchaseOrder.
+    
+    Args:
+        parent_object: The Bill or PurchaseOrder instance
+        item_model: BillItem or PurchaseOrderItem class
+        line_items: List of parsed line item dicts
+        parent_field_name: Name of FK field on item model ('bill' or 'purchase_order')
+    """
     created_items = []
-    logger.info(f"Attempting to create {len(line_items)} bill items from parsed data")
+    model_name = item_model.__name__
+    logger.info(f"Attempting to create {len(line_items)} {model_name}s from parsed data")
 
     for idx, item_data in enumerate(line_items, 1):
         try:
-            logger.debug(f"Processing line item {idx}: {item_data}")
+            logger.debug(f"Processing {model_name} {idx}: {item_data}")
 
             quantity = clean_decimal(item_data.get("quantity"))
             unit_price = clean_decimal(item_data.get("unit_price"))
@@ -258,51 +315,61 @@ def _create_bill_items(bill: Bill, line_items: list) -> list[BillItem]:
 
             # Sanitize line number
             raw_line_num = item_data.get("line_number")
-            line_number = idx  # Default to index
+            line_number = idx
             if raw_line_num:
                 with contextlib.suppress(ValueError, TypeError):
                     line_number = int(str(raw_line_num).strip())
 
-            bill_item = BillItem.objects.create(
-                bill=bill,
-                description=(
+            # Build base fields
+            item_fields = {
+                parent_field_name: parent_object,
+                "description": (
                     clean_string(item_data.get("description", "No description"))
                     or "No description"
                 )[:500],
-                quantity=quantity,
-                unit_price=unit_price,
-                amount=amount,
-                uom=(clean_string(item_data.get("uom", "")) or "")[:20],
-                product_code=(clean_string(item_data.get("product_code", "")) or "")[:50],
-                line_number=line_number,
-            )
-            created_items.append(bill_item)
+                "quantity": quantity,
+                "unit_price": unit_price,
+                "amount": amount,
+                "uom": (clean_string(item_data.get("uom", "")) or "")[:20],
+                "product_code": (clean_string(item_data.get("product_code", "")) or "")[:50],
+                "line_number": line_number,
+            }
+
+            # Add PO-specific field
+            if item_model == PurchaseOrderItem:
+                item_fields["line_status"] = "open"
+
+            item = item_model.objects.create(**item_fields)
+            created_items.append(item)
 
         except Exception as item_error:
-            logger.error(f"Failed to create bill item {idx}: {item_error}", exc_info=True)
+            logger.error(f"Failed to create {model_name} {idx}: {item_error}", exc_info=True)
             continue
 
-    logger.info(f"Created {len(created_items)} bill items")
+    logger.info(f"Created {len(created_items)} {model_name}s")
     return created_items
 
 
 def _create_attachment(
-    organization: Organization, bill: Bill, file_path: str | Path, file_name: str
+    organization: Organization, content_object: models.Model, file_path: str | Path, file_name: str
 ) -> Attachment | None:
-    """Create Attachment and link to bill"""
+    """Create Attachment and link to generic object (Bill or PurchaseOrder)"""
     try:
-        bill_content_type = ContentType.objects.get_for_model(Bill)
+        content_type = ContentType.objects.get_for_model(content_object)
 
         # Note: file is already saved in storage at file_path
         attachment = Attachment.objects.create(
             organization=organization,
             file=str(file_path),
             file_name=file_name,
-            content_type=bill_content_type,
-            object_id=bill.id,
+            content_type=content_type,
+            object_id=content_object.id,
         )
 
-        logger.info(f"Created attachment {attachment.id} linked to bill {bill.id}")
+        logger.info(
+            f"Created attachment {attachment.id} linked to "
+            f"{content_type.model} {content_object.id}"
+        )
         return attachment
 
     except Exception as attach_error:
@@ -311,24 +378,23 @@ def _create_attachment(
 
 
 @shared_task(bind=True)
-def process_bill_ocr_task(
+def process_document_ocr_task(
     self,
     file_path: str | Path,
     file_name: str,
     organization_id: str | int,
     task_id: str,
     engine: str = "auto",
+    document_type: str = "bill",
 ) -> dict[str, Any]:
     """
-    Celery task to process bill OCR asynchronously
-    Creates Bill and BillItem records from extracted data
-    Performs semantic vendor matching
-    Creates Attachment record after successful processing
+    Celery task to process document OCR asynchronously
+    Supports Bill and Purchase Order
     """
-    logger.info(f"Starting bill OCR processing for file {file_path} (task: {task_id})")
+    logger.info(f"Starting {document_type} OCR processing for file {file_path} (task: {task_id})")
     start_time = time.time()
 
-    bill = None
+    created_document = None
 
     try:
         try:
@@ -340,37 +406,66 @@ def process_bill_ocr_task(
         # 1. Perform OCR
         cleaned_text, ocr_time, ocr_result = _perform_ocr(file_path, engine)
 
-        # 2. Parse Bill Data
-        parsed_data, parse_time = _parse_bill_text(cleaned_text)
+        # 2. Parse Data
+        parsed_data, parse_time = _parse_document(cleaned_text, document_type)
 
         # 3. Create Extraction Record
-        extraction = _create_bill_extraction(
+        extraction = _create_document_extraction(
             organization_id,
             file_path,
             file_name,
             cleaned_text,
             parsed_data,
             {"ocr_time": ocr_time, "parse_time": parse_time},
+            document_type=document_type,
         )
 
-        # 4. Match Purchase Order
-        matched_po = _match_purchase_order(organization_id, parsed_data.get("purchase_order"))
-
-        # 5. Match Vendor
+        
+        matched_vendor = None
+        vendor_created = False
+        vendor_confidence = 0.0
+        
+        # 5. Match Vendor (Common for both)
+        # Note: Bills can look up PO vendor. POs rely on vendor name.
+        matched_po = None
+        if document_type == "bill":
+             matched_po = _match_purchase_order(organization_id, parsed_data.get("purchase_order"))
+        
         matched_vendor, vendor_created, vendor_confidence = _match_vendor(
             organization, parsed_data.get("vendor", {}) or {}, matched_po
         )
 
-        # 6. Create Bill and Items (Atomic)
+
+        # 6. Create Record (Atomic)
         with transaction.atomic():
-            bill = _create_bill_record(organization, matched_vendor, parsed_data, matched_po)
+            if document_type == "bill":
+                bill = _create_bill_record(organization, matched_vendor, parsed_data, matched_po)
+                created_document = bill
+                
+                extraction.bill = bill
+                extraction.save(update_fields=["bill"])
 
-            extraction.bill = bill
-            extraction.save(update_fields=["bill"])
-
-            created_items = _create_bill_items(bill, parsed_data.get("line_items", []))
-
-            _create_attachment(organization, bill, file_path, file_name)
+                _create_line_items(
+                    bill, BillItem, parsed_data.get("line_items", []), "bill"
+                )
+                # Create Attachment (Generic)
+                _create_attachment(organization, bill, file_path, file_name)
+                
+            elif document_type == "purchase_order":
+                po, is_new_po = _create_po_record(organization, matched_vendor, parsed_data)
+                created_document = po
+                
+                extraction.purchase_order = po
+                extraction.save(update_fields=["purchase_order"])
+                
+                if is_new_po:
+                    _create_line_items(
+                        po, PurchaseOrderItem,
+                        parsed_data.get("line_items", []), "purchase_order"
+                    )
+                    _create_attachment(organization, po, file_path, file_name)
+                else:
+                    logger.info(f"Skipping line item creation for existing PO: {po.po_number}")
 
         total_time = time.time() - start_time
 
@@ -379,53 +474,50 @@ def process_bill_ocr_task(
             "task_id": task_id,
             "file_path": str(file_path),
             "vendor_matched": matched_vendor.vendor_name if matched_vendor else None,
-            "vendor_created": vendor_created,
-            "vendor_confidence": vendor_confidence,
-            "line_items_count": len(created_items),
+            "document_type": document_type,
             "ocr_time": ocr_time,
             "parse_time": parse_time,
         }
 
         OCRLog.objects.create(
-            document_type="bill",
-            document_id=bill.id if bill else None,
-            operation="process_bill_ocr",
+            document_type=document_type,
+            document_id=created_document.id if created_document else None,
+            operation=f"process_{document_type}_ocr",
             status=ProcessingStatus.COMPLETED,
             processing_time=total_time,
             ocr_engine=ocr_result.get("engine", "unknown"),
             details=log_details,
         )
+        
+        if document_type == "bill":
+            doc_number = created_document.bill_number
+        else:
+            doc_number = created_document.po_number
 
         logger.info(
-            f"Bill OCR processing completed: Bill {bill.bill_number} (ID: {bill.id}) in "
-            f"{total_time:.2f}s"
+            f"{document_type.title()} processing completed: {doc_number} in {total_time:.2f}s"
         )
 
         return {
             "status": "success",
-            "bill_id": str(bill.id),
-            "bill_number": bill.bill_number,
-            "vendor": matched_vendor.vendor_name if matched_vendor else None,
-            "vendor_created": vendor_created,
-            "line_items_count": len(created_items),
+            "document_id": str(created_document.id),
+            "document_number": doc_number,
             "processing_time": round(total_time, 2),
         }
 
     except Exception as e:
         total_time = time.time() - start_time
-        logger.error(f"Bill OCR processing failed: {e!s}", exc_info=True)
+        logger.error(f"Document OCR processing failed: {e!s}", exc_info=True)
 
-        try:
+        with contextlib.suppress(Exception):
             OCRLog.objects.create(
-                document_type="bill",
-                document_id=bill.id if bill else None,
-                operation="process_bill_ocr",
+                document_type=document_type,
+                document_id=created_document.id if created_document else None,
+                operation=f"process_{document_type}_ocr",
                 status=ProcessingStatus.FAILED,
                 error_details=str(e),
                 processing_time=total_time,
                 details={"task_id": task_id, "file_path": str(file_path)},
             )
-        except Exception as log_error:
-            logger.error(f"Failed to log error: {log_error}")
 
         return {"status": "failed", "error": str(e)}

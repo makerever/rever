@@ -6,38 +6,38 @@ All OCR and Document Intelligence endpoints
 from django.urls import path
 
 from rever.intellidocs.views import (
-    BillExtractionViewSet,
-    BillOCRResultAPIView,
-    BillOCRStatusAPIView,
-    BillOCRUploadAPIView,
+    DocumentExtractionViewSet,
+    DocumentOCRResultAPIView,
+    DocumentOCRStatusAPIView,
+    DocumentOCRUploadAPIView,
 )
 
 urlpatterns = [
-    # Bill OCR Upload and Processing
+    # Document Upload and Processing (Generic: Bill, PO)
     path(
-        "intellidocs/bills/upload/",
-        BillOCRUploadAPIView.as_view(),
-        name="bill-ocr-upload",
+        "intellidocs/upload/",
+        DocumentOCRUploadAPIView.as_view(),
+        name="document-ocr-upload",
     ),
     path(
-        "intellidocs/bills/status/<uuid:task_id>/",
-        BillOCRStatusAPIView.as_view(),
-        name="bill-ocr-status",
+        "intellidocs/status/<uuid:task_id>/",
+        DocumentOCRStatusAPIView.as_view(),
+        name="document-ocr-status",
     ),
     path(
-        "intellidocs/bills/result/<uuid:task_id>/",
-        BillOCRResultAPIView.as_view(),
-        name="bill-ocr-result",
+        "intellidocs/result/<uuid:task_id>/",
+        DocumentOCRResultAPIView.as_view(),
+        name="document-ocr-result",
     ),
-    # OCR Extraction Viewing/Debugging
+    # OCR Extraction
     path(
-        "intellidocs/bills/extractions/",
-        BillExtractionViewSet.as_view({"get": "list"}),
-        name="bill-extraction-list",
+        "intellidocs/extractions/",
+        DocumentExtractionViewSet.as_view({"get": "list"}),
+        name="document-extraction-list",
     ),
     path(
-        "intellidocs/bills/extractions/<uuid:pk>/",
-        BillExtractionViewSet.as_view({"get": "retrieve"}),
-        name="bill-extraction-detail",
+        "intellidocs/extractions/<uuid:pk>/",
+        DocumentExtractionViewSet.as_view({"get": "retrieve"}),
+        name="document-extraction-detail",
     ),
 ]
