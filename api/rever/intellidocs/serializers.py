@@ -1,31 +1,23 @@
 """
-Bill OCR Serializers
-Handles serialization for bill document upload and OCR results
+Document OCR Serializers
+Handles serialization for document upload and OCR results (Bills and Purchase Orders)
 """
 
 from rest_framework import serializers
 
-from rever.db.models.payable import Bill, BillItem
-from rever.intellidocs.models import BillExtraction, ProcessingStatus
+from rever.db.models.payable import Bill, BillItem, PurchaseOrder, PurchaseOrderItem
+from rever.intellidocs.models import DocumentExtraction
 
 
-class BillOCRUploadSerializer(serializers.Serializer):
-    """Serializer for bill document upload"""
+class DocumentUploadSerializer(serializers.Serializer):
+    """Serializer for document upload"""
 
     file = serializers.FileField()
-
-
-class BillOCRStatusSerializer(serializers.Serializer):
-    """Serializer for OCR status response"""
-
-    task_id = serializers.UUIDField()
-    status = serializers.ChoiceField(choices=ProcessingStatus.choices)
-    bill_id = serializers.UUIDField(required=False)
-    bill_number = serializers.CharField(required=False)
-    vendor_name = serializers.CharField(required=False)
-    total = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
-    error = serializers.CharField(required=False)
-    message = serializers.CharField()
+    document_type = serializers.ChoiceField(
+        choices=["bill", "purchase_order"],
+        default="bill",
+        help_text="Type of document: 'bill' or 'purchase_order'",
+    )
 
 
 class BillItemSerializer(serializers.ModelSerializer):
@@ -45,7 +37,7 @@ class BillItemSerializer(serializers.ModelSerializer):
         ]
 
 
-class BillOCRResultSerializer(serializers.ModelSerializer):
+class BillResultSerializer(serializers.ModelSerializer):
     """Serializer for processed bill data"""
 
     items = BillItemSerializer(many=True, read_only=True)
@@ -70,34 +62,108 @@ class BillOCRResultSerializer(serializers.ModelSerializer):
         ]
 
 
-class BillExtractionListSerializer(serializers.ModelSerializer):
-    """List serializer for BillExtraction - minimal data"""
-
-    bill_number_extracted = serializers.CharField(source="bill_number", read_only=True)
-    bill_id = serializers.UUIDField(source="bill.id", read_only=True)
-    bill_number_final = serializers.CharField(source="bill.bill_number", read_only=True)
+class PurchaseOrderItemSerializer(serializers.ModelSerializer):
+    """Serializer for purchase order line items"""
 
     class Meta:
-        model = BillExtraction
+        model = PurchaseOrderItem
+        fields = [
+            "id",
+            "description",
+            "quantity",
+            "unit_price",
+            "amount",
+            "uom",
+            "product_code",
+            "line_number",
+            "line_status",
+        ]
+
+
+class PurchaseOrderResultSerializer(serializers.ModelSerializer):
+    """Serializer for processed purchase order data"""
+
+    items = PurchaseOrderItemSerializer(many=True, read_only=True)
+    vendor_name = serializers.CharField(source="vendor.vendor_name", read_only=True)
+
+    class Meta:
+        model = PurchaseOrder
+        fields = [
+            "id",
+            "po_number",
+            "po_date",
+            "delivery_date",
+            "vendor_name",
+            "sub_total",
+            "tax_percentage",
+            "total_tax",
+            "total",
+            "payment_terms",
+            "comments",
+            "status",
+            "items",
+        ]
+
+
+class DocumentExtractionListSerializer(serializers.ModelSerializer):
+    """List serializer for DocumentExtraction - consistent for all document types"""
+
+    # Generic extracted data (from OCR)
+    document_number_extracted = serializers.SerializerMethodField()
+    
+    # Linked record info
+    document_id = serializers.SerializerMethodField()
+    document_number_final = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DocumentExtraction
         fields = [
             "id",
             "created_at",
             "file_name",
             "status",
-            "bill_number_extracted",
+            "document_type",
+            "document_number_extracted",
             "vendor_name",
             "total_amount",
-            "bill_id",
-            "bill_number_final",
+            "document_id",
+            "document_number_final",
             "file_url",
         ]
 
+    def get_document_number_extracted(self, obj):
+        """Return extracted document number based on type"""
+        if obj.document_type == "bill":
+            return obj.bill_number
+        elif obj.document_type == "purchase_order":
+            return obj.po_number
+        return None
 
-class BillExtractionDetailSerializer(serializers.ModelSerializer):
-    """Detailed serializer for BillExtraction showing raw OCR and parsed JSON"""
+    def get_document_id(self, obj):
+        """Return linked document ID based on type"""
+        if obj.document_type == "bill" and obj.bill:
+            return str(obj.bill.id)
+        elif obj.document_type == "purchase_order" and obj.purchase_order:
+            return str(obj.purchase_order.id)
+        return None
+
+    def get_document_number_final(self, obj):
+        """Return final document number from linked record"""
+        if obj.document_type == "bill" and obj.bill:
+            return obj.bill.bill_number
+        elif obj.document_type == "purchase_order" and obj.purchase_order:
+            return obj.purchase_order.po_number
+        return None
+
+
+class DocumentExtractionDetailSerializer(serializers.ModelSerializer):
+    """Detailed serializer for DocumentExtraction showing raw OCR and parsed JSON"""
+    
+    bill_number_final = serializers.CharField(source="bill.bill_number", read_only=True)
+    po_number_final = serializers.CharField(source="purchase_order.po_number", read_only=True)
 
     class Meta:
-        model = BillExtraction
+        model = DocumentExtraction
         fields = [
             "id",
             "created_at",
@@ -117,4 +183,11 @@ class BillExtractionDetailSerializer(serializers.ModelSerializer):
             "total_amount",
             "currency",
             "bill",
+            "purchase_order",
+            "document_type",
+            "bill_number_final",
+            "po_number_final",
         ]
+
+
+

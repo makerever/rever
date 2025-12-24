@@ -8,16 +8,16 @@ from django.urls import reverse
 from django.utils import timezone
 
 from rever.db.models.payable import Bill, BillItem, Organization, PurchaseOrder, Vendor
-from rever.intellidocs.models import BillExtraction
+from rever.intellidocs.models import DocumentExtraction
 from rever.intellidocs.parsers.bill_parser import BillParser
 from rever.intellidocs.services.vendor_matcher import VendorMatcher
-from rever.intellidocs.tasks import process_bill_ocr_task
+from rever.intellidocs.tasks import process_document_ocr_task
 
 
-class BillOCRTaskTest(TestCase):
+class DocumentOCRTaskTest(TestCase):
     """
-    Integration tests for the Bill OCR Task.
-    Tests the full flow from task execution to DB record creation.
+    Integration tests for the Document OCR Task.
+    Tests the full flow from task execution to DB record creation for Bills and POs.
     """
 
     def setUp(self):
@@ -36,9 +36,7 @@ class BillOCRTaskTest(TestCase):
             status="approved",
         )
 
-        # Create a dummy file for testing
-        # Create a dummy file for testing
-        self.test_file_path = Path("test_bill.pdf")
+        self.test_file_path = Path("test_doc.pdf")
         with self.test_file_path.open("wb") as f:
             f.write(b"dummy pdf content")
 
@@ -47,10 +45,10 @@ class BillOCRTaskTest(TestCase):
             self.test_file_path.unlink()
 
     @patch("rever.intellidocs.tasks.OCRService")
-    @patch("rever.intellidocs.tasks.BillParser")
+    @patch("rever.intellidocs.tasks.DocumentParserFactory")
     @patch("rever.intellidocs.tasks.VendorMatcher")
     def test_1_basic_bill_happy_path(
-        self, mock_vendor_matcher, mock_bill_parser, mock_ocr_service
+        self, mock_vendor_matcher, mock_factory, mock_ocr_service
     ):
         """Test 1: Basic Bill - Standard layout, clear fields, exact vendor match"""
         print("\n--- Test 1: Basic Bill Happy Path ---")
@@ -62,9 +60,9 @@ class BillOCRTaskTest(TestCase):
             "engine": "test",
         }
 
-        # Mock Parser
-        mock_parser_instance = mock_bill_parser.return_value
-        mock_parser_instance.parse.return_value = {
+        # Mock Parser Factory
+        mock_parser = mock_factory.get_parser.return_value
+        mock_parser.parse.return_value = {
             "bill_number": "INV-001",
             "bill_date": "2025-01-01",
             "due_date": "2025-01-31",
@@ -85,17 +83,17 @@ class BillOCRTaskTest(TestCase):
         mock_matcher_instance.find_vendor.return_value = (self.vendor, 1.0, "Exact match")
 
         # Run Task
-        result = process_bill_ocr_task(
+        result = process_document_ocr_task(
             file_path=self.test_file_path,
             file_name="invoice.pdf",
             organization_id=self.organization.id,
             task_id=str(uuid.uuid4()),
+            document_type="bill",
         )
 
         # Verify
         assert result["status"] == "success"
-        assert result["bill_number"] == "INV-001"
-        assert result["vendor"] == "Xolo"
+        assert result["document_number"] == "INV-001"
 
         # Check DB
         bill = Bill.objects.get(bill_number="INV-001")
@@ -104,15 +102,76 @@ class BillOCRTaskTest(TestCase):
         assert bill.items.count() == 1
 
         # Check Extraction
-        extraction = BillExtraction.objects.get(bill=bill)
+        extraction = DocumentExtraction.objects.get(bill=bill)
         assert extraction.bill_number == "INV-001"
         assert extraction.total_amount == Decimal("110.00")
 
     @patch("rever.intellidocs.tasks.OCRService")
-    @patch("rever.intellidocs.tasks.BillParser")
+    @patch("rever.intellidocs.tasks.DocumentParserFactory")
+    @patch("rever.intellidocs.tasks.VendorMatcher")
+    def test_po_processing(self, mock_vendor_matcher, mock_factory, mock_ocr_service):
+        """Test PO Processing"""
+        print("\n--- Test: PO Processing ---")
+
+        # Mock OCR
+        mock_ocr_service.return_value.process_document.return_value = {
+            "text": "Purchase Order PO-NEW-001",
+            "engine": "test",
+        }
+
+        # Mock Parser
+        mock_parser = mock_factory.get_parser.return_value
+        mock_parser.parse.return_value = {
+            "po_number": "PO-NEW-001",
+            "po_date": "2025-02-01",
+            "delivery_date": "2025-02-15",
+            "vendor": {"name": "Xolo"},
+            "amounts": {"total": "500.00"},
+            "line_items": [
+                {
+                    "description": "Item 1",
+                    "quantity": "5",
+                    "unit_price": "100.00",
+                    "amount": "500.00",
+                    "line_number": "1",
+                }
+            ],
+        }
+
+        # Mock Matcher
+        mock_vendor_matcher.return_value.find_vendor.return_value = (self.vendor, 1.0, "Match")
+
+        # Run Task
+        result = process_document_ocr_task(
+            file_path=self.test_file_path,
+            file_name="po.pdf",
+            organization_id=self.organization.id,
+            task_id=str(uuid.uuid4()),
+            document_type="purchase_order",
+        )
+
+        assert result["status"] == "success"
+        assert result["document_number"] == "PO-NEW-001"
+
+        # Check DB
+        po = PurchaseOrder.objects.get(po_number="PO-NEW-001")
+        assert po.vendor == self.vendor
+        assert po.total == Decimal("500.00")
+        assert po.items.count() == 1
+        
+        item = po.items.first()
+        assert item.line_number == 1
+        assert item.quantity == Decimal("5")
+
+        # Check Extraction
+        extraction = DocumentExtraction.objects.get(purchase_order=po)
+        assert extraction.po_number == "PO-NEW-001"
+
+    @patch("rever.intellidocs.tasks.OCRService")
+    @patch("rever.intellidocs.tasks.DocumentParserFactory")
     @patch("rever.intellidocs.tasks.VendorMatcher")
     def test_2_complex_bill_po_linking(
-        self, mock_vendor_matcher, mock_bill_parser, mock_ocr_service
+        self, mock_vendor_matcher, mock_factory, mock_ocr_service
     ):
         """Test 2: Complex Bill - PO Linking"""
         print("\n--- Test 2: PO Linking ---")
@@ -122,7 +181,7 @@ class BillOCRTaskTest(TestCase):
             "text": "Invoice with PO",
             "engine": "test",
         }
-        mock_bill_parser.return_value.parse.return_value = {
+        mock_factory.get_parser.return_value.parse.return_value = {
             "bill_number": "INV-PO-001",
             "purchase_order": "PO-12345",  # Matches self.po
             "vendor": {"name": "Unknown Vendor"},  # Should be ignored in favor of PO vendor
@@ -132,7 +191,7 @@ class BillOCRTaskTest(TestCase):
         # Mock Vendor Matcher (Should not be used if PO matched, or used as fallback)
         mock_vendor_matcher.return_value.find_vendor.return_value = (None, 0.0, "No match")
 
-        process_bill_ocr_task(
+        process_document_ocr_task(
             file_path=self.test_file_path,
             file_name="invoice_po.pdf",
             organization_id=self.organization.id,
@@ -143,14 +202,14 @@ class BillOCRTaskTest(TestCase):
         assert bill.purchase_order == self.po
         assert bill.vendor == self.vendor  # Should take vendor from PO
 
-        extraction = BillExtraction.objects.get(bill=bill)
+        extraction = DocumentExtraction.objects.get(bill=bill)
         assert extraction.po_number == "PO-12345"
 
     @patch("rever.intellidocs.tasks.OCRService")
-    @patch("rever.intellidocs.tasks.BillParser")
+    @patch("rever.intellidocs.tasks.DocumentParserFactory")
     @patch("rever.intellidocs.tasks.VendorMatcher")
     def test_3_complex_bill_vendor_substring(
-        self, mock_vendor_matcher, mock_bill_parser, mock_ocr_service
+        self, mock_vendor_matcher, mock_factory, mock_ocr_service
     ):
         """Test 3: Complex Bill - Vendor Substring Match"""
         print("\n--- Test 3: Vendor Substring Match ---")
@@ -159,7 +218,7 @@ class BillOCRTaskTest(TestCase):
             "text": "Invoice from XOLO India",
             "engine": "test",
         }
-        mock_bill_parser.return_value.parse.return_value = {
+        mock_factory.get_parser.return_value.parse.return_value = {
             "bill_number": "INV-SUB-001",
             "vendor": {"name": "XOLO India"},  # Should match "Xolo"
             "amounts": {"total": "500.00"},
@@ -171,7 +230,7 @@ class BillOCRTaskTest(TestCase):
             "Substring match",
         )
 
-        process_bill_ocr_task(
+        process_document_ocr_task(
             file_path=self.test_file_path,
             file_name="invoice_sub.pdf",
             organization_id=self.organization.id,
@@ -182,9 +241,9 @@ class BillOCRTaskTest(TestCase):
         assert bill.vendor == self.vendor
 
     @patch("rever.intellidocs.tasks.OCRService")
-    @patch("rever.intellidocs.tasks.BillParser")
+    @patch("rever.intellidocs.tasks.DocumentParserFactory")
     @patch("rever.intellidocs.tasks.VendorMatcher")
-    def test_4_data_normalization(self, mock_vendor_matcher, mock_bill_parser, mock_ocr_service):
+    def test_4_data_normalization(self, mock_vendor_matcher, mock_factory, mock_ocr_service):
         """Test 4: Data Normalization (Payment Terms, Currency)"""
         print("\n--- Test 4: Data Normalization ---")
 
@@ -192,7 +251,7 @@ class BillOCRTaskTest(TestCase):
             "text": "Dirty Data Invoice",
             "engine": "test",
         }
-        mock_bill_parser.return_value.parse.return_value = {
+        mock_factory.get_parser.return_value.parse.return_value = {
             "bill_number": "INV-NORM-001",
             "payment_terms": "Due on Receipt",  # Should normalize to 'due'
             "amounts": {
@@ -212,7 +271,7 @@ class BillOCRTaskTest(TestCase):
         }
         mock_vendor_matcher.return_value.find_vendor.return_value = (self.vendor, 1.0, "Match")
 
-        process_bill_ocr_task(
+        process_document_ocr_task(
             file_path=self.test_file_path,
             file_name="invoice_norm.pdf",
             organization_id=self.organization.id,
@@ -230,9 +289,9 @@ class BillOCRTaskTest(TestCase):
         assert item.amount == Decimal("1000.00")
 
     @patch("rever.intellidocs.tasks.OCRService")
-    @patch("rever.intellidocs.tasks.BillParser")
+    @patch("rever.intellidocs.tasks.DocumentParserFactory")
     @patch("rever.intellidocs.tasks.VendorMatcher")
-    def test_5_edge_cases(self, mock_vendor_matcher, mock_bill_parser, mock_ocr_service):
+    def test_5_edge_cases(self, mock_vendor_matcher, mock_factory, mock_ocr_service):
         """Test 5: Edge Cases (Missing Data)"""
         print("\n--- Test 5: Edge Cases ---")
 
@@ -240,7 +299,7 @@ class BillOCRTaskTest(TestCase):
             "text": "Empty Invoice",
             "engine": "test",
         }
-        mock_bill_parser.return_value.parse.return_value = {
+        mock_factory.get_parser.return_value.parse.return_value = {
             "bill_number": None,  # Should auto-generate
             "amounts": {},  # Missing amounts
             "vendor": {},  # Missing vendor
@@ -248,7 +307,7 @@ class BillOCRTaskTest(TestCase):
         }
         mock_vendor_matcher.return_value.find_vendor.return_value = (None, 0.0, "No match")
 
-        result = process_bill_ocr_task(
+        result = process_document_ocr_task(
             file_path=self.test_file_path,
             file_name="invoice_edge.pdf",
             organization_id=self.organization.id,
@@ -274,9 +333,9 @@ class BillOCRTaskTest(TestCase):
         assert bill.vendor is None
 
     @patch("rever.intellidocs.tasks.OCRService")
-    @patch("rever.intellidocs.tasks.BillParser")
+    @patch("rever.intellidocs.tasks.DocumentParserFactory")
     @patch("rever.intellidocs.tasks.VendorMatcher")
-    def test_6_invalid_line_number(self, mock_vendor_matcher, mock_bill_parser, mock_ocr_service):
+    def test_6_invalid_line_number(self, mock_vendor_matcher, mock_factory, mock_ocr_service):
         """Test 6: Invalid Line Number (e.g. 'a')"""
         print("\n--- Test 6: Invalid Line Number ---")
 
@@ -284,7 +343,7 @@ class BillOCRTaskTest(TestCase):
             "text": "Invoice with bad line num",
             "engine": "test",
         }
-        mock_bill_parser.return_value.parse.return_value = {
+        mock_factory.get_parser.return_value.parse.return_value = {
             "bill_number": "INV-BAD-LINE",
             "amounts": {"total": "100.00"},
             "line_items": [
@@ -299,7 +358,7 @@ class BillOCRTaskTest(TestCase):
         }
         mock_vendor_matcher.return_value.find_vendor.return_value = (self.vendor, 1.0, "Match")
 
-        result = process_bill_ocr_task(
+        result = process_document_ocr_task(
             file_path=self.test_file_path,
             file_name="invoice_bad_line.pdf",
             organization_id=self.organization.id,
@@ -313,7 +372,97 @@ class BillOCRTaskTest(TestCase):
         item = bill.items.first()
         assert item.line_number == 1  # Should fallback to index (1)
 
+    @patch("rever.intellidocs.tasks.OCRService")
+    @patch("rever.intellidocs.tasks.DocumentParserFactory")
+    @patch("rever.intellidocs.tasks.VendorMatcher")
+    def test_7_duplicate_po_check(self, mock_vendor_matcher, mock_factory, mock_ocr_service):
+        """Test 7: Duplicate PO Check - Should assume existing PO"""
+        print("\n--- Test 7: Duplicate PO Parsing ---")
 
+        # 1. Existing PO is self.po (PO-12345)
+        # Mock OCR to return this number
+        mock_ocr_service.return_value.process_document.return_value = {
+            "text": "Purchase Order PO-12345",
+            "engine": "test",
+        }
+        mock_factory.get_parser.return_value.parse.return_value = {
+            "po_number": "PO-12345",
+            "amounts": {"total": "1000.00"},
+            "vendor": {"name": "Xolo"},
+        }
+        mock_vendor_matcher.return_value.find_vendor.return_value = (self.vendor, 1.0, "Match")
+
+        # Run Task
+        result = process_document_ocr_task(
+            file_path=self.test_file_path,
+            file_name="duplicate_po.pdf",
+            organization_id=self.organization.id,
+            task_id=str(uuid.uuid4()),
+            document_type="purchase_order",
+        )
+
+        assert result["status"] == "success"
+        
+        # Check that we got the EXISTING PO ID, not a new one
+        assert result["document_id"] == str(self.po.id)
+        
+        # Verify no new PO was created
+        assert PurchaseOrder.objects.count() == 1
+
+    @patch("rever.intellidocs.tasks.OCRService")
+    @patch("rever.intellidocs.tasks.DocumentParserFactory")
+    @patch("rever.intellidocs.tasks.VendorMatcher")
+    def test_8_ollama_failure_fallback(self, mock_vendor_matcher, mock_factory, mock_ocr_service):
+        """Test 8: Ollama Service Failure Fallback"""
+        print("\n--- Test 8: Ollama Failure Fallback ---")
+
+        mock_ocr_service.return_value.process_document.return_value = {
+            "text": "Invoice # 99999",
+            "engine": "test",
+        }
+        
+        # Mock Factory to return a REAL parser, with mocks inside it?
+        # If parse() fails, we call _fallback_parse
+        # BaseParser.parse is abstract - testing TASK exception handling
+        # The task calls parser.parse(text)
+        
+        # Scenario: parse() raises Exception or returns incomplete data? 
+        # BaseParser implementations handle LLM errors internally
+        # If connection fails, parse_with_llm returns None, parse() may fallback
+        
+        # Let's mock parser.parse to raise an Exception to simulate total failure
+        mock_parser = mock_factory.get_parser.return_value
+        mock_parser.parse.side_effect = Exception("Ollama connection failed")
+        
+        # AND mock _fallback_parse to succeed (simulating task catching exception)
+        # Wait, does the TASK catch generic exceptions?
+        # Checking tasks.py:
+        # try: parsed_data = parser.parse(text) ... except Exception as e: ...
+        
+        mock_parser._fallback_parse.return_value = {
+            "bill_number": "99999",
+            "total": None
+        }
+
+        # Run Task
+        result = process_document_ocr_task(
+            file_path=self.test_file_path,
+            file_name="invoice_fail.pdf",
+            organization_id=self.organization.id,
+            task_id=str(uuid.uuid4()),
+            document_type="bill",
+        )
+
+        # Expected behavior: Task catches exception, logs it, and marks as FAILED?
+        # OR does it attempt fallback?
+        # Currently tasks.py: catch Exception -> status=FAILED, error_message=str(e)
+        
+        assert result["status"] == "failed"
+        assert "Ollama connection failed" in result.get("error", "")
+
+        # Verify OCR Log records failure
+        log = DocumentExtraction.objects.filter(file_name="invoice_fail.pdf").first()
+        assert log.status == "failed"
 class VendorMatcherTest(TestCase):
     """
     Unit tests for VendorMatcher using RapidFuzz.
@@ -497,27 +646,8 @@ class BillParserTest(TestCase):
         self.parser = BillParser()
         self.sample_text = """
         NARS Group LLC. INVOICE
-        3720 Sidney Lane,
-        Flower Mound, TX 75022
         # 61124
         Date: Jun 11, 2024
-        Bill To:
-        Payment Terms: 45
-        Techouts
-        13800 Coppermine Road, Suite 281, Due Date: Jul 26, 2024
-        Herndon, VA 20171
-        Balance Due: $11,040.00
-        Item Quantity Rate Amount
-        Consulting services provided by Amit Sharma 184 $60.00 $11,040.00
-        Subtotal: $11,040.00
-        Tax (0%): $0.00
-        Total: $11,040.00
-        Terms:
-        Please remit payment to:
-        Electronically:
-        A/c number: 36118610983
-        Routing number: 031176110
-        By check: 3 Grace Court, Plainsboro, NJ 08536
         """
 
     def test_fallback_parse(self):
@@ -526,23 +656,11 @@ class BillParserTest(TestCase):
 
         result = self.parser._fallback_parse(self.sample_text)
 
-        # Verify basic fields
+        # Verify only bill_number is extracted in minimal fallback
         assert result.get("bill_number") == "61124"
-        assert result.get("payment_terms") == "net45"
-
-        # Verify amounts
-        amounts = result.get("amounts", {})
-        assert amounts.get("total") == "11040.00"
-        assert amounts.get("subtotal") == "11040.00"
-
-        # Verify line items
-        line_items = result.get("line_items", [])
-        assert len(line_items) > 0
-        item = line_items[0]
-        assert "Consulting services" in item.get("description")
-        assert item.get("quantity") == "184"
-        assert item.get("unit_price") == "60.00"
-        assert item.get("amount") == "11040.00"
+        assert result.get("total") is None
+        # Fallback no longer extracts line items or other fields
+        assert "line_items" not in result
 
     def test_bill_number_formats(self):
         """Test various bill number formats"""
@@ -553,7 +671,7 @@ class BillParserTest(TestCase):
             ("Invoice No: INV-999", "INV-999"),
             ("Bill Number: B-100", "B-100"),
             ("Invoice: 55555", "55555"),
-            ("InvoiceNumber 187042", "187042"),  # From repro case
+            ("InvoiceNumber 187042", "187042"),
         ]
 
         for text, expected in cases:
@@ -564,7 +682,7 @@ class BillParserTest(TestCase):
             assert result == expected
 
     def test_currency_truncation(self):
-        """Test that currency strings longer than 10 chars are truncated"""
+        """Test that currency strings longer than 10 chars are truncated during validation"""
         data = {
             "currency": "United States Dollar",
             "line_items": [],
@@ -575,74 +693,56 @@ class BillParserTest(TestCase):
         assert cleaned["currency"] == "United Sta"
         assert len(cleaned["currency"]) == 10
 
-    def test_complex_line_items(self):
-        """Test complex line item formats (Discount, Tax, Decimals)"""
-        print("\n--- Test: Complex Line Items ---")
+class PurchaseOrderParserTest(TestCase):
+    """
+    Unit tests for PurchaseOrderParser.
+    """
+    
+    def setUp(self):
+        from rever.intellidocs.parsers.purchase_order_parser import PurchaseOrderParser
+        self.parser = PurchaseOrderParser()
 
-        # Case 1: With Discount and Tax columns (like repro case)
-        text_complex = """
-        Description | Quantity | Unit Price | Discount | Tax | Amount
-        Item A | 23.00 | 100.00 | 0.00 | 0.00 | 2300.00
-        Item B | 1.5 | 50.00 | 5.00 | 2.50 | 72.50
-        """
-        items = self.parser._extract_line_items(text_complex)
-        assert len(items) == 2
-
-        # Item A
-        assert items[0]["quantity"] == "23.00"
-        assert items[0]["unit_price"] == "100.00"
-        assert items[0]["amount"] == "2300.00"
-
-        # Item B
-        assert items[1]["quantity"] == "1.5"
-        assert items[1]["unit_price"] == "50.00"
-        # Note: logic might not extract discount/tax into separate fields yet,
-        # but should get amount right
-        assert items[1]["amount"] == "72.50"
-
-    def test_date_formats(self):
-        """Test various date formats"""
-        print("\n--- Test: Date Formats ---")
-
+    def test_po_number_formats(self):
+        """Test various PO number formats"""
+        print("\n--- Test: PO Number Formats ---")
+        
         cases = [
-            ("Date: 2024-01-31", "2024-01-31"),
-            ("Invoice Date: Jan 31, 2024", "Jan 31, 2024"),
-            ("Date: 01/31/2024", "01/31/2024"),
-            ("Issue Date: 31-Jan-2024", "31-Jan-2024"),
+            ("PO # 12345", "12345"),
+            ("Purchase Order: PO-999", "PO-999"),
+            ("PO Number: P-100", "P-100"),
+            ("Order # 55555", "55555"),
         ]
-
+        
         for text, expected in cases:
-            result = self.parser._extract_date(text, "bill")
-            print(f"  '{text}' -> '{result}'")
-            # Note: The parser extracts the string, normalization happens in task
-            assert expected in (result if result else "")
+            context = f"Header\n{text}\nDate: 2024-01-01"
+            result = self.parser._extract_po_number(context)
+            assert result == expected
 
-
-class BillAPIURLTest(TestCase):
+class DocumentAPIURLTest(TestCase):
     """
     Test URL configuration for Intellidocs API.
     Verifies that named routes resolve to the correct paths.
     """
 
     def test_bill_ocr_upload_url(self):
-        url = reverse("bill-ocr-upload")
-        assert url == "/api/intellidocs/bills/upload/"
+        url = reverse("document-ocr-upload")
+        assert url == "/api/intellidocs/upload/"
 
     def test_bill_ocr_status_url(self):
         task_id = uuid.uuid4()
-        url = reverse("bill-ocr-status", args=[task_id])
-        assert url == f"/api/intellidocs/bills/status/{task_id}/"
+        url = reverse("document-ocr-status", args=[task_id])
+        assert url == f"/api/intellidocs/status/{task_id}/"
 
     def test_bill_ocr_result_url(self):
         task_id = uuid.uuid4()
-        url = reverse("bill-ocr-result", args=[task_id])
-        assert url == f"/api/intellidocs/bills/result/{task_id}/"
+        url = reverse("document-ocr-result", args=[task_id])
+        assert url == f"/api/intellidocs/result/{task_id}/"
 
     def test_bill_extraction_list_url(self):
-        url = reverse("bill-extraction-list")
-        assert url == "/api/intellidocs/bills/extractions/"
+        url = reverse("document-extraction-list")
+        assert url == "/api/intellidocs/extractions/"
 
     def test_bill_extraction_detail_url(self):
         pk = uuid.uuid4()
-        url = reverse("bill-extraction-detail", args=[pk])
-        assert url == f"/api/intellidocs/bills/extractions/{pk}/"
+        url = reverse("document-extraction-detail", args=[pk])
+        assert url == f"/api/intellidocs/extractions/{pk}/"

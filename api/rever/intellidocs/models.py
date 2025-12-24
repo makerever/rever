@@ -3,13 +3,7 @@ from django.db import models
 from django.db.models import JSONField
 
 from rever.db.models.base import BaseModel
-
-
-class ProcessingStatus(models.TextChoices):
-    PENDING = "pending", "Pending"
-    PROCESSING = "processing", "Processing"
-    COMPLETED = "completed", "Completed"
-    FAILED = "failed", "Failed"
+from rever.intellidocs.constants import ProcessingStatus
 
 
 class BaseDocument(BaseModel):
@@ -69,18 +63,34 @@ class OCRLog(BaseModel):
         return f"{self.document_type} - {self.operation} - {self.status}"
 
 
-class BillExtraction(BaseDocument):
+class DocumentExtraction(BaseDocument):
     """
-    Stores the raw extraction results from a bill/invoice document.
-    Acts as a staging area before creating the actual Bill record.
+    Stores the raw extraction results from a document (bill or purchase order).
+    Acts as a staging area before creating the actual record.
     """
 
+    class DocumentType(models.TextChoices):
+        BILL = "bill", "Bill"
+        PURCHASE_ORDER = "purchase_order", "Purchase Order"
+
     organization = models.ForeignKey(
-        "db.Organization", on_delete=models.CASCADE, related_name="bill_extractions"
+        "db.Organization", on_delete=models.CASCADE, related_name="document_extractions"
+    )
+
+    document_type = models.CharField(
+        max_length=50, choices=DocumentType.choices, default=DocumentType.BILL
     )
 
     bill = models.ForeignKey(
         "db.Bill", on_delete=models.SET_NULL, null=True, blank=True, related_name="extractions"
+    )
+
+    purchase_order = models.ForeignKey(
+        "db.PurchaseOrder",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="extractions",
     )
 
     bill_number = models.CharField(max_length=100, blank=True, null=True)
@@ -97,8 +107,8 @@ class BillExtraction(BaseDocument):
     completion_tokens = models.IntegerField(null=True, blank=True)
 
     class Meta:
-        db_table = "bill_extractions"
+        db_table = "document_extractions"
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"Extraction {self.id} - {self.file_name}"
+        return f"{self.document_type} Extraction {self.id} - {self.file_name}"

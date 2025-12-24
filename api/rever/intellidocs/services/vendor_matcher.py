@@ -164,8 +164,8 @@ class VendorMatcher:
                 f"Falling back to full scan."
             )
             # Fallback: scan all vendors (slower but more thorough)
-            # Use iterator to avoid loading all vendors into memory at once
-            first_word_matches = vendors.iterator()
+            # Note: Using list() instead of iterator() to avoid cursor issues in Celery
+            first_word_matches = list(vendors)
 
         # Iterate once over candidates to find best match
         best_score = 0.0
