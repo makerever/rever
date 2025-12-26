@@ -92,6 +92,7 @@ const getStatusIcon = (status: string, error_message?: string) => {
 
 const MAX_ATTEMPTS = 20;
 const DELAY_MS = 2000;
+const PDF_TYPE = "application/pdf";
 
 // Main Add Bill component with URL params
 const AddBillComponentWithParams = () => {
@@ -215,10 +216,9 @@ const AddBillComponentWithParams = () => {
         if (responseFile?.status === 200) {
           setFileResponse(responseFile?.data?.results[0]);
           setFileUrl(responseFile?.data?.results[0]?.file);
-          setIsLoading(false);
-        } else {
-          setIsLoading(false);
+          setFiles({ status: "completed" });
         }
+        setIsLoading(false);
       } else {
         router.push("/bill/list");
       }
@@ -390,7 +390,7 @@ const AddBillComponentWithParams = () => {
   // PDF upload/preview handlers
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = e.target.files?.[0];
-    if (uploadedFile && uploadedFile.type === "application/pdf") {
+    if (uploadedFile && uploadedFile.type === PDF_TYPE) {
       setFileDetails(uploadedFile);
       const url = URL.createObjectURL(uploadedFile);
       setFileUrl(url);
@@ -408,21 +408,10 @@ const AddBillComponentWithParams = () => {
           const { task_id } = uploadRes.data;
           await pollDocumentStatus(task_id);
         } else {
-          if (
-            uploadRes &&
-            uploadRes?.data[0] ===
-              "Your subscription has expired. Please renew to continue."
-          ) {
-            showErrorToast(uploadRes?.data[0]);
-            setShowPdf(false);
-            setFileUrl(null);
-            setFileDetails(null);
-          } else {
-            setShowPdf(false);
-            setFileUrl(null);
-            setFileDetails(null);
-            showErrorToast("File must be under 5MB and limited to 5 pages");
-          }
+          setShowPdf(false);
+          setFileUrl(null);
+          setFileDetails(null);
+          showErrorToast("File must be under 5MB and limited to 5 pages");
         }
       }
     } else {
@@ -440,8 +429,11 @@ const AddBillComponentWithParams = () => {
 
         setFiles({ status: responseData?.status });
         if (["completed"].includes(responseData?.status)) {
-          if (responseData?.status === "completed" && responseData?.bill_id) {
-            setIdValue(responseData?.bill_id);
+          if (
+            responseData?.status === "completed" &&
+            responseData?.document_id
+          ) {
+            setIdValue(responseData?.document_id);
             setShowPdf(true);
           }
           break;
@@ -503,7 +495,7 @@ const AddBillComponentWithParams = () => {
                   onChange={handleFileChange}
                   type="file"
                   className="hidden"
-                  accept="application/pdf"
+                  accept={PDF_TYPE}
                 />
                 <div className="bg-transparent flex items-center text-xs rounded-md transition duration-300 px-3 py-1 cursor-pointer text-primary-500 border border-primary-500 disabled:hover:bg-transparent disabled:text-primary-500 hover:bg-primary-500 hover:text-white">
                   <Upload width={16} className="mr-1" /> Extract PDF

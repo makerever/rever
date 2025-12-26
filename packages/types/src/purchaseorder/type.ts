@@ -46,6 +46,7 @@ export interface PurchaseOrder {
   comments?: string;
   updated_at?: string;
   created_at?: string;
+  is_attachment?: boolean;
 }
 
 // Interface for props used in the View PO Details component
