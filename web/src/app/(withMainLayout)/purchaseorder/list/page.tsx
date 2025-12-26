@@ -2,7 +2,13 @@
 
 "use client";
 
-import { CheckBox, DataTable, PageLoader } from "@rever/common";
+import {
+  CheckBox,
+  CustomTooltip,
+  DataTable,
+  PageLoader,
+  UploadFilesModal,
+} from "@rever/common";
 import { tabOptions } from "@rever/constants";
 import { useUserStore } from "@rever/stores";
 import { POAPIResponse, PurchaseOrder } from "@rever/types";
@@ -18,6 +24,7 @@ import { ColumnDef, sortingFns } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { PURCHASE_ORDER_API, useApi } from "@rever/services";
+import { Paperclip } from "lucide-react";
 
 // Main component for displaying the bill list
 const PurchaseOrderList = () => {
@@ -29,12 +36,14 @@ const PurchaseOrderList = () => {
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const { data: purchaseOrder } = useApi<POAPIResponse>(
+  const { data: purchaseOrder, mutate } = useApi<POAPIResponse>(
     "purchaseOrder",
     PURCHASE_ORDER_API.MANAGE_PURCHASE_ORDERS,
   );
 
   const orgDetails = useUserStore((state) => state.user?.organization);
+
+  const [isFileUploadModal, setIsFileUploadModal] = useState(false);
 
   const collator = useMemo(
     () => new Intl.Collator(undefined, { numeric: true, sensitivity: "base" }),
@@ -124,7 +133,7 @@ const PurchaseOrderList = () => {
             className="flex items-center gap-4"
           >
             <span className="font-semibold cursor-pointer overflow-hidden text-ellipsis">
-              {getValue() as string}
+              {(getValue() as string) || "--"}
             </span>
           </div>
         ),
@@ -150,7 +159,7 @@ const PurchaseOrderList = () => {
         accessorKey: "status",
         header: "Status",
         sortDescFirst: false,
-        cell: ({ getValue }) => {
+        cell: ({ row, getValue }) => {
           const value = getValue() as string;
 
           return (
@@ -162,6 +171,14 @@ const PurchaseOrderList = () => {
               >
                 {value}
               </span>
+
+              {row?.original.is_attachment && (
+                <CustomTooltip content="PDF attached">
+                  <div>
+                    <Paperclip className="text-slate-400" width={14} />
+                  </div>
+                </CustomTooltip>
+              )}
             </div>
           );
         },
@@ -191,6 +208,7 @@ const PurchaseOrderList = () => {
             delivery_date: po?.delivery_date,
             vendor: po?.vendor,
             total: po?.total || 0,
+            is_attachment: po?.is_attachment,
             status: getLabelForBillStatus(po?.status),
           };
         });
@@ -249,8 +267,28 @@ const PurchaseOrderList = () => {
           search={search}
           clearSearch={() => setSearch("")}
           flowImageSrc="/images/flowImages/poMasterFlow.svg"
+          btnPopupItems={["Create PO", "Upload PO's"]}
+          onBtnPopupItemsClick={(value) => {
+            if (value === "Upload PO's") {
+              setIsFileUploadModal(true);
+            }
+          }}
         />
       )}
+
+      {isFileUploadModal ? (
+        <UploadFilesModal
+          isOpen={isFileUploadModal}
+          onClose={async () => {
+            setIsLoading(true);
+            await mutate();
+            setIsFileUploadModal(false);
+          }}
+          maxFiles={50}
+          acceptedFormats="application/pdf"
+          document_type="purchase_order"
+        />
+      ) : null}
     </>
   );
 };

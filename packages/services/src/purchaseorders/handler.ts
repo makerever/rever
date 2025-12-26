@@ -1,6 +1,6 @@
 import { ApproveRejectBillProps, PurchaseOrder } from "@rever/types";
 import axiosInstance from "../api/axios";
-import { PURCHASE_ORDER_API } from "../api/urls";
+import { ATTACHMENT_API, PURCHASE_ORDER_API } from "../api/urls";
 
 // Get po's list
 export const getPurchaseOrdersApi = async () => {
@@ -82,6 +82,36 @@ export const getPOAuditHistoryApi = async (id: string) => {
 export const getAssociateBillsByPoIDApi = async (id: string) => {
   const response = await axiosInstance.get(
     `/bills/by-purchase-order/?purchase_order_id=${id}`,
+  );
+  return response;
+};
+
+// Add an attachment to a PO
+export const addPOAttachment = async (data: FormData, poId: string) => {
+  const response = await axiosInstance.post(
+    `${ATTACHMENT_API.ADD_ATTACH}?model=purchaseorder&id=${poId}`,
+    data,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
+  );
+  return response;
+};
+
+// Get all attachments for a specific PO
+export const getPOAttachment = async (poId: string) => {
+  const response = await axiosInstance.get(
+    `${ATTACHMENT_API.GET_ATTACH}?model=purchaseorder&id=${poId}`,
+  );
+  return response;
+};
+
+// Delete a specific attachment by its ID
+export const deletePOAttachment = async (id: string) => {
+  const response = await axiosInstance.delete(
+    `${ATTACHMENT_API.DELETE_ATTACH}${id}/delete/`,
   );
   return response;
 };

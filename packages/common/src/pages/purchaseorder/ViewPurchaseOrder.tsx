@@ -1,4 +1,4 @@
-// Component to render view bill details
+// Component to render view PO details
 
 "use client";
 
@@ -49,7 +49,7 @@ import {
 } from "@rever/services";
 import { ColumnDef, sortingFns } from "@tanstack/react-table";
 
-// Main component to display bill details in view mode
+// Main component to display PO details in view mode
 const ViewPODetails = ({
   poDetails,
   deletePO,
@@ -276,12 +276,12 @@ const ViewPODetails = ({
             }`}
           >
             <div className="flex items-center gap-1">
-              {/* Bill number */}
+              {/* PO number */}
               <p className="text-slate-800 mr-1 text-lg font-semibold">
                 {poDetails?.po_number}
               </p>
 
-              {/* Bill status label */}
+              {/* PO status label */}
               <span
                 className={`text-2xs border py-1 px-1.5 rounded-md ${getStatusClass(
                   getLabelForBillStatus(poDetails?.status || ""),
@@ -372,7 +372,7 @@ const ViewPODetails = ({
               </div>
             ) : null}
 
-            {/* Bill details section */}
+            {/* PO details section */}
             <div
               className={
                 fileUrl && showPdf ? "lg:w-3/5 mt-8 lg:mt-0" : "lg:w-3/4"
@@ -434,7 +434,7 @@ const ViewPODetails = ({
                 </div>
               </div>
 
-              {/* Bill line items table */}
+              {/* PO line items table */}
               <div className="mt-8">
                 <p className="text-slate-800 mb-6 text-lg font-semibold">
                   PO line items

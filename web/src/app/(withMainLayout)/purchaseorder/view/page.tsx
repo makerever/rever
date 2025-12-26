@@ -9,12 +9,14 @@ import {
   ViewPODetails,
 } from "@rever/common";
 import { ConfirmationPopup } from "@rever/common";
-import { PurchaseOrder } from "@rever/types";
+import { AttachmentProps, PurchaseOrder } from "@rever/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, Suspense, useState, useCallback } from "react";
 import {
+  deletePOAttachment,
   deletePOByIdApi,
   getAssignApprovalApi,
+  getPOAttachment,
   getPODetailsByIdApi,
   sendPOForApprovalApi,
   updatePOApi,
@@ -33,8 +35,11 @@ const ViewPOWithParams = () => {
   const [isLoaderFormSubmit, setIsLoaderFormSubmit] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
-  // const [fileUrl, setFileUrl] = useState<string>("");
+
+  const [fileUrl, setFileUrl] = useState<string>("");
   const [showPdf, setShowPdf] = useState<boolean>(false);
+
+  const [fileResponse, setFileResponse] = useState<AttachmentProps>({});
 
   const setDynamicCrumb = useBreadcrumbStore((s) => s.setDynamicCrumb);
 
@@ -66,11 +71,11 @@ const ViewPOWithParams = () => {
           name: response?.data?.po_number,
         });
         setPODetails(response?.data);
-        // const responseFile = await getBillAttachment(idValue);
-        // if (responseFile?.status === 200) {
-        //   setFileResponse(responseFile?.data?.results[0]);
-        //   setFileUrl(responseFile?.data?.results[0]?.file);
-        // }
+        const responseFile = await getPOAttachment(idValue);
+        if (responseFile?.status === 200) {
+          setFileResponse(responseFile?.data?.results[0]);
+          setFileUrl(responseFile?.data?.results[0]?.file);
+        }
         getApprovalStatus();
       } else {
         router.push("/purchaseorder/list");
@@ -92,6 +97,9 @@ const ViewPOWithParams = () => {
   const handleDelete = async () => {
     const response = await deletePOByIdApi(idValue || "");
     if (response?.status === 204) {
+      if (fileResponse?.id) {
+        await deletePOAttachment(fileResponse?.id || "");
+      }
       setIsPopupOpen(false);
       showSuccessToast("Purchase Order deleted successfully");
       router.push("/purchaseorder/list");
@@ -149,7 +157,7 @@ const ViewPOWithParams = () => {
             <ViewPODetails
               deletePO={() => setIsPopupOpen(true)}
               poDetails={poDetails}
-              fileUrl={""}
+              fileUrl={fileUrl}
               showPdf={showPdf}
               setShowPdf={(val) => setShowPdf(val)}
               isLoaderFormSubmit={isLoaderFormSubmit}
@@ -170,7 +178,7 @@ const ViewPOWithParams = () => {
         message="Are you sure you want to delete this PO?"
       />
 
-      {/* Popup for confirming bill rejection */}
+      {/* Popup for confirming PO rejection */}
       <ConfirmationPopup
         isOpen={isConfirmRejectPopupOpen}
         onClose={() => setIsConfirmRejectPopupOpen(false)}
