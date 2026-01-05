@@ -45,6 +45,7 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
   const last_name = watch("last_name");
   const org_name = watch("org_name");
   const password = watch("password");
+  const confirmPassword = watch("confirmPassword");
   const org_currency = watch("currency");
 
   const router = useRouter();
@@ -65,10 +66,14 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
     isLoaderFormSubmit || !Boolean(errors.org_name?.message);
 
   const isPasswordValid =
-    isLoaderFormSubmit || Boolean(errors.password?.message);
+    !Boolean(password) ||
+    isLoaderFormSubmit ||
+    Boolean(errors.password?.message);
 
   const isConfirmPasswordValid =
-    isLoaderFormSubmit || Boolean(errors.confirmPassword?.message);
+    !Boolean(confirmPassword) ||
+    isLoaderFormSubmit ||
+    Boolean(errors.confirmPassword?.message);
 
   // Store user details in global state
   const setUser = useUserStore((state) => state.setUser);
@@ -143,6 +148,7 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
   const goToPreviousStep = () => {
     setFocus("first_name");
     clearErrors("password");
+    clearErrors("confirmPassword");
     if (showStep > 1) setShowStep(showStep - 1);
   };
 
@@ -161,13 +167,13 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
         {/* Step 1: Profile details */}
         {showStep === 1 && (
           <>
-            <div>
+            {/* <div>
               <Label htmlFor="email" text="Email" />
               <TextInput disabled id="email" value={email} type="email" />
-            </div>
-            <div className="grid grid-cols-2 gap-4 mb-5">
+            </div> */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <Label htmlFor="first_name" text="First name" isRequired />
+                <Label htmlFor="first_name" text="First Name" isRequired />
                 <TextInput
                   register={register("first_name")}
                   id="first_name"
@@ -177,7 +183,7 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
                 />
               </div>
               <div>
-                <Label htmlFor="last_name" text="Last name" isRequired />
+                <Label htmlFor="last_name" text="Last Name" isRequired />
                 <TextInput
                   register={register("last_name")}
                   id="last_name"
@@ -189,7 +195,7 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
             </div>
 
             <div className="mb-5">
-              <Label htmlFor="org_name" text="Organization name" isRequired />
+              <Label htmlFor="org_name" text="Organization Name" isRequired />
               <TextInput
                 register={register("org_name")}
                 id="org_name"
@@ -226,13 +232,13 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
 
         {/* Step 2: Password setup */}
         {showStep === 2 && (
-          <div className="grid grid-cols-1 gap-4 mb-5">
+          <div className="grid grid-cols-1 gap-4 mb-4">
             <div>
-              <Label htmlFor="password" text="Password" />
+              <Label htmlFor="password" text="Create Password" />
               <PasswordInput
                 register={register("password")}
                 id="password"
-                placeholder="Enter password"
+                placeholder="Create a strong password"
                 error={touchedFields.password ? errors.password : undefined}
                 value={getValues("password")}
                 password={password}
@@ -240,11 +246,11 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
               />
             </div>
             <div>
-              <Label htmlFor="confirmPassword" text="Confirm password" />
+              <Label htmlFor="confirmPassword" text="Confirm Password" />
               <PasswordInput
                 register={register("confirmPassword")}
                 id="confirmPassword"
-                placeholder="Enter confirm password"
+                placeholder="Confirm your password"
                 error={errors.confirmPassword}
                 value={getValues("confirmPassword")}
               />
@@ -255,11 +261,12 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
         {/* Register button for step 2 */}
         {showStep === 2 && (
           <Button
-            className="text-white"
-            isLoading={isLoaderFormSubmit}
-            text="Register"
             type="submit"
             disabled={isPasswordValid || isConfirmPasswordValid}
+            name="Let's get started"
+            button_type="primary"
+            icon_type={isLoaderFormSubmit ? "loader" : null}
+            width="w-full"
           />
         )}
       </form>
@@ -268,23 +275,24 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
         {showStep === 1 && (
           <Button
             onClick={goToNextStep}
-            className="text-white mt-5"
-            text="Continue"
-            type="button"
             disabled={isProfileValid || !isOrgNameValid}
+            name="Continue"
+            button_type="primary"
+            width="w-full"
           />
         )}
 
         {/* Back button for step 2 */}
         {showStep === 2 && (
-          <Button
-            onClick={goToPreviousStep}
-            className="mt-1 bg-transparent hover:bg-transparent disabled:bg-transparent disabled:hover:bg-transparent text-slate-500"
-            text="Back"
-            type="button"
-            icon={<ChevronLeft width={18} height={18} />}
-            disabled={isLoaderFormSubmit}
-          />
+          <div className="mt-5">
+            <Button
+              onClick={goToPreviousStep}
+              disabled={isLoaderFormSubmit}
+              name="Go back"
+              button_type="secondary-outline"
+              width="w-full"
+            />
+          </div>
         )}
       </div>
     </>

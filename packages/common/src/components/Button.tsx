@@ -1,45 +1,59 @@
 // Reusable component for a standard button
 
+import { ReactElement } from "react";
+import {
+  Plus,
+  Upload,
+  X,
+  Check,
+  Loader,
+  MailPlus,
+  LoaderCircle,
+  Download,
+} from "lucide-react";
 import { ButtonProps } from "@rever/types";
-import { Loader } from "lucide-react";
+
+const iconData: Record<
+  | "upload"
+  | "download"
+  | "create"
+  | "approve"
+  | "reject"
+  | "loader"
+  | "mailPlus"
+  | "plus"
+  | "loaderCircle",
+  ReactElement
+> = {
+  upload: <Upload size={16} />,
+  download: <Download size={16} />,
+  create: <Plus size={16} />,
+  approve: <Check size={16} />,
+  reject: <X size={16} />,
+  loader: <Loader size={16} className="animate-spin" />,
+  loaderCircle: <LoaderCircle size={16} className="animate-spin" />,
+  mailPlus: <MailPlus width={16} />,
+  plus: <Plus width={16} />,
+};
 
 const Button = ({
-  text,
+  name,
   onClick,
-  className = "",
-  icon,
   type = "button",
   disabled = false,
-  isLoading = false,
-  width,
-  isDefault = true,
-  isLoaderDark,
+  button_type = "primary",
+  icon_type,
+  width = "w-max",
 }: ButtonProps) => {
   return (
     <button
-      type={type ?? "button"}
       onClick={onClick}
+      className={`btn ${width} btn-${button_type} icon-button`}
+      type={type}
       disabled={disabled}
-      className={`${icon ? "py-1" : "py-2.5"} ${
-        width ? width : "w-full"
-      } h-8 px-3 flex items-center justify-center gap-1 disabled:cursor-not-allowed rounded-md text-xs font-medium ${isDefault ? "bg-primary-500 hover:bg-primary-600 disabled:hover:bg-primary-500 duration-300" : ""} ${className}`}
     >
-      {isLoading ? (
-        <div className="flex items-center justify-center gap-1">
-          <Loader
-            width={16}
-            height={16}
-            className={`animate-spin ${isLoaderDark ? "text-slate-800" : "text-white"}`}
-          />
-          {text}
-        </div>
-      ) : (
-        <>
-          {" "}
-          {icon && <div className="text-base">{icon}</div>}
-          {text}
-        </>
-      )}
+      {icon_type ? iconData[icon_type] : null}
+      <span className="">{name}</span>
     </button>
   );
 };
