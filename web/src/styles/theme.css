@@ -1,0 +1,182 @@
+@theme {
+
+  /* ------------------------------------------------------------
+     ANIMATIONS (Tokens)
+  ------------------------------------------------------------ */
+  --animate-fade-slide-down: fade-slide-down 0.2s ease-out forwards;
+  --animate-fade-slide-left: fade-slide-left 0.2s ease-out forwards;
+  --animate-fade-slide-right: fade-slide-right 0.2s ease-out forwards;
+  --animate-fade-slide-up: fade-slide-up 0.2s ease-out forwards;
+
+  /* ------------------------------------------------------------
+     SHADOWS
+  ------------------------------------------------------------ */
+  --shadow-4xl: rgba(99, 99, 99, 0.2) 0px 2px 8px;
+  --shadow-5xl: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  --shadow-6xl: rgba(0, 0, 0, 0.16) 0px 0px 16px;
+
+  /* ------------------------------------------------------------
+     RADII
+  ------------------------------------------------------------ */
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  /* ------------------------------------------------------------
+     SEMANTIC COLORS (HSL tokens)
+  ------------------------------------------------------------ */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
+  /* ------------------------------------------------------------
+     PALETTES: PRIMARY (100 → 900)
+  ------------------------------------------------------------ */
+  --color-primary-100: var(--primary-100);
+  --color-primary-200: var(--primary-200);
+  --color-primary-300: var(--primary-300);
+  --color-primary-400: var(--primary-400);
+  --color-primary-500: var(--primary-500);
+  --color-primary-600: var(--primary-600);
+  --color-primary-700: var(--primary-700);
+  --color-primary-800: var(--primary-800);
+  --color-primary-900: var(--primary-900);
+
+  /* ------------------------------------------------------------
+     PALETTES: SECONDARY (100 → 900)
+  ------------------------------------------------------------ */
+  --color-secondary-100: var(--secondary-100);
+  --color-secondary-200: var(--secondary-200);
+  --color-secondary-300: var(--secondary-300);
+  --color-secondary-400: var(--secondary-400);
+  --color-secondary-500: var(--secondary-500);
+  --color-secondary-600: var(--secondary-600);
+  --color-secondary-700: var(--secondary-700);
+  --color-secondary-800: var(--secondary-800);
+  --color-secondary-900: var(--secondary-900);
+
+  /* ------------------------------------------------------------
+     PALETTES: DANGER (100 → 900)
+  ------------------------------------------------------------ */
+  --color-danger-100: var(--danger-100);
+  --color-danger-200: var(--danger-200);
+  --color-danger-300: var(--danger-300);
+  --color-danger-400: var(--danger-400);
+  --color-danger-500: var(--danger-500);
+  --color-danger-600: var(--danger-600);
+  --color-danger-700: var(--danger-700);
+  --color-danger-800: var(--danger-800);
+  --color-danger-900: var(--danger-900);
+
+  /* ------------------------------------------------------------
+     PALETTES: SUCCESS (100 → 900)
+  ------------------------------------------------------------ */
+  --color-success-100: var(--success-100);
+  --color-success-200: var(--success-200);
+  --color-success-300: var(--success-300);
+  --color-success-400: var(--success-400);
+  --color-success-500: var(--success-500);
+  --color-success-600: var(--success-600);
+  --color-success-700: var(--success-700);
+  --color-success-800: var(--success-800);
+  --color-success-900: var(--success-900);
+
+  /* ------------------------------------------------------------
+     PALETTES: NEUTRAL (100 → 900)
+  ------------------------------------------------------------ */
+  --color-neutral-100: var(--neutral-100);
+  --color-neutral-200: var(--neutral-200);
+  --color-neutral-300: var(--neutral-300);
+  --color-neutral-400: var(--neutral-400);
+  --color-neutral-500: var(--neutral-500);
+  --color-neutral-600: var(--neutral-600);
+  --color-neutral-700: var(--neutral-700);
+  --color-neutral-800: var(--neutral-800);
+  --color-neutral-900: var(--neutral-900);
+  --color-neutral-1000: var(--neutral-1000);
+  --color-neutral-1100: var(--neutral-1100);
+
+  --color-pill-active: var(--active-pill);
+  --color-active-pill-text: var(--active-pill-text);
+
+  /* ------------------------------------------------------------
+     KEYFRAMES
+  ------------------------------------------------------------ */
+  @keyframes fade-slide-right {
+    from {
+      opacity: 0;
+      transform: translateX(8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fade-slide-left {
+    from {
+      opacity: 0;
+      transform: translateX(-8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fade-slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-slide-down {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

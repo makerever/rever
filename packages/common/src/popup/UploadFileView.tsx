@@ -10,7 +10,7 @@ const UploadFileView = ({ fileName, removeFile }: FileOptions) => {
     <div
       className={`popup-slide-down absolute flex items-center justify-between right-5 z-20 text-xs w-48 rounded-md shadow-5xl bg-white p-2`}
     >
-      <p className="w-32 break-words">{fileName}</p>
+      <p className="w-32 wrap-break-word">{fileName}</p>
 
       <button
         type="button"
