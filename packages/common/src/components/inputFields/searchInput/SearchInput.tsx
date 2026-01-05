@@ -9,7 +9,7 @@ import { CustomTooltip } from "@rever/common";
 export default function SearchInput({
   onlyIcon,
   noCmdIcon,
-  placeholder = "Search anything",
+  placeholder = "Search",
   onChange,
   search,
   clearSearch,
@@ -27,7 +27,7 @@ export default function SearchInput({
       <div className="relative w-full max-w-md">
         {/* Search icon on the left */}
         <Search
-          className="absolute z-10 left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          className={`absolute z-10 left-3 top-1/2 -translate-y-1/2 text-neutral-700`}
           size={14}
         />
         {/* Search input field */}
@@ -37,7 +37,7 @@ export default function SearchInput({
           readOnly={!clearSearch} // Make input readonly if clearSearch is not provided
           onChange={onChange}
           placeholder={placeholder}
-          className="px-8 disabled:bg-gray-100 rounded-md font-light h-8 border border-slate-200 text-2xs w-full transition duration-200 hover:border-slate-400 focus:outline-none focus:border-primary-500 text-slate-800"
+          className="input input-default input-shadow px-8"
         />
         {!noCmdIcon ? (
           <div className="absolute p-1 bg-gray-100 flex text-xs items-center justify-center rounded-sm right-1.5 top-1/2 -translate-y-1/2 text-gray-400">
@@ -49,7 +49,7 @@ export default function SearchInput({
           search.length && (
             <div
               onClick={clearSearch}
-              className="absolute cursor-pointer p-1 flex text-2xs items-center justify-center rounded-sm right-1.5 top-1/2 -translate-y-1/2 text-gray-400"
+              className={`absolute cursor-pointer p-1 flex text-2xs items-center justify-center rounded-sm right-1.5 top-1/2 -translate-y-1/2 text-neutral-1000`}
             >
               <CircleX size={14} />
             </div>

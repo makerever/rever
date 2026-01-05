@@ -1,14 +1,33 @@
 // Reusable component for checkbox input
 
-import { checkBoxProps } from "@rever/types";
+import { checkBoxProps, CheckBoxVisualState } from "@rever/types";
+import React from "react";
 
-const CheckBox = ({ checked, onChange }: checkBoxProps) => {
+const CheckBox: React.FC<checkBoxProps> = ({
+  checked,
+  onChange,
+  isDisable = false,
+  variant = "primary",
+  visualState, // if not passed, derive from checked
+}) => {
+  // derive visual state from checked if not provided
+  const state: CheckBoxVisualState =
+    visualState ?? (checked ? "checked" : "unchecked");
+
+  const stateClass =
+    state === "checked"
+      ? "checked"
+      : state === "indeterminate"
+        ? "indeterminate"
+        : "";
+
   return (
     <input
       type="checkbox"
       checked={checked}
       onChange={onChange}
-      className="w-4 h-4 min-w-4 min-h-4"
+      disabled={isDisable}
+      className={`checkbox ${variant} ${stateClass}`}
     />
   );
 };

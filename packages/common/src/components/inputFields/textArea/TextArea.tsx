@@ -75,9 +75,11 @@ const TextAreaInput = <T extends FieldValues>({
         readOnly={stepNo ? stepNo !== STEP.EMAIL : false}
         placeholder={placeholder}
         {...inputProps}
-        className={`disabled:bg-gray-100 rounded-md border py-1 px-3 text-sm w-full transition duration-200 hover:border-slate-400 focus:outline-none focus:border-primary-500 text-slate-800 ${
-          error || noErrorIcon ? "border-red-500" : "border-gray-200"
-        } autofill:shadow-[inset_0_0_0px_1000px_white] ${className}`}
+        className={`textarea px-3 ${
+          error || noErrorIcon
+            ? "input-danger input-shadow-danger"
+            : "input-default input-shadow"
+        } ${className}`}
         onKeyDown={handleKeyDown}
       />
 
@@ -93,7 +95,7 @@ const TextAreaInput = <T extends FieldValues>({
 
       {/* Show error message if error exists and error icon is not suppressed */}
       {!noErrorIcon && error && (
-        <div className="flex items-center gap-1 text-red-500 text-xs mt-1">
+        <div className="flex items-center gap-1 text-danger-500 text-xs mt-1">
           <BadgeInfo width={14} height={14} />
           <span>{error.message}</span>
         </div>
