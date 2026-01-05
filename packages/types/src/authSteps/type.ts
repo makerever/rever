@@ -1,6 +1,5 @@
 // TS authentication steps inteface objects
 
-import { StepType } from "@rever/constants";
 import {
   UseFormRegister,
   FieldErrors,
@@ -11,6 +10,7 @@ import {
   FieldValues,
   UseFormClearErrors,
 } from "react-hook-form";
+import { StepType } from "../../../constants/src";
 
 // Interface for common form props used in authentication steps
 export interface CommonFormProps<T extends FieldValues> {

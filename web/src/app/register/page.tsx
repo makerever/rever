@@ -13,7 +13,7 @@ const Register = () => {
       mainTitle={showStep === 1 ? "Welcome to Rever" : "Secure your account"}
       subTitle={
         showStep === 1
-          ? "Start your journey — set up your profile"
+          ? "Fill up your details to get started"
           : "Set a strong password to protect your account"
       }
     >
