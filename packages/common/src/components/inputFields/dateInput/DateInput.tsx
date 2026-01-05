@@ -7,10 +7,13 @@ import { format } from "date-fns";
 import { BadgeInfo, CalendarIcon, XIcon } from "lucide-react";
 
 import { cn } from "@rever/utils";
-import { ButtonCn, Calendar } from "@rever/common";
-import { Popover, PopoverContent, PopoverTrigger } from "@rever/common";
+// import { ButtonCn, Calendar } from "@rever/common";
+// import { Popover, PopoverContent, PopoverTrigger } from "@rever/common";
 import { DateComponentProps } from "@rever/types";
 import { FieldValues } from "react-hook-form";
+import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
+import { ButtonCn } from "../../ui/button";
+import { Calendar } from "../../ui/calendar";
 
 // Generic DatePicker component for forms
 const DatePickerDemo = <T extends FieldValues>({
@@ -87,10 +90,12 @@ const DatePickerDemo = <T extends FieldValues>({
           <ButtonCn
             variant={"outline"}
             className={cn(
-              `w-full px-2.5 text-slate-800 h-8 hover:bg-white hover:border-slate-400 focus:border-primary-500 justify-between text-left font-normal ${
-                error ? "border-red-500" : "border-gray-200"
+              `w-full px-2.5 date-input cursor-pointer ${
+                error
+                  ? "input-danger input-shadow-danger"
+                  : "input-default input-shadow"
               }`,
-              !date && "text-gray-400",
+              !date && "text-neutral-500 hover:text-neutral-500 hover:bg-white",
             )}
           >
             {date ? format(date, "PPP") : <span>{placeholder}</span>}
@@ -122,7 +127,7 @@ const DatePickerDemo = <T extends FieldValues>({
       </Popover>
       {/* Show error message if validation fails */}
       {error && (
-        <div className="flex items-center gap-1 text-red-500 text-xs mt-1">
+        <div className="flex items-center gap-1 text-danger-500 text-xs mt-1">
           <BadgeInfo width={14} height={14} />
           <span>{title} is required</span>
         </div>

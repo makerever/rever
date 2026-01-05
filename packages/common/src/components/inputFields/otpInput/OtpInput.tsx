@@ -124,7 +124,7 @@ export default function OtpInput<T extends FieldValues>({
           ref={(el) => {
             inputsRef.current[i] = el;
           }}
-          className="w-8 h-8 rounded-md border text-sm transition duration-200 hover:border-slate-400 focus:outline-none focus:border-primary-500 text-slate-800 dark:text-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 text-center outline-none focus:scale-110"
+          className="otp-input input-default input-shadow size-8"
         />
       ))}
     </div>
