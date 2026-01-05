@@ -21,7 +21,6 @@ const nextConfig = {
     return config;
   },
   transpilePackages: [
-    "@rever/tailwind-config",
     "@rever/common",
     "@rever/constants",
     "@rever/services",
