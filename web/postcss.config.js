@@ -1,1 +1,5 @@
-module.exports = require("@rever/tailwind-config/postcss.config.js");
+module.exports = {
+  plugins: {
+    '@tailwindcss/postcss': {},
+  },
+};

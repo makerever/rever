@@ -1,0 +1,627 @@
+/* ------------------------------------------------------------
+   BASE STYLES (OUTSIDE UTILITIES)
+------------------------------------------------------------ */
+html,
+body {
+  @apply bg-background text-foreground;
+  height: -webkit-fill-available;
+}
+
+.height_f {
+  height: -webkit-fill-available;
+  height: 100%; /* for firefox mac  */
+}
+
+/* Input Shadow */
+.input-shadow {
+  box-shadow: 0 1px 1px 0 rgba(20, 21, 26, 0.03);
+}
+
+.input-shadow:focus {
+  box-shadow: 0px 0px 0px 2px rgba(119, 235, 61, 0.2);
+}
+
+.input-shadow-danger:focus {
+  box-shadow: 0 0 0 2px rgba(218, 37, 45, 0.2);
+}
+
+.auth-background-shadow {
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 1px 1px 0 rgba(0, 0, 0, 0.1),
+    0 2px 2px 0 rgba(0, 0, 0, 0.05),
+    0 2px 6px 0 rgba(0, 0, 0, 0.04);
+}
+
+.tooltip-box-shadow {
+  box-shadow:
+    0 1px 1px 0 rgba(0, 0, 0, 0.03),
+    0 2px 2px 0 rgba(0, 0, 0, 0.04),
+    0 4px 4px 0 rgba(0, 0, 0, 0.05),
+    0 8px 24px 0 rgba(0, 0, 0, 0.07),
+    0 1px 0 0 rgba(0, 0, 0, 0.08);
+}
+
+.popup-shadow {
+  box-shadow:
+    0px 1px 0px rgba(0, 0, 0, 0.08),
+    0px 8px 24px rgba(0, 0, 0, 0.07),
+    0px 4px 4px rgba(0, 0, 0, 0.05),
+    0px 2px 2px rgba(0, 0, 0, 0.04),
+    0px 1px 1px rgba(0, 0, 0, 0.03),
+    0px 0px 0px 1px rgba(3, 54, 66, 0.08);
+}
+
+.dashboard-card-active-shadow {
+  box-shadow: 0 0 0 2px rgba(119, 235, 61, 0.2);
+}
+
+/* ------------------------------------------------------------
+   GLOBAL UTILITIES
+------------------------------------------------------------ */
+@layer utilities {
+  :root {
+    --vh: 100%;
+  }
+
+  /* -------------------------------
+     Border Compatibility (Tailwind v4)
+  -------------------------------- */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  /* -------------------------------
+     Animations
+  -------------------------------- */
+  @keyframes growWidth {
+    to {
+      width: var(--target-width);
+    }
+  }
+
+  /* -------------------------------
+     Popup / Slide Animations
+  -------------------------------- */
+  .popup-slide-down {
+    @apply transition-all duration-300 ease-out opacity-0 animate-fade-slide-down;
+  }
+
+  .popup-slide-left {
+    @apply transition-all duration-300 ease-out opacity-0 animate-fade-slide-left;
+  }
+
+  .popup-slide-right {
+    @apply transition-all duration-300 ease-out opacity-0 animate-fade-slide-right;
+  }
+
+  .popup-slide-up {
+    @apply transition-all duration-300 ease-out opacity-0 animate-fade-slide-up;
+  }
+
+  /* -------------------------------
+     Button Base Utilities
+  -------------------------------- */
+  .btn {
+    @apply transition-all duration-300 rounded-full px-3 py-1.5 h-8 cursor-pointer disabled:cursor-not-allowed text-sm font-medium outline-none;
+  }
+
+  .dropdown-btn {
+    @apply transition-all duration-300 rounded-full h-8 cursor-pointer disabled:cursor-not-allowed text-sm font-medium outline-none;
+  }
+
+  .popup-btn {
+    @apply flex items-center justify-center transition-all duration-300 cursor-pointer disabled:cursor-not-allowed text-sm font-medium outline-none;
+  }
+
+  .icon-button {
+    @apply inline-flex items-center justify-center gap-1.5;
+  }
+
+  /* -------------------------------
+     Breadcrumb Base Utilities
+  -------------------------------- */
+
+  .breadcrumb {
+    @apply gap-1.5 flex items-center text-secondary-700 font-medium;
+  }
+
+  .breadcrumb-hover {
+    @apply hover:underline hover:text-neutral-1100 hover:cursor-pointer;
+  }
+
+  /* -------------------------------
+     Button Variants
+  -------------------------------- */
+  .btn-primary {
+    @apply bg-primary-600 hover:bg-primary-700 active:bg-primary-800 active:ring-0 active:ring-offset-0 disabled:bg-primary-100 disabled:text-secondary-500 focus:bg-primary-600 focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 text-neutral-1100;
+  }
+
+  .btn-primary-outline {
+    @apply border border-primary-600 hover:border-primary-700 active:border-primary-800 active:ring-0 active:ring-offset-0 focus:border-primary-700 focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 focus:ring-offset-white text-primary-800;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary-200 text-neutral-1100 hover:bg-secondary-300 active:bg-secondary-400 disabled:bg-secondary-100 disabled:text-secondary-500 active:ring-0 active:ring-offset-0 focus:ring-2 focus:ring-primary-700 focus:ring-offset-2;
+  }
+
+  .btn-secondary-outline {
+    @apply border border-secondary-200 text-neutral-900 hover:text-neutral-1000 active:text-neutral-1100 hover:border-secondary-300 active:border-secondary-400 active:ring-0 active:ring-offset-0 disabled:border-secondary-100 disabled:text-neutral-500 focus:border-secondary-200 focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 focus:ring-offset-white;
+  }
+
+  .btn-danger {
+    @apply bg-danger-600 hover:bg-danger-700 active:bg-danger-800 active:ring-0 active:ring-offset-0 disabled:bg-danger-100 disabled:text-white focus:ring-2 focus:ring-danger-600 focus:ring-offset-2 text-white;
+  }
+
+  .btn-danger-outline {
+    @apply border border-danger-600 text-danger-600 hover:border-danger-700 hover:text-danger-700 active:border-danger-800 active:text-danger-800 active:ring-0 active:ring-offset-0 disabled:border-danger-100 disabled:text-danger-500 focus:ring-2 focus:ring-danger-600 focus:ring-offset-2 focus:text-danger-600;
+  }
+
+  .btn-success {
+    @apply bg-success-600 hover:bg-success-700 active:bg-success-800 active:ring-0 active:ring-offset-0 disabled:bg-success-100 disabled:text-white focus:ring-2 focus:ring-success-600 focus:ring-offset-2 text-white;
+  }
+
+  .btn-success-outline {
+    @apply border border-success-600 text-success-600 hover:border-success-700 hover:text-success-700 active:border-success-800 active:text-success-800 active:ring-0 active:ring-offset-0 disabled:border-success-100 disabled:text-success-500 focus:ring-2 focus:ring-success-600 focus:ring-offset-2 focus:text-success-600;
+  }
+
+  /* -------------------------------
+     Checkbox Styling
+  -------------------------------- */
+
+  /* Base checkbox */
+  input[type="checkbox"].checkbox {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+    border-radius: 6px;
+    position: relative;
+    display: inline-block;
+    border-width: 1px;
+    border-style: solid;
+    background: #fff;
+    cursor: pointer;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  /* Variant tokens: set variables only once */
+  input[type="checkbox"].checkbox.primary {
+    /* default: unselected */
+    @apply border-secondary-200;
+    --cb-border-hover: theme(colors.secondary.300);
+    --cb-border-pressed: theme(colors.secondary.400);
+    --cb-bg-selected: theme(colors.primary.600);
+    --cb-bg-hover: theme(colors.primary.700);
+    --cb-bg-pressed: theme(colors.primary.800);
+    --cb-border-focus: theme(colors.primary.600);
+    --cb-ring-focus: theme(colors.primary.200);
+  }
+
+  input[type="checkbox"].checkbox.danger {
+    @apply border-secondary-200;
+    --cb-border-hover: theme(colors.secondary.300);
+    --cb-border-pressed: theme(colors.secondary.400);
+    --cb-bg-selected: theme(colors.danger.600);
+    --cb-bg-hover: theme(colors.danger.700);
+    --cb-bg-pressed: theme(colors.danger.800);
+    --cb-border-focus: theme(colors.danger.600);
+    --cb-ring-focus: theme(colors.danger.200);
+  }
+
+  /* Unselected hover / pressed / focus (both variants) */
+  input[type="checkbox"].checkbox:hover:not(:disabled):not(.checked):not(
+      .indeterminate
+    ) {
+    border-color: var(--cb-border-hover);
+  }
+
+  input[type="checkbox"].checkbox:active:not(:disabled):not(.checked):not(
+      .indeterminate
+    ) {
+    border-color: var(--cb-border-pressed);
+  }
+
+  input[type="checkbox"].checkbox:focus-visible:not(:disabled):not(
+      .checked
+    ):not(.indeterminate) {
+    border-color: var(--cb-border-focus);
+    box-shadow: 0 0 0 2px var(--cb-ring-focus);
+  }
+
+  /* Selected + indeterminate share same background patterns */
+  input[type="checkbox"].checkbox.checked,
+  input[type="checkbox"].checkbox.indeterminate {
+    background-color: var(--cb-bg-selected);
+    border-color: var(--cb-bg-selected);
+  }
+
+  /* Hover / pressed when selected or indeterminate */
+  input[type="checkbox"].checkbox.checked:hover:not(:disabled),
+  input[type="checkbox"].checkbox.indeterminate:hover:not(:disabled) {
+    background-color: var(--cb-bg-hover);
+    border-color: var(--cb-bg-hover);
+  }
+
+  input[type="checkbox"].checkbox.checked:active:not(:disabled),
+  input[type="checkbox"].checkbox.indeterminate:active:not(:disabled) {
+    background-color: var(--cb-bg-pressed);
+    border-color: var(--cb-bg-pressed);
+  }
+
+  /* Focus when selected / indeterminate */
+  input[type="checkbox"].checkbox.checked:focus-visible:not(:disabled),
+  input[type="checkbox"].checkbox.indeterminate:focus-visible:not(:disabled) {
+    background-color: var(--cb-bg-selected);
+    border-color: var(--cb-border-focus);
+    box-shadow: 0 0 0 2px var(--cb-ring-focus);
+  }
+
+  /* Shared positioning for tick + dash */
+  input[type="checkbox"].checkbox.checked::before,
+  input[type="checkbox"].checkbox.indeterminate::before {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.75rem;
+  }
+
+  /* Primary: black tick/dash */
+  input[type="checkbox"].checkbox.primary.checked::before,
+  input[type="checkbox"].checkbox.primary.indeterminate::before {
+    color: var(--color-neutral-1100);
+  }
+
+  /* Danger: white tick/dash */
+  input[type="checkbox"].checkbox.danger.checked::before,
+  input[type="checkbox"].checkbox.danger.indeterminate::before {
+    color: white;
+  }
+
+  /* Symbols */
+  input[type="checkbox"].checkbox.checked::before {
+    content: "✓";
+  }
+
+  input[type="checkbox"].checkbox.indeterminate::before {
+    content: "—";
+  }
+
+  /* Disabled */
+  input[type="checkbox"].checkbox:disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+
+  /* ============================
+   BASE RADIO STYLE
+   ============================ */
+  .radio {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--neutral-300);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.16s ease-in-out;
+    background: transparent;
+  }
+
+  /* inner circle */
+  .radio::after {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: transparent;
+    /* unchecked */
+    transition: all 0.16s ease-in-out;
+  }
+
+  /* ============================
+   VARIANT: PRIMARY
+   ============================ */
+
+  /* Unchecked */
+  .radio.primary {
+    border-color: var(--primary-600);
+  }
+
+  /* Hover */
+  .radio.primary:hover:not(:disabled) {
+    border-color: var(--primary-700);
+  }
+
+  /* Selected */
+  .radio.primary.checked {
+    border-color: var(--primary-600);
+  }
+
+  .radio.primary.checked::after {
+    background: var(--primary-600);
+  }
+
+  /* Pressed */
+  .radio.primary:active:not(:disabled) {
+    border-color: var(--primary-800);
+  }
+
+  /* Disabled */
+  .radio.primary:disabled {
+    border-color: var(--primary-100);
+  }
+
+  .radio.primary:disabled.checked::after {
+    background: var(--primary-100);
+  }
+
+  /* ============================
+   VARIANT: DANGER
+   ============================ */
+
+  .radio.danger {
+    border-color: var(--danger-600);
+  }
+
+  .radio.danger:hover:not(:disabled) {
+    border-color: var(--danger-700);
+  }
+
+  .radio.danger.checked {
+    border-color: var(--danger-600);
+  }
+
+  .radio.danger.checked::after {
+    background: var(--danger-600);
+  }
+
+  .radio.danger:active:not(:disabled) {
+    border-color: var(--danger-800);
+  }
+
+  .radio.danger:disabled {
+    border-color: var(--danger-100);
+  }
+
+  .radio.danger:disabled.checked::after {
+    background: var(--danger-100);
+  }
+
+  input::-webkit-credentials-auto-fill-button {
+    display: none !important;
+  }
+
+  /* -------------------------------
+     Input Utilities
+  -------------------------------- */
+
+  .input {
+    @apply bg-white border outline-none text-sm placeholder-neutral-700 text-neutral-1100 disabled:cursor-not-allowed disabled:text-neutral-500 rounded-lg py-1.5 h-8 w-full transition duration-200;
+  }
+
+  .date-input {
+    @apply border outline-none text-sm font-normal justify-between text-left cursor-pointer disabled:cursor-not-allowed rounded-lg py-1.5 h-8 min-w-60 w-full transition duration-200;
+  }
+
+  .textarea {
+    @apply border outline-none text-sm placeholder-neutral-700 text-neutral-1100 disabled:cursor-not-allowed disabled:text-neutral-500 rounded-lg py-1.5 w-full transition duration-200;
+  }
+
+  .otp-input {
+    @apply w-12 h-12 font-medium border outline-none text-sm placeholder-neutral-700 text-neutral-1100 disabled:cursor-not-allowed rounded-lg text-center transition duration-200;
+  }
+
+  .input-default {
+    @apply font-medium border-secondary-200 hover:border-secondary-300 active:border-secondary-400 disabled:border-secondary-100 focus:border-primary-600;
+  }
+
+  .input-danger {
+    @apply border-danger-600 hover:border-danger-700 active:border-danger-800 disabled:border-danger-100;
+  }
+
+  /* -------------------------------
+    Toggle Switch Utilities
+  -------------------------------- */
+  .switch {
+    @apply w-8 h-max rounded-full transition-colors duration-300 flex items-center;
+  }
+
+  .switch-inner-circle {
+    @apply size-4 m-0.5 rounded-full duration-300;
+  }
+
+  /* -------------------------------
+    Toggle Switch Utilities
+  -------------------------------- */
+  .pill-badge {
+    @apply py-1 text-xs font-medium flex items-center justify-center flex-row gap-0.5;
+  }
+
+  /* -------------------------------
+     Typography Utilities
+  -------------------------------- */
+  .text-2xs {
+    font-size: 11px;
+  }
+
+  /* -------------------------------
+    PopUp Utilities
+  -------------------------------- */
+  .popup {
+    @apply bg-white px-1 right-0 top-10 absolute z-20 w-44 rounded-[8px];
+  }
+
+  .menu-item {
+    @apply flex items-center px-1.5 py-1.5 my-1 rounded-[6px] cursor-pointer font-medium transition-all duration-300;
+  }
+
+  .menu-item-sidebar {
+    @apply -my-0.5 text-secondary-900 hover:text-neutral-1000 active:text-neutral-1100 text-sm hover:bg-secondary-200 active:bg-secondary-300;
+  }
+
+  .menu-item-sidebar-danger {
+    @apply -my-0.5 text-danger-600 hover:text-danger-700 active:text-danger-800 text-sm hover:bg-danger-200 active:bg-danger-300;
+  }
+
+  .menu-item-default {
+    @apply text-secondary-800 hover:text-neutral-1000 active:text-neutral-1100 text-xs hover:bg-secondary-200 active:bg-secondary-300;
+  }
+
+  .menu-item-danger {
+    @apply text-danger-600 hover:text-danger-700 active:text-danger-800 text-xs hover:bg-danger-200 active:bg-danger-300;
+  }
+
+  /* -------------------------------
+     Layout / Components Utilities
+  -------------------------------- */
+
+  .profile-icon {
+    @apply w-8 h-8 min-w-8 min-h-8;
+  }
+
+  .hover-effect {
+    @apply transition-all duration-300 cursor-pointer hover:bg-secondary-100;
+  }
+
+  /* -------------------------------
+     Scrollbar Utilities
+  -------------------------------- */
+  .custom_scrollbar::-webkit-scrollbar {
+    background-color: #f5f5f5;
+    border-radius: 50px;
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom_scrollbar::-webkit-scrollbar-thumb {
+    background-color: #dbdbdb;
+    border-radius: 50px;
+  }
+
+  .scrollbar_none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* -------------------------------
+     Misc Utilities
+  -------------------------------- */
+  .custom_box_shadow {
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px;
+  }
+
+  .status_filter_popup {
+    padding: 12px !important;
+  }
+
+  .stepper-count-line {
+    width: calc(100% - 50%);
+  }
+
+  /* Third party libraries config */
+
+  /* -------------------------------
+     Toast Utilities
+  -------------------------------- */
+
+  .toast {
+    padding: 8px 16px !important;
+    color: #fff !important;
+    gap: 0px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+  }
+
+  .toast-error {
+    background-color: var(--color-danger-600) !important;
+  }
+
+  .toast-success {
+    background-color: var(--color-success-600) !important;
+  }
+
+  .toast-default {
+    background-color: #fff !important;
+    color: var(--color-neutral-1100) !important;
+  }
+
+  .rpv-core__page-layer.rpv-core__page-layer--single {
+    width: auto !important;
+    margin: 0 !important;
+  }
+
+  .rpv-core__inner-pages.rpv-core__inner-pages--vertical::-webkit-scrollbar {
+    background-color: rgb(242, 242, 242);
+    border-radius: 50px;
+    height: 5px;
+    width: 5px;
+  }
+
+  .rpv-core__inner-pages.rpv-core__inner-pages--vertical::-webkit-scrollbar-thumb {
+    background-color: rgb(188, 188, 188);
+    border-radius: 50px;
+  }
+
+  .rpv-core__page-layer::after {
+    box-shadow: none !important;
+  }
+
+  .scrollbar_none::-webkit-scrollbar {
+    display: none;
+  }
+
+  .phone_input .react-tel-input .selected-flag:hover,
+  .react-tel-input .selected-flag:focus,
+  .phone_input .react-tel-input .flag-dropdown.open .selected-flag {
+    background: transparent !important;
+  }
+
+  /* Default loader to show PDF */
+  .pdf_uploader .react-pdf__message {
+    display: none !important;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  /* Remove password reveal buttons */
+  input[type="password"]::-ms-reveal,
+  input[type="password"]::-ms-clear,
+  input[type="password"]::-webkit-textfield-decoration-container {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------
+   RESPONSIVE FIXES
+------------------------------------------------------------ */
+@media (max-width: 450px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .stepper-count-line {
+    width: calc(100% - 70%);
+  }
+}

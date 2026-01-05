@@ -28,7 +28,6 @@
       "@rever/types": ["../packages/types/src"],
       "@rever/utils": ["../packages/utils/src"],
       "@rever/validations": ["../packages/validations/src"],
-      "@rever/tailwind-config": ["../packages/tailwind-config/src"]
     }
   },
   "include": [

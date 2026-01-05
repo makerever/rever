@@ -9,15 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.0.1",
     "@rever/common": "workspace:*",
     "@rever/constants": "workspace:*",
     "@rever/services": "workspace:*",
     "@rever/stores": "workspace:*",
-    "@rever/tailwind-config": "workspace:*",
     "@rever/types": "workspace:*",
     "@rever/utils": "workspace:*",
     "@rever/validations": "workspace:*",
-    "@hookform/resolvers": "^5.0.1",
+    "@tailwindcss/postcss": "^4.1.17",
     "@tanstack/react-table": "^8.21.3",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.513.0",
@@ -26,7 +26,8 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.56.1",
     "react-select": "^5.10.1",
-    "sonner": "^2.0.3"
+    "sonner": "^2.0.3",
+    "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
