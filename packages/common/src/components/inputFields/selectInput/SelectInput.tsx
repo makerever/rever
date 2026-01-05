@@ -18,7 +18,7 @@ import type { ClearIndicatorProps, DropdownIndicatorProps } from "react-select";
 
 // Custom clear (X) icon for the select input
 const CustomClearIndicator = (
-  props: ClearIndicatorProps<Option, boolean, GroupBase<Option>>,
+  props: ClearIndicatorProps<Option, boolean, GroupBase<Option>>
 ) => {
   const {
     selectProps: { isDisabled },
@@ -29,18 +29,28 @@ const CustomClearIndicator = (
 
   return (
     <components.ClearIndicator {...props}>
-      <XIcon width={16} className="-mr-3 text-slate-800" />
+      <XIcon
+        width={16}
+        className={`-mr-2 ${!isDisabled ? "text-neutral-1100" : "text-secondary-500"}`}
+      />
     </components.ClearIndicator>
   );
 };
 
 // Custom dropdown arrow icon for the select input
 const CustomDropdownIndicator = (
-  props: DropdownIndicatorProps<Option, boolean, GroupBase<Option>>,
+  props: DropdownIndicatorProps<Option, boolean, GroupBase<Option>>
 ) => {
+  const {
+    selectProps: { isDisabled },
+  } = props;
+
   return (
     <components.DropdownIndicator {...props}>
-      <ChevronDown width={18} className=" text-slate-800" />
+      <ChevronDown
+        width={18}
+        className={`${!isDisabled ? "text-neutral-1100" : "text-secondary-500"}`}
+      />
     </components.DropdownIndicator>
   );
 };
@@ -77,37 +87,37 @@ const SelectComponent = <T extends FieldValues>({
         ? "transparent"
         : isDisabled
           ? isDarkMode
-            ? "#18181b"
-            : "#f3f4f6"
+            ? "#fff"
+            : "#fff"
           : isDarkMode
-            ? "#1f2937"
-            : "#ffffff",
+            ? "#fff"
+            : "#fff",
       borderColor:
         error?.message || noErrorIcon
-          ? "#f87171"
+          ? "var(--danger-600)"
           : isDisabled
             ? isDarkMode
-              ? "#6b7280"
-              : "#d1d5db"
+              ? "var(--secondary-100)"
+              : "var(--secondary-100)"
             : isDarkMode
-              ? "#374151"
-              : "#e5e7eb",
-      boxShadow: "none",
+              ? "var(--secondary-200)"
+              : "var(--secondary-200)",
+      boxShadow: "0 1px 1px 0 rgba(26, 26, 26, 0.03)",
       borderRadius: "0.42rem",
       minHeight: "32px",
       cursor: isDisabled ? "not-allowed" : "pointer",
       transition: "border-color 0.2s ease, box-shadow 0.2s ease",
       color: state.isFocused
         ? isDarkMode
-          ? "#d1d5db"
-          : "#18181b"
+          ? "var(--secondary-400)"
+          : "var(--secondary-400)"
         : isDisabled
           ? isDarkMode
-            ? "#9ca3af"
-            : "#9ca3af"
+            ? "var(--secondary-400)"
+            : "var(--secondary-400)"
           : isDarkMode
-            ? "#9ca3af"
-            : "#9ca3af",
+            ? "var(--secondary-400)"
+            : "var(--secondary-400)",
       fontSize: ".875rem",
       height: "32px",
     }),
@@ -116,7 +126,7 @@ const SelectComponent = <T extends FieldValues>({
       borderRadius: "0.75rem",
       marginTop: "0.25rem",
       boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-      backgroundColor: isDarkMode ? "#1f2937" : "#ffffff",
+      backgroundColor: isDarkMode ? "var(--neutral-1100)" : "#fff",
     }),
     menuList: (provided) => ({
       ...provided,
@@ -126,16 +136,20 @@ const SelectComponent = <T extends FieldValues>({
       ...provided,
       backgroundColor: state.isSelected
         ? isDarkMode
-          ? "#01242D"
-          : "#01242D"
+          ? "var(--neutral-1100)"
+          : "var(--primary-600)"
         : state.isFocused
           ? isDarkMode
-            ? "#374151"
-            : "#f3f4f6"
+            ? "var(--neutral-1100)"
+            : "var(--primary-200)"
           : isDarkMode
-            ? "#1f2937"
+            ? "var(--neutral-1100)"
             : "#ffffff",
-      color: state.isSelected ? "#ffffff" : isDarkMode ? "#d1d5db" : "#18181b",
+      color: state.isSelected
+        ? "var(--neutral-1100)"
+        : isDarkMode
+          ? "#fff"
+          : "var(--neutral-1100)",
       padding: "0.5rem",
       borderRadius: "0.5rem",
       cursor: "pointer",
@@ -143,13 +157,17 @@ const SelectComponent = <T extends FieldValues>({
     }),
     singleValue: (provided) => ({
       ...provided,
-      color: isDarkMode ? "#d1d5db" : "#18181b",
+      color: isDarkMode ? "var(--neutral-1100)" : "var(--neutral-1100)",
       fontSize: ".875rem",
       height: "24px",
     }),
     placeholder: (provided) => ({
       ...provided,
-      color: isDarkMode ? "#9ca3af" : "#9ca3af",
+      color: isDarkMode
+        ? "var(--secondary-700)"
+        : isDisabled
+          ? "var(--secondary-500)"
+          : "var(--secondary-700)",
       fontSize: ".875rem",
       height: "24px",
       whiteSpace: "nowrap",
@@ -193,13 +211,13 @@ const SelectComponent = <T extends FieldValues>({
     // For single select
     if (selectedValue && !isMulti) {
       setSelectedOption(
-        options.find((option) => option.value === selectedValue) || null,
+        options.find((option) => option.value === selectedValue) || null
       );
     }
     // For multi select
     if (isMulti && Array.isArray(selectedValue)) {
       setSelectedOption(
-        options.filter((option) => selectedValue.includes(option.value)) || [],
+        options.filter((option) => selectedValue.includes(option.value)) || []
       );
     }
     // If value prop is provided, use it
@@ -212,7 +230,7 @@ const SelectComponent = <T extends FieldValues>({
 
   // Handle select value change
   const handleChange = (
-    selectedOption: SingleValue<Option> | MultiValue<Option> | null,
+    selectedOption: SingleValue<Option> | MultiValue<Option> | null
   ) => {
     setSelectedOption(selectedOption);
     // If using react-hook-form, trigger its onChange
@@ -281,15 +299,15 @@ const SelectComponent = <T extends FieldValues>({
           ...theme,
           colors: {
             ...theme.colors,
-            primary: "#01242D", // selected option & active border
+            primary: "var(--secondary-300)", // selected option & active border
             // primary25: "#01242D", // hover color for options
-            primary50: "#D5E5E8", // focused color for options
+            primary50: "var(--primary-300)", // focused color for options
           },
         })}
       />
       {/* Error message display */}
       {!noErrorIcon && error && (
-        <div className="flex items-center gap-1 text-red-500 text-xs mt-1">
+        <div className="flex items-center gap-1 text-danger-600 text-xs mt-1">
           <BadgeInfo width={14} height={14} />
           <span>{title} is required</span>
         </div>
