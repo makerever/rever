@@ -2,11 +2,10 @@
 
 "use client";
 
-import { PasswordInput } from "@rever/common";
+import { Button, PasswordInput } from "@rever/common";
 import { Label } from "@rever/common";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Button } from "@rever/common";
 import { showErrorToast, showSuccessToast } from "@rever/common";
 import OtpStep from "./authSteps/OtpStep";
 import { forgotPasswordApi, resetForgotPasswordApi } from "@rever/services";
@@ -44,13 +43,18 @@ const ResetPasswordComponent = () => {
   // Local state for email and loader
   const [email, setEmail] = useState<string>("");
   const [isLoaderFormSubmit, setIsLoaderFormSubmit] = useState(false);
+  const [otpSending, setOtpSending] = useState<boolean>(false);
 
   // Validation helpers
   const isPasswordValid =
-    !Boolean(password) || Boolean(errors.password?.message);
+    !Boolean(password) ||
+    !Boolean(password) ||
+    Boolean(errors.password?.message);
 
   const isConfirmPasswordValid =
-    !Boolean(confirmPassword) || Boolean(errors.confirmPassword?.message);
+    !Boolean(confirmPassword) ||
+    !Boolean(confirmPassword) ||
+    Boolean(errors.confirmPassword?.message);
 
   const isOtpValid = otp.length < 6;
 
@@ -103,11 +107,15 @@ const ResetPasswordComponent = () => {
 
   // Handle resend OTP
   const resendOtp = async () => {
+    setOtpSending(true);
     const response = await forgotPasswordApi({
       email: email,
     });
     if (response?.status === 202) {
+      setOtpSending(false);
       showSuccessToast("OTP resent. Check your inbox.");
+    } else {
+      setOtpSending(false);
     }
   };
 
@@ -115,7 +123,7 @@ const ResetPasswordComponent = () => {
     <>
       {/* Reset password form */}
       <form onSubmit={handleSubmit(submitForm)} className="space-y-5">
-        <div className="grid grid-cols-1 gap-4 mb-5">
+        <div className="grid grid-cols-1 gap-4 mb-4">
           {/* OTP input step */}
           <div>
             <OtpStep
@@ -127,15 +135,16 @@ const ResetPasswordComponent = () => {
               errors={errors}
               clearErrors={clearErrors}
               resendOtp={resendOtp}
+              otpSending={otpSending}
             />
           </div>
           {/* Password input */}
           <div>
-            <Label htmlFor="password" text="Password" />
+            <Label htmlFor="password" text="Create Password" />
             <PasswordInput
               register={register("password")}
               id="password"
-              placeholder="Enter password"
+              placeholder="Create a strong password"
               error={touchedFields.password ? errors.password : undefined}
               value={getValues("password")}
               password={password}
@@ -144,11 +153,11 @@ const ResetPasswordComponent = () => {
           </div>
           {/* Confirm password input */}
           <div>
-            <Label htmlFor="confirmPassword" text="Confirm password" />
+            <Label htmlFor="confirmPassword" text="Confirm Password" />
             <PasswordInput
               register={register("confirmPassword")}
               id="confirmPassword"
-              placeholder="Enter confirm password"
+              placeholder="Confirm your password"
               error={errors.confirmPassword}
               value={getValues("confirmPassword")}
             />
@@ -157,12 +166,17 @@ const ResetPasswordComponent = () => {
 
         {/* Submit button */}
         <Button
-          className="text-white"
-          text="Submit"
           type="submit"
           disabled={
-            isPasswordValid || isConfirmPasswordValid || isLoaderFormSubmit
+            isOtpValid ||
+            isPasswordValid ||
+            isConfirmPasswordValid ||
+            isLoaderFormSubmit
           }
+          button_type="primary"
+          icon_type={isLoaderFormSubmit ? "loader" : null}
+          name="Reset password"
+          width="w-full"
         />
       </form>
     </>

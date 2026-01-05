@@ -7,13 +7,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginFormSchemaValues, loginSignupSchema } from "@rever/validations";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
-import { STEP } from "@rever/constants";
 import { useRouter } from "next/navigation";
 import EmailStep from "./authSteps/EmailStep";
 import PasswordStep from "./authSteps/PasswordStep";
 import OtpStep from "./authSteps/OtpStep";
 import { LoginStepProps } from "@rever/types";
-import { ChevronLeft } from "lucide-react";
 import {
   checkEmailRegisteredApi,
   forgotPasswordApi,
@@ -27,6 +25,7 @@ import { showErrorToast, showSuccessToast } from "@rever/common";
 import Cookies from "js-cookie";
 import { setAuthToken } from "@rever/services";
 import { useUserStore } from "@rever/stores";
+import { STEP } from "@rever/constants";
 
 // Main LoginSignup component
 const LoginSignup = ({ showStep, setShowStep }: LoginStepProps) => {
@@ -260,16 +259,17 @@ const LoginSignup = ({ showStep, setShowStep }: LoginStepProps) => {
             handleForgotPwd={() => setShowStep(STEP.FORGOT_PASSWORD)}
           />
           {/* Divider and OTP login button */}
-          <div className="flex items-center gap-2 text-slate-600 text-xs my-2.5">
-            <div className="h-px flex-1 bg-slate-300 dark:bg-slate-500" />
-            <span className="mb-0.5">or</span>
-            <div className="h-px flex-1 bg-slate-300 dark:bg-slate-500" />
+          <div className="flex items-center gap-2 text-slate-600 text-xs my-4">
+            <div className="h-px flex-1 bg-secondary-200" />
+            <span className="mb-0.5">Or</span>
+            <div className="h-px flex-1 bg-secondary-200" />
           </div>
           <Button
             onClick={() => otpLogin()}
-            text="OTP login"
             disabled={isLoaderFormSubmit}
-            className="bg-transparent text-primary-500 border border-primary-500 disabled:hover:bg-transparent disabled:text-primary-500 hover:bg-primary-500 hover:text-white"
+            name="Sign in using OTP"
+            button_type="secondary"
+            width="w-full"
           />
         </>
       ) : null}
@@ -298,50 +298,25 @@ const LoginSignup = ({ showStep, setShowStep }: LoginStepProps) => {
         <>
           <Button
             onClick={handleGetResetCode}
-            text="Get reset code"
-            className="text-white"
             disabled={isLoaderFormSubmit}
+            name="Get reset code"
+            button_type="primary"
+            width="w-full"
           />
 
-          <Button
-            onClick={() => {
-              setShowStep(STEP.PASSWORD);
-            }}
-            className="mt-1 bg-transparent hover:bg-transparent disabled:bg-transparent disabled:hover:bg-transparent text-slate-500"
-            text="Back"
-            disabled={isLoaderFormSubmit}
-            icon={<ChevronLeft width={18} height={18} />}
-          />
+          <div className="mt-5">
+            <Button
+              onClick={() => {
+                setShowStep(STEP.PASSWORD);
+              }}
+              disabled={isLoaderFormSubmit}
+              name="Go back to sign in"
+              button_type="secondary-outline"
+              width="w-full"
+            />
+          </div>
         </>
       ) : null}
-
-      {/* Terms and privacy policy notice */}
-      {showStep !== STEP.FORGOT_PASSWORD && (
-        <p className="text-slate-500 dark:text-slate-300 font-light text-xs text-center lg:px-3 mt-6">
-          By continuing, you acknowledge that you understand and agree to
-          the&nbsp;
-          <a
-            href="https://reverfin.ai/legal/terms-and-conditions"
-            target="_blank"
-          >
-            <span className="underline font-medium cursor-pointer">
-              Terms of Service
-            </span>
-          </a>
-          ,&nbsp;
-          <a href="https://reverfin.ai/legal/eula" target="_blank">
-            <span className="underline font-medium cursor-pointer">
-              EULA
-            </span>{" "}
-          </a>
-          and{" "}
-          <a href="https://reverfin.ai/legal/privacy-policy" target="_blank">
-            <span className="underline font-medium cursor-pointer">
-              Privacy Policy
-            </span>
-          </a>
-        </p>
-      )}
     </>
   );
 };

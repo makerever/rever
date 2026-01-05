@@ -23,37 +23,66 @@ const AuthLayout = ({
   }, []);
 
   return isMounted ? (
-    <div className="relative height_f flex flex-col items-start justify-center lg:p-10 p-4 overflow-hidden">
+    <div className="px-4 lg:px-0 relative h-[calc(100vh-1px)] flex flex-col items-center justify-center">
       {/* Background - Light: Image, Dark: Color */}
       <div className="absolute inset-0 z-0">
         {/* Light Mode Background Image */}
-        <div className="absolute top-0 right-0 h-full w-[40%] bg-[url('/images/authBackground.svg')] bg-no-repeat bg-right bg-cover opacity-20 dark:hidden" />
+        <div className="top-0 right-0 h-full w-full bg-[url('/images/authBackground.svg')] bg-no-repeat bg-right bg-cover dark:hidden" />
         {/* Dark Mode Background Color */}
         <div className="h-full w-full hidden dark:block bg-zinc-900" />
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 flex justify-center items-center flex-1 w-full lg:p-10">
-        <div className="card w-full max-w-[450px] rounded-xl lg:p-10 lg:pb-6 p-4">
-          <div className="flex">
+      <div className="auth-background-shadow rounded-2xl relative mx-6 lg:mx-0 w-full lg:w-[650px] bg-white z-10 flex justify-center items-center">
+        <div className="px-4 py-12 md:px-16 md:py-12 w-full">
+          <div className="flex justify-center">
             <Image
-              src="/images/reverLogoDark2.svg"
+              src="/images/reverLogoGreen.svg"
               alt="Rever Logo"
-              width={48}
-              height={48}
+              width={105}
+              height={105}
             />
           </div>
 
-          <div className="mt-5 mb-10">
-            <h3 className="mb-1 text-slate-800 dark:text-slate-100 text-2xl font-semibold">
+          <div className="my-10">
+            <h3 className="text-center text-neutral-1100 text-[28px] font-medium">
               {mainTitle}
             </h3>
-            <h3 className="text-slate-500 dark:text-slate-300 text-sm font-light">
+            <h3 className="mt-1 text-base text-secondary-700 font-medium text-center">
               {subTitle}
             </h3>
           </div>
 
           {children}
+
+          <div>
+            {/* Terms and privacy policy notice */}
+            <p className="text-secondary-700 font-medium text-xs text-center mt-8">
+              By continuing, you acknowledge that you understand and agree to
+              the&nbsp;
+              <a
+                href="https://rever.ai/legal/terms-and-conditions"
+                target="_blank"
+              >
+                <span className="underline font-medium cursor-pointer">
+                  Terms of Service
+                </span>
+              </a>
+              ,&nbsp;
+              <br />
+              <a href="https://rever.ai/legal/eula" target="_blank">
+                <span className="underline font-medium cursor-pointer">
+                  EULA
+                </span>{" "}
+              </a>
+              and{" "}
+              <a href="https://rever.ai/legal/privacy-policy" target="_blank">
+                <span className="underline font-medium cursor-pointer">
+                  Privacy Policy
+                </span>
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>
