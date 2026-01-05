@@ -179,7 +179,7 @@ function AreaChart({
         className={`transition-all grid sm:place-self-center duration-300 ${
           windowWidth > 450 ? "px-5" : "pr-5"
         } md:pl-5 overflow-x-auto sm:overflow-visible custom_scrollbar ${
-          sidebarCollapsed ? "sm:w-[calc(100%-80px)]" : "w-[100%]"
+          sidebarCollapsed ? "sm:w-[calc(100%-80px)]" : "w-full"
         }`}
       >
         {isDataLoading ? (

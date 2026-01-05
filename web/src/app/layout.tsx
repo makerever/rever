@@ -1,7 +1,7 @@
 // Entry point for the Next.js application
 
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import {
@@ -10,7 +10,7 @@ import {
   SafeHydrate,
 } from "@rever/common";
 
-const inter = Inter({ subsets: ["latin"] });
+const geist = Geist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Rever | AI Driven Finance Transformation",
@@ -35,7 +35,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#1e40af" />
         <link rel="icon" href="/icons/favicon.ico.svg" />
       </head>
-      <body className={`${inter.className} scale-wrapper`}>
+      <body className={`${geist.className} scale-wrapper`}>
         <SafeHydrate>
           <HydrationLoader>
             <GlobalErrorBoundary>{children}</GlobalErrorBoundary>
