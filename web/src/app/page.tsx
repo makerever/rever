@@ -14,12 +14,16 @@ export default function Home() {
         mainTitle={
           showStep === STEP.FORGOT_PASSWORD
             ? "Reset Your password"
-            : "Log in or Sign up"
+            : showStep === STEP.OTP
+              ? "Verify your email to get started"
+              : showStep === STEP.EMAIL
+                ? "Sign in or get started"
+                : "Sign in to your account"
         }
         subTitle={
           showStep === STEP.FORGOT_PASSWORD
             ? "We’ll send a code to this email"
-            : "Rever, where finance works better"
+            : ""
         }
       >
         <LoginSignup showStep={showStep} setShowStep={setShowStep} />

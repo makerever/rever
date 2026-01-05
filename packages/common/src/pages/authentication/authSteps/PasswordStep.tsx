@@ -33,19 +33,20 @@ const PasswordStep = <T extends FieldValues>({
         {/* Forgot password link */}
         <div
           onClick={handleForgotPwd}
-          className="w-fit flex items-center font-medium cursor-pointer text-primary-500 text-2xs mt-1"
+          className="w-fit flex items-center font-medium cursor-pointer text-primary-800 underline text-xs mt-1"
         >
           <span>Forgot your password?</span>
         </div>
       </div>
-      {/* Login button */}
+
       <Button
+        onClick={handleSubmit(submitForm)}
+        disabled={isPasswordEmpty || isLoaderFormSubmit}
+        name="Sign in"
         type="submit"
-        onClick={handleSubmit(submitForm)} // Submit form on click
-        text="Login"
-        disabled={isPasswordEmpty || isLoaderFormSubmit} // Disable if empty or loading
-        className="text-white"
-        isLoading={isLoaderFormSubmit}
+        button_type="primary"
+        icon_type={isLoaderFormSubmit ? "loader" : null}
+        width="w-full"
       />
     </>
   );

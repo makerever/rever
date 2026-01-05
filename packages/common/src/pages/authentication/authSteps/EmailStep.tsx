@@ -55,13 +55,16 @@ const EmailStep = <T extends FieldValues>({
 
       {/* Continue button only shown on email step */}
       {showStep === STEP.EMAIL && (
-        <Button
-          onClick={handleEmailCheck}
-          text="Continue"
-          disabled={isEmailValid || isLoaderFormSubmit}
-          className="text-white"
-          isLoading={isLoaderFormSubmit}
-        />
+        <>
+          <Button
+            onClick={handleEmailCheck}
+            disabled={isEmailValid || isLoaderFormSubmit}
+            name="Continue"
+            button_type="primary"
+            icon_type={isLoaderFormSubmit ? "loader" : null}
+            width="w-full"
+          />
+        </>
       )}
     </>
   );

@@ -17,16 +17,31 @@ import { LoggedUserProps } from "../store/type";
 
 // Interface for button component props
 export interface ButtonProps {
-  text: string;
+  name: string;
   onClick?: () => void;
-  className?: string;
-  icon?: ReactNode;
-  type?: "button" | "submit" | "reset";
   disabled?: boolean;
-  isLoading?: boolean;
+  type?: "submit" | "reset" | "button";
+  button_type?:
+    | "primary"
+    | "primary-outline"
+    | "secondary"
+    | "secondary-outline"
+    | "danger"
+    | "danger-outline"
+    | "success"
+    | "success-outline";
+  icon_type?:
+    | "upload"
+    | "download"
+    | "create"
+    | "approve"
+    | "reject"
+    | "loader"
+    | "mailPlus"
+    | "plus"
+    | "loaderCircle"
+    | null;
   width?: string;
-  isDefault?: boolean;
-  isLoaderDark?: boolean;
 }
 
 // Interface for label component props
