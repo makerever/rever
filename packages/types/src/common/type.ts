@@ -150,16 +150,25 @@ export interface ProfileSidebarProps {
 }
 
 // Interface for checkbox component props
+export type CheckBoxbVariant = "primary" | "danger";
+export type CheckBoxVisualState = "unchecked" | "checked" | "indeterminate";
 export interface checkBoxProps {
   checked: boolean;
-  onChange: (value: unknown) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  isDisable?: boolean;
+  variant?: CheckBoxbVariant;
+  visualState?: CheckBoxVisualState;
 }
 
 // Interface for checkbox component props
+export type RadioBtnVariant = "primary" | "danger";
+export type RadioBtnVisualState = "unchecked" | "checked";
 export interface RadioBtnProps {
   checked: boolean | undefined;
   onChange: (value: unknown) => void;
   isDisable?: boolean;
+  variant?: RadioBtnVariant;
+  visualState?: RadioBtnVisualState;
 }
 
 // Interface for table component props

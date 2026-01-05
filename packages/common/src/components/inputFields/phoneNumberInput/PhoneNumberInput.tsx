@@ -37,7 +37,7 @@ const PhoneInputComp: FC<PhoneInputCompProps> = ({
           });
         }}
         inputStyle={{
-          backgroundColor: disabled ? "#f3f4f6" : "#fff", // dark:bg-zinc-900
+          backgroundColor: disabled ? "#fff" : "#fff", // dark:bg-zinc-900
           color: "#1e293b", // dark:text-zinc-100
           height: "2rem", // h-8
           width: "100%",
@@ -47,23 +47,23 @@ const PhoneInputComp: FC<PhoneInputCompProps> = ({
           fontSize: "0.875rem", // text-sm
           border: `1px solid ${
             error
-              ? "#ef4444" // red-500
-              : "#e5e7eb" // gray-200
+              ? `var(--danger-600)` // red-500
+              : `var(--secondary-200)` // gray-200
           }`,
           transition: "border 0.2s ease-in-out",
         }}
         buttonStyle={{
-          backgroundColor: disabled ? "#f3f4f6" : "transparent",
+          backgroundColor: disabled ? "transparent" : "transparent",
           border: "none",
         }}
         containerStyle={{
           width: "100%",
-          backgroundColor: disabled ? "#f3f4f6" : "transparent",
+          backgroundColor: disabled ? "transparent" : "transparent",
         }}
         disabled={disabled}
       />
 
-      {error && <div className="text-red-500 text-xs mt-1">{error}</div>}
+      {error && <div className="text-danger-600 text-xs mt-1">{error}</div>}
     </div>
   );
 };
