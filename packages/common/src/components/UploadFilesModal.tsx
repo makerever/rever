@@ -4,17 +4,15 @@
 
 import { useState, useRef } from "react";
 import {
-  Check,
-  CircleAlert,
   CircleCheck,
-  CircleDashed,
-  CloudUpload,
-  Loader,
-  Paperclip,
+  CircleX,
+  Image,
+  LoaderCircle,
+  Upload,
   X,
 } from "lucide-react";
 import Modal from "./Modal";
-import IconWrapper from "./IconWrapper";
+
 import { UploadFilesModalProps } from "@rever/types";
 import { getDocument, uploadDocument } from "@rever/services";
 import { showErrorToast } from "./Toast";
@@ -24,15 +22,17 @@ import { getStatusLabelForExtraction } from "@rever/utils";
 const getStatusIcon = (status: string, error_message?: string) => {
   switch (status) {
     case "uploading":
-      return <Loader className="animate-spin text-slate-800" size={16} />;
+      return (
+        <LoaderCircle className="animate-spin text-neutral-1000" size={16} />
+      );
     case "processing":
-      return <Loader className="animate-spin text-blue-500" size={16} />;
+      return <LoaderCircle className="animate-spin text-blue-500" size={16} />;
     case "extracting":
       return (
-        <CircleDashed className="animate-spin text-purple-500" size={16} />
+        <LoaderCircle className="animate-spin text-purple-500" size={16} />
       );
     case "enriched":
-      return <CircleCheck className="text-green-600" size={16} />;
+      return <CircleCheck className="text-green-500" size={16} />;
     case "failed":
       return (
         <CustomTooltip
@@ -44,7 +44,7 @@ const getStatusIcon = (status: string, error_message?: string) => {
           side="right"
         >
           <div>
-            <CircleAlert className="text-red-500" size={16} />
+            <CircleX className="text-danger-600" size={16} />
           </div>
         </CustomTooltip>
       );
@@ -213,12 +213,13 @@ const UploadFilesModal = ({
           onClose();
         }
       }}
+      className="w-1/3"
     >
       <div className="pt-0">
         {/* Modal Header */}
-        <div className="px-6 py-4 flex items-center justify-between border-b border-slate-200 pb-2">
+        <div className="p-4 flex items-center justify-between border-b border-secondary-200 pb-2">
           <div className="w-full flex items-center gap-1">
-            {fileUploadEnded ? (
+            {/* {fileUploadEnded ? (
               <div className="w-9 h-9 min-w-9 min-h-9 rounded-full border border-green-600 flex items-center justify-center mr-2">
                 <Check className="w-5 h-5 text-green-600" />
               </div>
@@ -230,10 +231,10 @@ const UploadFilesModal = ({
               <div className="w-9 h-9 min-w-9 min-h-9 rounded-full border border-slate-300 flex items-center justify-center mr-2">
                 <CloudUpload className="w-5 h-5 text-slate-500" />
               </div>
-            )}
+            )} */}
 
             <div className="w-full">
-              <p className="text-md font-semibold text-slate-800">
+              <p className="text-xl font-medium text-neutral-1100">
                 {fileUploadStarted
                   ? "Uploading files..."
                   : total > 0
@@ -255,7 +256,7 @@ const UploadFilesModal = ({
                   </div>
                   {enrichedCount + failedCount === total && total > 0 ? (
                     <p className="text-xs font-medium mt-1">
-                      <span className="text-slate-800">
+                      <span className="text-neutral-1100">
                         {total} files processed:&nbsp;
                       </span>
                       <span className="text-green-600">
@@ -278,13 +279,14 @@ const UploadFilesModal = ({
                   )}
                 </div>
               ) : (
-                <p className="text-xs font-medium text-slate-500">
+                <p className="text-xs font-medium text-secondary-700">
                   Select and upload the files of your choice
                 </p>
               )}
             </div>
           </div>
-          <IconWrapper
+
+          <button
             onClick={() => {
               if (fileUploadStarted) {
                 showErrorToast(
@@ -294,45 +296,47 @@ const UploadFilesModal = ({
                 onClose();
               }
             }}
-            icon={<X width={16} />}
-          />
+            className="popup-btn rounded-[8px] size-8 btn-secondary-outline"
+          >
+            <X size={16} />
+          </button>
         </div>
 
-        <div className="p-5">
+        <div className="p-4">
           {files.length > 0 ? (
-            <div className="bg-white custom_box_shadow rounded-md max-h-[450px] overflow-y-auto custom_scrollbar">
+            <div className="max-h-112 overflow-y-auto custom_scrollbar">
               <ul>
                 {files.map((item, index) => (
                   <li
                     key={index}
-                    className={`flex items-center justify-between p-3 ${
-                      index < files.length - 1 ? "border-b" : ""
-                    }`}
+                    className="p-3 bg-secondary-100 rounded-lg flex items-center justify-between mb-3"
                   >
                     <div className="flex items-center">
-                      <Paperclip
-                        size={14}
-                        className="ms-1 mr-4 text-gray-500"
-                      />
-                      <span className="text-xs font-medium truncate w-80">
-                        {item.file.name}
-                      </span>
+                      <div className="w-8 h-8 min-w-8 min-h-8 bg-secondary-300 rounded-md flex justify-center items-center">
+                        <Image size={16} className="text-neutral-1100" />
+                      </div>
+
+                      <div className="ms-4">
+                        <p className="text-neutral-1100 text-sm font-semibold line-clamp-1 w-60">
+                          {item.file.name}
+                        </p>
+                        <p
+                          className={`text-neutral-700 text-sm font-medium mt-0.5 capitalize ${
+                            item.status === "processing" ||
+                            item.status === "extracting"
+                              ? "italic"
+                              : ""
+                          }`}
+                        >
+                          {getStatusLabelForExtraction(item.status)}
+                        </p>
+                      </div>
                     </div>
 
                     <div
                       className="flex items-center gap-6"
                       //   onClick={() => removeFile(index)}
                     >
-                      <p
-                        className={`text-slate-800 text-xs capitalize ${
-                          item.status === "processing" ||
-                          item.status === "uploading"
-                            ? "italic"
-                            : ""
-                        }`}
-                      >
-                        {getStatusLabelForExtraction(item.status)}
-                      </p>
                       {getStatusIcon(
                         getStatusLabelForExtraction(item.status),
                         item?.error_message,
@@ -344,7 +348,7 @@ const UploadFilesModal = ({
             </div>
           ) : (
             <div
-              className={`relative border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center min-h-[200px] ${
+              className={`relative border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center min-h-38 ${
                 dragActive
                   ? "border-primary-500 bg-primary-50"
                   : "border-gray-300"
@@ -353,25 +357,18 @@ const UploadFilesModal = ({
               onDragOver={handleDrag}
               onDragLeave={handleDrag}
               onDrop={handleDrop}
+              onClick={triggerFileInput}
             >
-              <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4">
-                <CloudUpload className="w-6 h-6 text-gray-500" />
+              <div className="rounded-full flex items-center justify-center mb-2">
+                <Upload className="w-6 h-6 text-neutral-1100" />
               </div>
 
-              <h3 className="text-md font-medium text-gray-700 mb-1">
-                Choose a file or drag & drop it here
+              <h3 className="text-sm font-medium text-neutral-900 mb-1.5">
+                Click or drop files to upload
               </h3>
-              <p className="text-xs text-slate-500 mb-5">
-                Upload up to {maxFiles} PDF files, each not exceeding 5MB in
-                size
+              <p className="text-xs text-neutral-700 font-medium">
+                Upload up to {maxFiles} files, each not exceeding 5 MB in size.
               </p>
-
-              <button
-                onClick={triggerFileInput}
-                className="px-4 py-2 text-sm font-medium text-primary-500 border border-primary-500 rounded-md hover:bg-primary-500 hover:text-white transition-colors"
-              >
-                Browse files
-              </button>
 
               <input
                 ref={fileInputRef}

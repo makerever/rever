@@ -3,6 +3,7 @@
 "use client";
 
 import { Table } from "@tanstack/react-table";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
@@ -10,6 +11,7 @@ interface DataTablePaginationProps<TData> {
   selectedRows: number;
   tableHeading?: string;
   hideExportIcon?: boolean;
+  perPageItemCount: number[];
 }
 
 export function DataTablePagination<TData>({
@@ -18,65 +20,66 @@ export function DataTablePagination<TData>({
   selectedRows,
   tableHeading,
   hideExportIcon,
+  perPageItemCount,
 }: DataTablePaginationProps<TData>) {
   return (
-    <div className="py-4 font-medium flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500">
+    <div className="py-4 lg:py-0 md:py-0 font-medium flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm text-neutral-1100">
       {!hideExportIcon ? (
         <div>
-          {selectedRows} of {totalRows} {tableHeading?.toLocaleLowerCase()}{" "}
-          selected
+          {/* {selectedRows} of {totalRows} {tableHeading?.toLocaleLowerCase()}{" "}
+          selected */}
+
+          <span className="sm:inline mr-2">Rows per page</span>
+          <select
+            value={table.getState().pagination.pageSize}
+            onChange={(e) => table.setPageSize(Number(e.target.value))}
+            className="border rounded-md px-2 py-1 text-xs"
+          >
+            {perPageItemCount.map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
         </div>
       ) : (
         <div></div>
       )}
 
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="hidden sm:inline">Items per page</span>
-        <select
-          value={table.getState().pagination.pageSize}
-          onChange={(e) => table.setPageSize(Number(e.target.value))}
-          className="border rounded-md px-2 py-1 text-xs"
+      <div className="flex items-center gap-4 py-3">
+        {/* Prev */}
+        <button
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+          className="hover:cursor-pointer disabled:hover:cursor-default flex items-center gap-1 px-2 py-1 rounded disabled:text-secondary-500"
         >
-          {[10, 20, 50, 100].map((size) => (
-            <option key={size} value={size}>
-              {size}
+          <ChevronLeftIcon width={16} /> Prev
+        </button>
+
+        {/* Page Dropdown */}
+        <select
+          className="border rounded-lg px-3 py-1 text-sm"
+          value={table.getState().pagination.pageIndex}
+          onChange={(e) => table.setPageIndex(Number(e.target.value))}
+        >
+          {Array.from({ length: table.getPageCount() }).map((_, i) => (
+            <option key={i} value={i}>
+              {i + 1}
             </option>
           ))}
         </select>
-        <span className="mx-4">
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()}
-        </span>
-        <div className="flex gap-1">
-          <button
-            onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
-            className="px-2 py-1 border rounded disabled:opacity-50"
-          >
-            ≪
-          </button>
-          <button
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="px-2 py-1 border rounded disabled:opacity-50"
-          >
-            ‹
-          </button>
-          <button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            className="px-2 py-1 border rounded disabled:opacity-50"
-          >
-            ›
-          </button>
-          <button
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            disabled={!table.getCanNextPage()}
-            className="px-2 py-1 border rounded disabled:opacity-50"
-          >
-            ≫
-          </button>
-        </div>
+
+        {/* Page Count */}
+        <span className="text-sm">of {table.getPageCount()}</span>
+
+        {/* Next */}
+        <button
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+          className="hover:cursor-pointer disabled:hover:cursor-default flex items-center gap-1 px-2 py-1 rounded disabled:text-secondary-500"
+        >
+          Next <ChevronRightIcon width={16} />
+        </button>
       </div>
     </div>
   );

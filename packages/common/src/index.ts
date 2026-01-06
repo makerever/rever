@@ -23,6 +23,8 @@ export * from "./components/ui/dialog";
 export * from "./components/ui/popover";
 export * from "./components/ui/tooltip";
 
+export { default as DropdownButton } from "./components/DropdownButton";
+
 export { default as DataTable } from "./components/Table/DataTable";
 export * from "./components/Table/DataTablePagination";
 

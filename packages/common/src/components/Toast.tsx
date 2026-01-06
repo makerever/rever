@@ -3,31 +3,27 @@
 "use client";
 
 import { toast } from "sonner";
-import { CheckCircle, AlertTriangle, XCircle } from "lucide-react";
-
-export const showSuccessToast = (message: string) => {
-  toast(
-    <div className="flex items-center gap-2">
-      <CheckCircle className="text-green-500" size={20} />
-      <span className="text-sm">{message}</span>
-    </div>,
-  );
-};
-
-export const showWarningToast = (message: string) => {
-  toast(
-    <div className="flex items-center gap-2">
-      <AlertTriangle className="text-yellow-500" size={20} />
-      <span className="text-sm">{message}</span>
-    </div>,
-  );
-};
+import { CircleCheck, Info } from "lucide-react";
 
 export const showErrorToast = (message: string) => {
-  toast(
-    <div className="flex items-center gap-2">
-      <XCircle className="text-red-500" size={20} />
-      <span className="text-sm">{message}</span>
-    </div>,
-  );
+  toast(message, {
+    icon: <Info width={16} />,
+    className: "toast toast-error",
+    duration: 2500,
+  });
+};
+
+export const showSuccessToast = (message: string) => {
+  toast(message, {
+    icon: <CircleCheck width={16} />,
+    className: "toast toast-success",
+    duration: 2500,
+  });
+};
+
+export const showDefaultToast = (message: string) => {
+  toast(message, {
+    className: "toast toast-default",
+    duration: 2500,
+  });
 };

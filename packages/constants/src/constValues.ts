@@ -25,6 +25,9 @@ export const roleBasedAccess: Record<Role, string[]> = {
     "/settings/controls",
     "/settings/approvals",
     "/settings/members",
+    "/profile",
+    "/preferences",
+    "/security",
   ],
   member: [
     "/home",
@@ -35,6 +38,9 @@ export const roleBasedAccess: Record<Role, string[]> = {
     "/settings/general",
     "/settings/controls",
     "/settings/members",
+    "/profile",
+    "/preferences",
+    "/security",
   ],
   finance_manager: [
     "/home",
@@ -43,8 +49,17 @@ export const roleBasedAccess: Record<Role, string[]> = {
     "/approvals/list/review",
     "/settings/general",
     "/settings/members",
+    "/profile",
+    "/preferences",
+    "/security",
   ],
-  lite_user: ["/inbox", "/request-receipt/list"],
+  lite_user: [
+    "/inbox",
+    "/request-receipt/list",
+    "/profile",
+    "/preferences",
+    "/security",
+  ],
 };
 
 // Tab options for approvals

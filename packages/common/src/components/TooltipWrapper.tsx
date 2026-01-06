@@ -14,14 +14,12 @@ export function CustomTooltip({
   children,
   content,
   side = "top",
-  align = "center",
   sideOffset = 4,
   className = "",
 }: {
   children: ReactNode;
   content: string | ReactNode;
   side?: "top" | "right" | "bottom" | "left";
-  align?: "start" | "center" | "end";
   sideOffset?: number;
   className?: string;
 }) {
@@ -33,7 +31,6 @@ export function CustomTooltip({
           className={className}
           sideOffset={sideOffset}
           side={side}
-          align={align}
         >
           {content}
         </TooltipContent>
