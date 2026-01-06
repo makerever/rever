@@ -44,18 +44,21 @@ export default function MainLayout({
   }, []);
 
   return (
-    <div className="flex min-h-screen dark:bg-zinc-900">
+    <div className="flex min-h-screen dark:bg-zinc-900 bg-secondary-200 border-r border-secondary-200">
       <Sidebar
         isSidebarCollapsed={isCollapsed}
         setIsSidebarCollapsed={toggleSidebar}
       />
       <div
         className={`flex-1 transition-all duration-300 ${
-          !isCollapsed ? "lg:ml-62 md:ml-62 ml-20" : "ml-20"
+          !isCollapsed ? "md:ml-80 ml-20" : "ml-20"
         }`}
       >
-        <Header />
-        <main className="pr-6 pb-5 ps-0">{children}</main>
+        <Header
+          isSidebarCollapsed={isCollapsed}
+          setIsSidebarCollapsed={toggleSidebar}
+        />
+        <main className="flex-1 overflow-auto ps-0">{children}</main>
       </div>
     </div>
   );

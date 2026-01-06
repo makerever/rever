@@ -5,6 +5,7 @@
 import { useEffect } from "react";
 import { ProfileSidebar } from "./ProfileSidebar";
 import { useSidebarStore } from "@rever/stores";
+import { Header } from "./Header";
 
 const ProfileLayout = ({ children }: { children: React.ReactNode }) => {
   const { isCollapsed, toggleCollapse, setCollapse } = useSidebarStore();
@@ -39,17 +40,21 @@ const ProfileLayout = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-secondary-200">
       <ProfileSidebar
         isProfileSidebarCollapsed={isCollapsed}
         setIsProfileSidebarCollapsed={toggleSidebar}
       />
       <div
         className={`flex-1 transition-all duration-300 ${
-          !isCollapsed ? "lg:ml-62 md:ml-62 ml-20" : "ml-20"
+          !isCollapsed ? "md:ml-80 ml-20" : "ml-20"
         }`}
       >
-        <main className="pr-6 pt-10 pb-5 ps-0">{children}</main>
+        <Header
+          isSidebarCollapsed={isCollapsed}
+          setIsSidebarCollapsed={toggleSidebar}
+        />
+        <main className="">{children}</main>
       </div>
     </div>
   );

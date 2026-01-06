@@ -24,12 +24,7 @@ const MAIN_ROUTES = [
   "/404",
   "/not-access",
 ];
-const PROFILE_ROUTES = [
-  "/profile",
-  "/security",
-  "/appearance",
-  "/notification",
-];
+const PROFILE_ROUTES = ["/profile", "/security", "/appearance", "/preferences"];
 const VALID_ROUTES = [...PUBLIC_ROUTES, ...MAIN_ROUTES, ...PROFILE_ROUTES];
 
 // Ignore system/static paths

@@ -56,15 +56,17 @@ const OrgProfile = ({
       >
         {/* Organization initial as avatar */}
         <div
-          className={`text-xs text-white w-8 h-8 min-w-8 min-h-8 flex justify-center items-center rounded-md bg-primary-500`}
+          className={`text-xs text-neutral-1100 w-8 h-8 min-w-8 min-h-8 flex justify-center items-center rounded-md bg-primary-600`}
         >
           {getFirstLetter(userDetails?.organization?.name)}
         </div>
         <div className={`w-full ms-2.5`}>
           <div className="flex whitespace-pre items-center text-slate-800 text-xs">
-            <p>{getLabelForRoles(userDetails?.role || "")}</p>
+            <p className="menu-item menu-item-sidebar">
+              {getLabelForRoles(userDetails?.role || "")}
+            </p>
             <Dot width={20} />
-            <div>
+            <div className="menu-item menu-item-sidebar">
               {userDetails?.organization?.member_count &&
               userDetails?.organization?.member_count > 1
                 ? `${userDetails?.organization?.member_count || 0} members`
@@ -78,7 +80,7 @@ const OrgProfile = ({
       {hasPermission("members", "create") ? (
         <div
           onClick={() => routeAction && routeAction("/settings/members/invite")}
-          className="menu-item"
+          className="menu-item menu-item-sidebar"
         >
           <UserRoundPlus size={16} />
           <p className="ms-1.5">Invite members</p>
@@ -89,7 +91,7 @@ const OrgProfile = ({
       {hasPermission("bill", "create") ? (
         <div
           onClick={() => routeAction && routeAction("/bill/add")}
-          className="menu-item"
+          className="menu-item menu-item-sidebar"
         >
           <CirclePlus size={16} />
           <p className="ms-1.5">Create bills</p>
@@ -97,9 +99,9 @@ const OrgProfile = ({
       ) : null}
 
       {/* Logout action */}
-      <div onClick={logOut} className="menu-item">
-        <LogOut size={16} className="text-red-500" />
-        <p className="ms-1.5 text-red-500">Logout</p>
+      <div onClick={logOut} className="menu-item menu-item-sidebar-danger">
+        <LogOut size={16} />
+        <p className="ms-1.5">Logout</p>
       </div>
     </div>
   );

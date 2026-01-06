@@ -31,7 +31,7 @@ export default function SidePanel({
 
       {/* Panel */}
       <div
-        className={`absolute rounded-md right-0 overflow-auto h-[calc(100%-0px)] bg-white ${className ? className : "w-full lg:w-[70vw] md:w-[70vw] sm:w-[70vw]"} shadow-xl transform transition-transform duration-400 ${
+        className={`absolute rounded-l-[20px] right-0 overflow-auto h-[calc(100%-0px)] bg-white ${className ? className : "w-full lg:w-[70vw] md:w-[70vw] sm:w-[70vw]"} popup-shadow transform transition-transform duration-400 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
