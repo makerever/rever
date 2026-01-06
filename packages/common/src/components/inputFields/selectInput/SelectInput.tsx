@@ -18,7 +18,7 @@ import type { ClearIndicatorProps, DropdownIndicatorProps } from "react-select";
 
 // Custom clear (X) icon for the select input
 const CustomClearIndicator = (
-  props: ClearIndicatorProps<Option, boolean, GroupBase<Option>>
+  props: ClearIndicatorProps<Option, boolean, GroupBase<Option>>,
 ) => {
   const {
     selectProps: { isDisabled },
@@ -39,7 +39,7 @@ const CustomClearIndicator = (
 
 // Custom dropdown arrow icon for the select input
 const CustomDropdownIndicator = (
-  props: DropdownIndicatorProps<Option, boolean, GroupBase<Option>>
+  props: DropdownIndicatorProps<Option, boolean, GroupBase<Option>>,
 ) => {
   const {
     selectProps: { isDisabled },
@@ -211,13 +211,13 @@ const SelectComponent = <T extends FieldValues>({
     // For single select
     if (selectedValue && !isMulti) {
       setSelectedOption(
-        options.find((option) => option.value === selectedValue) || null
+        options.find((option) => option.value === selectedValue) || null,
       );
     }
     // For multi select
     if (isMulti && Array.isArray(selectedValue)) {
       setSelectedOption(
-        options.filter((option) => selectedValue.includes(option.value)) || []
+        options.filter((option) => selectedValue.includes(option.value)) || [],
       );
     }
     // If value prop is provided, use it
@@ -230,7 +230,7 @@ const SelectComponent = <T extends FieldValues>({
 
   // Handle select value change
   const handleChange = (
-    selectedOption: SingleValue<Option> | MultiValue<Option> | null
+    selectedOption: SingleValue<Option> | MultiValue<Option> | null,
   ) => {
     setSelectedOption(selectedOption);
     // If using react-hook-form, trigger its onChange

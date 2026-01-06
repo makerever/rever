@@ -21,7 +21,7 @@ type CommandDemoProps = {
 
 export function CommandDemo({ redirectRoute }: CommandDemoProps) {
   return (
-    <Command className="md:min-w-[450px] border text-slate-800">
+    <Command className="md:min-w-112.5 border text-neutral-1100">
       <CommandInput autoFocus placeholder="Search..." />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>

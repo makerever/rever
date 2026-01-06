@@ -2,14 +2,12 @@
 
 import { SidebarLinkProps } from "@rever/types";
 import {
-  Bell,
+  Building,
   CirclePlus,
-  CircleUserRound,
   FileText,
-  Home,
   Inbox,
   Key,
-  KeyRound,
+  LayoutDashboard,
   ReceiptText,
   Settings2,
   // SunMoon,
@@ -21,10 +19,10 @@ import {
 // Sidebar links for main navigation
 export const sidebarLinks: SidebarLinkProps[] = [
   {
-    name: "Home", // Home page link
+    name: "Dashboard", // Home page link
     url: "/home",
     activeUrl: ["/home"],
-    icon: <Home size={16} />,
+    icon: <LayoutDashboard size={16} />,
   },
 
   {
@@ -76,10 +74,39 @@ export const sidebarLinks: SidebarLinkProps[] = [
     activeUrl: ["/inbox"],
     icon: <Inbox size={16} />,
   },
+];
+
+// Sidebar links for user profile section
+export const profileSidebarLinks: SidebarLinkProps[] = [
   {
-    name: "Settings", // Settings section with sub-items
+    name: "PERSONAL SETTINGS",
     url: "#",
-    icon: <Settings2 size={16} />,
+    icon: <User size={16} />,
+    subItems: [
+      {
+        name: "Profile", // User profile page
+        url: "/profile",
+        activeUrl: ["/profile"],
+        // icon: <CircleUserRound size={16} />,
+      },
+      {
+        name: "Security", // Security settings
+        url: "/security",
+        activeUrl: ["/security"],
+        // icon: <KeyRound size={16} />,
+      },
+      {
+        name: "Preferences", // Notification settings
+        url: "/preferences",
+        activeUrl: ["/preferences"],
+        // icon: <Bell size={16} />,
+      },
+    ],
+  },
+  {
+    name: "ORGANIZATION SETTINGS", // Settings section with sub-items
+    url: "#",
+    icon: <Building size={16} />,
     subItems: [
       {
         name: "General", // General settings
@@ -98,28 +125,6 @@ export const sidebarLinks: SidebarLinkProps[] = [
         url: ["/settings/approvals"],
       },
     ],
-  },
-];
-
-// Sidebar links for user profile section
-export const profileSidebarLinks: SidebarLinkProps[] = [
-  {
-    name: "Profile", // User profile page
-    url: "/profile",
-    activeUrl: ["/profile"],
-    icon: <CircleUserRound size={16} />,
-  },
-  {
-    name: "Security", // Security settings
-    url: "/security",
-    activeUrl: ["/security"],
-    icon: <KeyRound size={16} />,
-  },
-  {
-    name: "Notification", // Notification settings
-    url: "/notification",
-    activeUrl: ["/notification"],
-    icon: <Bell size={16} />,
   },
   // {
   //   name: "Appereance", // Appearance/theme settings

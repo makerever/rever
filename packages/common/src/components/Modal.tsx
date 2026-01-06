@@ -24,7 +24,7 @@ export default function Modal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       {/* BACKDROP CLICK TO CLOSE */}
       <div className="absolute inset-0" onClick={onClose} />
 
