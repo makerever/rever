@@ -6,7 +6,7 @@ const Label = ({ htmlFor, text, className = "", isRequired }: LabelProps) => {
   return (
     <label
       htmlFor={htmlFor}
-      className={`block text-xs font-medium text-slate-500 dark:text-slate-300 mb-1 ${className}`}
+      className={`block text-sm ${className ? className : "mb-1.5 font-semibold text-neutral-1100"}`}
     >
       {text} {isRequired ? <span className="text-red-500">*</span> : null}
     </label>

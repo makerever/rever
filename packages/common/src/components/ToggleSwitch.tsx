@@ -27,13 +27,11 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
         disabled={disabled}
       />
       <div
-        className={`w-5 h-2 flex items-center rounded-full transition-colors duration-300 ${
-          isOn ? "bg-primary-200" : "bg-slate-200"
-        }`}
+        className={`switch ${isOn ? `${disabled ? "bg-primary-100 hover:bg-primary-100" : "active:bg-primary-700 bg-primary-600 hover:bg-primary-800"}` : `${disabled ? "bg-secondary-100 hover:bg-secondary-100" : "active:bg-secondary-300 bg-neutral-200 hover:bg-secondary-400"}`}`}
       >
         <div
-          className={`w-3 h-3 rounded-full shadow-md transform transition-transform duration-300 ${
-            isOn ? "translate-x-2 bg-primary-500" : "bg-slate-500"
+          className={`switch-inner-circle switch-circle-shadow ${
+            isOn ? "translate-x-3 bg-white" : "bg-white"
           }`}
         ></div>
       </div>

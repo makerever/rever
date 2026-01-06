@@ -2,31 +2,25 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, ChevronDown, Ellipsis } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { ChevronDown, ChevronsUpDown } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  payablePathNameUrl,
-  settingPathNameUrl,
-  sidebarLinks,
-} from "@rever/constants";
+import { payablePathNameUrl, sidebarLinks } from "@rever/constants";
 import { Role, SidebarProps } from "@rever/types";
 import UserProfile from "../popup/UserProfile";
-import { CustomTooltip, OutsideClickHandler } from "@rever/common";
+import { OutsideClickHandler } from "@rever/common";
 import { SearchInput } from "@rever/common";
 import OrgProfile from "../popup/OrganizationProfile";
 import { useUserStore } from "@rever/stores";
-import { getFirstLetter } from "@rever/utils";
+import { getFirstLetter, getLabelForRoles } from "@rever/utils";
 import { Modal } from "@rever/common";
 import { CommandDemo } from "@rever/common";
 import { filterSidebarByRole } from "@rever/utils";
+import Image from "next/image";
 
 // Sidebar component definition
-export function Sidebar({
-  isSidebarCollapsed,
-  setIsSidebarCollapsed,
-}: SidebarProps) {
+export function Sidebar({ isSidebarCollapsed }: SidebarProps) {
   // State for tracking which sidebar item is open (expanded)
   const [openItem, setOpenItem] = useState<string | null>(null);
   // State for showing/hiding user profile popup
@@ -46,6 +40,9 @@ export function Sidebar({
 
   // Get user data from store
   const user = useUserStore((state) => state.user);
+
+  // Get org data from store
+  const orgDetails = useUserStore((state) => state?.user?.organization);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -75,11 +72,12 @@ export function Sidebar({
         : "";
     if (!isSidebarCollapsed && payablePathNameUrl.includes(activeUrl)) {
       setOpenItem("Expenses");
-    } else if (!isSidebarCollapsed && settingPathNameUrl.includes(pathname)) {
-      setOpenItem("Settings");
     } else {
       setOpenItem(null);
     }
+    // else if (!isSidebarCollapsed && settingPathNameUrl.includes(pathname)) {
+    //   setOpenItem("Settings");
+    // }
   }, [isSidebarCollapsed, pathname]);
 
   // Toggle sidebar item open/close
@@ -124,8 +122,8 @@ export function Sidebar({
     <>
       {/* Sidebar container */}
       <aside
-        className={`fixed height_f px-3 pt-2.5 pb-2.5 flex flex-col justify-between z-20 top-0 left-0 bg-white dark:bg-gray-900 shadow-md transition-all duration-300 ${
-          isSidebarCollapsed ? "w-14" : "w-56"
+        className={`fixed height_f p-4 flex flex-col justify-between z-20 top-0 left-0 border-r border-secondary-200 rounded-r-[20px] bg-white dark:bg-gray-900 transition-all duration-300 ${
+          isSidebarCollapsed ? "w-20" : "w-80"
         }`}
       >
         <div>
@@ -139,13 +137,22 @@ export function Sidebar({
                   : "py-1"
               }`}
             >
-              <div
-                className={`text-xs text-white w-8 h-8 min-w-8 min-h-8 flex justify-center items-center rounded-md bg-primary-500`}
+              {/* <div
+                className={`text-xs text-white w-12 h-12 min-w-12 min-h-12 flex justify-center items-center rounded-md bg-primary-500`}
               >
                 {getFirstLetter(user?.organization?.name)}
+              </div> */}
+              <div className="flex justify-center">
+                <Image
+                  src="/images/reverLogoGreenIcon.svg"
+                  alt="Rever Logo"
+                  width={54}
+                  height={54}
+                  className="w-12 h-12 min-w-12 min-h-12"
+                />
               </div>
               <div
-                className={`w-full ms-2.5 transition-all duration-700 ${
+                className={`w-full ms-3 transition-all duration-700 ${
                   isSidebarCollapsed
                     ? "opacity-0 scale-95 pointer-events-none"
                     : "opacity-100 scale-100 pointer-events-auto"
@@ -153,9 +160,11 @@ export function Sidebar({
               >
                 {!isSidebarCollapsed && (
                   <div className="flex items-center justify-between">
-                    <p className="text-slate-800 text-xs font-semibold mr-2 w-28 overflow-hidden">
-                      {user?.organization?.name}
-                    </p>
+                    <div>
+                      <p className="text-neutral-1100 text-sm font-semibold w-28 overflow-hidden">
+                        {user?.organization?.name}
+                      </p>
+                    </div>
                     <ChevronDown width={16} className="text-gray-600" />
                   </div>
                 )}
@@ -178,9 +187,9 @@ export function Sidebar({
           {/* Global search input */}
           <div
             onClick={() => setOpenGlobalSearchModal(true)}
-            className={`cursor-pointer mt-2 mb-3`}
+            className={`cursor-pointer mt-4 mb-3`}
           >
-            <SearchInput onlyIcon={isSidebarCollapsed} />
+            <SearchInput onlyIcon={isSidebarCollapsed} noCmdIcon />
           </div>
 
           {/* Sidebar navigation links */}
@@ -204,16 +213,13 @@ export function Sidebar({
                         onClick={() => {
                           if (!isSidebarCollapsed) toggleItem(link.name);
                         }}
-                        className={`duration-1000 ease-in-out cursor-pointer flex rounded-md items-center p-2 transition-all hover:bg-slate-50 dark:hover:bg-gray-700 ${
-                          isActive(link.url)
-                            ? "text-primary-600 dark:text-white"
-                            : "text-slate-800 dark:text-white"
-                        } ${isSidebarCollapsed ? "justify-center" : "justify-between"}`}
+                        className={`flex rounded-md items-center p-1.5 text-neutral-1100 hover-effect
+                           ${isSidebarCollapsed ? "justify-center" : "justify-between"}`}
                       >
                         <div className="flex items-center">
                           {link.icon}
                           {!isSidebarCollapsed && (
-                            <p className="ps-1.5 font-medium text-xs">
+                            <p className="ps-1.5 font-medium text-sm">
                               {link.name}
                             </p>
                           )}
@@ -221,7 +227,7 @@ export function Sidebar({
                         {!isSidebarCollapsed && (
                           <ChevronDown
                             size={16}
-                            className={`text-slate-800 duration-300 transform ${
+                            className={`text-neutral-1100 duration-300 transform ${
                               openItem === link.name ? "" : "-rotate-90"
                             }`}
                           />
@@ -239,10 +245,10 @@ export function Sidebar({
                               }
                             >
                               <li
-                                className={`px-4 py-2 text-xs font-medium cursor-pointer transition-colors ${
+                                className={`p-1.5 text-sm font-medium hover-effect text-neutral-1100 ${
                                   isActive(sub.url)
-                                    ? "bg-primary-100 text-primary-600 dark:text-white"
-                                    : "text-slate-800 dark:text-white hover:bg-slate-50 dark:hover:bg-gray-700"
+                                    ? "bg-secondary-100 font-semibold"
+                                    : ""
                                 }`}
                                 onClick={() => setHoveredItem(null)}
                               >
@@ -256,7 +262,7 @@ export function Sidebar({
                       {/* Sub-items dropdown for expanded sidebar */}
                       {!isSidebarCollapsed && (
                         <ul
-                          className={`overflow-hidden ms-5 ps-2 transition-all duration-700 ease-in-out ${
+                          className={`overflow-hidden ms-4 ps-1.5 transition-all duration-700 ease-in-out border-l border-secondary-200 ${
                             openItem === link.name
                               ? "max-h-64 opacity-100"
                               : "max-h-0 opacity-0"
@@ -272,13 +278,13 @@ export function Sidebar({
                               }
                             >
                               <div
-                                className={`flex items-center p-2 my-1 rounded-md transition-all ${
+                                className={`mt-1 p-1.5 text-sm font-medium flex items-center rounded-md hover-effect text-neutral-1100 ${
                                   isActive(subItem.url, subItem?.key)
-                                    ? "text-primary-600 bg-primary-100 dark:bg-gray-700 dark:text-white"
-                                    : "text-slate-800 dark:text-white hover:bg-slate-50"
+                                    ? "bg-secondary-100 font-semibold"
+                                    : ""
                                 }`}
                               >
-                                <li className="flex font-medium items-center text-xs">
+                                <li className="flex items-center">
                                   {subItem.name}
                                 </li>
                               </div>
@@ -294,18 +300,16 @@ export function Sidebar({
                       href={Array.isArray(link.url) ? link.url[0] : link.url}
                     >
                       <li
-                        className={`p-2 flex items-center rounded-md transition-all dark:hover:bg-gray-700 ${
+                        className={`p-1.5 text-sm font-medium flex items-center rounded-md hover-effect text-neutral-1100 ${
                           isActive(link.url)
-                            ? "text-primary-600 bg-primary-100 hover:bg-primary-100 dark:text-white"
-                            : "text-slate-800 dark:text-white hover:bg-slate-50"
+                            ? "bg-secondary-100 font-semibold"
+                            : ""
                         } ${isSidebarCollapsed ? "justify-center" : ""}`}
                       >
                         <div className="flex items-center">
                           {link.icon}
                           {!isSidebarCollapsed && (
-                            <p className="ps-1.5 font-medium text-xs">
-                              {link.name}
-                            </p>
+                            <p className="ps-1.5">{link.name}</p>
                           )}
                         </div>
                       </li>
@@ -317,39 +321,17 @@ export function Sidebar({
         </div>
 
         {/* Sidebar footer: collapse button and user profile */}
-        <div>
-          {/* Sidebar collapse/expand button */}
-          <div
-            onClick={() => {
-              if (setIsSidebarCollapsed) setIsSidebarCollapsed();
-            }}
-            className={`flex items-center ${
-              isSidebarCollapsed
-                ? "justify-center w-8 h-8 min-w-8 min-h-8"
-                : "px-2 py-1 justify-between"
-            } cursor-pointer rounded-md text-slate-800 text-xs mb-1`}
-          >
-            {isSidebarCollapsed ? (
-              <CustomTooltip content="Maximize" side="right">
-                <ArrowRight width={16} />
-              </CustomTooltip>
-            ) : (
-              <CustomTooltip content="Minimize" side="right">
-                <ArrowLeft width={16} />
-              </CustomTooltip>
-            )}
-          </div>
-
+        <div className="relative">
           {/* User profile section */}
           <OutsideClickHandler onClose={() => setShowUserProfile(false)}>
             <div
               onClick={() => setShowUserProfile(!showUserProfile)}
-              className={`flex items-center cursor-pointer ${
+              className={`flex items-center cursor-pointer justify-center ${
                 !isSidebarCollapsed ? "hover-effect rounded-md py-1 px-1" : ""
               }`}
             >
               <div
-                className={`text-xs text-slate-800 w-8 h-8 min-w-8 min-h-8 flex justify-center items-center rounded-md bg-gray-200`}
+                className={`text-sm font-semibold text-neutral-1100 w-10 h-10 min-w-10 min-h-10 flex justify-center items-center rounded-full bg-purple-100`}
               >
                 {getFirstLetter(user?.first_name)}
                 {getFirstLetter(user?.last_name)}
@@ -357,26 +339,35 @@ export function Sidebar({
               <div
                 className={`w-full ms-2.5 transition-all duration-700 ${
                   isSidebarCollapsed
-                    ? "opacity-0 scale-95 pointer-events-none"
+                    ? "hidden opacity-0 scale-95 pointer-events-none"
                     : "opacity-100 scale-100 pointer-events-auto"
                 }`}
               >
                 {!isSidebarCollapsed && (
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-slate-800 text-xs font-semibold w-28 overflow-hidden">
+                      <p className="text-neutral-1100 text-sm font-semibold max-w-32 overflow-hidden">
                         {user?.first_name} {user?.last_name}
                       </p>
+                      <p className="mt-1 text-secondary-700 text-xs font-medium w-28 overflow-hidden">
+                        {getLabelForRoles(user?.role || "")}
+                      </p>
                     </div>
-                    <Ellipsis width={16} className="text-gray-600" />
+                    <ChevronsUpDown width={16} className="text-neutral-1100" />
                   </div>
                 )}
               </div>
             </div>
 
             {showUserProfile && (
-              <div className="transition-all  duration-300 ease-out">
-                <UserProfile isSidebarCollapsed={isSidebarCollapsed} />
+              <div className="transition-all duration-300 ease-out">
+                <UserProfile
+                  handlClick={(url) => {
+                    setShowUserProfile(false);
+                    router.push(url);
+                  }}
+                  isSidebarCollapsed={isSidebarCollapsed}
+                />
               </div>
             )}
           </OutsideClickHandler>

@@ -153,9 +153,11 @@ export interface SidebarLink {
 // Interface for sidebar component props
 export interface SidebarProps {
   isSidebarCollapsed: boolean;
+  setShowUserProfile?: () => void;
   setIsSidebarCollapsed?: () => void;
   routeAction?: (e: string) => void;
   user?: LoggedUserProps | null;
+  handlClick?: (url: string) => void;
 }
 
 // Interface for profile sidebar component props
@@ -188,15 +190,20 @@ export interface RadioBtnProps {
 
 // Interface for table component props
 export interface TableProps<T> {
+  isHeader?: boolean;
+  roundedBorder?: boolean;
   tableHeading?: string;
   exportKey?: string;
   addBtnText?: string;
+  uploadBtnText?: string;
   onActionBtClick?: () => void;
+  onUploadBtnClick?: () => void;
   tableData: T[];
   columns: ColumnDef<T>[];
   tabNames?: string[];
   activeTab?: string;
   setActiveTab?: (tab: string | undefined) => void;
+  tabSeparatorAt?: number;
   statusList?: string[];
   roleList?: string[];
   search?: string;
@@ -208,11 +215,15 @@ export interface TableProps<T> {
   noStatusFilter?: boolean;
   filterHeading?: string;
   hideExportIcon?: boolean;
+  showSyncIcon?: boolean;
   flowImageSrc?: string;
-  perPageItemCount?: number[];
-  statusFilterLabel?: string;
+  handleSync?: () => void;
   btnPopupItems?: string[];
   onBtnPopupItemsClick?: (value: string) => void;
+  isBillEmailConfigured?: string | undefined;
+  perPageItemCount?: number[];
+  defaultSelectedStatusFilter?: string[];
+  isLoading?: boolean;
 }
 
 // Interface for status filter component props
@@ -301,8 +312,7 @@ export interface TabsProps {
   tabNames: string[] | undefined;
   activeTab: string | undefined;
   setActiveTab: (tab: string | undefined) => void;
-  noLine?: boolean;
-  tabStyleBox?: boolean;
+  separatorAt?: number;
 }
 
 // Type for icon wrapper props
@@ -485,8 +495,11 @@ export type LoaderContextType = {
 
 // Type for pill item component props
 export interface PillItemProps {
-  name: string;
+  name?: string;
   className: string;
+  icon?: "check" | "info" | "warning";
+  isRounded?: boolean;
+  onClick?: () => void;
 }
 
 // Type for Upload files modal props
@@ -495,4 +508,22 @@ export interface UploadFilesModalProps extends Omit<ModalProps, "children"> {
   maxFiles?: number;
   acceptedFormats?: string;
   document_type?: string;
+}
+
+//Interface for Dummy Dropdown button component props
+export interface DropdownItemProps {
+  icon: ReactNode;
+  name: string;
+}
+
+//Interface for Dropdown button component props
+export interface DropdownButtonProps {
+  name: string;
+  onActionBtClick?: () => void;
+  onClose: () => void;
+  onBtnPopupItemsClick?: (value: string) => void;
+  onClickArrow: () => void;
+  showBtnPopup: boolean;
+  btnPopupItems: string[] | DropdownItemProps[];
+  button_type: string;
 }

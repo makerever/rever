@@ -5,14 +5,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Home,
   Users,
-  Settings2,
   ReceiptText,
   UsersRound,
   UserRoundCheck,
   FileCheck2,
   Inbox,
+  Settings,
+  LayoutDashboard,
 } from "lucide-react";
 import { useBreadcrumbStore } from "@rever/stores";
 
@@ -23,13 +23,10 @@ type Crumb = {
 };
 
 const breadcrumbMap: Record<string, Crumb[]> = {
-  "/home": [{ label: "Home", icon: <Home size={16} />, href: "/" }],
-
-  "/vendor/list": [{ label: "Vendors", icon: <Users size={16} />, href: "" }],
-  "/vendor/add": [
-    { label: "Vendors", icon: <Users size={16} />, href: "/vendor/list" },
-    { label: "Create vendor", icon: "", href: "" },
+  "/home": [
+    { label: "Dashboard", icon: <LayoutDashboard size={16} />, href: "/" },
   ],
+  "/vendor/list": [{ label: "Vendors", icon: <Users size={16} />, href: "" }],
   "/vendor/view": [
     { label: "Vendors", icon: <Users size={16} />, href: "/vendor/list" },
     {
@@ -37,7 +34,11 @@ const breadcrumbMap: Record<string, Crumb[]> = {
       href: "",
     },
   ],
-  "/vendor/update": [
+  "/vendor/add": [
+    { label: "Vendors", icon: <ReceiptText size={16} />, href: "/vendor/list" },
+    { label: "Create vendor", icon: "", href: "" },
+  ],
+  "/vendor/edit": [
     { label: "Vendors", icon: <Users size={16} />, href: "/vendor/list" },
     {
       label: (data) => data?.name || "--",
@@ -138,11 +139,23 @@ const breadcrumbMap: Record<string, Crumb[]> = {
     { label: "Update", href: "" },
   ],
   "/inbox": [{ label: "Inbox", icon: <Inbox size={16} />, href: "/" }],
+  "/profile": [
+    // { label: "Settings", icon: <Settings size={16} />, href: undefined },
+    { label: "Profile", href: "/" },
+  ],
+  "/security": [
+    // { label: "Settings", icon: <Settings size={16} />, href: undefined },
+    { label: "Security", href: "/" },
+  ],
+  "/preferences": [
+    // { label: "Settings", icon: <Settings size={16} />, href: undefined },
+    { label: "Preferences", href: "/" },
+  ],
   "/settings/general": [
-    { label: "General settings", icon: <Settings2 size={16} />, href: "/" },
+    { label: "General settings", icon: <Settings size={16} />, href: "/" },
   ],
   "/settings/controls": [
-    { label: "Controls", icon: <Settings2 size={16} />, href: "/" },
+    { label: "Controls", icon: <Settings size={16} />, href: "/" },
   ],
   "/settings/members": [
     { label: "Members", icon: <UsersRound size={16} />, href: "/" },
@@ -166,7 +179,7 @@ export default function Breadcrumb() {
   const dynamicData = useBreadcrumbStore((s) => s.dynamicCrumb[pathname]);
 
   return (
-    <nav className="text-sm text-slate-600 flex gap-1 items-center">
+    <nav className="flex items-center">
       {breadcrumb.map((crumb, index) => {
         const isLast = index === breadcrumb.length - 1;
         const label =
@@ -179,23 +192,20 @@ export default function Breadcrumb() {
             : crumb.href;
 
         return (
-          <span key={index} className="flex items-center gap-1">
-            {index !== 0 && <span>/</span>}
+          <span key={index} className="flex items-center text-xs">
+            {index !== 0 && <span className="text-neutral-200 px-3">/</span>}
             {isLast ? (
-              <span className="flex items-center gap-2">
+              <span className="breadcrumb">
                 {crumb.icon}
                 {label}
               </span>
             ) : href ? (
-              <Link
-                href={href}
-                className="flex items-center gap-2 text-slate-800 font-medium hover:underline hover:text-black"
-              >
+              <Link href={href} className="breadcrumb breadcrumb-hover">
                 {crumb.icon}
                 {label}
               </Link>
             ) : (
-              <div className="flex items-center gap-2 hover:underline hover:text-black">
+              <div className="breadcrumb breadcrumb-hover">
                 {crumb.icon}
                 {label}
               </div>
