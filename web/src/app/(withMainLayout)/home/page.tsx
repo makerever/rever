@@ -11,9 +11,7 @@ import {
 } from "@rever/common";
 import { barChartOptions, overviewOptions } from "@rever/constants";
 import { getBarGraphDataAPI, getBillsSummaryApi } from "@rever/services";
-import { useUserStore } from "@rever/stores";
 import { barGraphDataType, barGraphStateDataType, Option } from "@rever/types";
-import { formatNumber } from "@rever/utils";
 import {
   CircleCheck,
   CircleDollarSign,
@@ -27,12 +25,12 @@ import { SingleValue } from "react-select";
 const Home = () => {
   // State for header filter dropdown
   const [headerFilter, setHeaderFilter] = useState<SingleValue<Option>>(
-    overviewOptions[0],
+    overviewOptions[0]
   );
 
   // State for bar chart filter
   const [barChartFilter, setBarChartFilter] = useState<SingleValue<Option>>(
-    barChartOptions[0],
+    barChartOptions[0]
   );
 
   // State for radial chart filter
@@ -46,16 +44,46 @@ const Home = () => {
   const [isPieChartLoading, setIsPieChartLoading] = useState<boolean>(true);
 
   const [billSummaryData, setBillsSummaryData] = useState({
-    total: 0,
-    in_review: 0,
-    under_approval: 0,
-    approved: 0,
+    total: {
+      amount: 0,
+      count: 0,
+    },
+    in_review: {
+      amount: 0,
+      count: 0,
+    },
+    under_approval: {
+      amount: 0,
+      count: 0,
+    },
+    approved: {
+      amount: 0,
+      count: 0,
+    },
   });
 
-  const [pieChartData, setPieChartData] = useState({
-    total_amount: 0,
-    series: [0, 0, 0] as number[],
-  });
+  const [billStageSegregation, setBillStageSegregation] = useState([
+    {
+      amount: 0,
+      count: 0,
+    },
+    {
+      amount: 0,
+      count: 0,
+    },
+    {
+      amount: 0,
+      count: 0,
+    },
+    {
+      amount: 0,
+      count: 0,
+    },
+    {
+      amount: 0,
+      count: 0,
+    },
+  ]);
 
   const [barGraphData, setBarGraphData] = useState<barGraphStateDataType>({
     months: [],
@@ -63,8 +91,6 @@ const Home = () => {
     totalAmount: [],
     totalBills: [],
   });
-
-  const orgDetails = useUserStore((state) => state.user?.organization);
 
   const getBillsSummaryBarData = useCallback(
     async (filterKey: string | number, retries = 10) => {
@@ -85,10 +111,10 @@ const Home = () => {
             months: data.map((item: barGraphDataType) => item?.month || ""),
             years: data.map((item: barGraphDataType) => item?.year || 0),
             totalAmount: data.map(
-              (item: barGraphDataType) => item?.total_amount || 0,
+              (item: barGraphDataType) => item?.total_amount || 0
             ),
             totalBills: data.map(
-              (item: barGraphDataType) => item?.total_count || 0,
+              (item: barGraphDataType) => item?.total_count || 0
             ),
           });
           setIsLoading(false);
@@ -105,7 +131,7 @@ const Home = () => {
         setIsBarChartLoading(false);
       }
     },
-    [setBarGraphData, setIsLoading, setIsBarChartLoading],
+    [setBarGraphData, setIsLoading, setIsBarChartLoading]
   );
 
   const getBillsSummaryCards = useCallback(
@@ -117,15 +143,27 @@ const Home = () => {
       if (response?.status === 200) {
         const data = response?.data?.data;
         setBillsSummaryData({
-          total: data?.total_amount || 0,
-          in_review: data?.by_status?.in_review?.total || 0,
-          under_approval: data?.by_status?.under_approval?.total || 0,
-          approved: data?.by_status?.approved?.total || 0,
+          total: {
+            amount: data?.total_amount || 0,
+            count: data?.total_count || 0,
+          },
+          in_review: {
+            amount: data?.by_status?.in_review?.total || 0,
+            count: data?.by_status?.in_review?.count || 0,
+          },
+          under_approval: {
+            amount: data?.by_status?.under_approval?.total || 0,
+            count: data?.by_status?.under_approval?.count || 0,
+          },
+          approved: {
+            amount: data?.by_status?.approved?.total || 0,
+            count: data?.by_status?.approved?.count || 0,
+          },
         });
         setIsLoading(false);
       }
     },
-    [headerFilter?.value],
+    [headerFilter?.value]
   );
 
   const getBillsSummaryPieData = useCallback(
@@ -136,26 +174,42 @@ const Home = () => {
         getBillsSummaryPieData(radialChartFilter?.value || "");
       }
       if (response?.status === 200) {
-        const data = response?.data?.data;
-        const total = data?.total_amount || 0;
-        const inReview = data?.by_status?.in_review?.total || 0;
-        const underApproval = data?.by_status?.under_approval?.total || 0;
-        const approved = data?.by_status?.approved?.total || 0;
+        const data = response?.data?.data || {};
 
-        const result = {
-          total_amount: total,
-          series: [
-            total ? parseFloat(((inReview / total) * 100).toFixed(2)) : 0,
-            total ? parseFloat(((underApproval / total) * 100).toFixed(2)) : 0,
-            total ? parseFloat(((approved / total) * 100).toFixed(2)) : 0,
-          ],
-        };
-        setPieChartData(result);
+        // If valid data found, prepare pie chart percentage breakdown
+        if (Object.keys(data).length > 0) {
+          setBillStageSegregation([
+            {
+              amount: data?.by_status?.in_review?.total || 0,
+              count: data?.by_status?.in_review?.count || 0,
+            },
+            {
+              amount: data?.by_status?.under_approval?.total || 0,
+              count: data?.by_status?.under_approval?.count || 0,
+            },
+            {
+              amount: data?.by_status?.approved?.total || 0,
+              count: data?.by_status?.approved?.count || 0,
+            },
+            {
+              amount: data?.by_status?.rejected?.total || 0,
+              count: data?.by_status?.rejected?.count || 0,
+            },
+            {
+              amount: data?.by_status?.posted?.total || 0,
+              count: data?.by_status?.posted?.count || 0,
+            },
+          ]);
+          setIsPieChartLoading(false);
+          setIsLoading(false);
+        } else {
+          setIsPieChartLoading(false);
+        }
         setIsPieChartLoading(false);
         setIsLoading(false);
       }
     },
-    [radialChartFilter?.value],
+    [radialChartFilter?.value]
   );
 
   useEffect(() => {
@@ -172,64 +226,57 @@ const Home = () => {
 
   return (
     <>
+      <div className="rounded-b-[20px] bg-white p-4 h-28 border border-secondary-200 flex items-end justify-start">
+        {/* Header section with overview title and filter */}
+        <div className="flex items-center justify-between w-full h-8">
+          <p className="text-neutral-1100 text-2xl font-medium">Overview</p>
+          <div className="w-40">
+            {/* Dropdown for overview filter */}
+            <SelectComponent
+              options={overviewOptions}
+              value={headerFilter}
+              onChange={(e) => {
+                setHeaderFilter(e);
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Show content only when not loading */}
       {isLoading ? (
         <PageLoader />
       ) : (
-        <div className="flex flex-col gap-4 w-full">
-          {/* Header section with overview title and filter */}
-          <div className="flex items-center justify-between">
-            <p className="text-slate-800 text-lg font-semibold">Overview</p>
-            <div className="w-40">
-              {/* Dropdown for overview filter */}
-              <SelectComponent
-                options={overviewOptions}
-                value={headerFilter}
-                onChange={(e) => {
-                  setHeaderFilter(e);
-                }}
-              />
-            </div>
-          </div>
-
+        <div className="lg:flex items-start">
           {/* Cards showing summary statistics */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-4">
+          <div className="lg:w-1/3">
             <Card
               heading="Total"
               icon={<CircleDollarSign width={20} />}
-              value={formatNumber(billSummaryData?.total, orgDetails?.currency)}
+              value={billSummaryData?.total}
             />
             <Card
-              heading="Under review"
+              heading="Under Review"
               icon={<FileClock width={20} />}
-              value={formatNumber(
-                billSummaryData?.in_review,
-                orgDetails?.currency,
-              )}
+              value={billSummaryData?.in_review}
             />
             <Card
-              heading="Under approval"
+              heading="Under Approval"
               icon={<FileCheck width={20} />}
-              value={formatNumber(
-                billSummaryData?.under_approval,
-                orgDetails?.currency,
-              )}
+              value={billSummaryData?.under_approval}
             />
             <Card
               heading="Approved"
               icon={<CircleCheck width={20} />}
-              value={formatNumber(
-                billSummaryData?.approved,
-                orgDetails?.currency,
-              )}
+              value={billSummaryData?.approved}
             />
           </div>
 
           {/* Graphs section: Analytics (bar) and Insights (radial bar) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
+          <div className="lg:w-2/3">
             {/* Bar chart for analytics */}
             <BarChart
-              heading="Analytics"
+              heading="Total Bills"
               months={barGraphData?.months}
               years={barGraphData?.years}
               totalAmount={barGraphData?.totalAmount}
@@ -241,12 +288,20 @@ const Home = () => {
 
             {/* Radial pie chart for insights */}
             <PieChart
-              heading="Insights"
-              totalAmount={pieChartData?.total_amount}
-              radialSeries={pieChartData.series}
+              series={billStageSegregation.map((v) => v?.count)}
+              billAllData={billStageSegregation}
+              isDataLoading={isPieChartLoading}
+              heading="Bills by stage"
+              labels={[
+                "Under Review",
+                "Under Approval",
+                "Approved",
+                "Rejected",
+                "Ledger Entry",
+              ]}
+              colors={["#F5D670", "#79D7EC", "#AAD57B", "#E57C98", "#8582E5"]}
               barChartFilter={radialChartFilter}
               setBarChartFilter={setRadialChartFilter}
-              isDataLoading={isPieChartLoading}
             />
           </div>
         </div>
