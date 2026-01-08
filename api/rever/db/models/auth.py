@@ -148,6 +148,10 @@ class User(AbstractUser):
         verbose_name = "User"
         verbose_name_plural = "Users"
         db_table = "users"
+    
+    @property
+    def display_name(self):
+        return f"{self.first_name} {self.last_name}".strip() or None
 
 
 class VerificationToken(models.Model):
