@@ -62,63 +62,93 @@ const ChangePassword = () => {
   return (
     <>
       {/* Change Password Form */}
+      <div className="flex items-center justify-between bg-white rounded-b-[20px] p-4 pt-16 border border-secondary-200">
+        <div className="flex items-center justify-between w-full h-8">
+          <div className="flex items-center gap-3">
+            <p className="text-neutral-1100 text-2xl font-medium">
+              Change Password
+            </p>
+          </div>
+        </div>
+      </div>
       <form
         onSubmit={handleSubmit(submitForm)}
-        className="space-y-5 lg:w-96 w-full"
+        className="bg-white rounded-[20px] p-4 border border-secondary-200"
+        style={{
+          minHeight: `calc(100vh - 10rem - 2px)`,
+        }}
       >
-        <div className="grid grid-cols-1 gap-4 mb-5">
+        <div className="grid grid-cols-1">
           {/* Old Password Field */}
-          <div>
-            <Label htmlFor="old_password" text="Old password" />
-            <PasswordInput
-              register={register("old_password")}
-              id="old_password"
-              placeholder="Enter old password"
-              error={
-                touchedFields.old_password ? errors.old_password : undefined
-              }
-              value={getValues("old_password")}
-              showPasswordStrength
+          <div className="border-b border-neutral-200 flex items-center pb-3">
+            <Label
+              htmlFor="old_password"
+              text="Old password:"
+              className="text-neutral-700 font-medium text-sm max-w-60 w-full"
             />
+            <div className="max-w-80 w-full">
+              <PasswordInput
+                register={register("old_password")}
+                id="old_password"
+                placeholder="Enter old password"
+                error={
+                  touchedFields.old_password ? errors.old_password : undefined
+                }
+                value={getValues("old_password")}
+                showPasswordStrength
+              />
+            </div>
           </div>
           {/* New Password Field */}
-          <div>
-            <Label htmlFor="new_password" text="New password" />
-            <PasswordInput
-              register={register("new_password")}
-              id="new_password"
-              placeholder="Enter new password"
-              error={
-                touchedFields.new_password ? errors.new_password : undefined
-              }
-              value={getValues("new_password")}
-              password={new_password}
-              showPasswordStrength
+          <div className="border-b border-neutral-200 flex items-center py-3">
+            <Label
+              htmlFor="new_password"
+              text="New password:"
+              className="text-neutral-700 font-medium text-sm max-w-60 w-full"
             />
+            <div className="max-w-80 w-full">
+              <PasswordInput
+                register={register("new_password")}
+                id="new_password"
+                placeholder="Enter new password"
+                error={
+                  touchedFields.new_password ? errors.new_password : undefined
+                }
+                value={getValues("new_password")}
+                password={new_password}
+                showPasswordStrength
+              />
+            </div>
           </div>
           {/* Confirm Password Field */}
-          <div>
-            <Label htmlFor="confirmPassword" text="Confirm password" />
-            <PasswordInput
-              register={register("confirmPassword")}
-              id="confirmPassword"
-              placeholder="Enter confirm password"
-              error={errors.confirmPassword}
-              value={getValues("confirmPassword")}
+          <div className="border-b border-neutral-200 flex items-center py-3">
+            <Label
+              htmlFor="confirmPassword"
+              text="Confirm password:"
+              className="text-neutral-700 font-medium text-sm max-w-60 w-full"
             />
+            <div className="max-w-80 w-full">
+              <PasswordInput
+                register={register("confirmPassword")}
+                id="confirmPassword"
+                placeholder="Enter confirm password"
+                error={errors.confirmPassword}
+                value={getValues("confirmPassword")}
+              />
+            </div>
           </div>
         </div>
 
         {/* Save Button */}
-        <div className="w-fit">
+        <div className="flex items-center justify-start mt-6 gap-3">
           <Button
-            className="text-white"
-            text="Save"
             type="submit"
             disabled={
               isPasswordValid || isConfirmPasswordValid || isLoaderFormSubmit
             }
-            isLoading={isLoaderFormSubmit}
+            name="Save changes"
+            button_type="primary"
+            icon_type={isLoaderFormSubmit ? "loader" : null}
           />
         </div>
       </form>

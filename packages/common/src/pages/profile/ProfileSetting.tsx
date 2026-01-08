@@ -6,16 +6,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Label } from "@rever/common";
 import { TextInput } from "@rever/common";
-import { useEffect, useState } from "react";
-import { Button } from "@rever/common";
+import { useEffect, useState, useRef } from "react";
 import {
   profileSettingSchema,
-  profileSettingSchemaValues,
 } from "@rever/validations";
 import { useUserStore } from "@rever/stores";
 import { SelectComponent } from "@rever/common";
 import { getLoggedInUserDetails, updateProfileApi } from "@rever/services";
-import { memberRoleOptions, timezoneList } from "@rever/constants";
+import { timezoneList } from "@rever/constants";
 import { showErrorToast, showSuccessToast } from "@rever/common";
 import { PageLoader } from "@rever/common";
 
@@ -27,6 +25,7 @@ const ProfileSettings = () => {
     getValues,
     setValue,
     trigger,
+    watch,
   } = useForm({
     resolver: zodResolver(profileSettingSchema),
     mode: "onChange",
@@ -40,6 +39,7 @@ const ProfileSettings = () => {
 
   // Populate form fields with user data when user changes
   useEffect(() => {
+    console.log("Populating form with user data:", user);
     setValue("first_name", user?.first_name || "");
     setValue("last_name", user?.last_name || "");
     setValue("email", user?.email || "");
@@ -48,30 +48,79 @@ const ProfileSettings = () => {
     setIsLoading(false);
   }, [setValue, user]);
 
-  // Fetch latest user details and update store
-  const getUserDetails = async () => {
-    const response = await getLoggedInUserDetails();
-    if (response?.status === 200) {
-      setUser(response?.data);
-      setIsLoaderFormSubmit(false);
-      showSuccessToast("Profile details updated");
-    } else {
-      setIsLoaderFormSubmit(false);
-      showErrorToast("Something went wrong");
-    }
-  };
+  // refs
+  const autoSaveTimer = useRef<NodeJS.Timeout | null>(null);
+  const isInitializing = useRef(true);
+  const isPopulatingForm = useRef(false);
+  const lastSavedData = useRef({});
 
-  // Handle form submission to update profile
-  const submitForm = async (data: profileSettingSchemaValues) => {
-    setIsLoaderFormSubmit(true);
-    const response = await updateProfileApi(data);
-    if (response?.status === 200) {
-      getUserDetails();
-    } else {
-      setIsLoaderFormSubmit(false);
-      showErrorToast("Something went wrong");
-    }
-  };
+  // Stop autosave on initial setValue calls
+  useEffect(() => {
+    setTimeout(() => {
+      isInitializing.current = false;
+    }, 300);
+  }, []);
+
+  useEffect(() => {
+    const subscription = watch(async (formData) => {
+      try {
+        // Skip autosave during initialization or when setValue is populating form
+        if (isInitializing.current || isPopulatingForm.current) return;
+
+        // Clear previous debounce timer
+        if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+
+        autoSaveTimer.current = setTimeout(async () => {
+          // Build snapshot for profile settings
+          const snapshot = {
+            first_name: formData.first_name || "",
+            last_name: formData.last_name || "",
+            email: formData.email || "",
+            role: formData.role || "",
+            timezone: formData.timezone || "",
+          };
+
+          // If no changes → stop
+          if (
+            JSON.stringify(lastSavedData.current) === JSON.stringify(snapshot)
+          ) {
+            return;
+          }
+
+          setIsLoaderFormSubmit(true);
+
+          // Your profile update API
+          const response = await updateProfileApi(snapshot);
+          // console.log(response);
+          if (response?.status === 200) {
+            // Update store
+            setUser({
+              id: user?.id,
+              first_name: snapshot.first_name,
+              last_name: snapshot.last_name,
+              email: snapshot.email,
+              role: snapshot.role,
+              timezone: snapshot.timezone,
+              organization: response?.data?.organization,
+            });
+
+            lastSavedData.current = snapshot;
+            showSuccessToast("Profile autosaved");
+          }
+
+          setIsLoaderFormSubmit(false);
+        }, 500); // debounce delay
+      } catch (err) {
+        setIsLoaderFormSubmit(false);
+      }
+    });
+
+    return () => {
+      // cleanup subscription and timer
+      subscription.unsubscribe();
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    };
+  }, [watch, user, setUser]);
 
   return (
     <>
@@ -79,96 +128,97 @@ const ProfileSettings = () => {
       {isLoading ? (
         <PageLoader />
       ) : (
-        <form onSubmit={handleSubmit(submitForm)}>
-          <div className="lg:w-3/4 w-full">
-            {/* First row: First name, Last name, Email */}
-            <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-              <div>
-                <Label htmlFor="first_name" text="First name" isRequired />
-                <TextInput
-                  register={register("first_name")}
-                  id="first_name"
-                  placeholder="Enter first name"
-                  error={errors.first_name}
-                  value={getValues("first_name")}
-                />
-              </div>
-              <div>
-                <Label htmlFor="last_name" text="Last name" />
-                <TextInput
-                  register={register("last_name")}
-                  id="last_name"
-                  placeholder="Enter last name"
-                  error={errors.last_name}
-                  value={getValues("last_name")}
-                />
-              </div>
-              <div>
-                <Label htmlFor="email" text="Email" />
-                <TextInput
-                  register={register("email")}
-                  id="email"
-                  disabled
-                  placeholder="Enter email"
-                  error={errors.email}
-                  value={getValues("email")}
-                />
-              </div>
-            </div>
-
-            {/* Second row: Display name, Timezone, Role */}
-            <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-              {/* <div>
-                <Label htmlFor="display_name" text="Display name" />
-                <TextInput
-                  register={register("display_name")}
-                  id="display_name"
-                  placeholder="Enter display name"
-                  error={errors.display_name}
-                  value={getValues("display_name")}
-                />
-              </div> */}
-              <div>
-                <Label htmlFor="timezone" text="Timezone" />
-                <SelectComponent
-                  name="timezone"
-                  register={register}
-                  trigger={trigger}
-                  getValues={getValues}
-                  error={errors?.timezone}
-                  options={timezoneList}
-                  placeholder="Select timezone"
-                  isClearable={true}
-                />
-              </div>
-              <div>
-                <Label htmlFor="role" text="Role" />
-                <SelectComponent
-                  name="role"
-                  register={register}
-                  trigger={trigger}
-                  error={errors?.role}
-                  getValues={getValues}
-                  options={memberRoleOptions}
-                  isDisabled
-                  placeholder="Select role"
-                  isClearable={true}
-                />
+        <>
+          <div className="flex items-center justify-between bg-white rounded-b-[20px] p-4 pt-16 border border-secondary-200">
+            <div className="flex items-center justify-between w-full h-8">
+              <div className="flex items-center gap-3">
+                <p className="text-neutral-1100 text-2xl font-medium">
+                  Profile
+                </p>
               </div>
             </div>
           </div>
+          <form
+            className="bg-white rounded-[20px] p-4 border border-secondary-200"
+            style={{
+              minHeight: `calc(100vh - 10rem - 2px)`,
+            }}
+          >
+            <div className="w-full">
+              {/* First row: First name, Last name, Email */}
+              <div className="grid grid-cols-1">
+                <div className="border-b border-neutral-200 pb-3 flex items-center">
+                  <Label
+                    htmlFor="first_name"
+                    text="First name:"
+                    className="text-neutral-700 font-medium text-sm max-w-60 w-full"
+                  />
+                  <div className="max-w-80 w-full">
+                    <TextInput
+                      register={register("first_name")}
+                      id="first_name"
+                      placeholder="Enter first name"
+                      error={errors.first_name}
+                      value={getValues("first_name")}
+                    />
+                  </div>
+                </div>
+                <div className="border-b border-neutral-200 py-3 flex items-center">
+                  <Label
+                    htmlFor="last_name"
+                    text="Last name:"
+                    className="text-neutral-700 font-medium text-sm max-w-60 w-full"
+                  />
+                  <div className="max-w-80 w-full">
+                    <TextInput
+                      register={register("last_name")}
+                      id="last_name"
+                      placeholder="Enter last name"
+                      error={errors.last_name}
+                      value={getValues("last_name")}
+                    />
+                  </div>
+                </div>
+                <div className="border-b border-neutral-200 py-3 flex items-center">
+                  <Label
+                    htmlFor="email"
+                    text="Email:"
+                    className="text-neutral-700 font-medium text-sm max-w-60 w-full"
+                  />
+                  <div className="max-w-80 w-full">
+                    <TextInput
+                      register={register("email")}
+                      id="email"
+                      disabled
+                      placeholder="Enter email"
+                      error={errors.email}
+                      value={getValues("email")}
+                    />
+                  </div>
+                </div>
 
-          {/* Save button */}
-          <div className="grid grid-cols-2 w-fit gap-3 mt-6">
-            <Button
-              type="submit"
-              text="Save"
-              disabled={isLoaderFormSubmit}
-              className="text-white"
-              isLoading={isLoaderFormSubmit}
-            />
-          </div>
-        </form>
+                <div className="flex items-center pt-3">
+                  <Label
+                    htmlFor="timezone"
+                    text="Timezone:"
+                    className="text-neutral-700 font-medium text-sm max-w-60 w-full"
+                  />
+                  <div className="max-w-80 w-full">
+                    <SelectComponent
+                      name="timezone"
+                      register={register}
+                      trigger={trigger}
+                      getValues={getValues}
+                      error={errors?.timezone}
+                      options={timezoneList}
+                      placeholder="Select timezone"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </>
       )}
     </>
   );
