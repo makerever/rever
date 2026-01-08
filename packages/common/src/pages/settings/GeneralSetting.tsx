@@ -6,13 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { Label, PhoneInputComp } from "@rever/common";
 import { TextInput } from "@rever/common";
-import { useEffect, useState } from "react";
-import { Button } from "@rever/common";
+import { useEffect, useState, useRef } from "react";
 import { SelectComponent } from "@rever/common";
-import {
-  generalSettingSchema,
-  generalSettingSchemaValues,
-} from "@rever/validations";
+import { generalSettingSchema } from "@rever/validations";
 import { useUserStore } from "@rever/stores";
 import {
   businessTypeOptions,
@@ -60,25 +56,62 @@ const GeneralSettings = () => {
   const selectedCountry = watch("address.country");
   const selectedState = watch("address.state");
 
-  // Populate form fields with organization data when user changes
+  // ---------- AUTOSAVE HELPERS ----------
+  const autoSaveTimer = useRef<NodeJS.Timeout | null>(null);
+  const lastSavedData = useRef<any>(null);
+
+  // Flags to prevent autosave during initial population / reset
+  const isInitializing = useRef<boolean>(true);
+  const isPopulatingForm = useRef<boolean>(false);
+
+  // Populate form fields with organization data when component mounts
   useEffect(() => {
     getOrgDetails();
-  }, [setValue, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getOrgDetails = async () => {
+    setIsLoading(true);
     const response = await getOrgApi();
+
     if (response?.status === 200) {
-      setValue("org_name", response?.data?.name || "");
-      setValue("currency", response?.data?.currency || "");
-      setValue("date_format", response?.data?.date_format || "");
-      setValue("email", response?.data?.email || "");
-      setValue("phone_number", response?.data?.phone_number || "");
-      setValue("business_type", response?.data?.business_type || "");
-      setValue("industry", response?.data?.industry || "");
-      setValue("address.country", response?.data?.address?.country || "");
-      setValue("address.state", response?.data?.address?.state || "");
-      setValue("address.city", response?.data?.address?.city || "");
-      setValue("address.zip_code", response?.data?.address?.zip_code || "");
+      // Prevent autosave while we populate fields
+      isPopulatingForm.current = true;
+
+      const d = response.data;
+
+      setValue("org_name", d?.name || "");
+      setValue("currency", d?.currency || "");
+      setValue("date_format", d?.date_format || "");
+      setValue("email", d?.email || "");
+      setValue("phone_number", d?.phone_number || "");
+      setValue("business_type", d?.business_type || "");
+      setValue("industry", d?.industry || "");
+      setValue("address.country", d?.address?.country || "");
+      setValue("address.state", d?.address?.state || "");
+      setValue("address.city", d?.address?.city || "");
+      setValue("address.zip_code", d?.address?.zip_code || "");
+
+      // store snapshot of what is saved on server so autosave won't re-send same data
+      lastSavedData.current = {
+        org_name: d?.name || "",
+        currency: d?.currency || "",
+        date_format: d?.date_format || "",
+        email: d?.email || "",
+        phone_number: d?.phone_number || "",
+        business_type: d?.business_type || "",
+        industry: d?.industry || "",
+        address: {
+          country: d?.address?.country || "",
+          state: d?.address?.state || "",
+          city: d?.address?.city || "",
+          zip_code: d?.address?.zip_code || "",
+        },
+      };
+
+      // done populating — allow autosave from now on
+      isPopulatingForm.current = false;
+      isInitializing.current = false;
       setIsLoading(false);
     } else {
       setIsLoading(false);
@@ -90,11 +123,14 @@ const GeneralSettings = () => {
     const stateList = stateOptions.filter(
       (s) => s.countryId === getValues("address.country"),
     );
-    setValue("address.state", " ");
-    setValue("address.city", " ");
+    // Reset dependent selects to empty value
+    isPopulatingForm.current = true;
+    setValue("address.state", "");
+    setValue("address.city", "");
     setStateOptionsList(stateList);
     setCityOptionsList([]);
-  }, [getValues, selectedCountry, setValue]);
+    isPopulatingForm.current = false;
+  }, [selectedCountry]);
 
   // Update city dropdown when state changes
   useEffect(() => {
@@ -105,40 +141,97 @@ const GeneralSettings = () => {
     );
 
     setCityOptionsList(citiesList);
-  }, [getValues, selectedState]);
+  }, [selectedState]);
 
-  // Handle form submission to update organization details
-  const submitForm = async (data: generalSettingSchemaValues) => {
-    setIsLoaderFormSubmit(true);
-    const response = await updateOrgApi(data);
-    if (response?.status === 200) {
-      setUser({
-        id: user?.id,
-        first_name: user?.first_name,
-        last_name: user?.last_name,
-        email: user?.email,
-        role: user?.role,
-        organization: response?.data,
-        timezone: response?.data,
-      });
+  // ---------------- AUTOSAVE EFFECT ----------------
+  useEffect(() => {
+    // if user doesn't have update permission, don't attempt autosave
+    if (!hasPermission("general", "update")) return;
 
-      showSuccessToast("Organization details updated");
-      setIsLoaderFormSubmit(false);
-    }
-  };
+    const subscription = watch(async (formData) => {
+      try {
+        // Block autosave while we're initializing or populating the form via setValue
+        if (isInitializing.current || isPopulatingForm.current) return;
+
+        // Debounce: clear pending timer
+        if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+
+        // Schedule save
+        autoSaveTimer.current = setTimeout(async () => {
+          // Build a comparable snapshot in the same shape as lastSavedData
+          const snapshot = {
+            org_name: formData.org_name || "",
+            currency: formData.currency || "",
+            date_format: formData.date_format || "",
+            email: formData.email || "",
+            phone_number: formData.phone_number || "",
+            business_type: formData.business_type || "",
+            industry: formData.industry || "",
+            address: {
+              country: formData?.address?.country || "",
+              state: formData?.address?.state || "",
+              city: formData?.address?.city || "",
+              zip_code: formData?.address?.zip_code || "",
+            },
+          };
+
+          // If nothing changed compared to last saved snapshot, skip autosave
+          if (
+            JSON.stringify(lastSavedData.current) === JSON.stringify(snapshot)
+          ) {
+            return;
+          }
+
+          // mark as saving using the same loader state so UI remains consistent
+          setIsLoaderFormSubmit(true);
+
+          const response = await updateOrgApi(formData);
+
+          if (response?.status === 200) {
+            // update user store + snapshot
+            setUser({
+              id: user?.id,
+              first_name: user?.first_name,
+              last_name: user?.last_name,
+              email: user?.email,
+              role: user?.role,
+              organization: response?.data,
+              timezone: response?.data,
+            });
+
+            lastSavedData.current = snapshot;
+            showSuccessToast("Changes have been autosaved");
+          }
+
+          setIsLoaderFormSubmit(false);
+        }, 500); // debounce delay 0.5s
+      } catch (err) {
+        // swallow errors (or you can add error toast)
+        setIsLoaderFormSubmit(false);
+      }
+    });
+
+    return () => {
+      // cleanup subscription and timer
+      subscription.unsubscribe();
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    };
+    // include user in deps so setUser closure is up-to-date
+  }, [watch, user]);
 
   return (
     <>
-      {/* Show nothing while loading organization data */}
       {isLoading ? (
         <PageLoader />
       ) : (
-        <form onSubmit={handleSubmit(submitForm)}>
-          <div className="lg:w-3/4 w-full">
-            {/* First row: Organization name, Base currency, Date format */}
-            <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-              <div>
-                <Label htmlFor="org_name" text="Organization name" isRequired />
+        <form>
+          <div className="w-full rounded-[20px] border bg-white shadow-xs p-4 min-h-[calc(100vh-160px)]">
+            <div className="flex flex-row items-center border-b border-secondary-200 pb-3">
+              <Label
+                text="Organization Name:"
+                className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
+              />
+              <div className="w-1/3">
                 <TextInput
                   register={register("org_name")}
                   id="org_name"
@@ -148,8 +241,13 @@ const GeneralSettings = () => {
                   disabled
                 />
               </div>
-              <div>
-                <Label htmlFor="base_currency" text="Base currency" />
+            </div>
+            <div className="flex flex-row items-center border-b border-secondary-200 py-3">
+              <Label
+                text="Base Currency:"
+                className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
+              />
+              <div className="w-1/3">
                 <SelectComponent
                   name="currency"
                   register={register}
@@ -161,8 +259,13 @@ const GeneralSettings = () => {
                   isDisabled
                 />
               </div>
-              <div>
-                <Label htmlFor="date_format" text="Date format" />
+            </div>
+            <div className="flex flex-row items-center border-b border-secondary-200 py-3">
+              <Label
+                text="Date Format:"
+                className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
+              />
+              <div className="w-1/3">
                 <SelectComponent
                   name="date_format"
                   register={register}
@@ -171,24 +274,32 @@ const GeneralSettings = () => {
                   getValues={getValues}
                   options={dateFormatOptions}
                   placeholder="Select date format"
+                  isDisabled={!hasPermission("general", "update")}
                 />
               </div>
             </div>
-
-            <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-              <div>
-                <Label htmlFor="email" text="Email" />
+            <div className="flex flex-row items-center border-b border-secondary-200 py-3">
+              <Label
+                text="Email:"
+                className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
+              />
+              <div className="w-1/3">
                 <TextInput
                   register={register("email")}
                   id="email"
-                  placeholder="Enter email"
+                  placeholder="Enter org email"
                   error={errors.email}
                   value={getValues("email")}
+                  disabled={!hasPermission("general", "update")}
                 />
               </div>
-
-              <div className="phone_input">
-                <Label htmlFor="phone_number" text="Phone Number" />
+            </div>
+            <div className="flex flex-row items-center border-b border-secondary-200 py-3">
+              <Label
+                text="Contact:"
+                className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
+              />
+              <div className="w-1/3">
                 <Controller
                   name="phone_number"
                   control={control}
@@ -198,15 +309,19 @@ const GeneralSettings = () => {
                       value={field.value || ""}
                       onChange={field.onChange}
                       error={errors.phone_number?.message}
+                      disabled={!hasPermission("general", "update")}
                     />
                   )}
                 />
               </div>
             </div>
 
-            <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-              <div>
-                <Label htmlFor="business_type" text="Business type" />
+            <div className="flex flex-row items-center border-b border-secondary-200 py-3">
+              <Label
+                text="Business Type:"
+                className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
+              />
+              <div className="w-1/3">
                 <SelectComponent
                   name="business_type"
                   register={register}
@@ -216,10 +331,16 @@ const GeneralSettings = () => {
                   options={businessTypeOptions}
                   placeholder="Select business type"
                   isClearable
+                  isDisabled={!hasPermission("general", "update")}
                 />
               </div>
-              <div>
-                <Label htmlFor="industry" text="Industry" />
+            </div>
+            <div className="flex flex-row items-center border-b border-secondary-200 py-3">
+              <Label
+                text="Industry:"
+                className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
+              />
+              <div className="w-1/3">
                 <SelectComponent
                   name="industry"
                   register={register}
@@ -229,33 +350,16 @@ const GeneralSettings = () => {
                   options={industryOptions}
                   placeholder="Select industry"
                   isClearable
+                  isDisabled={!hasPermission("general", "update")}
                 />
               </div>
             </div>
-
-            {/* Second row: Financial year */}
-            {/* <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-              <div>
-                <Label htmlFor="financial_year" text="Financial year" />
-                <SelectComponent
-                  name="financial_year"
-                  register={register}
-                  trigger={trigger}
-                  error={errors?.financial_year}
-                  getValues={getValues}
-                  options={[]}
-                  placeholder="Select financial year"
-                />
-              </div>
-            </div> */}
-
-            <p className="text-slate-800 dark:text-slate-100 text-lg font-semibold mb-6">
-              Company address
-            </p>
-
-            <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-              <div>
-                <Label htmlFor="country" text="Country" />
+            <div className="flex flex-row items-center border-b border-secondary-200 py-3">
+              <Label
+                text="Country:"
+                className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
+              />
+              <div className="w-1/3">
                 <SelectComponent
                   name="address.country"
                   register={register}
@@ -265,10 +369,16 @@ const GeneralSettings = () => {
                   options={countryOptions}
                   placeholder="Select country"
                   isClearable={true}
+                  isDisabled={!hasPermission("general", "update")}
                 />
               </div>
-              <div>
-                <Label htmlFor="state" text="State" />
+            </div>
+            <div className="flex flex-row items-center border-b border-secondary-200 py-3">
+              <Label
+                text="State:"
+                className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
+              />
+              <div className="w-1/3">
                 <SelectComponent
                   name="address.state"
                   register={register}
@@ -278,13 +388,17 @@ const GeneralSettings = () => {
                   options={stateOptionsList}
                   placeholder="Select state"
                   isClearable={true}
+                  isDisabled={!hasPermission("general", "update")}
                 />
               </div>
             </div>
 
-            <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-              <div>
-                <Label htmlFor="city" text="City" />
+            <div className="flex flex-row items-center border-b border-secondary-200 py-3">
+              <Label
+                text="City:"
+                className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
+              />
+              <div className="w-1/3">
                 <SelectComponent
                   name="address.city"
                   register={register}
@@ -294,33 +408,27 @@ const GeneralSettings = () => {
                   options={cityOptionsList}
                   placeholder="Select city"
                   isClearable={true}
+                  isDisabled={!hasPermission("general", "update")}
                 />
               </div>
-              <div>
-                <Label htmlFor="zip_code" text="Zipcode" />
+            </div>
+            <div className="flex flex-row items-center border-b border-secondary-200 py-3">
+              <Label
+                text="ZIP code:"
+                className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
+              />
+              <div className="w-1/3">
                 <TextInput
                   register={register("address.zip_code")}
                   id="zip_code"
                   placeholder="Enter zipcode"
                   error={errors?.address?.zip_code}
                   value={getValues("address.zip_code")}
+                  disabled={!hasPermission("general", "update")}
                 />
               </div>
             </div>
           </div>
-
-          {/* Save button, only visible if user has update permission */}
-          {hasPermission("general", "update") && (
-            <div className="grid grid-cols-2 w-fit gap-3 mt-6">
-              <Button
-                type="submit"
-                text="Save"
-                disabled={isLoaderFormSubmit}
-                className="text-white"
-                isLoading={isLoaderFormSubmit}
-              />
-            </div>
-          )}
         </form>
       )}
     </>
