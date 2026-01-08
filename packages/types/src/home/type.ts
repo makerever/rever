@@ -5,10 +5,14 @@ import { Dispatch, SetStateAction } from "react";
 import { Option } from "../common/type";
 
 // Interface for card component on dashboard
+interface CardPropsValues {
+  amount: number;
+  count: number;
+}
 export interface CardProps {
   heading: string;
   icon: React.ReactNode;
-  value: string;
+  value: CardPropsValues;
 }
 
 // Interface for graph card component on dashboard
@@ -25,11 +29,17 @@ export interface BarChartProps {
 
 export interface PieChartProps {
   heading: string;
+  series: number[];
+  labels: string[];
+  colors: string[];
+  isDataLoading: boolean;
+  onSliceClick?: (label: string) => void;
+  isSelected?: boolean;
+  isTooltip?: boolean;
   barChartFilter?: SingleValue<Option>;
   setBarChartFilter?: Dispatch<SetStateAction<SingleValue<Option>>>;
-  radialSeries: number[];
-  totalAmount: string | number;
-  isDataLoading: boolean;
+  billAllData?: CardPropsValues[];
+  chartHeight?: string;
 }
 
 export interface barGraphDataType {
