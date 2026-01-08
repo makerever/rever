@@ -1,11 +1,11 @@
-import { InviteMemberFormData } from "@rever/types";
+
 import axiosInstance from "../api/axios";
 import { MEMBER_API } from "../api/urls";
 import { inviteMemberSignupSchemaValues } from "@rever/validations";
 import { inviteMemberSchemaValues } from "@rever/validations";
 
 // Invite a new user to the platform
-export const inviteUserApi = async (data: InviteMemberFormData) => {
+export const inviteUserApi = async (data: inviteMemberSchemaValues) => {
   const response = await axiosInstance.post(MEMBER_API.INVITE_USER, data);
   return response;
 };

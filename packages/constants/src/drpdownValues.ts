@@ -2496,18 +2496,18 @@ export const matchingOptions = [
     label: "None",
     value: "none",
     description:
-      "Bills are processed without comparing them against PO's or receipts.",
+      "Bills will be processed without comparing them against POs or receipts.",
   },
   {
-    label: "2-Way match",
+    label: "2-Way Match",
     value: "two_way",
     description:
-      "Compare bills against PO's to ensure quantities and amounts match.",
+      "Verify that the vendor invoice matches the corresponding PO for price and quantity.",
   },
   {
-    label: "3-Way match",
+    label: "3-Way Match",
     value: "three_way",
     description:
-      "Compare bills against PO's and receipts to ensure quantities and amounts match.",
+      "Verify that the goods were both ordered and received before the invoice is paid.",
   },
 ];
