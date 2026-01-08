@@ -6,7 +6,9 @@ import {
   CheckBox,
   ConfirmationPopup,
   DataTable,
-  PageLoader,
+  InviteMemberModal,
+  Modal,
+  PillItem,
   showErrorToast,
 } from "@rever/common";
 import { memberTabOptions } from "@rever/constants";
@@ -19,17 +21,15 @@ import {
 import { useUserStore } from "@rever/stores";
 import { InvitedMemberDataAPIType, MemberDataAPIType } from "@rever/types";
 import {
-  getLabelForMemberStatus,
+  getLabelForBillStatus,
   getLabelForRoles,
   getStatusClass,
   hasPermission,
 } from "@rever/utils";
 import { ColumnDef } from "@tanstack/react-table";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 const MembersList = () => {
-  const router = useRouter();
   const user = useUserStore((state) => state.user);
   const updateUser = useUserStore.getState().setUser;
 
@@ -52,22 +52,7 @@ const MembersList = () => {
               checked={row.getIsSelected()}
               onChange={row.getToggleSelectedHandler()}
             />
-            <span
-              onClick={() => {
-                if (
-                  hasPermission("members", "update") &&
-                  user?.id !== String(row.original.id)
-                ) {
-                  router.push(`/settings/members/invite?id=${row.original.id}`);
-                }
-              }}
-              className={`${
-                hasPermission("members", "update") &&
-                user?.id !== String(row.original.id)
-                  ? "font-semibold cursor-pointer"
-                  : ""
-              } overflow-hidden text-ellipsis`}
-            >
+            <span className={`overflow-hidden text-ellipsis`}>
               {getValue() as string}
             </span>
           </div>
@@ -111,8 +96,9 @@ const MembersList = () => {
         },
       },
     ],
-    [router, user?.id],
+    [],
   );
+
   const invitedMemberColumns: ColumnDef<InvitedMemberDataAPIType>[] = useMemo(
     () => [
       {
@@ -181,17 +167,20 @@ const MembersList = () => {
       {
         accessorKey: "invite_status",
         header: "Status",
-        cell: ({ getValue }) => (
-          <div className="flex items-center gap-4">
-            <span
-              className={`text-2xs border py-1 px-1.5 rounded-md ${getStatusClass(
-                getValue() as string,
-              )}`}
-            >
-              {getValue() as string}
-            </span>
-          </div>
-        ),
+        sortDescFirst: false,
+        cell: ({ getValue }) => {
+          const value = getValue() as string;
+
+          return (
+            <div className="flex items-center pr-2 justify-between w-32">
+              <PillItem
+                className={`${getStatusClass(getLabelForBillStatus(value) || "")}`}
+                isRounded={true}
+                name={getLabelForBillStatus(value || "")}
+              />
+            </div>
+          );
+        },
       },
     ],
     [],
@@ -212,6 +201,8 @@ const MembersList = () => {
   );
 
   const [userUpdate, setUserUpdate] = useState<boolean>(false);
+
+  const [inviteMemberModal, setInviteMemberModal] = useState(false);
 
   // Fetch members list when component mounts or user changes
   useEffect(() => {
@@ -250,7 +241,7 @@ const MembersList = () => {
           return {
             ...v,
             status: getLabelForRoles(v?.role),
-            invite_status: getLabelForMemberStatus(v?.status),
+            invite_status: v?.status,
           };
         });
         setInvitedMembersList(allData);
@@ -274,7 +265,7 @@ const MembersList = () => {
 
   // Redirect to invite member page
   const handleRedirect = () => {
-    router.push("members/invite");
+    setInviteMemberModal(true);
   };
 
   // Open confirmation popup for deleting a member
@@ -324,48 +315,49 @@ const MembersList = () => {
 
   return (
     <>
-      {/* Show DataTable if not loading */}
-      {isLoading ? (
-        <PageLoader />
-      ) : (
-        <>
-          {activeTab === "Active members" ? (
-            <DataTable
-              onActionBtClick={handleRedirect}
-              addBtnText={hasPermission("members", "create") ? "Invite" : ""}
-              tableHeading="Members"
-              tableData={filteredMembers}
-              columns={columns}
-              tabNames={memberTabOptions}
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              actions={hasPermission("members", "delete") ? true : false}
-              handleDelete={handleDelete}
-              isMembers={true}
-              setSearch={setSearch}
-              search={search}
-              clearSearch={() => setSearch("")}
-              filterHeading="Role"
-            />
-          ) : (
-            <DataTable
-              onActionBtClick={handleRedirect}
-              addBtnText={hasPermission("members", "create") ? "Invite" : ""}
-              tableHeading="Members"
-              tableData={filteredInvitedMembers}
-              columns={invitedMemberColumns}
-              tabNames={memberTabOptions}
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              isMembers={true}
-              setSearch={setSearch}
-              search={search}
-              clearSearch={() => setSearch("")}
-              filterHeading="Role"
-            />
-          )}
-        </>
-      )}
+      <>
+        {activeTab === "Active members" ? (
+          <DataTable
+            onActionBtClick={handleRedirect}
+            addBtnText={
+              hasPermission("members", "create") ? "Invite members" : ""
+            }
+            tableHeading="Members"
+            tableData={filteredMembers}
+            columns={columns}
+            tabNames={memberTabOptions}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            actions={hasPermission("members", "delete") ? true : false}
+            handleDelete={handleDelete}
+            isMembers={true}
+            setSearch={setSearch}
+            search={search}
+            clearSearch={() => setSearch("")}
+            filterHeading="Role"
+            isLoading={isLoading}
+          />
+        ) : (
+          <DataTable
+            onActionBtClick={handleRedirect}
+            addBtnText={
+              hasPermission("members", "create") ? "Invite members" : ""
+            }
+            tableHeading="Members"
+            tableData={filteredInvitedMembers}
+            columns={invitedMemberColumns}
+            tabNames={memberTabOptions}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            isMembers={true}
+            setSearch={setSearch}
+            search={search}
+            clearSearch={() => setSearch("")}
+            filterHeading="Role"
+            isLoading={isLoading}
+          />
+        )}
+      </>
 
       {/* Confirmation popup for deleting a member */}
       <ConfirmationPopup
@@ -374,6 +366,19 @@ const MembersList = () => {
         onConfirm={handleDeleteUser}
         message="Are you sure you want to delete this member?"
       />
+
+      <Modal
+        isOpen={inviteMemberModal}
+        onClose={() => setInviteMemberModal(false)}
+        className="lg:w-[35%] md:2/6 w-5/6"
+      >
+        <InviteMemberModal
+          onClose={() => setInviteMemberModal(false)}
+          reqConfirmed={() => {
+            setInviteMemberModal(false);
+          }}
+        />
+      </Modal>
     </>
   );
 };

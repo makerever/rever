@@ -2,118 +2,148 @@
 
 "use client";
 
-import { Button, RadioBtn, showSuccessToast } from "@rever/common";
+import { RadioBtn, showSuccessToast } from "@rever/common";
 import { matchingOptions } from "@rever/constants";
 import { updateOrgApi } from "@rever/services";
 import { useUserStore } from "@rever/stores";
 import { Option } from "@rever/types";
 import { hasPermission } from "@rever/utils";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const Controls = () => {
   const orgDetails = useUserStore((state) => state.user?.organization);
   const user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
 
-  const [isLoaderFormSubmit, setIsLoaderFormSubmit] = useState(false);
   const [selectedMatchOption, setSelectedMatchOption] =
     useState<Option | null>();
 
+  // Flags to prevent autosave at initialization
+  const isInitialLoad = useRef(true);
+  const lastSavedValue = useRef<string | null>(null);
+  const autoSaveTimer = useRef<NodeJS.Timeout | null>(null);
+
+  // LOAD EXISTING SELECTION
   useEffect(() => {
     if (orgDetails?.matching_type) {
       const matchingType = orgDetails?.receipt_confirmation_enabled
         ? "three_way"
         : orgDetails.matching_type;
+
       const found = matchingOptions.find((v) => v.value === matchingType);
-      if (found) setSelectedMatchOption(found);
+
+      if (found) {
+        setSelectedMatchOption(found);
+        lastSavedValue.current = found.value; // store initial value to avoid autosave
+      }
     }
+
+    // Allow autosave AFTER load
+    setTimeout(() => {
+      isInitialLoad.current = false;
+    }, 300);
   }, [orgDetails]);
 
-  const saveDetails = async () => {
-    setIsLoaderFormSubmit(true);
-    const data = {
-      matching_type:
-        selectedMatchOption?.value === "three_way"
-          ? "two_way"
-          : selectedMatchOption?.value,
-      receipt_confirmation_enabled:
-        selectedMatchOption?.value === "three_way" ? true : false,
-    };
-    const response = await updateOrgApi(data);
+  // AUTOSAVE FUNCTION
+  const autoSave = useCallback(
+    async (value: string) => {
+      const data = {
+        matching_type: value === "three_way" ? "two_way" : value,
+        receipt_confirmation_enabled: value === "three_way",
+      };
 
-    if (response?.status === 200) {
-      setUser({
-        id: user?.id,
-        first_name: user?.first_name,
-        last_name: user?.last_name,
-        email: user?.email,
-        role: user?.role,
-        organization: response?.data,
-        timezone: response?.data,
-      });
-      showSuccessToast("Changes saved");
-    }
-    setIsLoaderFormSubmit(false);
-  };
+      const response = await updateOrgApi(data);
+
+      if (response?.status === 200) {
+        setUser({
+          id: user?.id,
+          first_name: user?.first_name,
+          last_name: user?.last_name,
+          email: user?.email,
+          role: user?.role,
+          organization: response?.data,
+          timezone: user?.timezone,
+        });
+
+        showSuccessToast("Changes have been autosaved");
+      }
+    },
+    [user, setUser], // dependencies used inside the function
+  );
+
+  // AUTOSAVE ON CHANGE
+  useEffect(() => {
+    if (isInitialLoad.current) return;
+    if (!selectedMatchOption) return;
+
+    const newVal = String(selectedMatchOption.value ?? "");
+
+    // skip if value did not change
+    if (newVal === lastSavedValue.current) return;
+
+    // debounce
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+
+    autoSaveTimer.current = setTimeout(() => {
+      autoSave(newVal);
+      lastSavedValue.current = String(newVal);
+    }, 500);
+  }, [selectedMatchOption, autoSave]);
 
   const baseLabelClass =
-    "mb-3 border p-4 rounded-md flex items-center gap-4 transition-all duration-300 ease-in-out";
+    "border-b border-secondary-200 p-4 rounded-md flex items-center gap-4 transition-all duration-300 ease-in-out";
 
   return (
     <div>
-      <p className="text-slate-800 dark:text-slate-100 text-lg font-semibold mb-6">
-        Matching type
-      </p>
+      <div className="rounded-b-[20px] bg-white p-4 h-28 border border-secondary-200 flex items-end justify-start">
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 w-full h-8">
+          <div className="flex items-center gap-2">
+            <p className="text-neutral-1100 text-2xl font-medium">Controls</p>
+          </div>
+        </div>
+      </div>
 
-      <div className="lg:w-1/2 w-full">
+      <div className="w-full rounded-[20px] border bg-white shadow-xs p-4 min-h-[calc(100vh-162px)]">
+        <p className="text-neutral-1100 text-xl font-medium mb-5">Match Type</p>
         {matchingOptions.map((val) => (
           <label
             key={val.value}
             className={`${baseLabelClass} ${
-              selectedMatchOption?.value === val.value
-                ? "bg-slate-50"
-                : "hover:border-primary-500"
-            } ${user?.role !== "admin" ? "cursor-not-allowed hover:border-slate-200" : "cursor-pointer"}`}
+              selectedMatchOption?.value === val.value ? "" : ""
+            } ${
+              user?.role !== "admin" ? "cursor-not-allowed" : "cursor-pointer"
+            }`}
           >
             <RadioBtn
-              isDisable={user?.role !== "admin"}
+              isDisable={!hasPermission("general", "update")}
               checked={selectedMatchOption?.value === val.value}
               onChange={() => setSelectedMatchOption(val)}
             />
             <div>
-              <p className="mb-1 text-xs font-semibold text-slate-800">
+              <p className="mb-1 text-sm font-medium text-neutral-1100">
                 {val.label}
               </p>
-              <p className="text-2xs text-slate-500">{val.description}</p>
+              <p className="text-xs font-medium text-secondary-700">
+                {val.description}
+              </p>
             </div>
           </label>
         ))}
 
-        <label className="opacity-50 mb-3 border p-4 rounded-md flex items-center gap-4">
+        <label className="opacity-50 mb-3 p-4 rounded-md flex items-center gap-4">
           <RadioBtn isDisable checked={false} onChange={() => {}} />
           <div>
             <p className="mb-1 text-xs font-semibold text-slate-800">
-              4-Way match
+              4-Way Match
             </p>
             <p className="text-2xs text-slate-600">
-              Bill is matched against the PO&apos;s, receipt, and quality check.
+              Verify that the goods received meet specific quality standards.
             </p>
           </div>
         </label>
       </div>
 
-      {hasPermission("general", "update") && (
-        <div className="grid grid-cols-2 w-fit gap-3 mt-6">
-          <Button
-            type="button"
-            text="Save"
-            disabled={isLoaderFormSubmit}
-            className="text-white"
-            onClick={saveDetails}
-            isLoading={isLoaderFormSubmit}
-          />
-        </div>
-      )}
+      {/* Save button removed safely */}
     </div>
   );
 };

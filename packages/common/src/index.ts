@@ -113,3 +113,6 @@ export { default as poExtractAnimation } from "./components/animations/poExtract
 
 // Hooks to handle common logic code
 export { useCountAnimation } from "./hooks/useCountAnimation";
+
+// Invite member export
+export { default as InviteMemberModal } from "./pages/settings/members/InviteMember";
