@@ -2,7 +2,7 @@
 
 "use client";
 
-import { PageLoader, ToggleSwitch } from "@rever/common";
+import { PageLoader, showSuccessToast, ToggleSwitch } from "@rever/common";
 import {
   getNotificationStatusApi,
   updateNotificationStatusApi,
@@ -41,52 +41,65 @@ const Notification = () => {
       data.notify_on_approval_result = val;
       setNotiPreferenceApp2(val);
     }
-    await updateNotificationStatusApi(data);
+    const responseData = await updateNotificationStatusApi(data);
+
+    if (responseData?.status === 200) {
+      showSuccessToast("Notification preference updated successfully");
+    }
   };
 
   return (
     <>
+      <div className="flex items-center justify-between bg-white rounded-b-[20px] p-4 pt-16 border border-secondary-200">
+        <div className="flex items-center justify-between w-full h-8">
+          <div className="flex items-center gap-3">
+            <p className="text-neutral-1100 text-2xl font-medium">
+              Preferences
+            </p>
+          </div>
+        </div>
+      </div>
       {isLoading ? (
         <PageLoader />
       ) : (
-        <div className="w-full lg:w-2/4">
-          {/* Section title */}
-          <p className="text-slate-800 dark:text-slate-100 text-lg font-semibold mb-6">
-            Email notifications
-          </p>
-
+        <div
+          className="w-full bg-white border border-secondary-200 rounded-[20px] p-4"
+          style={{
+            minHeight: `calc(100vh - 10rem - 2px)`,
+          }}
+        >
           {/* Toggle for transaction submitted notification */}
-          <div className="flex items-start justify-between mb-4 bg-gray-50 rounded-md p-3">
-            <div>
-              <p className="font-semibold text-sm text-slate-800 dark:text-gray-200">
-                Notify when transactions are submitted for approval
-              </p>
-              <p className="mt-1 font-light text-xs text-slate-500 dark:text-gray-200">
-                Get notified instantly when a transaction is awaiting approval
-                in the system.
-              </p>
-            </div>
+          <div className="flex items-start justify-start gap-3 pb-3 border-b border-neutral-200">
             <ToggleSwitch
               isOn={notiPreferenceApp1}
               setIsOn={(val) => updateNotificationStatus(val, "1")}
             />
+            <div className="-mt-0.5">
+              <p className="font-medium text-sm text-neutral-1100 dark:text-gray-200">
+                Notify when transactions are submitted for approval
+              </p>
+              <p className="mt-1 font-medium text-xs text-neutral-700 dark:text-gray-200">
+                Get notified instantly when a transaction is awaiting approval
+                in the system.
+              </p>
+            </div>
           </div>
 
           {/* Toggle for transaction approved notification */}
-          <div className="flex items-start justify-between mb-4 bg-gray-50 rounded-md p-3">
-            <div>
-              <p className="font-semibold text-sm text-slate-800 dark:text-gray-200">
-                Notify when transaction is approved/rejected
-              </p>
-              <p className="mt-1 font-light text-xs text-slate-500 dark:text-gray-200">
-                Receive a notification as soon as a transaction gets
-                approved/rejected successfully.
-              </p>
-            </div>
+          <div className="flex items-start justify-start gap-3 pt-3">
             <ToggleSwitch
               isOn={notiPreferenceApp2}
               setIsOn={(val) => updateNotificationStatus(val, "2")}
             />
+            <div className="-mt-0.5">
+              <p className="font-medium text-sm text-neutral-1100 dark:text-gray-200">
+                Notify when transaction is approved/rejected
+              </p>
+              <p className="mt-1 font-medium text-xs text-neutral-700 dark:text-gray-200">
+                Receive a notification as soon as a transaction gets
+                approved/rejected successfully.
+              </p>
+            </div>
           </div>
         </div>
       )}
