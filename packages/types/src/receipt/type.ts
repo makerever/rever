@@ -47,3 +47,8 @@ export interface confirmationHistory {
   assignee_name?: string;
   assignee_email?: string;
 }
+
+export type InviteMemberProps = {
+  onClose: () => void;
+  reqConfirmed: () => void;
+};

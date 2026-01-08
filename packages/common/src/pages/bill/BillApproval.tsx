@@ -24,9 +24,9 @@ import {
 } from "@rever/services";
 
 import { useUserStore } from "@rever/stores";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { Minus, Plus } from "lucide-react";
+import { Minus, MoveDown } from "lucide-react";
 
 import type {
   ApprovalListProps,
@@ -48,18 +48,25 @@ const BillApproval = () => {
   const user = useUserStore((state) => state.user);
   const [isOn, setIsOn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDataSubmitting, setIsDataSubmitting] = useState(false);
-  const [isConfirmRejectPopupOpen, setIsConfirmRejectPopupOpen] =
-    useState(false);
+
   const [membersList, setMembersList] = useState<Option[]>([]);
   const [approvers, setApprovers] = useState<Approver[]>([{ approver: null }]);
   const [isApprovalAvailable, setIsApprovalAvailable] = useState(false);
 
+  const [isConfirmRejectPopupOpen, setIsConfirmRejectPopupOpen] =
+    useState(false);
+
+  // AUTOSAVE REFS
+  const isInitialLoad = useRef(true);
+  const autoSaveTimer = useRef<NodeJS.Timeout | null>(null);
+  const lastSavedApprovers = useRef<string>("");
+  const shouldAutoSave = useRef(false);
+
+  // FETCH INITIAL DATA
   const fetchInitialData = useCallback(async () => {
     try {
       setIsLoading(true);
 
-      // Fetch approval status & current approvers in parallel
       const [statusRes, membersRes, approversRes] = await Promise.all([
         getApprovalStatusApi(model_name),
         getMembersListApi(),
@@ -93,17 +100,24 @@ const BillApproval = () => {
           approver: { label: v.approver_name, value: v.approver_id },
           level: v.level,
         }));
+
         setApprovers(formatted);
+        lastSavedApprovers.current = JSON.stringify(formatted);
         setIsApprovalAvailable(true);
       } else {
         setApprovers([{ approver: null }]);
+        lastSavedApprovers.current = JSON.stringify([{ approver: null }]);
         setIsApprovalAvailable(false);
       }
     } catch (err) {
-      console.error("Error fetching initial data", err);
       showErrorToast("Failed to load approval data");
     } finally {
       setIsLoading(false);
+
+      // Enable autosave AFTER initial load
+      setTimeout(() => {
+        isInitialLoad.current = false;
+      }, 300);
     }
   }, [user]);
 
@@ -111,6 +125,7 @@ const BillApproval = () => {
     fetchInitialData();
   }, [fetchInitialData]);
 
+  // ENABLE / DISABLE APPROVAL WORKFLOW
   const handleToggle = async () => {
     try {
       if (isOn) {
@@ -137,7 +152,7 @@ const BillApproval = () => {
       } else {
         showErrorToast(
           res?.data?.detail ||
-            "Cannot disable approval; some bills are still under approval.",
+            "Cannot disable approval; some POs are still under approval.",
         );
       }
     } catch {
@@ -146,46 +161,32 @@ const BillApproval = () => {
   };
 
   const handleAdd = () => {
+    shouldAutoSave.current = false; // prevent autosave
     if (approvers.length < 5) {
       setApprovers([...approvers, { approver: null }]);
     }
   };
 
   const handleRemove = (index: number) => {
-    setApprovers((prev) => prev.filter((_, i) => i !== index));
+    shouldAutoSave.current = false; // prevent autosave
+    setApprovers(approvers.filter((_, i) => i !== index));
   };
 
   const handleChange = (index: number, value: Option | null) => {
+    shouldAutoSave.current = true; // allow autosave only for selects
+
     const updated = [...approvers];
     updated[index].approver = value ?? null;
     setApprovers(updated);
   };
 
-  const getFilteredOptions = (index: number): Option[] => {
-    const selectedValues = approvers
-      .filter((_, i) => i !== index)
-      .map((a) => a.approver?.value);
-
-    return membersList.filter(
-      (option) => !selectedValues.includes(option.value),
-    );
-  };
-
-  const isAnyApproverMissing = useMemo(() => {
-    return approvers.some((a) => !a.approver);
-  }, [approvers]);
-
-  const handleSave = async () => {
+  // AUTOSAVE FUNCTION
+  const autoSave = async (currentData: Approver[]) => {
     try {
-      setIsDataSubmitting(true);
-
-      const validAssignments: ApproverAssignment[] = approvers
-        .filter(
-          (v): v is { approver: { value: string | number } } =>
-            v.approver?.value !== undefined,
-        )
+      const validAssignments: ApproverAssignment[] = currentData
+        .filter((v) => v.approver?.value !== undefined)
         .map((v, i) => ({
-          approver: v.approver.value,
+          approver: v.approver!.value,
           level: i + 1,
         }));
 
@@ -193,115 +194,115 @@ const BillApproval = () => {
         model_name,
         assignments: validAssignments,
       };
-      const response = await assignApproverApi(dataObj);
 
-      if (response?.status === 200) {
-        showSuccessToast("Approver assigned successfully");
-        fetchInitialData();
+      const res = await assignApproverApi(dataObj);
+
+      if (res?.status === 200) {
+        showSuccessToast("Changes have been autosaved");
+        lastSavedApprovers.current = JSON.stringify(currentData);
+      } else {
+        showErrorToast("An approver can't be assigned to multiple levels.");
       }
-    } catch (err) {
-      setIsDataSubmitting(false);
-      showErrorToast("Failed to assign approvers");
-    } finally {
-      setIsDataSubmitting(false);
+    } catch {
+      showErrorToast("Failed to auto-save approvers");
     }
   };
+
+  useEffect(() => {
+    if (isInitialLoad.current) return;
+    if (!shouldAutoSave.current) return;
+
+    const currentSerialized = JSON.stringify(approvers);
+
+    if (currentSerialized === lastSavedApprovers.current) return;
+
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+
+    autoSaveTimer.current = setTimeout(() => {
+      autoSave(approvers);
+      shouldAutoSave.current = false; // reset after autosave
+    }, 500);
+  }, [approvers]);
 
   return (
     <>
       {isLoading ? (
         <PageLoader />
       ) : (
-        <div className="w-full mt-6">
-          <div className="lg:w-5/12 w-full flex items-start justify-between mb-4 bg-gray-50 rounded-md p-3">
-            <div>
-              <p className="font-semibold text-sm text-slate-800 dark:text-gray-200">
-                Add approver
+        <div className="w-full">
+          <div className="w-fit flex items-start justify-between mb-6">
+            <ToggleSwitch isOn={isOn} setIsOn={handleToggle} />
+            <div className="ms-3 -mt-0.5">
+              <p className="font-medium text-sm text-neutral-1100 dark:text-gray-200">
+                Enable bill approval workflow
               </p>
-              <p className="mt-1 font-light text-xs text-slate-500 dark:text-gray-200">
-                Set up approvers to manage and streamline your bill order
-                approvals.
+              <p className="mt-1 font-medium text-xs text-secondary-700 dark:text-gray-200">
+                Allow finance managers to streamline the bill approval process.
               </p>
             </div>
-            <ToggleSwitch isOn={isOn} setIsOn={handleToggle} />
           </div>
 
           {isOn ? (
             <div className="lg:w-5/12 w-full">
-              <div className="bg-gray-50 p-3 grid lg:grid-cols-2 gap-10">
-                <p className="text-xs font-semibold text-slate-600">Approver</p>
-                <p className="text-xs font-semibold text-slate-600">Level</p>
-              </div>
-
               {approvers.map((item, index) => (
-                <div
-                  key={index}
-                  className="border-t py-4 grid lg:grid-cols-2 gap-10 items-center"
-                >
-                  <SelectComponent
-                    title="Approver"
-                    name={`approver_${index}`}
-                    options={getFilteredOptions(index)}
-                    value={item.approver}
-                    placeholder="Select approver"
-                    onChange={(value) => handleChange(index, value)}
-                  />
-
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-slate-600">Level {index + 1}</p>
-                    <div className="flex items-center gap-2">
-                      {approvers.length > 1 && !item.level && (
-                        <CustomTooltip content="Remove">
-                          <IconWrapper
-                            onClick={() => handleRemove(index)}
-                            icon={<Minus className="text-red-500" width={16} />}
-                          />
-                        </CustomTooltip>
-                      )}
-                      {index === approvers.length - 1 && (
-                        <CustomTooltip
-                          content={
-                            approvers.length >= 5
-                              ? "Maximum 5 approvers allowed"
-                              : "Add"
-                          }
-                        >
-                          <IconWrapper
-                            isDisabled={approvers.length >= 5}
-                            onClick={handleAdd}
-                            icon={
-                              <Plus
-                                className={
-                                  approvers.length >= 5
-                                    ? "text-gray-400"
-                                    : "text-green-600"
-                                }
-                                width={16}
-                              />
-                            }
-                          />
-                        </CustomTooltip>
-                      )}
+                <div key={index}>
+                  <div>
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <p className="text-xs text-secondary-700 font-medium">
+                          LEVEL {index + 1}
+                        </p>
+                        {approvers.length > 1 && !item.level && (
+                          <CustomTooltip content="Remove">
+                            <IconWrapper
+                              onClick={() => handleRemove(index)}
+                              icon={
+                                <Minus className="text-red-500" width={16} />
+                              }
+                            />
+                          </CustomTooltip>
+                        )}
+                      </div>
                     </div>
+
+                    <SelectComponent
+                      title="Approver"
+                      name={`approver_${index}`}
+                      options={membersList}
+                      value={item.approver}
+                      placeholder="Select approver"
+                      onChange={(value) => handleChange(index, value)}
+                    />
                   </div>
+                  <div className="text-secondary-300 flex justify-center my-2">
+                    {approvers.length > 1 && !item.level && (
+                      <div>
+                        <MoveDown width={18} />
+                      </div>
+                    )}
+                  </div>
+
+                  {index === approvers.length - 1 && (
+                    <div className="flex items-center justify-between mt-5">
+                      <Button
+                        onClick={handleAdd}
+                        name="Add approver"
+                        button_type="secondary"
+                        icon_type="plus"
+                        disabled={approvers.length >= 5 || !item.approver}
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
 
-              <div className="grid grid-cols-2 w-fit gap-3 mt-6">
-                <Button
-                  text="Save"
-                  className="text-white disabled:bg-primary-400 hover:disabled:bg-primary-400"
-                  onClick={handleSave}
-                  disabled={isAnyApproverMissing || isDataSubmitting}
-                  isLoading={isDataSubmitting}
-                />
-              </div>
+              {/* Save button removed */}
             </div>
           ) : (
-            <div className="relative w-full mt-4 h-[400px]">
+            <div className="relative w-full mt-4 h-100">
               <Image
-                alt="Bill Approval Flow"
-                src="/images/flowImages/billApprovalFlow.svg"
+                alt="PO Approval Flow"
+                src="/images/flowImages/poApprovalFlow.svg"
                 fill
                 className="object-contain"
               />
@@ -316,7 +317,7 @@ const BillApproval = () => {
         onClose={() => setIsConfirmRejectPopupOpen(false)}
         onConfirm={handleDisable}
         buttonText="Disable"
-        message="Disabling this may impact bill under approval, if any"
+        message="Disabling this may impact PO under approval, if any"
       />
     </>
   );
