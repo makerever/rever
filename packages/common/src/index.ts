@@ -110,3 +110,6 @@ export { default as UploadFilesModal } from "./components/UploadFilesModal";
 // Extraction animations
 export { default as billExtractAnimation } from "./components/animations/billExtraction.json";
 export { default as poExtractAnimation } from "./components/animations/poExtraction.json";
+
+// Hooks to handle common logic code
+export { useCountAnimation } from "./hooks/useCountAnimation";

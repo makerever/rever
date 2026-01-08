@@ -73,7 +73,7 @@ function AreaChart({
     dataLabels: {
       enabled: false,
       style: {
-        fontFamily: "Inter",
+        fontFamily: "Geist",
       },
     },
     stroke: {
@@ -86,14 +86,14 @@ function AreaChart({
         shade: "light",
         type: "vertical",
         shadeIntensity: 0.5,
-        gradientToColors: ["#916AFC"],
+        gradientToColors: ["#91EF62"],
         inverseColors: false,
-        opacityFrom: 0.8,
-        opacityTo: 0.3,
+        opacityFrom: 0.6,
+        opacityTo: 0.1,
         stops: [0, 100],
       },
     },
-    colors: ["#916AFC"],
+    colors: ["#91EF62"],
     xaxis: {
       tooltip: {
         enabled: false,
@@ -108,9 +108,9 @@ function AreaChart({
           return labelValue;
         },
         style: {
-          fontFamily: "Inter",
-          colors: "#71717A",
-          fontSize: windowWidth < 450 ? "10px" : "12px",
+          fontFamily: "Geist",
+          colors: "#738184",
+          fontSize: "12px",
         },
       },
       axisBorder: { show: false },
@@ -120,8 +120,9 @@ function AreaChart({
     yaxis: {
       labels: {
         style: {
-          fontFamily: "Inter",
-          colors: "#71717A",
+          fontFamily: "Geist",
+          colors: "#738184",
+          fontSize: "12px",
         },
         formatter: function (val: number) {
           return formatNumber(
@@ -142,19 +143,14 @@ function AreaChart({
         return `
           <div style="
             background: white;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            color: #333;
+            font-family: Geist;
           ">
-            <div style="display: flex; align-items: center; flex-direction: column; width: 100%;">
-              <div style="padding:8px;background:#f2f3f2;width:100%;text-align:center">${month}, ${year}</div>
-              <div style="padding:8px;">
-                <div><strong>Bills:</strong> ${bills}</div>
-                <div><strong>Total Amt:</strong> ${formatNumber(
-                  amount,
-                  orgDetails?.currency,
-                )}</div>
-              </div>
+            <div style="padding: 6px; font-size: 12px; display: flex; align-items: center; flex-direction: column; width: 100%;">
+              <p style="color: #0E1010; font-weight: 600;">${month}, ${year}: ${formatNumber(
+                amount,
+                orgDetails?.currency,
+              )}</p>
+              <p style="text-align: center; color: #738184; font-weight: 500; margin-top: 2px;">${bills} Bills</p>
             </div>
           </div>
         `;
@@ -163,9 +159,9 @@ function AreaChart({
   };
 
   return (
-    <div className="rounded-md shadow-4xl min-h-96">
-      <div className="flex items-center justify-between px-5 sm:pr-5 pt-5">
-        <p className="font-semibold text-slate-800">{heading}</p>
+    <div className="rounded-[20px] p-4 bg-white border border-secondary-200">
+      <div className="flex items-center justify-between">
+        <p className="text-neutral-1100 font-medium text-xl">{heading}</p>
         <div className="w-40">
           <SelectComponent
             options={barChartOptions}
@@ -177,20 +173,20 @@ function AreaChart({
 
       <div
         className={`transition-all grid sm:place-self-center duration-300 ${
-          windowWidth > 450 ? "px-5" : "pr-5"
-        } md:pl-5 overflow-x-auto sm:overflow-visible custom_scrollbar ${
-          sidebarCollapsed ? "sm:w-[calc(100%-80px)]" : "w-full"
+          windowWidth > 450 ? "" : "pr-5"
+        } overflow-x-auto sm:overflow-visible custom_scrollbar ${
+          sidebarCollapsed ? "sm:w-[calc(100%-160px)]" : "w-full"
         }`}
       >
         {isDataLoading ? (
-          <PageLoader />
+          <PageLoader className="h-71.5 min-h-71.5" />
         ) : (
-          <div className="h-96 min-h-96">
+          <div className="h-71.5 min-h-71.5">
             <Chart
               options={areaOptions}
               series={areaSeries}
               type="area"
-              height={350}
+              height={300}
             />
           </div>
         )}
