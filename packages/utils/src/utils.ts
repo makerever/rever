@@ -23,7 +23,7 @@ export function formatNumber(
   value: number | string | undefined,
   currency: string = "USD",
   locale?: string,
-  compact?: boolean,
+  compact?: boolean
 ): string {
   if (value === undefined || value === null || value === "") return "";
 
@@ -78,7 +78,7 @@ export function formatPlainNumber(
   value: number | string | undefined,
   compact?: boolean,
   minFractionDigits: number = 2,
-  maxFractionDigits: number = 2,
+  maxFractionDigits: number = 2
 ): string {
   if (value === undefined || value === null || value === "") return "";
 
@@ -100,11 +100,16 @@ export const capitalizeFirstLetter = (str: string) =>
 export const getCombineAddress = (str?: AddressTypeProps) => {
   if (!str) return "--";
 
-  return `${str.line1} ${str.line2} ${str.city ? "," + str.city : ""} ${
-    str.state ? "," + str.state : ""
-  } ${str.country ? "," + str.country : ""} ${
-    str.zip_code ? "," + str.zip_code : ""
-  }`;
+  const parts = [
+    str.line1,
+    str.line2,
+    str.city,
+    str.state,
+    str.country,
+    str.zip_code,
+  ].filter(Boolean); // removes undefined, null, or empty strings
+
+  return parts.length === 0 ? "--" : parts.join(", ");
 };
 
 // Function to list label for payment terms
@@ -122,9 +127,11 @@ export const getLabelForTerm = (value: string) =>
 // Function to list label for bill status
 export const billStatusLabels: Record<string, string> = {
   draft: "Draft",
-  in_review: "Under review",
-  under_approval: "Under approval",
+  in_review: "Under Review",
+  under_approval: "Under Approval",
   approved: "Approved",
+  posted: "Ledger Entry",
+  failed: "Failed",
   rejected: "Rejected",
   closed: "Closed",
   active: "Active",
@@ -132,6 +139,7 @@ export const billStatusLabels: Record<string, string> = {
   requested: "Pending",
   confirmed: "Confirmed",
   completed: "Completed",
+  expired: "Expired",
   matched: "Exact match",
   partial: "Partial match",
   mismatched: "Mismatch",
@@ -152,39 +160,30 @@ const statusClassMap: StatusClassMap = {
   Confirmed: "text-green-800 bg-green-100 border-green-400 font-medium",
   done: "text-green-800 bg-green-100 border-green-400 font-medium",
   completed: "text-green-800 bg-green-100 border-green-400 font-medium",
-  Approved: "text-lime-800 bg-lime-100 border-lime-400 font-medium",
 
   // Red
   Inactive: "text-red-800 bg-red-100 border-red-400 font-medium",
   inactive: "text-red-800 bg-red-100 border-red-400 font-medium",
   failed: "text-red-800 bg-red-100 border-red-400 font-medium",
   Revoked: "text-red-800 bg-red-100 border-red-400 font-medium",
-  Mismatch: "text-red-800 bg-red-100 border-red-400 font-medium",
-  Rejected: "text-pink-800 bg-pink-100 border-pink-400 font-medium",
 
   // Yellow
-  Pending: "text-yellow-800 bg-yellow-100 border-yellow-400 font-medium",
-  Assigned: "text-yellow-800 bg-yellow-100 border-yellow-400 font-medium",
-  "Under review": "text-yellow-800 bg-yellow-100 border-yellow-400 font-medium",
+  Pending: "bg-yellow-100",
+  Assigned: "bg-yellow-100",
 
-  // Sky
-  "Under approval": "text-sky-800 bg-sky-100 border-sky-400 font-medium",
+  "Under Review": "bg-yellow-100",
+  "Under Approval": "bg-cyan-100",
+  Draft: "bg-secondary-200",
+  "Ledger Entry": "bg-purple-100",
+  Rejected: "bg-pink-100",
+  Approved: "bg-lime-100",
 
-  // Slate
-  Draft: "text-slate-800 bg-slate-100 border-slate-400 font-medium",
+  "Exact match": "bg-green-100",
+  Mismatch: "bg-red-100",
+  "Partial match": "bg-orange-100",
+  "No PO": "bg-zinc-100",
 
-  // Indigo
-  "Ledger entry": "text-indigo-800 bg-indigo-100 border-indigo-400 font-medium",
-
-  // Teal
-  "Exact match": "text-teal-800 bg-teal-100 border-teal-400 font-medium",
-
-  // Orange
-  "Partial match":
-    "text-orange-800 bg-orange-100 border-orange-400 font-medium",
-
-  // Zinc
-  "No PO": "text-zinc-800 bg-zinc-100 border-zinc-400 font-medium",
+  Expired: "bg-secondary-200",
 };
 
 // Function to get bill status pills
@@ -195,7 +194,7 @@ export const getStatusClass = (status: string = ""): string => {
 // Function to export data as excel
 export async function exportToExcel<T extends object>(
   data: T[],
-  fileName = "export",
+  fileName = "export"
 ) {
   if (!data || data.length === 0) {
     console.warn("No data provided for Excel export.");

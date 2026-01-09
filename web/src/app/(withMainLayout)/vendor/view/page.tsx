@@ -2,14 +2,12 @@
 
 "use client";
 
-import { ListSideVendorView, PageLoader } from "@rever/common";
+import { PageLoader } from "@rever/common";
 import { ViewVendorDetails } from "@rever/common";
-import { getVendorDetailsAPI, useApi, VENDOR_API } from "@rever/services";
+import { getVendorDetailsAPI } from "@rever/services";
 import { useBreadcrumbStore } from "@rever/stores";
 import {
   VenderDataAPIType,
-  VendorsAPIData,
-  VendorTableList,
 } from "@rever/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
@@ -26,15 +24,8 @@ const ViewVendorWithParams = () => {
     undefined,
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [vendorList, setVendorList] = useState<VendorTableList[]>([]);
 
   const setDynamicCrumb = useBreadcrumbStore((s) => s.setDynamicCrumb);
-
-  // Fetch all vendors data using custom API hook
-  const { data: vendors } = useApi<VendorsAPIData>(
-    "vendor",
-    `${VENDOR_API.MANAGE_VENDORS}?include_inactive=true`,
-  );
 
   // Fetch individual vendor details by ID
   const handleGetIndividualVendor = useCallback(async () => {
@@ -60,41 +51,6 @@ const ViewVendorWithParams = () => {
     }
   }, [handleGetIndividualVendor, idValue, router]);
 
-  // Effect to structure and set vendor list data when vendors data changes
-  useEffect(() => {
-    if (vendors) {
-      const structuredData = vendors?.results?.map(
-        (item: VenderDataAPIType) => ({
-          id: item?.id || "",
-          vendorName: item?.vendor_name,
-          companyName: item.company_name || "--",
-          email: item.email || "--",
-          taxId: item.tax_id || "--",
-          status: item.is_active ? "Active" : "Inactive",
-          website: item?.website,
-          mobile: item.mobile || "--",
-          accountNumber: item.account_number || "",
-          paymentTerms: item?.payment_terms || "",
-          billingAddress: {
-            id: item?.billing_address?.id || "",
-            line1: item?.billing_address?.line1 || "",
-            line2: item?.billing_address?.line2 || "",
-            city: item?.billing_address?.city || "",
-            state: item?.billing_address?.state || "",
-            zipCode: item?.billing_address?.zip_code || "",
-            country: item?.billing_address?.country || "",
-          },
-        }),
-      );
-      setVendorList(structuredData);
-    }
-  }, [vendors]);
-
-  // Handle vendor change in the side list
-  const handleChangeVendor = (id: string) => {
-    router.push(`/vendor/view?id=${id}`);
-  };
-
   // Render vendor details, side list, and confirmation popup
   return (
     <>
@@ -103,19 +59,13 @@ const ViewVendorWithParams = () => {
           <PageLoader />
         ) : (
           <>
-            <div className="lg:w-3/4 w-full">
+            <div className="w-full">
               <ViewVendorDetails
                 vendorData={vendorData}
                 isLoading={isLoading}
               />
             </div>
-            <div className="w-96">
-              <ListSideVendorView
-                changeVendor={handleChangeVendor}
-                vendorId={idValue}
-                vendorData={vendorList}
-              />
-            </div>
+            
           </>
         )}
       </div>

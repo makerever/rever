@@ -527,3 +527,19 @@ export interface DropdownButtonProps {
   btnPopupItems: string[] | DropdownItemProps[];
   button_type: string;
 }
+
+//Interface for Dummy Dropdown button component props
+export interface PopupButtonMenuProps {
+  icon: ReactNode;
+  name: string;
+  isShown: boolean;
+  onClick: () => void;
+}
+
+//Interface for Popup button component props
+export interface PopupButtonProps {
+  children: ReactNode;
+  onClose: () => void;
+  showBtnPopup: boolean;
+  btnPopupItems: PopupButtonMenuProps[];
+}
