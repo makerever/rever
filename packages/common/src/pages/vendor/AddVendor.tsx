@@ -7,18 +7,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { Label, ToggleSwitch } from "@rever/common";
 import { TextInput } from "@rever/common";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@rever/common";
 import { useRouter } from "next/navigation";
 import {
-  bankTypeOptions,
-  cityOptions,
-  countryOptions,
   paymentTermsOptions,
-  stateOptions,
-  statusOptions,
 } from "@rever/constants";
-import { CitiesOption, StateOption } from "@rever/types";
 import { SelectComponent } from "@rever/common";
 import {
   createNewVendorAPI,
@@ -41,7 +35,6 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
     formState: { errors },
     getValues,
     trigger,
-    watch,
     setValue,
     control,
   } = useForm({
@@ -54,38 +47,28 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
   // State for showing loader on form submit
   const [isLoaderFormSubmit, setIsLoaderFormSubmit] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [stateOptionsList, setStateOptionsList] = useState<StateOption[]>([]);
-  const [cityOptionsList, setCityOptionsList] = useState<CitiesOption[]>([]);
+
+  const [vendorSectionHeight, setVendorSectionHeight] = useState<number | null>(
+    null
+  );
+  const vendorDetailsRef = useRef<HTMLDivElement | null>(null);
+  const vendorAddressRef = useRef<HTMLDivElement | null>(null);
 
   const [isOn, setIsOn] = useState<boolean>(true);
 
-  // Watch selected country and state for address fields
-  const selectedCountry = watch("billingAddress.country");
-  const selectedState = watch("billingAddress.state");
-
   const setDynamicCrumb = useBreadcrumbStore((s) => s.setDynamicCrumb);
 
-  // Update state dropdown when country changes
+  //useeffect to track the height of vendorDetails and vendorAddress sections
   useEffect(() => {
-    const stateList = stateOptions.filter(
-      (s) => s.countryId === getValues("billingAddress.country"),
-    );
-    setValue("billingAddress.state", " ");
-    setValue("billingAddress.city", " ");
-    setStateOptionsList(stateList);
-    setCityOptionsList([]);
-  }, [getValues, selectedCountry, setValue]);
-
-  // Update city dropdown when state changes
-  useEffect(() => {
-    const citiesList = cityOptions.filter(
-      (c) =>
-        c.stateId === getValues("billingAddress.state") &&
-        c.stateCode === getValues("billingAddress.country"),
-    );
-
-    setCityOptionsList(citiesList);
-  }, [getValues, selectedState]);
+    if (!isLoading) {
+      const vendorDetailsheight = vendorDetailsRef.current?.offsetHeight;
+      const vendorAddressheight = vendorAddressRef.current?.offsetHeight;
+      setVendorSectionHeight(
+        (vendorDetailsheight ?? 0) + (vendorAddressheight ?? 0)
+      );
+      // console.log(vendorDetailsheight, vendorAddressheight);
+    }
+  }, [isLoading]);
 
   // Fetch individual vendor details and populate form fields
   const handleGetIndividualVendor = useCallback(async () => {
@@ -104,36 +87,36 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
       setValue("website", vendorData?.website ?? "");
       setValue(
         "billingAddress.line1",
-        vendorData?.billing_address?.line1 ?? "",
+        vendorData?.billing_address?.line1 ?? ""
       );
       setValue(
         "billingAddress.line2",
-        vendorData?.billing_address?.line2 ?? "",
+        vendorData?.billing_address?.line2 ?? ""
       );
       setValue(
         "billingAddress.country",
-        vendorData?.billing_address?.country ?? "",
+        vendorData?.billing_address?.country ?? ""
       );
       setValue(
         "billingAddress.state",
-        vendorData?.billing_address?.state ?? "",
+        vendorData?.billing_address?.state ?? ""
       );
       setValue("billingAddress.city", vendorData?.billing_address?.city ?? "");
       setValue(
         "billingAddress.zip_code",
-        vendorData?.billing_address?.zip_code ?? "",
+        vendorData?.billing_address?.zip_code ?? ""
       );
       setValue(
         "bank_account.account_holder_name",
-        vendorData?.bank_account?.account_holder_name ?? "",
+        vendorData?.bank_account?.account_holder_name ?? ""
       );
       setValue(
         "bank_account.account_number",
-        vendorData?.bank_account?.account_number ?? "",
+        vendorData?.bank_account?.account_number ?? ""
       );
       setValue(
         "bank_account.bank_name",
-        vendorData?.bank_account?.bank_name ?? "",
+        vendorData?.bank_account?.bank_name ?? ""
       );
       setValue("paymentTerms", vendorData?.payment_terms ?? "");
       setValue("status", vendorData?.is_active ? "active" : "inactive");
@@ -227,283 +210,326 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
     <>
       {/* Show nothing while loading vendor data */}
       {isLoading ? (
-        <PageLoader />
+        <div
+          className={`${vendorId ? "flex items-center justify-center h-full" : ""}`}
+        >
+          <PageLoader />
+        </div>
       ) : (
-        <form onSubmit={handleSubmit(submitForm)}>
-          <div className="pr-8 lg:w-3/4 w-full">
-            <div className="w-full">
-              {/* Vendor basic details row */}
-              <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-                <div>
-                  <Label htmlFor="vendorName" text="Vendor name" isRequired />
-                  <TextInput
-                    register={register("vendorName")}
-                    id="vendorName"
-                    placeholder="Enter vendor name"
-                    error={errors.vendorName}
-                    value={getValues("vendorName")}
-                  />
+        <>
+          <div>
+            <div className="bg-secondary-200 pb-px">
+              <form onSubmit={handleSubmit(submitForm)} className="">
+                <div className="flex items-center justify-between bg-white rounded-b-[20px] p-4 pt-16 border border-secondary-200">
+                  <div className="flex items-center gap-2">
+                    <p className="text-neutral-1100 text-2xl font-medium">
+                      {vendorId
+                        ? `Edit Vendor - ${getValues("vendorName")}`
+                        : "New Vendor"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Button
+                      name="Cancel"
+                      onClick={() =>
+                        vendorId
+                          ? router.push(`/vendor/view?id=${vendorId}`)
+                          : router.push("/vendor/list")
+                      }
+                      disabled={isLoaderFormSubmit}
+                      button_type="secondary-outline"
+                    />
+                    <Button
+                      type="submit"
+                      name={vendorId ? "Save changes" : "Save"}
+                      disabled={isLoaderFormSubmit}
+                      button_type="primary"
+                      icon_type={isLoaderFormSubmit ? "loader" : null}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="companyName" text="Company name" />
-                  <TextInput
-                    register={register("companyName")}
-                    id="companyName"
-                    placeholder="Enter company name"
-                    error={errors.companyName}
-                    value={getValues("companyName")}
-                  />
-                </div>
-                <div className="phone_input">
-                  <Label htmlFor="mobile" text="Mobile" />
-                  {/* <TextInput
-                  register={register("mobile")}
-                  id="mobile"
-                  placeholder="Enter mobile"
-                  error={errors.companyName}
-                  value={getValues("mobile")}
-                /> */}
-                  <Controller
-                    name="mobile"
-                    control={control}
-                    rules={{ required: "Phone number is required" }}
-                    render={({ field }) => (
-                      <PhoneInputComp
-                        value={field.value || ""}
-                        onChange={field.onChange}
-                        error={errors.mobile?.message}
-                      />
-                    )}
-                  />
-                </div>
-              </div>
-
-              {/* Vendor contact details row */}
-              <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-                <div>
-                  <Label htmlFor="email" text="Email" />
-                  <TextInput
-                    register={register("email")}
-                    id="email"
-                    placeholder="Enter email"
-                    error={errors.email}
-                    value={getValues("email")}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="taxId" text="Tax ID" />
-                  <TextInput
-                    register={register("taxId")}
-                    id="taxId"
-                    placeholder="Enter tax id"
-                    error={errors.taxId}
-                    value={getValues("taxId")}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="website" text="Website" />
-                  <TextInput
-                    register={register("website")}
-                    id="website"
-                    placeholder="Enter website"
-                    error={errors.website}
-                    value={getValues("website") ?? ""}
-                  />
-                </div>
-              </div>
-
-              {/* Payment terms and status row */}
-              <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-                <div>
-                  <Label htmlFor="paymentTerms" text="Payment terms" />
-                  <SelectComponent
-                    name="paymentTerms"
-                    register={register}
-                    trigger={trigger}
-                    error={errors?.paymentTerms}
-                    options={paymentTermsOptions}
-                    placeholder="Select payment terms"
-                    isClearable={true}
-                    getValues={getValues}
-                  />
-                </div>
-                {/* Show status dropdown only when editing vendor */}
-                {vendorId && (
-                  <div>
-                    <Label htmlFor="status" text="Vendor Status" />
-                    {/* <SelectComponent
-                      name="status"
-                      register={register}
-                      trigger={trigger}
-                      error={errors?.status}
-                      options={statusOptions}
-                      placeholder="Select vendor status"
-                      getValues={getValues}
-                    /> */}
-
-                    <div className="mt-3 flex items-center">
-                      <ToggleSwitch
-                        isOn={isOn}
-                        setIsOn={() => setIsOn(!isOn)}
-                      />
-
-                      <p className="ms-2 text-xs text-slate-800 dark:text-gray-200">
-                        {isOn ? "Active" : "Inactive"}
+                <div className="w-full">
+                  {/* Vendor details section */}
+                  <div
+                    ref={vendorDetailsRef}
+                    className="border border-secondary-200 rounded-[20px] bg-white p-4"
+                  >
+                    <div className="w-full flex items-start justify-between">
+                      <p className="text-neutral-1100 text-xl mb-5 font-medium">
+                        Vendor Details
                       </p>
                     </div>
+                    <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
+                      <div>
+                        <Label
+                          htmlFor="vendorName"
+                          text="Vendor name"
+                          className=""
+                          isRequired
+                        />
+                        <TextInput
+                          register={register("vendorName")}
+                          id="vendorName"
+                          placeholder="Enter vendor name"
+                          error={errors.vendorName}
+                          value={getValues("vendorName")}
+                        />
+                      </div>
+                      <div>
+                        <Label
+                          htmlFor="companyName"
+                          text="Company name"
+                          className=""
+                        />
+                        <TextInput
+                          register={register("companyName")}
+                          id="companyName"
+                          placeholder="Enter company name"
+                          error={errors.companyName}
+                          value={getValues("companyName")}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="email" text="Email" className="" />
+                        <TextInput
+                          register={register("email")}
+                          id="email"
+                          placeholder="Enter email"
+                          error={errors.email}
+                          value={getValues("email")}
+                        />
+                      </div>
+                      <div className="phone_input">
+                        <Label htmlFor="mobile" text="Mobile" className="" />
+                        <Controller
+                          name="mobile"
+                          control={control}
+                          rules={{ required: "Phone number is required" }}
+                          render={({ field }) => (
+                            <PhoneInputComp
+                              value={field.value || ""}
+                              onChange={field.onChange}
+                              error={errors.mobile?.message}
+                            />
+                          )}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="taxId" text="Tax ID" className="" />
+                        <TextInput
+                          register={register("taxId")}
+                          id="taxId"
+                          placeholder="Enter tax id"
+                          error={errors.taxId}
+                          value={getValues("taxId")}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="website" text="Website" className="" />
+                        <TextInput
+                          register={register("website")}
+                          id="website"
+                          placeholder="Enter website"
+                          error={errors.website}
+                          value={getValues("website") ?? ""}
+                        />
+                      </div>
+                      <div>
+                        <Label
+                          htmlFor="paymentTerms"
+                          text="Payment terms"
+                          className=""
+                        />
+                        <SelectComponent
+                          name="paymentTerms"
+                          register={register}
+                          trigger={trigger}
+                          error={errors?.paymentTerms}
+                          options={paymentTermsOptions}
+                          placeholder="Select payment terms"
+                          isClearable={true}
+                          getValues={getValues}
+                        />
+                      </div>
+                      {/* Show status dropdown only when editing vendor */}
+                      {vendorId && (
+                        <>
+                          <div>
+                            <Label
+                              htmlFor="status"
+                              text="Vendor Status"
+                              className=""
+                            />
+                            <div className="mt-3 flex items-center">
+                              <ToggleSwitch
+                                isOn={isOn}
+                                setIsOn={() => setIsOn(!isOn)}
+                              />
+
+                              <p className="ms-2 text-xs text-slate-800 dark:text-gray-200">
+                                {isOn ? "Active" : "Inactive"}
+                              </p>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
-                )}
-              </div>
-            </div>
-
-            {/* Vendor address section */}
-            <p className="text-slate-800 text-lg font-semibold mt-8 mb-6">
-              Address
-            </p>
-
-            <div className="w-full">
-              {/* Address line, country row */}
-              <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-                <div>
-                  <Label htmlFor="line1" text="Address line 1" />
-                  <TextInput
-                    register={register("billingAddress.line1")}
-                    id="line1"
-                    placeholder="Enter address line 1"
-                    error={errors.billingAddress?.line1}
-                    value={getValues("billingAddress.line1")}
-                  />
+                  {/* Vendor address section */}
+                  <div
+                    ref={vendorAddressRef}
+                    className="border border-secondary-200 rounded-[20px] bg-white p-4"
+                  >
+                    <div className="w-full flex items-start justify-between">
+                      <p className="text-neutral-1100 text-xl mb-5 font-medium">
+                        Vendor Address
+                      </p>
+                    </div>
+                    <div className="w-full">
+                      <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
+                        <div>
+                          <Label
+                            htmlFor="line1"
+                            text="Address line 1"
+                            className=""
+                          />
+                          <TextInput
+                            register={register("billingAddress.line1")}
+                            id="line1"
+                            placeholder="Enter address line 1"
+                            error={errors.billingAddress?.line1}
+                            value={getValues("billingAddress.line1")}
+                          />
+                        </div>
+                        <div>
+                          <Label
+                            htmlFor="line2"
+                            text="Address line 2"
+                            className=""
+                          />
+                          <TextInput
+                            register={register("billingAddress.line2")}
+                            id="line2"
+                            placeholder="Enter address line 2"
+                            error={errors.billingAddress?.line2}
+                            value={getValues("billingAddress.line2")}
+                          />
+                        </div>
+                        <div>
+                          <Label
+                            htmlFor="country"
+                            text="Country"
+                            className=""
+                          />
+                          <TextInput
+                            register={register("billingAddress.country")}
+                            id="country"
+                            error={errors.billingAddress?.country}
+                            placeholder="Enter country"
+                            value={getValues("billingAddress.country")}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="state" text="State" className="" />
+                          <TextInput
+                            register={register("billingAddress.state")}
+                            id="state"
+                            error={errors.billingAddress?.state}
+                            placeholder="Enter state"
+                            value={getValues("billingAddress.state")}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="city" text="City" className="" />
+                          <TextInput
+                            register={register("billingAddress.city")}
+                            id="city"
+                            error={errors.billingAddress?.city}
+                            placeholder="Enter city"
+                            value={getValues("billingAddress.city")}
+                          />
+                        </div>
+                        <div>
+                          <Label
+                            htmlFor="zip_code"
+                            text="PIN code"
+                            className=""
+                          />
+                          <TextInput
+                            register={register("billingAddress.zip_code")}
+                            id="zip_code"
+                            placeholder="Enter zipcode"
+                            error={errors.billingAddress?.zip_code}
+                            value={getValues("billingAddress.zip_code")}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Vendor bank details section */}
+                  <div
+                    className="border border-secondary-200 rounded-[20px] bg-white p-4"
+                    style={{
+                      minHeight: `calc(100vh - 10rem - ${vendorSectionHeight ?? 0}px - ${vendorId ? "8.5px" : "34.5px"})`,
+                    }}
+                  >
+                    <div className="w-full flex items-start justify-between">
+                      <p className="text-neutral-1100 text-xl mb-5 font-medium">
+                        Bank Account Details
+                      </p>
+                    </div>
+                    <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
+                      <div>
+                        <Label
+                          htmlFor="account_holder_name"
+                          text="Account holder name"
+                          className=""
+                        />
+                        <TextInput
+                          register={register(
+                            "bank_account.account_holder_name"
+                          )}
+                          id="account_holder_name"
+                          placeholder="Enter account holder name"
+                          error={errors.bank_account?.account_holder_name}
+                          value={getValues("bank_account.account_holder_name")}
+                        />
+                      </div>
+                      <div>
+                        <Label
+                          htmlFor="account_number"
+                          text="Account number"
+                          className=""
+                        />
+                        <TextInput
+                          register={register("bank_account.account_number")}
+                          id="account_number"
+                          placeholder="Enter account number"
+                          error={errors.bank_account?.account_number}
+                          value={getValues("bank_account.account_number")}
+                        />
+                      </div>
+                      <div>
+                        <Label
+                          htmlFor="bank_name"
+                          text="Bank name"
+                          className=""
+                        />
+                        <TextInput
+                          register={register("bank_account.bank_name")}
+                          id="bank_name"
+                          placeholder="Enter bank name"
+                          error={errors.bank_account?.bank_name}
+                          value={getValues("bank_account.bank_name")}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="line2" text="Address line 2" />
-                  <TextInput
-                    register={register("billingAddress.line2")}
-                    id="line2"
-                    placeholder="Enter address line 2"
-                    error={errors.billingAddress?.line2}
-                    value={getValues("billingAddress.line2")}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="country" text="Country" />
-                  <SelectComponent
-                    name="billingAddress.country"
-                    register={register}
-                    getValues={getValues}
-                    trigger={trigger}
-                    error={errors.billingAddress?.country}
-                    options={countryOptions}
-                    placeholder="Select country"
-                    isClearable={true}
-                  />
-                </div>
-              </div>
-
-              {/* State, city, zipcode row */}
-              <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-                <div>
-                  <Label htmlFor="state" text="State" />
-                  <SelectComponent
-                    name="billingAddress.state"
-                    register={register}
-                    trigger={trigger}
-                    getValues={getValues}
-                    error={errors.billingAddress?.state}
-                    options={stateOptionsList}
-                    placeholder="Select state"
-                    isClearable={true}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="city" text="City" />
-                  <SelectComponent
-                    name="billingAddress.city"
-                    register={register}
-                    getValues={getValues}
-                    trigger={trigger}
-                    error={errors.billingAddress?.city}
-                    options={cityOptionsList}
-                    placeholder="Select city"
-                    isClearable={true}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="zip_code" text="Zipcode" />
-                  <TextInput
-                    register={register("billingAddress.zip_code")}
-                    id="zip_code"
-                    placeholder="Enter zipcode"
-                    error={errors.billingAddress?.zip_code}
-                    value={getValues("billingAddress.zip_code")}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Vendor bank details section */}
-            <p className="text-slate-800 text-lg font-semibold mt-8 mb-6">
-              Bank details
-            </p>
-
-            <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-              <div>
-                <Label
-                  htmlFor="account_holder_name"
-                  text="Account holder name"
-                />
-                <TextInput
-                  register={register("bank_account.account_holder_name")}
-                  id="account_holder_name"
-                  placeholder="Enter account holder name"
-                  error={errors.bank_account?.account_holder_name}
-                  value={getValues("bank_account.account_holder_name")}
-                />
-              </div>
-              <div>
-                <Label htmlFor="account_number" text="Account number" />
-                <TextInput
-                  register={register("bank_account.account_number")}
-                  id="account_number"
-                  placeholder="Enter account number"
-                  error={errors.bank_account?.account_number}
-                  value={getValues("bank_account.account_number")}
-                />
-              </div>
-              <div>
-                <Label htmlFor="bank_name" text="Bank name" />
-                <TextInput
-                  register={register("bank_account.bank_name")}
-                  id="bank_name"
-                  placeholder="Enter bank name"
-                  error={errors.bank_account?.bank_name}
-                  value={getValues("bank_account.bank_name")}
-                />
-              </div>
+              </form>
             </div>
           </div>
-
-          {/* Save and Cancel buttons */}
-          <div className="grid grid-cols-2 w-fit gap-3 mt-10">
-            <Button
-              type="submit"
-              text="Save"
-              disabled={isLoaderFormSubmit}
-              className="text-white"
-              isLoading={isLoaderFormSubmit}
-            />
-
-            <Button
-              text="Cancel"
-              onClick={() =>
-                vendorId
-                  ? router.push(`/vendor/view?id=${vendorId}`)
-                  : router.push("/vendor/list")
-              }
-              disabled={isLoaderFormSubmit}
-              className="bg-white text-primary-500 border border-primary-500 disabled:hover:bg-transparent disabled:text-primary-500 hover:bg-primary-500 hover:text-white"
-            />
-          </div>
-        </form>
+        </>
       )}
     </>
   );
