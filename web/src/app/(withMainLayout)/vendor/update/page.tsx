@@ -13,9 +13,6 @@ const UpdateVendorUI = () => {
 
   return (
     <>
-      <p className="text-slate-800 dark:text-slate-100 text-lg font-semibold mb-6">
-        Vendor details
-      </p>
       <AddVendorComponent
         vendorId={String(vendorId)} // Pass vendor ID to AddVendorComponent
       />

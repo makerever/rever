@@ -38,7 +38,7 @@ const breadcrumbMap: Record<string, Crumb[]> = {
     { label: "Vendors", icon: <ReceiptText size={16} />, href: "/vendor/list" },
     { label: "Create vendor", icon: "", href: "" },
   ],
-  "/vendor/edit": [
+  "/vendor/update": [
     { label: "Vendors", icon: <Users size={16} />, href: "/vendor/list" },
     {
       label: (data) => data?.name || "--",
