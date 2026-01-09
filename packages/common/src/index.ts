@@ -116,3 +116,9 @@ export { useCountAnimation } from "./hooks/useCountAnimation";
 
 // Invite member export
 export { default as InviteMemberModal } from "./pages/settings/members/InviteMember";
+
+// Popup Button components
+export { default as PopupButton } from "./components/popupButton/PopupButton";
+export { default as PopupMenu } from "./components/popupButton/PopupMenu";
+
+export { default as DuplicateFlag } from "./components/DuplicateFlag";

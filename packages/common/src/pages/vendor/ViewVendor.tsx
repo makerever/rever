@@ -4,9 +4,10 @@
 
 import {
   DataTable,
-  IconWrapper,
+  DuplicateFlag,
   PageLoader,
   PillItem,
+  PopupButton,
   SidePanel,
 } from "@rever/common";
 import { Label } from "@rever/common";
@@ -18,17 +19,44 @@ import {
   hasPermission,
 } from "@rever/utils";
 import { getCombineAddress, getLabelForTerm } from "@rever/utils";
-import { Bill, ViewVendorDetailsProps } from "@rever/types";
-import { FileSymlink, Paperclip, SquarePen, X } from "lucide-react";
-import { useRouter } from "next/navigation";
+import {
+  Bill,
+  PopupButtonMenuProps,
+  VenderDataAPIType,
+  ViewVendorDetailsProps,
+} from "@rever/types";
+import { Ellipsis, FileSymlink, Paperclip, Pencil, X } from "lucide-react";
 import { CustomTooltip } from "@rever/common";
-import { useUserStore } from "@rever/stores";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { ColumnDef, sortingFns } from "@tanstack/react-table";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { getAssociateBillsByVendorIDApi } from "@rever/services";
+import { ColumnDef, sortingFns } from "@tanstack/react-table";
+import { useUserStore } from "@rever/stores";
+import { useRouter } from "next/navigation";
 
-const ViewVendorDetails = ({ vendorData }: ViewVendorDetailsProps) => {
+const ViewVendorDetails = ({
+  vendorData,
+  isLoading,
+  // closeSidePanel,
+  // setSidePanel,
+}: ViewVendorDetailsProps) => {
   const router = useRouter();
+
+  const [vendorRecord, setVendorRecord] = useState<
+    VenderDataAPIType | undefined
+  >(vendorData);
+
+  useEffect(() => {
+    setVendorRecord(vendorData);
+  }, [vendorData]);
+
+  // Fetch individual vendor details by ID
+  // const handleGetIndividualVendor = async () => {
+  //   const response = await getVendorDetailsAPI(vendorRecord?.id ?? "");
+  //   if (response.status === 200) {
+  //     setVendorRecord(response.data);
+  //     // setIsLoading(false);
+  //   }
+  // };
 
   const orgDetails = useUserStore((state) => state.user?.organization);
 
@@ -38,10 +66,50 @@ const ViewVendorDetails = ({ vendorData }: ViewVendorDetailsProps) => {
 
   const [isAssociateLoading, setIsAssociateLoading] = useState<boolean>(true);
 
+  const [showBtnPopup, setShowBtnPopup] = useState<boolean>(false);
+
+  const vendorDetailsRef = useRef<HTMLDivElement | null>(null);
+
+  const [vendorDetailsheight, setVendorDetailsHeight] = useState<number | null>(
+    null
+  );
+
+  const [search, setSearch] = useState<string>("");
+
+  useEffect(() => {
+    if (vendorDetailsRef.current) {
+      setVendorDetailsHeight(vendorDetailsRef.current.offsetHeight);
+    }
+  }, [vendorDetailsRef]);
+
   const collator = useMemo(
     () => new Intl.Collator(undefined, { numeric: true, sensitivity: "base" }),
-    [],
+    []
   );
+
+  const popupButtonItem: PopupButtonMenuProps[] = [
+    {
+      name: "Edit vendor",
+      icon: <Pencil size={16} />,
+      isShown: hasPermission("vendor", "update"),
+      onClick: () => {
+        router.push("/vendor/update?id=" + vendorData?.id);
+      },
+    },
+    {
+      name: "Associated bills",
+      icon: <FileSymlink size={16} />,
+      isShown: true,
+      onClick: () => setAssociateBillsSidePanel(true),
+    },
+    //Delete vendor case
+    // {
+    //   name: "Delete vendor",
+    //   icon: <Trash size={16} />,
+    //   isShown: true,
+    //   onClick: () => null
+    // }
+  ];
 
   // Define columns for the DataTable
   const columns: ColumnDef<Bill>[] = useMemo(
@@ -63,21 +131,16 @@ const ViewVendorDetails = ({ vendorData }: ViewVendorDetailsProps) => {
         cell: ({ row, getValue }) => {
           return (
             <div className="flex items-center gap-4">
-              <div className="flex items-center ">
+              <div className="flex items-center gap-1.5">
+                {row?.original?.is_duplicate ? <DuplicateFlag /> : null}
                 <span
                   onClick={() =>
-                    router.push(`/bill/view/?id=${row.original.id}`)
+                    router.push(`/bill/view?id=${row.original.id}`)
                   }
-                  className="font-semibold cursor-pointer overflow-hidden text-ellipsis"
+                  className="underline cursor-pointer overflow-hidden text-ellipsis"
                 >
-                  {getValue() as string}{" "}
+                  {(getValue() as string) || "--"}{" "}
                 </span>
-                {row?.original?.is_duplicate ? (
-                  <PillItem
-                    name="Duplicate"
-                    className="text-red-500 bg-red-50"
-                  />
-                ) : null}
               </div>
             </div>
           );
@@ -122,12 +185,12 @@ const ViewVendorDetails = ({ vendorData }: ViewVendorDetailsProps) => {
             <div
               onClick={() =>
                 router.push(
-                  `/purchaseorder/view?id=${row.original.purchase_order?.id}`,
+                  `/purchaseorder/view?id=${row.original.purchase_order?.id}`
                 )
               }
               className="flex items-center gap-4"
             >
-              <span className="font-semibold cursor-pointer overflow-hidden text-ellipsis ">
+              <span className="underline cursor-pointer overflow-hidden text-ellipsis ">
                 {(getValue() as string) || "--"}
               </span>
             </div>
@@ -154,28 +217,27 @@ const ViewVendorDetails = ({ vendorData }: ViewVendorDetailsProps) => {
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: "Stages",
         sortDescFirst: false,
         cell: ({ row, getValue }) => {
           const value = getValue() as string;
 
           return (
-            <div className="flex items-center pr-2 justify-between w-32">
-              <span
-                className={`text-2xs border py-1 px-1.5 rounded-md ${getStatusClass(
-                  value,
-                )}`}
-              >
-                {value}
-              </span>
-
-              {row?.original.is_attachment ? (
+            <div className="flex items-center pr-2 justify-between">
+              <div className="flex items-center pr-2 justify-between w-32">
+                <PillItem
+                  className={`${getStatusClass(getLabelForBillStatus(value) || "")}`}
+                  isRounded={true}
+                  name={getLabelForBillStatus(value || "")}
+                />
+              </div>
+              {row?.original.is_attachment && (
                 <CustomTooltip content="PDF attached">
                   <div>
                     <Paperclip className="text-slate-400" width={14} />
                   </div>
                 </CustomTooltip>
-              ) : null}
+              )}
             </div>
           );
         },
@@ -185,7 +247,7 @@ const ViewVendorDetails = ({ vendorData }: ViewVendorDetailsProps) => {
         },
       },
     ],
-    [collator, orgDetails?.date_format, router],
+    [collator, orgDetails?.date_format, router]
   );
 
   const getAssociateBillsByVendorID = useCallback(async (id: string) => {
@@ -205,137 +267,185 @@ const ViewVendorDetails = ({ vendorData }: ViewVendorDetailsProps) => {
 
   // Filter bills based on active tab and search input
   const filteredAssociateBills = useMemo(() => {
-    return associateBillsData.map((bill) => {
-      return {
-        ...bill,
-        status: getLabelForBillStatus(bill?.status),
-      };
+    const lowerSearch = search.toLowerCase();
+
+    return associateBillsData?.filter((bill: Bill) => {
+      return (
+        bill.bill_number?.toLowerCase().includes(lowerSearch) ||
+        bill.bill_date?.toLowerCase().includes(lowerSearch) ||
+        bill.due_date?.toLowerCase().includes(lowerSearch) ||
+        bill.purchase_order?.po_number.toLowerCase().includes(lowerSearch) ||
+        (bill?.total ?? 0).toString()?.toLowerCase().includes(lowerSearch) ||
+        getLabelForBillStatus(bill?.status)?.toLowerCase().includes(lowerSearch)
+      );
     });
-  }, [associateBillsData]);
+  }, [associateBillsData, search]);
 
   return (
     <>
-      <div className="">
-        <div>
-          {/* Header with vendor name and action icons */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-1">
-              <p className="text-slate-800 mr-1 text-lg font-semibold">
-                {vendorData?.vendor_name ?? ""}
+      <div>
+        {/* Header with vendor name and action icons */}
+        <div className="bg-secondary-200 pb-px">
+          <div className="flex items-center justify-between bg-white rounded-b-[20px] p-4 pt-16 border border-secondary-200">
+            <div className="flex items-center gap-2">
+              <p className="text-neutral-1100 text-2xl font-medium">
+                {vendorRecord?.vendor_name ?? ""}
               </p>
-              <span
-                className={`text-2xs border py-1 px-1.5 rounded-md ${
-                  vendorData?.is_active
-                    ? "text-green-600 bg-green-50 border-green-200"
-                    : "text-red-500 bg-red-50 border-red-200"
-                }`}
-              >
-                {(vendorData?.is_active ?? "") ? "Active" : "Inactive"}
-              </span>
+              <PillItem
+                className={`${vendorRecord?.is_active ? "bg-success-200 text-neutral-1100" : "bg-danger-200 text-neutral-1100"}`}
+                isRounded={true}
+                name={vendorRecord?.is_active ? "Active" : "Inactive"}
+              />
             </div>
-
+            {/* Dropdown button for actions */}
             <div className="flex items-center gap-1">
-              {/* Edit icon, visible if user has update permission */}
-              <CustomTooltip content="Associate bills">
-                <div>
-                  <IconWrapper
-                    onClick={() => setAssociateBillsSidePanel(true)}
-                    icon={<FileSymlink width={16} />}
-                  />
-                </div>
-              </CustomTooltip>
-              {hasPermission("vendor", "update") && (
-                <CustomTooltip content="Edit vendor">
-                  <div>
-                    <IconWrapper
-                      onClick={() =>
-                        router.push("/vendor/update?id=" + vendorData?.id)
-                      }
-                      icon={<SquarePen width={16} />}
-                    />
-                  </div>
-                </CustomTooltip>
-              )}
+              <PopupButton
+                btnPopupItems={popupButtonItem}
+                children={
+                  <>
+                    <button
+                      className="popup-btn rounded-[8px] size-8 btn-secondary-outline"
+                      onClick={() => {
+                        setShowBtnPopup(true);
+                      }}
+                    >
+                      <Ellipsis size={16} />
+                    </button>
+                  </>
+                }
+                onClose={() => {
+                  setShowBtnPopup(false);
+                }}
+                showBtnPopup={showBtnPopup}
+              />
             </div>
           </div>
-
           {/* Vendor main details: company, mobile, email */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-5">
-            <div>
-              <Label text="Company name" />
-              <p className="text-slate-800 text-sm font-medium mb-5">
-                {vendorData?.company_name || "-"}
-              </p>
-            </div>
-            <div>
-              <Label text="Mobile" />
-              <p className="text-slate-800 text-sm font-medium mb-5">
-                {vendorData?.mobile || "-"}
-              </p>
-            </div>
-            <div>
-              <Label text="Email" />
-              <p className="text-slate-800 text-sm font-medium mb-5">
-                {vendorData?.email || "-"}
-              </p>
-            </div>
+          <div
+            ref={vendorDetailsRef}
+            className="border border-secondary-200 rounded-[20px] bg-white p-4"
+          >
+            <p className="text-neutral-1100 text-xl mb-5 font-medium">
+              Vendor Details
+            </p>
+            <div className="grid grid-cols-1 gap-x-5">
+              <div className="flex flex-row items-center border-b border-secondary-200 h-11">
+                <Label
+                  text="Company Name:"
+                  className="max-w-60 w-full text-secondary-700"
+                />
+                <p className="text-neutral-1100 text-sm font-medium">
+                  {vendorRecord?.company_name || "--"}
+                </p>
+              </div>
+              <div className="flex flex-row items-center border-b border-secondary-200 pt-3 pb-2 h-11">
+                <Label
+                  text="Email:"
+                  className="max-w-60 w-full text-secondary-700"
+                />
+                <p className="text-neutral-1100 text-sm">
+                  {vendorRecord?.email || "--"}
+                </p>
+              </div>
+              <div className="flex flex-row items-center border-b border-secondary-200 pt-3 pb-2 h-11">
+                <Label
+                  text="Contact:"
+                  className="max-w-60 w-full text-secondary-700"
+                />
+                <p className="text-neutral-1100 text-sm font-medium">
+                  {vendorRecord?.mobile || "--"}
+                </p>
+              </div>
 
-            <div>
-              <Label text="Tax ID" />
-              <p className="text-slate-800 text-sm font-medium mb-5">
-                {vendorData?.tax_id || "-"}
-              </p>
-            </div>
-            <div>
-              <Label text="Website" />
-              <p className="text-slate-800 text-sm font-medium mb-5">
-                {vendorData?.website || "-"}
-              </p>
-            </div>
-            <div>
-              <Label text="Payment terms" />
-              <p className="text-slate-800 text-sm font-medium mb-5">
-                {getLabelForTerm(vendorData?.payment_terms || "")}
-              </p>
+              <div className="flex flex-row items-center border-b border-secondary-200 pt-3 pb-2 h-11">
+                <Label
+                  text="Tax ID:"
+                  className="max-w-60 w-full text-secondary-700"
+                />
+                <p className="text-neutral-1100 text-sm font-medium">
+                  {vendorRecord?.tax_id || "--"}
+                </p>
+              </div>
+              <div className="flex flex-row items-center border-b border-secondary-200 pt-3 pb-2 h-11">
+                <Label
+                  text="Website:"
+                  className="max-w-60 w-full text-secondary-700"
+                />
+                <p className="text-neutral-1100 text-sm font-medium">
+                  {vendorRecord?.website || "--"}
+                </p>
+              </div>
+              <div className="flex flex-row items-center border-b border-secondary-200 pt-3 pb-2 h-11">
+                <Label
+                  text="Vendor Address:"
+                  className="max-w-60 w-full text-secondary-700"
+                />
+                <p className="text-neutral-1100 text-sm font-medium">
+                  {vendorRecord?.billing_address ? (
+                    <>
+                      {getCombineAddress({
+                        line1: vendorRecord?.billing_address?.line1 ?? "",
+                        line2: vendorRecord?.billing_address?.line2 ?? "",
+                        city: vendorRecord?.billing_address?.city ?? "",
+                        state: vendorRecord?.billing_address?.state ?? "",
+                        zip_code: vendorRecord?.billing_address?.zip_code ?? "",
+                        country: vendorRecord?.billing_address?.country ?? "",
+                      })}
+                    </>
+                  ) : (
+                    "--"
+                  )}
+                </p>
+              </div>
+              <div className="flex flex-row items-center pt-3 h-11">
+                <Label
+                  text="Payment Terms:"
+                  className="max-w-60 w-full text-secondary-700"
+                />
+                <p className="text-neutral-1100 text-sm font-medium">
+                  {getLabelForTerm(vendorRecord?.payment_terms || "")}
+                </p>
+              </div>
             </div>
           </div>
-
-          {/* Vendor address */}
-          <div className="grid lg:grid-cols-3 gap-x-5">
-            <div>
-              <Label text="Vendor address" />
-              <p className="text-slate-800 text-sm font-medium">
-                {getCombineAddress({
-                  line1: vendorData?.billing_address?.line1 ?? "",
-                  line2: vendorData?.billing_address?.line2 ?? "",
-                  city: vendorData?.billing_address?.city ?? "",
-                  state: vendorData?.billing_address?.state ?? "",
-                  zip_code: vendorData?.billing_address?.zip_code ?? "",
-                  country: vendorData?.billing_address?.country ?? "",
-                })}
-              </p>
-            </div>
-          </div>
-
           {/* Vendor bank details*/}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 my-5 gap-x-5">
-            <div>
-              <Label text="Accounnt holder name" />
-              <p className="text-slate-800 text-sm font-medium">
-                {vendorData?.bank_account?.account_holder_name || "-"}
-              </p>
-            </div>
-            <div>
-              <Label text="Account number" />
-              <p className="text-slate-800 text-sm font-medium">
-                {vendorData?.bank_account?.account_number || "-"}
-              </p>
-            </div>
-            <div>
-              <Label text="Bank name" />
-              <p className="text-slate-800 text-sm font-medium">
-                {vendorData?.bank_account?.bank_name || "-"}
-              </p>
+          <div
+            className={`border border-secondary-200 rounded-[20px] bg-white p-4`}
+            style={{
+              minHeight: `calc(100vh - 10rem - ${vendorDetailsheight ?? 0}px - 2px)`, //4px (384) is for mesh UI - border 1px y-axis, padding 1px y-axis
+            }}
+          >
+            <p className="text-neutral-1100 text-xl mb-5 font-medium">
+              Bank Account Details
+            </p>
+            <div className="grid grid-cols-1 gap-x-5">
+              <div className="flex flex-row items-center border-b border-secondary-200 h-11">
+                <Label
+                  text="Account holder name"
+                  className="max-w-60 w-full text-secondary-700"
+                />
+                <p className="text-neutral-1100 text-sm">
+                  {vendorRecord?.bank_account?.account_holder_name || "--"}
+                </p>
+              </div>
+              <div className="flex flex-row items-center border-b border-secondary-200 pt-3 pb-2 h-11">
+                <Label
+                  text="Account number"
+                  className="max-w-60 w-full text-secondary-700"
+                />
+                <p className="text-neutral-1100 text-sm">
+                  {vendorRecord?.bank_account?.account_number || "--"}
+                </p>
+              </div>
+              <div className="flex flex-row items-center pt-3 pb-2">
+                <Label
+                  text="Bank name"
+                  className="max-w-60 w-full text-secondary-700"
+                />
+                <p className="text-neutral-1100 text-sm">
+                  {vendorRecord?.bank_account?.bank_name || "--"}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -345,15 +455,17 @@ const ViewVendorDetails = ({ vendorData }: ViewVendorDetailsProps) => {
         isOpen={associateBillsSidePanel}
         onClose={() => setAssociateBillsSidePanel(false)}
       >
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <p className="text-slate-800 text-lg font-semibold">
+        <div className="">
+          <div className="flex justify-between items-center p-4">
+            <p className="text-slate-800 text-lg font-medium">
               Associate bills
             </p>
-            <IconWrapper
+            <div
+              className="popup-btn rounded-[8px] size-8 btn-secondary-outline"
               onClick={() => setAssociateBillsSidePanel(false)}
-              icon={<X width={16} />}
-            />
+            >
+              <X width={16} />
+            </div>
           </div>
           {isAssociateLoading ? (
             <PageLoader />
@@ -362,6 +474,10 @@ const ViewVendorDetails = ({ vendorData }: ViewVendorDetailsProps) => {
               hideExportIcon
               tableData={filteredAssociateBills}
               columns={columns}
+              setSearch={setSearch}
+              search={search}
+              clearSearch={() => setSearch("")}
+              isHeader={false}
             />
           )}
         </div>
