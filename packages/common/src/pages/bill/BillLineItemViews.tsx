@@ -1,49 +1,48 @@
 // Component for bill line items UI ReadOnly
 "use client";
 
-import { formatNumber, formatPlainNumber } from "@rever/utils";
+import { formatNumber, formatPlainNumber, getAuditFieldValue, getLineItemAuditClass } from "@rever/utils";
 import { useUserStore } from "@rever/stores";
 import { BillLineItemsProps } from "@rever/types";
 
 // Table headers for the read-only bill items table
 const billItemHeaders = [
-  "#",
   "Description",
   "Product code",
-  "Quantity",
+  "Qty",
   "Confirmed Qty",
   "Unit price",
   "Amount",
 ];
 
 export default function BillLineItemsReadOnly({
+  showAuditHistory,
   billItems = [],
   billDetails,
+  itemsAuditValidation
 }: BillLineItemsProps) {
   const orgDetails = useUserStore((state) => state.user?.organization);
 
   return (
-    <div className="space-y-4">
+    <div className="rounded-xl border bg-white overflow-hidden">
       {/* Bill items table (read-only) */}
       <table className="table-fixed w-full text-left">
         {/* Set column widths */}
         <colgroup>
-          <col className="w-10" />
           <col className="w-5/12" />
-          <col className="w-2/12" />
           <col className="w-2/12" />
           <col className="w-2/12" />
           <col className="w-2/12" />
           <col className="w-2/12" />
         </colgroup>
 
-        <thead className="bg-gray-50">
+        <thead className="bg-secondary-100">
           <tr>
             {/* Render table headers */}
             {billItemHeaders.map((h, i) => (
               <th
                 key={i}
-                className={`px-2 py-4 text-xs text-slate-500 font-medium ${i < 3 ? "" : "text-right"}`}
+                className={`px-3 py-2 text-sm text-neutral-1100 font-semibold ${i < 2 ? "" : "text-right"}`}
               >
                 {h}
               </th>
@@ -58,34 +57,111 @@ export default function BillLineItemsReadOnly({
               const qty = Number(item.quantity) || 0;
               const unitPrice = Number(item.unit_price) || 0;
               const amount = qty * unitPrice;
+              const auditItem = itemsAuditValidation?.[index];
+              const auditObj = typeof auditItem === "object" ? auditItem : undefined;
 
               return (
                 <tr
                   key={index}
-                  className="border-t text-slate-800 text-xs transition duration-300 hover:bg-slate-50"
+                  className={`border-t text-sm font-medium transition duration-300 text-neutral-1100 hover:bg-secondary-100`}
                 >
-                  {/* Row number */}
-                  <td className="p-2.5">{index + 1}</td>
                   {/* Description */}
-                  <td className="p-2 whitespace-pre-wrap">
-                    {item.description || "-"}
+                  <td
+                    className={`px-3 py-2.5 
+                      ${getLineItemAuditClass(
+                      itemsAuditValidation,
+                      index,
+                      showAuditHistory,
+                      getAuditFieldValue(auditObj, "description")
+                    )}`}
+                  >
+                    <p className="line-clamp-2">{item?.description || "-"}</p>
                   </td>
+
+                  {/* <td
+                    className={`px-3 whitespace-pre-wrap
+                      ${getLineItemAuditClass(
+                      itemsAuditValidation,
+                      index,
+                      showAuditHistory,
+                      getAuditFieldValue(auditObj, "item", "name")
+                    )}`}
+                  >
+                    {item.item?.name || "-"}
+                  </td>
+
+                  <td
+                    className={`px-3 whitespace-pre-wrap ${getLineItemAuditClass(
+                      itemsAuditValidation,
+                      index,
+                      showAuditHistory,
+                      getAuditFieldValue(auditObj, "chart_of_account", "name")
+                    )}`}
+                  >
+                    {item.chart_of_account?.name || "-"}
+                  </td> */}
+
                   {/* Product code */}
-                  <td className="p-2">{item.product_code || "-"}</td>
-                  {/* Quantity */}
-                  <td className="p-2 text-right">
+                  <td
+                    className={`px-3 ${getLineItemAuditClass(
+                      itemsAuditValidation,
+                      index,
+                      showAuditHistory,
+                      getAuditFieldValue(auditObj, "product_code")
+                    )}`}
+                  >
+                    {item.product_code || "-"}
+                  </td>
+
+                  {/* Qty */}
+                  <td
+                    className={`px-3 text-right
+                      ${getLineItemAuditClass(
+                      itemsAuditValidation,
+                      index,
+                      showAuditHistory,
+                      getAuditFieldValue(auditObj, "quantity")
+                    )}`}
+                  >
                     {formatPlainNumber(item?.quantity)}
                   </td>
+
                   {/* Confirmed quantity */}
-                  <td className="p-2 text-right">
+                  <td
+                    className={`px-3 text-right 
+                      ${getLineItemAuditClass(
+                      itemsAuditValidation,
+                      index,
+                      showAuditHistory,
+                      getAuditFieldValue(auditObj, "confirmed_quantity")
+                    )}`}
+                  >
                     {formatPlainNumber(item?.confirmed_quantity) || "-"}
                   </td>
+
                   {/* Unit price */}
-                  <td className="p-2 text-right">
+                  <td
+                    className={`px-3 text-right
+                      ${getLineItemAuditClass(
+                      itemsAuditValidation,
+                      index,
+                      showAuditHistory,
+                      getAuditFieldValue(auditObj, "unit_price")
+                    )}`}
+                  >
                     {formatNumber(item.unit_price || 0, orgDetails?.currency)}
                   </td>
+
                   {/* Amount (computed) */}
-                  <td className="p-2 text-right">
+                  <td
+                    className={`px-3 text-right
+                      ${getLineItemAuditClass(
+                      itemsAuditValidation,
+                      index,
+                      showAuditHistory,
+                      getAuditFieldValue(auditObj, "unit_price")
+                    )}`}
+                  >
                     {formatNumber(amount, orgDetails?.currency)}
                   </td>
                 </tr>
@@ -104,38 +180,6 @@ export default function BillLineItemsReadOnly({
           )}
         </tbody>
       </table>
-
-      {/* Bill summary section (sub total, tax, total) */}
-      <div className="flex justify-end">
-        <div className="p-3 w-72 font-medium text-slate-600 text-sm bg-gray-50 rounded-md">
-          <div className="grid grid-cols-2">
-            <p>Sub total:</p>
-            <p className="text-right">
-              {formatNumber(billDetails?.sub_total || 0, orgDetails?.currency)}
-            </p>
-          </div>
-          <div className="grid items-center grid-cols-2 pb-2 mt-4 mb-3 border-b">
-            <div>
-              <p>Total tax:</p>
-              <span className="text-xs">
-                {formatNumber(
-                  billDetails?.total_tax || 0,
-                  orgDetails?.currency,
-                )}
-              </span>
-            </div>
-            <div className="text-right">
-              {billDetails?.tax_percentage || 0}%
-            </div>
-          </div>
-          <div className="grid grid-cols-2 text-slate-800 font-semibold">
-            <p>Total:</p>
-            <p className="text-right">
-              {formatNumber(billDetails?.total || 0, orgDetails?.currency)}
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

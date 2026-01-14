@@ -1,4 +1,3 @@
-// Utility functions
 
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
@@ -23,7 +22,7 @@ export function formatNumber(
   value: number | string | undefined,
   currency: string = "USD",
   locale?: string,
-  compact?: boolean
+  compact?: boolean,
 ): string {
   if (value === undefined || value === null || value === "") return "";
 
@@ -239,21 +238,17 @@ export const RolesLabels: Record<string, string> = {
 export const getLabelForRoles = (value: string) =>
   RolesLabels[value] || "Unknown";
 
-// Function to list label for member status
-export const memberStatusLabels: Record<string, string> = {
-  pending: "Pending",
-  expired: "Expired",
-};
-
-//Function to get labels for bill status
-export const getLabelForMemberStatus = (value: string) =>
-  memberStatusLabels[value] || "--";
-
 export function convertToPercentage(value: number) {
   return (value * 100).toFixed(1);
 }
 
-// Function to get status label for extraction process
+// Funcion to check value is object or not
+export function isNamedObject(
+  val: unknown,
+): val is { name: string; id: string } {
+  return typeof val === "object" && val !== null && "name" in val;
+}
+
 export const getStatusLabelForExtraction = (status: string) => {
   switch (status) {
     case "uploaded":
@@ -264,11 +259,58 @@ export const getStatusLabelForExtraction = (status: string) => {
       return "extracting";
     case "done":
       return "enriched";
-    case "completed":
-      return "enriched";
     case "failed":
       return "failed";
     default:
       return status;
   }
 };
+
+//Get line items field value for Audit validation
+export const getAuditFieldValue = (
+  auditItem: boolean | Record<string, any> | undefined,
+  key: string,
+  subItem?: string
+) => {
+  if (!auditItem || typeof auditItem !== "object") return undefined;
+
+  const value = auditItem[key];
+
+  if (subItem && typeof value === "object") {
+    return value?.[subItem];
+  }
+
+  return value;
+};
+
+//Get mismatch classname based on audit line items class
+export const getLineItemAuditClass = (
+  itemsAuditValidation: any[] | undefined,
+  index: number,
+  showAuditHistory: boolean,
+  field?: boolean
+) => {
+  if (!showAuditHistory) return "";
+
+  const auditItem = itemsAuditValidation?.[index];
+
+  //Case 1: Entire row mismatch
+  if (auditItem === false) {
+    return "bg-indigo-100 border-b border-indigo-800";
+  }
+
+  //Case 2: Field-level mismatch
+  if (auditItem && typeof auditItem === "object" && field === false) {
+    return "bg-indigo-100 border-b border-indigo-800";
+  }
+
+  return "";
+};
+
+//Get mismatch classname except lineitem
+export const checkAuditValidation = ({ showAuditHistory, field }: { showAuditHistory: boolean, field?: boolean }) => {
+  if (showAuditHistory && !field) {
+    return "bg-indigo-100 border border-indigo-800"
+  }
+  return ""
+}

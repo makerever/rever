@@ -6,13 +6,56 @@ import {
   UseFormGetValues,
   UseFormRegister,
   UseFormSetValue,
+  UseFormTrigger,
 } from "react-hook-form";
-import { AddressTypeProps } from "../vendor/type";
+import { AddressTypeProps, AuditValidationAddressTypeProps } from "../vendor/type";
 import { OrgDataProps } from "../apiTypes/type";
 
 export type BillLineItemsProps = {
+  showAuditHistory: boolean;
   billItems?: BillItemTypeProps[];
   billDetails?: Partial<Bill>;
+  itemsAuditValidation?: BillItemsAuditValidationType[] | boolean[];
+};
+
+export interface BillAuditValidationType {
+  id?: boolean;
+  bill_number?: boolean;
+  billing_address?: AuditValidationAddressTypeProps | boolean;
+  bill?: boolean;
+  vendor_id?: boolean;
+  vendor?: { id: boolean; name: boolean } | null;
+  purchase_order_id?: boolean;
+  purchase_order?: { id: boolean; po_number: boolean } | null;
+  comments?: boolean;
+  payment_terms?: boolean;
+  bill_date?: boolean;
+  due_date?: boolean;
+  sub_total?: boolean;
+  total_tax?: boolean;
+  tax_percentage?: boolean;
+  total?: boolean;
+  is_attachment?: boolean;
+  is_duplicate?: boolean;
+  updated_at?: boolean;
+  created_at?: boolean;
+  status: boolean;
+  receipt_status?: boolean;
+  match_status?: boolean;
+  receipt_comment?: boolean;
+  items?: BillItemsAuditValidationType[];
+}
+
+export type BillItemsAuditValidationType = {
+  id?: boolean;
+  description?: boolean;
+  item?: { id: boolean, name: boolean };
+  chart_of_account?: { id: boolean, name: boolean };
+  product_code?: boolean;
+  quantity?: boolean;
+  confirmed_quantity?: boolean;
+  unit_price?: boolean;
+  amount?: boolean;
 };
 
 // Interface representing the structure of a Bill object

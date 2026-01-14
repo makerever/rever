@@ -8,18 +8,21 @@ import {
   TextAreaInput,
   NumberInput,
   IconWrapper,
+  SelectComponent,
+  Button,
 } from "@rever/common";
 import { Plus, Trash } from "lucide-react";
-import { BillLineItemsTableProps } from "@rever/types";
-import { useEffect, useMemo } from "react";
-import { formatNumber } from "@rever/utils";
+import { BillLineItemsTableProps, Option } from "@rever/types";
+import { useEffect, useMemo, useState } from "react";
+import { formatNumber, isNamedObject } from "@rever/utils";
 import { useUserStore } from "@rever/stores";
+import { useApi } from "@rever/services";
 
 const billItemHeaders = [
-  "#",
+  // "#",
   "Description",
   "Product code",
-  "Quantity",
+  "Qty",
   "Unit price",
   "Amount",
   "Action",
@@ -42,6 +45,10 @@ export default function BillLineItemsTable({
   const billItems = useMemo(() => watchedItems || [], [watchedItems]);
 
   const orgDetails = useUserStore((state) => state.user?.organization);
+
+  const [coaList, setCoaList] = useState<Option[]>([]);
+
+  const [itemList, setItemList] = useState<Option[]>([]);
 
   // Update amount when qty or unit_price changes, avoid extra updates
   useEffect(() => {
@@ -72,18 +79,20 @@ export default function BillLineItemsTable({
   };
 
   return (
-    <div className="space-y-4">
-      <table className="table-fixed w-full text-left">
+    <div className="-mx-4">
+      <table className="table-fixed w-full text-left border-separate border-spacing-x-4">
         <colgroup>
-          <col className="w-8" />
-          <col className="w-3/12" />
+          {/* <col className="w-8" /> */}
+          <col className="w-[35%]" />
+          <col className="w-[15%]" />
+          <col className="w-2/12" />
         </colgroup>
-        <thead className="bg-gray-50">
+        <thead>
           <tr>
             {billItemHeaders.map((h, i) => (
               <th
                 key={i}
-                className={`px-2 py-4 text-xs text-slate-500 font-medium ${i < 3 ? "" : "text-right"}`}
+                className={`text-sm text-neutral-1100 font-semibold ${i < 2 ? "" : "text-right"}`}
               >
                 {h}
               </th>
@@ -98,14 +107,12 @@ export default function BillLineItemsTable({
             const rowAmt = rowQty * rowUp;
 
             return (
-              <tr
-                key={field.id}
-                className="border-t transition duration-300 hover:bg-slate-50"
-              >
-                <td className="p-2 text-xs">{index + 1}</td>
-                <td className="p-2">
+              <tr key={field.id}>
+                {/* <td className="p-2 text-xs">{index + 1}</td> */}
+                <td>
                   <TextAreaInput
-                    rows={2}
+                    className="mt-1.5"
+                    rows={1}
                     id={`items.${index}.description`}
                     register={register(`items.${index}.description`)}
                     noErrorIcon={
@@ -114,43 +121,44 @@ export default function BillLineItemsTable({
                     }
                   />
                 </td>
-                <td className="p-2">
+
+                <td>
                   <TextInput
                     id={`items.${index}.product_code`}
                     register={register(`items.${index}.product_code`)}
                   />
                 </td>
 
-                <td className="p-2">
+                <td>
                   <NumberInput
                     id={`items.${index}.quantity`}
                     register={register(`items.${index}.quantity`)}
                     allowDecimal={true}
+                    className="text-right"
                     noErrorIcon={
                       showItemsDescription &&
                       !getValues(`items.${index}.quantity`)
                     }
-                    className="text-right"
                   />
                 </td>
-                <td className="p-2">
+                <td>
                   <NumberInput
                     id={`items.${index}.unit_price`}
                     register={register(`items.${index}.unit_price`)}
                     allowDecimal={true}
+                    className="text-right"
                     noErrorIcon={
                       showItemsDescription &&
                       !getValues(`items.${index}.unit_price`)
                     }
-                    className="text-right"
                   />
                 </td>
-                <td className="p-2 text-right">
-                  <p className="text-slate-600 text-sm">
+                <td className="text-right">
+                  <p className="text-neutral-1100 font-medium text-sm">
                     {formatNumber(rowAmt, orgDetails?.currency)}
                   </p>
                 </td>
-                <td className="p-2">
+                <td>
                   <div className="flex justify-end">
                     <IconWrapper
                       onClick={() => remove(index)}
@@ -165,11 +173,13 @@ export default function BillLineItemsTable({
         </tbody>
       </table>
 
-      <div
-        onClick={handleAddItem}
-        className="flex items-center w-fit text-xs font-semibold text-primary-500 cursor-pointer"
-      >
-        <Plus width={16} className="mr-1" /> New bill item
+      <div className="m-4">
+        <Button
+          onClick={handleAddItem}
+          name="New bill item"
+          button_type="secondary"
+          icon_type="plus"
+        />
       </div>
     </div>
   );
