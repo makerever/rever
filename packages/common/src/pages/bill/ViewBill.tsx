@@ -4,42 +4,49 @@
 
 import {
   AuditHistory,
-  CustomTooltip,
-  IconWrapper,
+  DuplicateFlag,
   Modal,
-  OutsideClickHandler,
+  PageLoader,
   PdfViewer,
   PillItem,
-  ReceiptConfirmPopup,
+  PopupButton,
   RequestConfirmationModal,
   SidePanel,
   VersionHistory,
 } from "@rever/common";
 import { Label } from "@rever/common";
 import { ToggleSwitch } from "@rever/common";
-import { formatDate } from "@rever/utils";
+import { deepMatchAuditVersion, formatDate, formatNumber, hasPermission } from "@rever/utils";
 import {
   getCombineAddress,
   getLabelForBillStatus,
   getLabelForTerm,
   getStatusClass,
+  checkAuditValidation
 } from "@rever/utils";
-import { ViewBillDetailsProps } from "@rever/types";
 import {
-  ClipboardCheck,
-  FileCheck2,
+  Bill,
+  BillAuditValidationType,
+  // BillAuditValidationType, 
+  ViewBillDetailsProps
+} from "@rever/types";
+import {
+  Ellipsis,
+  FileCheck,
   FileClock,
-  SquarePen,
+  Pencil,
   Trash,
+  UserRoundPlus,
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import BillLineItemsReadOnly from "./BillLineItemViews";
 import { Button } from "@rever/common";
 import { useUserStore } from "@rever/stores";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   getBillAuditHistoryApi,
+  // getIndividualBillAuditApi,
   getRequestConfirmationHistoryApi,
 } from "@rever/services";
 import Link from "next/link";
@@ -60,428 +67,633 @@ const ViewBillDetails = ({
   handleApprovalAction,
   handleRejectionAction,
 }: ViewBillDetailsProps) => {
-  const router = useRouter();
+  // -------------------- STATE --------------------
 
+  const router = useRouter();
   const orgDetails = useUserStore((state) => state.user?.organization);
-  const [sidePanel, setSidePanel] = useState(false);
+
+  const [currentBillDetails, setCurrentBillDetails] = useState<Partial<Bill>>(billDetails);
+  const [latestBillDetials, setLatestBillDetails] = useState<Partial<Bill>>(billDetails);
+
+  const [auditValidation, setAuditValidation] =
+    useState<BillAuditValidationType | null>(null);
 
   const [auditData, setAuditData] = useState([]);
-
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isAuditLoading, setIsAuditLoading] = useState(false);
 
-  const [showReceiptConfirm, setShowReceiptConfirm] = useState(false);
   const [versionHistorySidePanel, setVersionHistorySidePanel] = useState(false);
-
   const [reqConfirmationModal, setReqConfirmationModal] = useState(false);
 
   const [confirmationHistoryList, setConfirmationHistoryList] = useState([]);
 
+  const [showBtnPopup, setShowBtnPopup] = useState<boolean>(false);
+  const [showAuditHistory, setShowAuditHistory] = useState<boolean>(false);
+
+  const [auditVersionDate, setAuditVersionDate] = useState<string | null>(null);
+  const [currentAuditVersion, setCurrentAuditVersion] = useState<number | null>(null);
+
+  const billDetailsSection = useRef<HTMLDivElement | null>(null);
+  const billLineItemsSection = useRef<HTMLDivElement | null>(null);
+
+  const [billLineItemsHeight, setBillLineItemsHeight] = useState<number | null>(null);
+  const [billDetailsHeight, setBillDetailsHeight] = useState<number | null>(null);
+
+  // -------------------- API FUNCTIONS --------------------
+
   const getBillAuditHistory = useCallback(async (id: number) => {
+    setIsLoading(true);
+    setIsAuditLoading(true);
     const response = await getBillAuditHistoryApi(id);
+
     if (response?.status === 200) {
-      setAuditData(response?.data);
-      setIsLoading(false);
+      setAuditData(response.data);
+      setCurrentAuditVersion(response.data?.[0]?.history_id ?? null);
+      setAuditVersionDate(formatDate(
+        response.data?.[0]?.changed_on,
+        orgDetails?.date_format,
+        undefined,
+        false,
+        true,
+      ) ?? null);
     }
+    setIsAuditLoading(false);
+    setIsLoading(false);
   }, []);
 
-  useEffect(() => {
-    if (billDetails?.id) {
-      getBillAuditHistory(billDetails.id);
-    }
-  }, [billDetails?.id, getBillAuditHistory]);
+  // const fetchIndividualAuditHistory = useCallback(
+  //   async (historyId: number | null) => {
+  //     if (!latestBillDetials?.id || !historyId) return;
+
+  //     const response = await getIndividualBillAuditApi(
+  //       latestBillDetials.id,
+  //       historyId
+  //     );
+
+  //     if (response?.status !== 200) return;
+
+  //     setCurrentBillDetails({
+  //       ...response.data,
+  //       id: latestBillDetials.id,
+  //     });
+  //     setIsAuditLoading(false);
+  //   },
+  //   [latestBillDetials?.id]
+  // );
 
   const getRequestConfirmationHistory = useCallback(async () => {
-    if (!billDetails?.id) return;
+    if (!currentBillDetails?.id) return;
+
     const response = await getRequestConfirmationHistoryApi(
-      String(billDetails.id),
+      String(currentBillDetails.id)
     );
+
     if (response?.status === 200) {
       setConfirmationHistoryList(response.data);
     } else {
       setConfirmationHistoryList([]);
     }
-  }, [billDetails?.id]);
+  }, [currentBillDetails?.id]);
 
+  // -------------------- LAYOUT UTILS --------------------
+
+  const calculateHeights = useCallback(() => {
+    if (!billDetailsSection.current || !billLineItemsSection.current) return;
+
+    setBillDetailsHeight(billDetailsSection.current.offsetHeight);
+    setBillLineItemsHeight(billLineItemsSection.current.offsetHeight);
+  }, []);
+
+  // -------------------- EFFECTS --------------------
+
+  /*Initial mount*/
   useEffect(() => {
+    setCurrentBillDetails(billDetails);
+    setLatestBillDetails(billDetails);
     getRequestConfirmationHistory();
   }, []);
 
+  /*Load audit history when audit panel opens*/
+  useEffect(() => {
+    if (!showAuditHistory || !currentBillDetails?.id) return;
+    getBillAuditHistory(currentBillDetails.id);
+  }, [showAuditHistory, currentBillDetails?.id, getBillAuditHistory]);
+
+  /*Load selected audit version data*/
+  // useEffect(() => {
+  //   if (!currentAuditVersion) return;
+  //   fetchIndividualAuditHistory(currentAuditVersion);
+  // }, [currentAuditVersion, fetchIndividualAuditHistory]);
+
+  /*Recalculate audit validation when data changes*/
+  useEffect(() => {
+    if (!latestBillDetials || !currentBillDetails) return;
+
+    setAuditValidation(
+      deepMatchAuditVersion(latestBillDetials, currentBillDetails)
+    );
+
+  }, [latestBillDetials, currentBillDetails]);
+
+  /*Measure heights after audit panel render*/
+  useLayoutEffect(() => {
+    if (!showAuditHistory || isLoading) return;
+
+    const raf1 = requestAnimationFrame(() => {
+      const raf2 = requestAnimationFrame(calculateHeights);
+      return () => cancelAnimationFrame(raf2);
+    });
+
+    return () => cancelAnimationFrame(raf1);
+  }, [showAuditHistory, isLoading, calculateHeights]);
+
+  /*Observe size changes*/
+  useEffect(() => {
+    if (!billDetailsSection.current || !billLineItemsSection.current) return;
+
+    const observer = new ResizeObserver(calculateHeights);
+
+    observer.observe(billDetailsSection.current);
+    observer.observe(billLineItemsSection.current);
+
+    return () => observer.disconnect();
+  }, [calculateHeights]);
+
+  // -------------------- HANDLERS --------------------
+
+  // const handleClickAuditHistoryCard = async (historyId: number) => {
+  //   if (!latestBillDetials?.id) return;
+
+  //   const response = await getIndividualBillAuditApi(
+  //     latestBillDetials.id,
+  //     historyId
+  //   );
+
+  //   if (response?.status !== 200) return;
+
+  //   setCurrentBillDetails({
+  //     ...response.data,
+  //     id: latestBillDetials.id,
+  //   });
+  // };
+
+  const handleCloseAuditHistory = () => {
+    setShowAuditHistory(false);
+    setIsAuditLoading(false);
+    setCurrentBillDetails(latestBillDetials);
+    setCurrentAuditVersion(null);
+    setAuditVersionDate(null);
+  };
+
+  const popupButtonItem = [
+    {
+      name: "Edit Bill",
+      icon: <Pencil size={16} />,
+      isShown: hasPermission("bill", "update"),
+      onClick: () => {
+        router.push("/bill/edit?id=" + currentBillDetails?.id);
+      },
+    },
+    {
+      name: "Request Confirmation",
+      icon: <UserRoundPlus size={16} />,
+      isShown: hasPermission("bill", "view"),
+      onClick: () => setReqConfirmationModal(true),
+      isHidden:
+        !orgDetails?.receipt_confirmation_enabled ||
+        currentBillDetails?.status !== "in_review",
+    },
+    {
+      name: "View Confirmations",
+      icon: <FileCheck size={16} />,
+      isShown: hasPermission("bill", "view"),
+      onClick: () => setVersionHistorySidePanel(true),
+      isHidden:
+        !orgDetails?.receipt_confirmation_enabled ||
+        currentBillDetails?.status !== "in_review",
+    },
+    {
+      name: "Audit History",
+      icon: <FileClock width={16} />,
+      isShown: true,
+      onClick: () => {
+        setShowAuditHistory(true);
+        setShowBtnPopup(false);
+      },
+    },
+    {
+      name: "Delete Bill",
+      icon: <Trash size={16} />,
+      isShown: true,
+      onClick: () => deleteBill(),
+    },
+  ];
+
+  const billingAddressField =
+    typeof auditValidation?.billing_address === 'object'
+      ? Boolean(
+        auditValidation?.billing_address?.city &&
+        auditValidation?.billing_address?.country &&
+        auditValidation?.billing_address?.line1 &&
+        auditValidation?.billing_address?.line2 &&
+        auditValidation?.billing_address?.state &&
+        auditValidation?.billing_address?.zip_code
+      )
+      : auditValidation?.billing_address;
+
+
   return (
     <>
-      <div className="flex lg:gap-8">
-        <div>
-          {/* Header section: Bill number, status, PDF toggle, edit/delete icons */}
-          <div
-            className={`flex items-center justify-between mb-8 ${
-              showPdf && fileUrl ? "w-full" : "w-3/4"
-            }`}
-          >
-            <div className="flex items-center gap-1">
-              {/* Bill number */}
-              <div className="flex items-center mr-2">
-                <p className="text-slate-800 text-lg font-semibold">
-                  {billDetails?.bill_number}{" "}
+      <div className="flex items-center justify-between bg-white rounded-b-[20px] p-4 pt-16 border border-secondary-200">
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              {billDetails?.is_duplicate ? <DuplicateFlag /> : null}
+              <p className={`text-neutral-1100 text-2xl font-medium ${checkAuditValidation({ showAuditHistory, field: auditValidation?.bill_number })}`}>
+                {currentBillDetails?.bill_number ?? ""}
+              </p>
+            </div>
+            <PillItem
+              className={`${getStatusClass(getLabelForBillStatus(currentBillDetails?.status || "") || "")}`}
+              isRounded={true}
+              name={getLabelForBillStatus(currentBillDetails?.status || "")}
+            />
+            <PillItem
+              className={`${getStatusClass(getLabelForBillStatus(currentBillDetails?.match_status || "") || "")}`}
+              isRounded={true}
+              name={getLabelForBillStatus(currentBillDetails?.match_status || "")}
+            />
+            {(fileUrl && !showAuditHistory) && (
+              <div className="flex items-center">
+                <ToggleSwitch isOn={showPdf} setIsOn={setShowPdf} />
+                <p className="ms-1.5 text-sm text-neutral-1100 font-medium">
+                  {!showPdf ? "Show pdf" : "Hide pdf"}
                 </p>
-                {billDetails?.is_duplicate ? (
-                  <PillItem
-                    name="Duplicate"
-                    className="text-red-500 bg-red-50"
-                  />
-                ) : null}
               </div>
-
-              {/* Bill status label */}
-              <span
-                className={`text-2xs border py-1 px-1.5 rounded-md ${getStatusClass(
-                  getLabelForBillStatus(billDetails?.status || ""),
-                )}`}
-              >
-                {getLabelForBillStatus(billDetails?.status || "")}
-              </span>
-
-              {/* Toggle to show/hide PDF if fileUrl exists */}
-              {fileUrl ? (
-                <div className="ms-4 flex items-center">
-                  <ToggleSwitch isOn={showPdf} setIsOn={setShowPdf} />
-                  <p className="ms-2 text-xs text-slate-800 dark:text-gray-200">
-                    {!showPdf ? "Show pdf" : "Hide pdf"}
-                  </p>
-                </div>
-              ) : null}
-            </div>
-
-            <div className="flex items-center gap-1">
-              <CustomTooltip content="Audit history">
-                <div>
-                  <IconWrapper
-                    onClick={() => setSidePanel(true)}
-                    icon={<FileClock width={16} />}
-                  />
-                </div>
-              </CustomTooltip>
-
-              {orgDetails?.receipt_confirmation_enabled &&
-              billDetails?.status === "in_review" ? (
-                <OutsideClickHandler
-                  onClose={() => setShowReceiptConfirm(false)}
-                >
-                  <CustomTooltip content="Request confirmation">
-                    <div>
-                      <IconWrapper
-                        onClick={() =>
-                          setShowReceiptConfirm(!showReceiptConfirm)
-                        }
-                        icon={<ClipboardCheck width={16} />}
-                      />
-                    </div>
-                  </CustomTooltip>
-                  {showReceiptConfirm && (
-                    <div className="relative">
-                      <div className="transition-all duration-300 ease-out">
-                        <ReceiptConfirmPopup
-                          handleReqConfirmation={() =>
-                            setReqConfirmationModal(true)
-                          }
-                          handleVersionHistory={() =>
-                            setVersionHistorySidePanel(true)
-                          }
-                          reqConfirmStatus={billDetails?.receipt_status || ""}
-                          confirmHistoryAvailable={
-                            confirmationHistoryList.length ? true : false
-                          }
-                        />
-                      </div>
-                    </div>
-                  )}
-                </OutsideClickHandler>
-              ) : null}
-
-              {/* Edit and Delete icons (not shown for approval users or approved bills) */}
-              {!isUserApproval ? (
-                <>
-                  {billDetails?.status !== "approved" &&
-                  billDetails?.status !== "under_approval" ? (
-                    <div className="flex items-center gap-1">
-                      <>
-                        <CustomTooltip content="Edit bill">
-                          <div>
-                            <IconWrapper
-                              onClick={() =>
-                                router.push(
-                                  `/bill/edit/?id=${billDetails.id}&showPdf=${showPdf}`,
-                                )
-                              }
-                              icon={<SquarePen width={16} />}
-                            />
-                          </div>
-                        </CustomTooltip>
-                        <CustomTooltip content="Delete bill">
-                          <div>
-                            <IconWrapper
-                              onClick={deleteBill}
-                              icon={<Trash width={16} />}
-                              className="hover:bg-red-100 hover:text-red-500"
-                            />
-                          </div>
-                        </CustomTooltip>
-                      </>
-                    </div>
-                  ) : null}
-                </>
-              ) : null}
-            </div>
+            )}
           </div>
 
-          <div className="lg:flex lg:gap-8">
-            {/* PDF preview section (if enabled) */}
-            {fileUrl && showPdf ? (
-              <div className="lg:w-1/3">
-                <div
-                  // style={{ height: "580px" }}
-                  className="scrollbar_none overflow-auto bg-white shadow-5xl rounded-md overflow-hidden"
-                >
-                  <PdfViewer fileUrl={fileUrl} />
-                </div>
+          <div className="flex items-center gap-3">
+            {/* Approval actions for users who can approve/reject */}
+            {(currentBillDetails?.status === "under_approval" && !showAuditHistory) && isUserApproval ? (
+              <div className="flex items-center gap-3 w-fit">
+                {currentBillDetails?.purchase_order?.id ? (
+                  <Button
+                    name="View match"
+                    onClick={() =>
+                      router.push(
+                        `/approvals/list/review/match?id=${currentBillDetails?.id}`,
+                      )
+                    }
+                    disabled={isLoaderFormSubmit}
+                    button_type="primary-outline"
+                  />
+                ) : (
+                  <Button
+                    name="Approve"
+                    onClick={handleApprovalAction}
+                    disabled={isLoaderFormSubmit}
+                    button_type="primary"
+                  />
+                )}
+
+                <Button
+                  name="Reject"
+                  onClick={handleRejectionAction}
+                  disabled={isLoaderFormSubmit}
+                  button_type="danger"
+                  icon_type="reject"
+                />
               </div>
             ) : null}
 
-            {/* Bill details section */}
-            <div
-              className={
-                fileUrl && showPdf ? "lg:w-2/3 mt-8 lg:mt-0" : "lg:w-3/4"
-              }
-            >
-              {/* Vendor, bill date, due date */}
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-5">
-                <div>
-                  <Label text="Vendor name" />
-                  <p
-                    className={`${billDetails?.vendor?.name ? "text-blue-600" : "text-slate-800"} text-sm font-medium mb-5`}
-                  >
-                    {billDetails?.vendor?.name ? (
-                      <Link
-                        className="hover:underline"
-                        href={`/vendor/view?id=${billDetails?.vendor?.id}`}
-                      >
-                        {billDetails?.vendor?.name}
-                      </Link>
-                    ) : (
-                      "--"
-                    )}
-                  </p>
-                </div>
-                <div>
-                  <Label text="Bill date" />
-                  <p className="text-slate-800 text-sm font-medium mb-5">
-                    {formatDate(
-                      billDetails?.bill_date,
-                      orgDetails?.date_format,
-                    )}
-                  </p>
-                </div>
-                <div>
-                  <Label text="Due date" />
-                  <p className="text-slate-800 text-sm font-medium mb-5">
-                    {formatDate(billDetails?.due_date, orgDetails?.date_format)}
-                  </p>
-                </div>
-                <div>
-                  <Label text="Purchase order" />
-                  <p
-                    className={`${billDetails?.purchase_order?.po_number ? "text-blue-600" : "text-slate-800"} text-sm font-medium mb-5`}
-                  >
-                    {billDetails?.purchase_order?.po_number ? (
-                      <Link
-                        className="hover:underline"
-                        href={`/purchaseorder/view?id=${billDetails?.purchase_order?.id}`}
-                      >
-                        {billDetails?.purchase_order?.po_number}
-                      </Link>
-                    ) : (
-                      "--"
-                    )}
-                  </p>
-                </div>
-                <div>
-                  <Label text="Payment terms" />
-                  <p className="text-slate-800 text-sm font-medium mb-5">
-                    {getLabelForTerm(billDetails.payment_terms || "")}
-                  </p>
-                </div>
-
-                <div>
-                  <Label text="Notes" />
-                  <p className="text-slate-800 text-sm font-medium line-clamp-2 mb-5">
-                    {billDetails?.comments || "--"}
-                  </p>
-                </div>
-              </div>
-
-              {/* Vendor address */}
-              <div className="grid lg:grid-cols-3 gap-x-5">
-                <div>
-                  <Label text="Vendor address" />
-                  <p className="text-slate-800 text-sm font-medium">
-                    {getCombineAddress(billDetails?.billing_address)}
-                  </p>
-                </div>
-              </div>
-
-              {/* Bill line items table */}
-              <div className="mt-8">
-                <p className="text-slate-800 mb-6 text-lg font-semibold">
-                  Bill line items
-                </p>
-                <BillLineItemsReadOnly
-                  billDetails={billDetails}
-                  billItems={billDetails?.items}
-                />
-              </div>
-
-              {/* Approval actions for users who can approve/reject */}
-              {billDetails?.status === "under_approval" && isUserApproval ? (
-                <div className="flex items-center gap-3 w-fit">
-                  {billDetails?.purchase_order?.id ? (
-                    <Button
-                      disabled={isLoaderFormSubmit}
-                      text="View match"
-                      onClick={() =>
-                        router.push(
-                          `/approvals/list/review/match?id=${billDetails?.id}`,
-                        )
-                      }
-                      className="text-white whitespace-pre bg-green-500 hover:bg-green-600"
-                      isDefault={false}
-                    />
-                  ) : (
-                    <Button
-                      disabled={isLoaderFormSubmit}
-                      text="Approve"
-                      onClick={handleApprovalAction}
-                      className="text-white whitespace-pre bg-green-500 hover:bg-green-600"
-                      isDefault={false}
-                    />
-                  )}
-
-                  <Button
-                    disabled={isLoaderFormSubmit}
-                    text="Reject"
-                    onClick={handleRejectionAction}
-                    className="text-white bg-red-500 hover:bg-red-600"
-                  />
-                </div>
-              ) : null}
-
-              {/* Actions for bills in review: send for approval, approve, or reject */}
-
-              {billDetails?.status !== "draft" && (
-                <div className="flex items-center gap-3 w-fit">
-                  {isApproverAvailable ? (
-                    <>
-                      {/* Approver is available */}
-                      {orgDetails?.matching_type !== "none" &&
-                      billDetails?.purchase_order?.id ? (
-                        <Button
-                          disabled={isLoaderFormSubmit}
-                          text="View match"
-                          onClick={() =>
-                            router.push(`/bill/match?id=${billDetails?.id}`)
-                          }
-                          className="text-white whitespace-pre bg-green-500 hover:bg-green-600"
-                          isDefault={false}
-                        />
-                      ) : billDetails?.status === "in_review" ? (
-                        <Button
-                          disabled={isLoaderFormSubmit}
-                          text="Send for approval"
-                          onClick={handleSendBillApproval}
-                          className="text-white whitespace-pre bg-green-500 hover:bg-green-600"
-                          isDefault={false}
-                        />
-                      ) : null}
-                    </>
-                  ) : (
-                    <>
-                      {/* Approver not available */}
-                      {!isUserApproval && (
-                        <>
-                          {orgDetails?.matching_type === "none" ||
-                          !billDetails?.purchase_order?.id ? (
-                            billDetails?.status === "in_review" && (
-                              <Button
-                                disabled={isLoaderFormSubmit}
-                                text="Approve"
-                                onClick={handleApproveBill}
-                                className="text-white whitespace-pre bg-green-500 hover:bg-green-600"
-                                isDefault={false}
-                              />
-                            )
-                          ) : (
+            {/* Actions for bills in review: send for approval, approve, or reject */}
+            {(currentBillDetails?.status !== "draft" && !showAuditHistory) && (
+              <div className="flex items-center gap-3 w-fit">
+                {isApproverAvailable ? (
+                  <>
+                    {/* Approver is available */}
+                    {orgDetails?.matching_type !== "none" &&
+                      currentBillDetails?.purchase_order?.id ? (
+                      <Button
+                        name="View match"
+                        onClick={() =>
+                          router.push(`/bill/match?id=${currentBillDetails?.id}`)
+                        }
+                        disabled={isLoaderFormSubmit}
+                        button_type="primary-outline"
+                      />
+                    ) : currentBillDetails?.status === "in_review" ? (
+                      <Button
+                        name="Send for approval"
+                        onClick={handleSendBillApproval}
+                        disabled={isLoaderFormSubmit}
+                        button_type="primary"
+                        icon_type={isLoaderFormSubmit ? "loader" : "approve"}
+                      />
+                    ) : null}
+                  </>
+                ) : (
+                  <>
+                    {/* Approver not available */}
+                    {!isUserApproval && (
+                      <>
+                        {orgDetails?.matching_type === "none" ||
+                          !currentBillDetails?.purchase_order?.id ? (
+                          currentBillDetails?.status === "in_review" && (
                             <Button
+                              name="Approve"
+                              onClick={handleApproveBill}
                               disabled={isLoaderFormSubmit}
-                              text="View match"
-                              onClick={() =>
-                                router.push(`/bill/match?id=${billDetails?.id}`)
+                              button_type="primary"
+                              icon_type={
+                                isLoaderFormSubmit ? "loader" : "approve"
                               }
-                              className="text-white whitespace-pre bg-green-500 hover:bg-green-600"
-                              isDefault={false}
                             />
-                          )}
-                        </>
-                      )}
-                    </>
-                  )}
+                          )
+                        ) : (
+                          <Button
+                            name="View match"
+                            onClick={() =>
+                              router.push(`/bill/match?id=${currentBillDetails?.id}`)
+                            }
+                            disabled={isLoaderFormSubmit}
+                            button_type="primary-outline"
+                          />
+                        )}
+                      </>
+                    )}
+                  </>
+                )}
 
-                  {/* Reject button shown to everyone if status is in_review */}
-                  {billDetails?.status === "in_review" && (
-                    <Button
-                      disabled={isLoaderFormSubmit}
-                      text="Reject"
-                      onClick={handleRejectBill}
-                      className="text-white bg-red-500 hover:bg-red-600"
-                    />
-                  )}
-                </div>
-              )}
+                {/* Reject button shown to everyone if status is in_review */}
+                {currentBillDetails?.status === "in_review" && (
+                  <Button
+                    name="Reject"
+                    onClick={handleRejectBill}
+                    disabled={isLoaderFormSubmit}
+                    button_type="danger"
+                    icon_type="reject"
+                  />
+                )}
+              </div>
+            )}
+
+            {/* Dropdown button for actions */}
+            <div className="flex items-center gap-1">
+              {
+                !showAuditHistory ?
+                  <PopupButton
+                    btnPopupItems={popupButtonItem?.filter((v) => !v?.isHidden)}
+                    children={
+                      <>
+                        <button
+                          className="popup-btn rounded-[8px] size-8 btn-secondary-outline"
+                          onClick={() => {
+                            setShowBtnPopup(true);
+                          }}
+                        >
+                          <Ellipsis size={16} />
+                        </button>
+                      </>
+                    }
+                    onClose={() => {
+                      setShowBtnPopup(false);
+                    }}
+                    showBtnPopup={showBtnPopup}
+                  /> :
+                  <>
+                    {
+                      auditVersionDate !== "--" &&
+                      <div className="font-medium text-neutral-1100 text-sm flex items-center justify-end gap-3">
+                        <p>
+                          <span>You are viewing </span>
+                          {auditVersionDate}
+                          <span> version</span>
+                        </p>
+                        <div
+                          className="popup-btn rounded-[8px] size-8 btn-secondary-outline"
+                          onClick={handleCloseAuditHistory}
+                        >
+                          <X width={16} />
+                        </div>
+                      </div>
+                    }
+                  </>
+              }
             </div>
           </div>
         </div>
       </div>
-
-      <SidePanel isOpen={sidePanel} onClose={() => setSidePanel(false)}>
-        <div className="p-6">
-          <div className="flex justify-between items-center">
-            <p className="text-slate-800 text-lg font-semibold">
-              Audit history
+      <div className="lg:flex">
+        <div
+          className={(fileUrl && showPdf) || showAuditHistory ? "lg:w-[70%]" : "w-full"}
+        >
+          <div
+            ref={billDetailsSection}
+            className={`border border-secondary-200 rounded-[20px] bg-white p-4`}
+          >
+            <p className="text-neutral-1100 text-xl mb-5 font-medium">
+              Bill Details
             </p>
-            <IconWrapper
-              onClick={() => setSidePanel(false)}
-              icon={<X width={16} />}
-            />
+            <div className="grid grid-cols-1 gap-x-5">
+              <div className="flex flex-row items-center border-b border-secondary-200 pb-3">
+                <Label
+                  text="Vendor:"
+                  className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
+                />
+                <p className="text-neutral-1100 text-sm font-medium">
+                  {currentBillDetails?.vendor?.name ? (
+                    <Link
+                      className={`underline text-blue-500 ${checkAuditValidation({ showAuditHistory, field: typeof auditValidation?.vendor === "object" ? auditValidation?.vendor?.name : auditValidation?.vendor })}`}
+                      href={`/vendor/view?id=${currentBillDetails?.vendor?.id}`}
+                    >
+                      {currentBillDetails?.vendor?.name}
+                    </Link>
+                  ) : (
+                    "--"
+                  )}
+                </p>
+              </div>
+
+              <div className="flex flex-row items-center border-b border-secondary-200 py-3">
+                <Label
+                  text="Purchase Order:"
+                  className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
+                />
+                <p className={`text-neutral-1100 text-sm font-medium ${checkAuditValidation({ showAuditHistory, field: typeof auditValidation?.purchase_order === "object" ? auditValidation?.purchase_order?.po_number : auditValidation?.purchase_order })}`}>
+                  {currentBillDetails?.purchase_order?.po_number ? (
+                    <Link
+                      className="underline text-blue-500"
+                      href={`/purchaseorder/view?id=${currentBillDetails?.purchase_order?.id}`}
+                    >
+                      {currentBillDetails?.purchase_order?.po_number}
+                    </Link>
+                  ) : (
+                    "--"
+                  )}
+                </p>
+              </div>
+
+              <div className="flex flex-row items-center border-b border-secondary-200 py-3">
+                <Label
+                  text="Bill Date:"
+                  className={`max-w-60 w-full text-secondary-700 mb-0 font-medium `}
+                />
+                <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.bill_date })}`}>
+                  {formatDate(currentBillDetails?.bill_date, orgDetails?.date_format)}
+                </p>
+              </div>
+
+              <div className="flex flex-row items-center border-b border-secondary-200 py-3">
+                <Label
+                  text="Due Date:"
+                  className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
+                />
+                <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.due_date })}`}>
+                  {formatDate(currentBillDetails?.due_date, orgDetails?.date_format)}
+                </p>
+              </div>
+
+              <div className="flex flex-row items-center border-b border-secondary-200 py-3">
+                <Label
+                  text="Vendor Address:"
+                  className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
+                />
+                <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: billingAddressField })}`}>
+                  {getCombineAddress(currentBillDetails?.billing_address)}
+                </p>
+              </div>
+
+              <div className="flex flex-row items-center py-3">
+                <Label
+                  text="Payment Terms:"
+                  className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
+                />
+                <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.payment_terms })}`}>
+                  {getLabelForTerm(currentBillDetails.payment_terms || "--")}
+                </p>
+              </div>
+            </div>
           </div>
 
-          <AuditHistory data={auditData} isLoading={isLoading} />
+          <div
+            ref={billLineItemsSection}
+            className="rounded-[20px] bg-white p-4 border border-secondary-200"
+            style={{
+              minHeight: `calc(100vh - 10rem - ${billDetailsHeight ?? 0}px - 2px)`,
+            }}
+          >
+            <p className="text-neutral-1100 text-xl font-medium mb-5">
+              Bill Line Items
+            </p>
+
+            <BillLineItemsReadOnly
+              showAuditHistory={showAuditHistory}
+              itemsAuditValidation={showAuditHistory ? auditValidation?.items : [true]}
+              billDetails={currentBillDetails}
+              billItems={currentBillDetails?.items}
+            />
+
+            <div className="mt-5 flex items-start justify-between">
+              {/* Notes */}
+              <div className="w-1/2">
+                <Label
+                  text="Notes:"
+                  className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
+                />
+                <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.comments })}`}>
+                  {currentBillDetails?.comments || "--"}
+                </p>
+              </div>
+
+              {/* Bill Summary */}
+              <div className="flex justify-end">
+                <div className="p-4 w-72 font-medium text-sm bg-secondary-100 rounded-[20px]">
+                  <div className="grid grid-cols-2">
+                    <p className="text-neutral-1100">Sub total:</p>
+                    <span className={`text-neutral-900 text-right ${checkAuditValidation({ showAuditHistory, field: auditValidation?.sub_total })}`}>
+                      {formatNumber(
+                        currentBillDetails?.sub_total || 0,
+                        orgDetails?.currency,
+                      )}
+                    </span>
+                  </div>
+                  <div className="grid items-center grid-cols-2 pb-2 mt-4 mb-2">
+                    <div>
+                      <p className="text-neutral-1100">Total tax:</p>
+                      <span className={`text-xs ${checkAuditValidation({ showAuditHistory, field: auditValidation?.total_tax })}`}>
+                        {formatNumber(
+                          currentBillDetails?.total_tax || 0,
+                          orgDetails?.currency,
+                        )}
+                      </span>
+                    </div>
+                    <div className={`text-right ${checkAuditValidation({ showAuditHistory, field: auditValidation?.tax_percentage })}`}>
+                      {currentBillDetails?.tax_percentage || 0}%
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 font-semibold">
+                    <p className="text-neutral-1100">Grand total:</p>
+                    <span className={`text-neutral-900 text-right ${checkAuditValidation({ showAuditHistory, field: auditValidation?.total })}`}>
+                      {formatNumber(
+                        currentBillDetails?.total || 0,
+                        orgDetails?.currency,
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </SidePanel>
+
+        {fileUrl && showPdf && (
+          <div className="relative lg:w-[30%] scrollbar_none rounded-[20px] bg-white border border-secondary-200 overflow-hidden">
+            <p className="p-4 mb-4 pb-0 text-neutral-1100 text-xl font-medium">
+              Bill Preview
+            </p>
+
+            <PdfViewer fileUrl={fileUrl} />
+          </div>
+        )}
+        {showAuditHistory && (
+          <div
+            className={`relative overflow-y-scroll lg:w-[30%] scrollbar_none rounded-[20px] bg-white border border-secondary-200`}
+            style={{
+              maxHeight: `calc(${billDetailsHeight ?? 0}px + ${billLineItemsHeight ?? 0}px - 0.5px)`, //is for mesh UI - border 1px y-axis, padding 1px y-axis
+            }}
+          >
+            {/* <AuditHistory
+              data={auditData}
+              isLoading={isLoading || isAuditLoading}
+              setAuditVersionDate={setAuditVersionDate}
+              currentVersion={currentAuditVersion}
+              setCurrentVersion={setCurrentAuditVersion}
+              handleClickAuditHistoryCard={handleClickAuditHistoryCard}
+            /> */}
+          </div>
+        )}
+      </div>
 
       <SidePanel
         isOpen={versionHistorySidePanel}
         onClose={() => setVersionHistorySidePanel(false)}
         className="w-full lg:w-96 md:w-96 sm:w-96"
       >
-        <div className="py-6">
-          <div className="px-6 flex justify-between items-center">
-            <p className="text-slate-800 text-lg font-semibold">
+        <div className="pb-6">
+          <div className="border-b border-secondary-200 p-4 flex justify-between items-center">
+            <p className="text-neutral-1100 text-xl font-semibold">
               Confirmation history
             </p>
-            <IconWrapper
+
+            <button
               onClick={() => setVersionHistorySidePanel(false)}
-              icon={<X width={16} />}
-            />
+              className="popup-btn rounded-[8px] size-8 btn-secondary-outline"
+            >
+              <X size={16} />
+            </button>
           </div>
-          <p className="px-6 text-slate-600 text-xs mt-2 mb-5">
-            Track all confirmations requests for this bill
-          </p>
 
           <VersionHistory confirmationHistoryList={confirmationHistoryList} />
         </div>
@@ -494,7 +706,7 @@ const ViewBillDetails = ({
       >
         <RequestConfirmationModal
           onClose={() => setReqConfirmationModal(false)}
-          billDetails={billDetails}
+          billDetails={currentBillDetails}
           reqConfirmed={() => {
             setReqConfirmationModal(false);
             getRequestConfirmationHistory();

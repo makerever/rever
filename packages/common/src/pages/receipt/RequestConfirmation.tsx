@@ -70,11 +70,15 @@ const RequestConfirmationModal = ({
   return (
     <>
       <div className="p-4 border-b flex justify-between items-center mb-4">
-        <h2 className="text-md text-slate-800 font-semibold overflow-hidden text-ellipsis mr-5 whitespace-pre">
-          Request Confirmation - {billDetails?.bill_number}
+        <h2 className="text-xl text-neutral-1100 font-semibold overflow-hidden text-ellipsis mr-5 whitespace-pre">
+          Request Confirmation
+          {/* - {billDetails?.bill_number} */}
         </h2>
-        <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-          <X className="w-5 h-5" />
+        <button
+          onClick={onClose}
+          className="popup-btn rounded-[8px] size-8 btn-secondary-outline"
+        >
+          <X size={16} />
         </button>
       </div>
 
@@ -87,23 +91,22 @@ const RequestConfirmationModal = ({
           onChange={(e) => setSelectedLiteUser(e)}
         />
 
-        <div className="mt-14 w-full flex justify-end mb-4">
-          <div className="w-fit flex">
-            <Button
-              text="Cancel"
-              onClick={onClose}
-              disabled={isReqConfirmLoading}
-              className="mr-2 bg-white text-primary-500 border border-primary-500 disabled:hover:bg-transparent disabled:text-primary-500 hover:bg-primary-500 hover:text-white"
-            />
-            <Button
-              onClick={requestConfirmation}
-              type="submit"
-              text="Request"
-              className="text-white"
-              disabled={!selectedLiteUser || isReqConfirmLoading}
-              isLoading={isReqConfirmLoading}
-            />
-          </div>
+        <div className="mt-14 w-full flex justify-end mb-4 gap-3">
+          <Button
+            name="Cancel"
+            onClick={onClose}
+            disabled={isReqConfirmLoading}
+            button_type="primary-outline"
+          />
+
+          <Button
+            type="submit"
+            name="Request"
+            onClick={requestConfirmation}
+            disabled={!selectedLiteUser || isReqConfirmLoading}
+            button_type="primary"
+            icon_type={isReqConfirmLoading ? "loader" : null}
+          />
         </div>
       </div>
     </>

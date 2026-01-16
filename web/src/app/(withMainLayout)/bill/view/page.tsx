@@ -106,42 +106,46 @@ const ViewBillWithParams = () => {
 
   // Handle bill approval or rejection
   const handleBillApprovalRejection = async () => {
-    if (idValue) {
-      setIsLoaderFormSubmit(true);
-      const billDetails = {
-        status: isConfirmRejectPopupOpen ? "rejected" : "approved",
-      };
-      const response = await updateBillApi(billDetails, idValue);
+    if (!idValue) return;
+
+    if (isConfirmRejectPopupOpen) {
+      const response = await updateBillApi({ status: "rejected" }, idValue);
       if (response?.status === 200) {
         setIsConfirmRejectPopupOpen(false);
-        setIsLoaderFormSubmit(false);
-        showSuccessToast(
-          `Bill ${
-            isConfirmRejectPopupOpen ? "rejected" : "approved"
-          } successfully`,
-        );
+        showSuccessToast("Bill rejected successfully");
+        router.push("/bill/list");
+      } else if (response?.data?.detail) {
+        showErrorToast(response.data.detail);
+      }
+    } else {
+      setIsLoaderFormSubmit(true);
+      const response = await updateBillApi({ status: "approved" }, idValue);
+      if (response?.status === 200) {
+        showSuccessToast("Bill approved successfully");
         router.push("/bill/list");
       } else {
+        setIsLoaderFormSubmit(false);
         if (response?.data?.detail) {
           showErrorToast(response?.data?.detail);
         }
-        setIsLoaderFormSubmit(false);
       }
     }
   };
 
   // Handle sending bill for approval
   const handleSendBillApproval = async () => {
-    setIsLoaderFormSubmit(true);
-    const response = await sendBillForApprovalApi(idValue);
-    if (response?.status === 200) {
-      setIsLoaderFormSubmit(false);
-      showSuccessToast("Bill sent for approval");
-      router.push("/bill/list");
-    } else {
-      setIsLoaderFormSubmit(false);
-      if (response?.data?.detail) {
-        showErrorToast(response?.data?.detail);
+    if (idValue) {
+      setIsLoaderFormSubmit(true);
+
+      const response = await sendBillForApprovalApi(idValue);
+      if (response?.status === 200) {
+        showSuccessToast("Bill sent for approval");
+        router.push("/bill/list");
+      } else {
+        setIsLoaderFormSubmit(false);
+        if (response?.data?.detail) {
+          showErrorToast(response?.data?.detail);
+        }
       }
     }
   };
@@ -185,6 +189,7 @@ const ViewBillWithParams = () => {
         onConfirm={handleBillApprovalRejection}
         message="Are you sure you want to reject this bill?"
         buttonText="Reject"
+        title="Reject Bill"
       />
     </>
   );

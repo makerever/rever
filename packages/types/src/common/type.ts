@@ -22,25 +22,25 @@ export interface ButtonProps {
   disabled?: boolean;
   type?: "submit" | "reset" | "button";
   button_type?:
-    | "primary"
-    | "primary-outline"
-    | "secondary"
-    | "secondary-outline"
-    | "danger"
-    | "danger-outline"
-    | "success"
-    | "success-outline";
+  | "primary"
+  | "primary-outline"
+  | "secondary"
+  | "secondary-outline"
+  | "danger"
+  | "danger-outline"
+  | "success"
+  | "success-outline";
   icon_type?:
-    | "upload"
-    | "download"
-    | "create"
-    | "approve"
-    | "reject"
-    | "loader"
-    | "mailPlus"
-    | "plus"
-    | "loaderCircle"
-    | null;
+  | "upload"
+  | "download"
+  | "create"
+  | "approve"
+  | "reject"
+  | "loader"
+  | "mailPlus"
+  | "plus"
+  | "loaderCircle"
+  | null;
   width?: string;
 }
 
@@ -332,6 +332,7 @@ export interface ConfirmationPopupProps {
   message: string;
   saveButton?: React.ReactNode;
   buttonText?: string;
+  isConfirmLoading?: boolean;
 }
 
 // Interface for billing address with id
