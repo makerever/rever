@@ -23,6 +23,16 @@ export interface AddressTypeProps {
   zip_code: string;
 }
 
+export interface AuditValidationAddressTypeProps {
+  id?: boolean;
+  line1: boolean;
+  line2: boolean;
+  country: boolean;
+  state: boolean;
+  city: boolean;
+  zip_code: boolean;
+}
+
 // Interface for view vendor details props
 export interface ViewVendorDetailsProps {
   vendorData: VenderDataAPIType | undefined;

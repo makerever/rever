@@ -2,44 +2,52 @@
 
 "use client";
 
-// Import dependencies, validation schemas, UI components, types, and utilities
-import { addBillSchema, addBillSchemaValues } from "@rever/validations";
+import {
+  addBillSchema,
+  addBillSchemaValues,
+} from "@rever/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import {
-  billExtractAnimation,
   Button,
   CustomTooltip,
   PdfViewer,
   TextAreaInput,
+  Label,
+  TextInput,
+  SelectComponent,
+  DatePickerDemo,
+  NumberInput,
+  ToggleSwitch,
+  IconWrapper,
+  PageLoader,
+  showErrorToast,
+  showSuccessToast,
+  billExtractAnimation,
+  DropdownButton,
 } from "@rever/common";
-import { Label } from "@rever/common";
-import { TextInput } from "@rever/common";
-import { SelectComponent } from "@rever/common";
-import { paymentTermsOptions } from "@rever/constants";
-import { DatePickerDemo } from "@rever/common";
-import BillItemsTable from "./BillLineItems";
-import { NumberInput } from "@rever/common";
-import { formatNumber, getStatusLabelForExtraction } from "@rever/utils";
-import { Option, PurchaseOrder } from "@rever/types";
 import {
-  CircleAlert,
-  CircleCheck,
-  CircleDashed,
-  Download,
-  Loader,
-  Paperclip,
-  Trash,
-  Upload,
-} from "lucide-react";
-import { OutsideClickHandler } from "@rever/common";
-import { UploadFileView } from "@rever/common";
-import { ToggleSwitch } from "@rever/common";
-import { IconWrapper } from "@rever/common";
-import { formatDate } from "@rever/utils";
-import { showErrorToast, showSuccessToast } from "@rever/common";
+  // billFieldRules,
+  paymentTermsOptions
+} from "@rever/constants";
+import BillItemsTable from "./BillLineItems";
+import {
+  formatNumber,
+  getStatusLabelForExtraction,
+  isNamedObject,
+  formatDate,
+} from "@rever/utils";
+import {
+  Option,
+  PurchaseOrder,
+  VenderDataAPIType,
+  AttachmentProps,
+  Bill,
+  // IntegrationFieldRules,
+} from "@rever/types";
+import { useBreadcrumbStore, useUserStore } from "@rever/stores";
 import {
   addBillAttachment,
   createBillApi,
@@ -50,12 +58,16 @@ import {
   getPoByVendorApi,
   updateBillApi,
   uploadDocument,
+  getVendorsDataAPI,
 } from "@rever/services";
-import { getVendorsDataAPI } from "@rever/services";
-import { VenderDataAPIType } from "@rever/types";
-import { AttachmentProps, Bill } from "@rever/types";
-import { useBreadcrumbStore, useUserStore } from "@rever/stores";
-import { PageLoader } from "@rever/common";
+import {
+  CircleAlert,
+  CircleCheck,
+  CircleDashed,
+  Download,
+  Loader,
+  Trash,
+} from "lucide-react";
 import Lottie from "lottie-react";
 
 const getStatusIcon = (status: string, error_message?: string) => {
@@ -94,9 +106,9 @@ const MAX_ATTEMPTS = 20;
 const DELAY_MS = 2000;
 const PDF_TYPE = "application/pdf";
 
-// Main Add Bill component with URL params
 const AddBillComponentWithParams = () => {
-  // Initialize react-hook-form with Zod validation
+  const [submitType, setSubmitType] = useState("");
+  // react-hook-form setup
   const {
     register,
     handleSubmit,
@@ -123,84 +135,95 @@ const AddBillComponentWithParams = () => {
     },
   });
 
-  // Get bill ID from URL if present
+  // useRouter, URL params, state
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
   const showPdfValue = searchParams.get("showPdf");
   const router = useRouter();
 
-  // Watch bill line items for calculations
-  const billItems =
-    useWatch({
-      control,
-      name: "items",
-    }) || [];
-
-  // State for vendor dropdown options
+  // state
   const [vendorOptionList, setVendorOptionList] = useState<Option[]>([]);
-
-  // State for po dropdown options
   const [purchaseOrderOptionList, setPurchaseOrderOptionList] = useState<
     Option[]
   >([]);
+  const [idValue, setIdValue] = useState<string | null>(id);
 
-  // UI and file upload states
   const [isLoaderFormSubmit, setIsLoaderFormSubmit] = useState(false);
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [fileDetails, setFileDetails] = useState<File | null>(null);
   const [fileResponse, setFileResponse] = useState<AttachmentProps>({});
-  const [showUploadFileView, setShowUploadFileView] = useState<boolean>(false);
-  const [showPdf, setShowPdf] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  // Bill details and submit type state
+  const [showUploadFileView, setShowUploadFileView] = useState(false);
+  const [showPdf, setShowPdf] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [billDetails, setBillDetails] = useState<Partial<Bill>>({});
-  const [submitType, setSubmitType] = useState("");
-
-  const [showItemsDescription, setShowItemsDescription] =
-    useState<boolean>(false);
-
-  const [idValue, setIdValue] = useState<string | null>(id);
   const [files, setFiles] = useState<{
     file?: File;
     status?: string;
     id?: string;
     error_message?: string;
   }>({});
+  const [showItemsDescription, setShowItemsDescription] = useState(false);
 
+  const [showBtnPopup, setShowBtnPopup] = useState<boolean>(false);
+
+  const billDetailsSection = useRef<HTMLDivElement | null>(null);
+  const [billDetailsHeight, setBillDetailsHeight] = useState<number | null>(
+    null,
+  );
+
+  // stores
   const orgDetails = useUserStore((state) => state.user?.organization);
-
   const setDynamicCrumb = useBreadcrumbStore((s) => s.setDynamicCrumb);
 
+  // form watches
   const billDate = watch("bill_date");
   const dueDate = watch("due_date");
   const vendor = watch("vendor");
+  const billItems = useWatch({ control, name: "items" }) || [];
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Get integration field rules
+  // const rules: IntegrationFieldRules = billFieldRules.default;
+
+  // Bill Calculation
+  const subtotal = billItems.reduce(
+    (sum, item) =>
+      (Number(item.quantity) || 0) * (Number(item.unit_price) || 0) + sum,
+    0,
+  );
+  const totalTax = useWatch({ control, name: "total_tax" }) || 0;
+  const totalTaxamount = (subtotal * Number(totalTax)) / 100;
+  const total = subtotal + totalTaxamount;
+
+  // Watch bill date / due date, clear due date when needed
   useEffect(() => {
-    if (dueDate && new Date(dueDate) < new Date(billDate)) {
+    if (dueDate && billDate && new Date(dueDate) < new Date(billDate)) {
       resetField("due_date");
     }
-  }, [billDate]);
+  }, [billDate, dueDate, resetField]);
 
+  // Watch vendor, fetch PO when vendor changes
   useEffect(() => {
+    setValue("purchase_order", undefined);
     const vendor_id = getValues("vendor");
-    if (vendor_id) {
-      getPoList(vendor_id);
-    }
+    if (vendor_id) getPoList(vendor_id);
   }, [vendor]);
 
-  // Fetch bill details and attachment by ID (for editing)
+  // Get Bill Details By ID (for editing)
   const getBillDetailsById = useCallback(
     async (idValue: string) => {
       const response = await getBillDetailsByIdApi(idValue);
       if (response?.status === 200) {
         if (response?.data?.status === "approved") {
           router.back();
+          return;
         }
         setDynamicCrumb("/bill/edit", {
           id: response?.data?.id,
           name: response?.data?.bill_number,
         });
-        setValue("billNumber", response?.data.bill_number);
+        setValue("billNumber", response?.data?.bill_number);
         setValue("items", response?.data?.items);
         setValue("bill_date", new Date(response?.data?.bill_date));
         setValue("due_date", new Date(response?.data?.due_date));
@@ -211,86 +234,92 @@ const AddBillComponentWithParams = () => {
         setValue("comments", response?.data?.comments);
         setBillDetails(response?.data);
 
-        // Fetch bill attachment (PDF)
+        // Get Bill Attachment
         const responseFile = await getBillAttachment(idValue);
         if (responseFile?.status === 200) {
           setFileResponse(responseFile?.data?.results[0]);
           setFileUrl(responseFile?.data?.results[0]?.file);
-          setFiles({ status: "completed" });
+          setFiles({ status: "done" });
         }
         setIsLoading(false);
       } else {
         router.push("/bill/list");
       }
     },
-    [router, setValue],
+    [router, setValue, setDynamicCrumb],
   );
 
-  // Fetch vendor list and bill details (if editing) on mount
+  // Fetch vendor list / bill detail on mount
   useEffect(() => {
     getVendorsList();
     if (idValue) {
-      if (showPdfValue && showPdfValue === "true") {
-        setShowPdf(true);
-      }
+      if (showPdfValue === "true") setShowPdf(true);
       getBillDetailsById(idValue);
     } else {
       setIsLoading(false);
     }
   }, [getBillDetailsById, idValue, showPdfValue]);
 
-  // Fetch vendor options for dropdown
-  const getVendorsList = async () => {
+  //to get current height of PO Detials section
+  useEffect(() => {
+    if (!isLoading) {
+      setBillDetailsHeight(billDetailsSection?.current?.offsetHeight ?? 0);
+    }
+  }, [isLoading]);
+
+  // Data Fetchers
+  async function getVendorsList() {
     const response = await getVendorsDataAPI();
     if (response?.status === 200) {
-      const data = response?.data?.results?.map((v: VenderDataAPIType) => {
-        return {
+      setVendorOptionList(
+        response?.data?.results?.map((v: VenderDataAPIType) => ({
           label: v?.vendor_name,
           value: v?.id,
-        };
-      });
-      setVendorOptionList(data);
+        })),
+      );
     }
-  };
+  }
 
-  // Fetch po options for dropdown
-  const getPoList = async (id: string) => {
+  async function getPoList(id: string) {
     const response = await getPoByVendorApi(id);
     if (response?.status === 200) {
-      const data = response?.data?.map((v: PurchaseOrder) => {
-        return {
+      setPurchaseOrderOptionList(
+        response?.data?.map((v: PurchaseOrder) => ({
           label: v?.po_number,
           value: v?.id,
-        };
-      });
-      setPurchaseOrderOptionList(data);
+        })),
+      );
     }
-  };
+  }
 
-  // Prevent form submission on Enter except for textarea
+  // Prevent Enter submit (except textarea)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
-    if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "TEXTAREA") {
+    if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "TEXTAREA")
       e.preventDefault();
-    }
   };
 
-  // Handle form submission for create/update bill
-  const submitForm = async (data: addBillSchemaValues) => {
-    setIsLoaderFormSubmit(true);
-    // Prepare bill items for API
-    const billItems = data?.items?.map((val) => {
-      return {
-        id: val.id || undefined,
-        description: val.description,
-        product_code: val.product_code,
-        quantity: val.quantity,
-        unit_price: val.unit_price,
-        amount: val.amount,
-      };
-    });
+  const triggerSubmit = (submitType: "draft" | "in_review") => {
+    setSubmitType(submitType);
+    handleSubmit((data) => submitForm(data, submitType))();
+    setShowBtnPopup(false);
+  };
 
-    // Prepare bill details payload
-    const billDetails = {
+  // Form Submission (CREATE or UPDATE)
+  const submitForm = async (data: addBillSchemaValues, submitType: string) => {
+    setIsLoaderFormSubmit(true);
+    // Prepare bill items
+    const billItems = data?.items?.map((val) => ({
+
+      id: val.id || undefined,
+      description: val.description,
+      product_code: val.product_code,
+      quantity: val.quantity,
+      unit_price: val.unit_price,
+      amount: val.amount,
+    }));
+
+    // API Payload
+    const payload = {
       bill_number: data?.billNumber,
       vendor_id: data.vendor,
       purchase_order_id: data.purchase_order,
@@ -310,82 +339,63 @@ const AddBillComponentWithParams = () => {
       items: billItems,
     };
 
-    // Update bill if editing, else create new bill
+    let response;
     if (idValue) {
-      const response = await updateBillApi(billDetails, idValue);
-      if (response?.status === 200) {
-        if (fileDetails) {
-          const formData = new FormData();
-          formData.append("file", fileDetails);
-          const responseFile = await addBillAttachment(
-            formData,
-            response?.data?.id,
+      response = await updateBillApi(payload, idValue);
+    } else {
+      response = await createBillApi(payload);
+    }
+
+    // Handle API Response
+    if (
+      (idValue && response?.status === 200) ||
+      (!idValue && response?.status === 201)
+    ) {
+      // If fileDetails present, attach after bill created/updated
+      if (fileDetails) {
+        const formData = new FormData();
+        formData.append("file", fileDetails);
+        const responseFile = await addBillAttachment(
+          formData,
+          (response?.data?.id || idValue)!,
+        );
+        if (responseFile?.status === 201) {
+          setIsLoaderFormSubmit(false);
+          showSuccessToast(
+            idValue ? "Bill updated successfully" : "Bill created successfully",
           );
-          if (responseFile?.status === 201) {
-            setIsLoaderFormSubmit(false);
-            showSuccessToast("Bill updated successfully");
-            router.push("/bill/list");
-          } else {
-            showErrorToast("Something went wrong!!");
+          if (idValue) {
+            router.push(`/bill/view?id=${idValue}`);
+          }
+          else {
             router.push("/bill/list");
           }
+          return;
         } else {
-          setIsLoaderFormSubmit(false);
-          showSuccessToast("Bill updated successfully");
-          router.push("/bill/list");
+          showErrorToast("Something went wrong!!");
         }
-      } else {
-        if (response?.data?.detail) {
-          showErrorToast(response?.data?.detail);
-        } else {
-          setShowItemsDescription(true);
-        }
-        setIsLoaderFormSubmit(false);
+        router.push("/bill/list");
+        return;
+      }
+      setIsLoaderFormSubmit(false);
+      showSuccessToast(
+        idValue ? "Bill updated successfully" : "Bill created successfully",
+      );
+      if (idValue) {
+        router.push(`/bill/view?id=${idValue}`);
+      }
+      else {
+        router.push("/bill/list");
       }
     } else {
-      const response = await createBillApi(billDetails);
-      if (response?.status === 201) {
-        // If file is attached, upload it after bill creation
-        if (fileDetails) {
-          const formData = new FormData();
-          formData.append("file", fileDetails);
-          const responseFile = await addBillAttachment(
-            formData,
-            response?.data?.id,
-          );
-          if (responseFile?.status === 201) {
-            setIsLoaderFormSubmit(false);
-            showSuccessToast("Bill created successfully");
-            router.push("/bill/list");
-          } else {
-            showErrorToast("Something went wrong!!");
-            router.push("/bill/list");
-          }
-        } else {
-          setIsLoaderFormSubmit(false);
-          showSuccessToast("Bill created successfully");
-          router.push("/bill/list");
-        }
+      if (response?.data?.detail) {
+        showErrorToast(response?.data?.detail);
       } else {
-        if (response?.data?.detail) {
-          showErrorToast(response?.data?.detail);
-        } else {
-          setShowItemsDescription(true);
-        }
-        setIsLoaderFormSubmit(false);
+        setShowItemsDescription(true);
       }
+      setIsLoaderFormSubmit(false);
     }
   };
-
-  // Bill Calculation
-  const subtotal = billItems.reduce(
-    (sum, item) =>
-      (Number(item.quantity) || 0) * (Number(item.unit_price) || 0) + sum,
-    0,
-  );
-  const totalTax = useWatch({ control, name: "total_tax" }) || 0;
-  const totalTaxamount = (subtotal * Number(totalTax)) / 100;
-  const total = subtotal + totalTaxamount;
 
   // PDF upload/preview handlers
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -425,26 +435,22 @@ const AddBillComponentWithParams = () => {
       try {
         const fileRes = await getDocument(id);
         if (fileRes.status !== 200) throw new Error("Fetch failed");
-        const responseData = fileRes.data;
-
-        setFiles({ status: responseData?.status });
-        if (["completed"].includes(responseData?.status)) {
-          if (
-            responseData?.status === "completed" &&
-            responseData?.document_id
-          ) {
-            setIdValue(responseData?.document_id);
+        const { status, target_object_id, error_message } = fileRes.data;
+        setFiles({ status: status });
+        if (["done"].includes(status)) {
+          if (status === "done" && target_object_id) {
+            setIdValue(target_object_id);
             setShowPdf(true);
           }
           break;
         }
-        if (["failed"].includes(responseData?.status)) {
+        if (["failed"].includes(status)) {
           setShowPdf(false);
           setFileUrl(null);
           setFileDetails(null);
           showErrorToast(
-            responseData?.message
-              ? responseData?.message
+            error_message
+              ? error_message
               : "File must be under 5MB and limited to 5 pages",
           );
           break;
@@ -465,79 +471,291 @@ const AddBillComponentWithParams = () => {
     }
   }
 
-  // Render UI
+  // Render
   return (
     <>
       {isLoading ? (
         <PageLoader />
       ) : (
         <>
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex justify-between items-center">
-              <p className="text-slate-800 text-lg font-semibold">
-                Bill details
-              </p>
+          <div className="rounded-b-[20px] bg-white p-4 h-28 border border-secondary-200 flex items-end justify-start">
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-3">
+                <p className="text-neutral-1100 text-2xl font-medium">
+                  {idValue ? billDetails?.bill_number : "New Bill"}
+                </p>
 
-              {fileUrl ? (
-                <div className="ms-4 flex items-center">
-                  <ToggleSwitch isOn={showPdf} setIsOn={setShowPdf} />
-                  <p className="ms-2 text-xs text-slate-800 dark:text-gray-200">
-                    {!showPdf ? "Show pdf" : "Hide pdf"}
-                  </p>
-                </div>
-              ) : null}
-            </div>
-
-            {/* File upload or attachment actions */}
-            {!fileUrl ? (
-              <label>
-                <input
-                  onChange={handleFileChange}
-                  type="file"
-                  className="hidden"
-                  accept={PDF_TYPE}
-                />
-                <div className="bg-transparent flex items-center text-xs rounded-md transition duration-300 px-3 py-1 cursor-pointer text-primary-500 border border-primary-500 disabled:hover:bg-transparent disabled:text-primary-500 hover:bg-primary-500 hover:text-white">
-                  <Upload width={16} className="mr-1" /> Extract PDF
-                </div>
-              </label>
-            ) : (
-              files.status === "completed" && (
-                <OutsideClickHandler
-                  onClose={() => setShowUploadFileView(false)}
-                >
-                  <div
-                    onClick={() => setShowUploadFileView(!showUploadFileView)}
-                    className="flex items-center text-primary-500 hover:text-primary-600 cursor-pointer text-sm"
-                  >
-                    <Paperclip width={16} className="mr-1" />1 file
-                  </div>
-                  {showUploadFileView && (
-                    <div>
-                      <UploadFileView
-                        removeFile={() => {
-                          if (idValue) deleteBillAttachmentFunc();
-                          setFileUrl(null);
-                          setShowUploadFileView(false);
-                        }}
-                        fileName={
-                          fileDetails?.name ||
-                          fileResponse?.file_name ||
-                          "File 1"
-                        }
-                      />
+                <div className="flex justify-between items-center">
+                  {fileUrl && (
+                    <div className="flex items-center">
+                      <ToggleSwitch isOn={showPdf} setIsOn={setShowPdf} />
+                      <p className="ms-1.5 text-sm text-neutral-1100 font-medium">
+                        {!showPdf ? "Show pdf" : "Hide pdf"}
+                      </p>
                     </div>
                   )}
-                </OutsideClickHandler>
-              )
-            )}
+                </div>
+              </div>
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3">
+                {!fileUrl ? (
+                  <div>
+                    {/* Hidden file input */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="application/pdf"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+
+                    <Button
+                      name={idValue ? "Upload bill" : "Extract bill"}
+                      button_type="primary-outline"
+                      icon_type="upload"
+                      disabled={isLoaderFormSubmit}
+                      onClick={() => fileInputRef.current?.click()} // triggers file input
+                    />
+                  </div>
+                ) : null}
+
+                <Button
+                  name="Cancel"
+                  onClick={() =>
+                    idValue
+                      ? router.push(`/bill/view?id=${idValue}`)
+                      : router.push("/bill/list")
+                  }
+                  button_type="secondary-outline"
+                  disabled={isLoaderFormSubmit}
+                />
+
+                {!idValue || billDetails?.status === "draft" ? (
+                  <DropdownButton
+                    name="Save"
+                    onActionBtClick={() => {
+                      triggerSubmit("in_review");
+                    }}
+                    onClose={() => setShowBtnPopup(false)}
+                    onBtnPopupItemsClick={(val) => {
+                      if (val === "Save as draft") {
+                        triggerSubmit("draft");
+                      }
+                    }}
+                    onClickArrow={() => setShowBtnPopup(true)}
+                    showBtnPopup={showBtnPopup}
+                    btnPopupItems={["Save", "Save as draft"]}
+                    button_type="primary"
+                  />
+                ) : (
+                  <Button
+                    name="Save"
+                    onClick={() => triggerSubmit("in_review")}
+                    button_type="primary"
+                    icon_type={isLoaderFormSubmit ? "loader" : null}
+                    disabled={isLoaderFormSubmit}
+                  />
+                )}
+              </div>
+            </div>
           </div>
+
           <div>
-            <div className="lg:flex gap-10">
-              {/* PDF Preview */}
+            <div className="lg:flex">
+              {/* ----- Bill Form  ------ */}
+              <form
+                className={
+                  fileUrl && showPdf ? "lg:w-[70%] mt-8 lg:mt-0" : "w-full"
+                }
+                onKeyDown={handleKeyDown}
+              >
+                <div>
+                  <div
+                    ref={billDetailsSection}
+                    className={`rounded-[20px] bg-white p-4 border border-secondary-200`}
+                  >
+                    {/* Bill details fields */}
+                    <p className="text-neutral-1100 text-xl font-medium mb-5">
+                      Bill Details
+                    </p>
+                    <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
+                      <div>
+                        <Label
+                          htmlFor="billNumber"
+                          text="Bill number"
+                          isRequired
+                        />
+                        <TextInput
+                          register={register("billNumber")}
+                          id="billNumber"
+                          placeholder="Enter bill no"
+                          error={errors.billNumber}
+                          value={getValues("billNumber")}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="vendor" text="Vendor" isRequired />
+                        <SelectComponent
+                          name="vendor"
+                          register={register}
+                          trigger={trigger}
+                          title="Vendor"
+                          error={errors?.vendor}
+                          options={vendorOptionList}
+                          placeholder="Select vendor"
+                          isClearable={true}
+                          getValues={getValues}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="purchase_order" text="Purchase order" />
+                        <SelectComponent
+                          name="purchase_order"
+                          register={register}
+                          trigger={trigger}
+                          title="Purchase order"
+                          error={errors?.purchase_order}
+                          options={purchaseOrderOptionList}
+                          placeholder="Select purchase order"
+                          isClearable={true}
+                          getValues={getValues}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="payment_terms" text="Payment terms" />
+                        <SelectComponent
+                          name="payment_terms"
+                          register={register}
+                          trigger={trigger}
+                          error={errors?.payment_terms}
+                          options={paymentTermsOptions}
+                          placeholder="Select payment terms"
+                          isClearable={true}
+                          getValues={getValues}
+                        />
+                      </div>
+                      <div>
+                        <Label
+                          htmlFor="bill_date"
+                          text="Bill date"
+                        />
+                        <DatePickerDemo
+                          register={register}
+                          name="bill_date"
+                          error={errors.bill_date}
+                          trigger={trigger}
+                          placeholder="Select bill date"
+                          title="Bill date"
+                          value={watch("bill_date") ?? undefined}
+                        />
+                      </div>
+                      <div>
+                        <Label
+                          htmlFor="due_date"
+                          text="Due date"
+                        />
+                        <DatePickerDemo
+                          register={register}
+                          name="due_date"
+                          error={errors.due_date}
+                          trigger={trigger}
+                          placeholder="Select due date"
+                          title="Due date"
+                          value={watch("due_date") ?? undefined}
+                          disabledBefore={
+                            watch("bill_date") != null
+                              ? new Date(watch("bill_date")!)
+                              : undefined
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  {/* Bill line items */}
+
+                  <div
+                    className={`rounded-[20px] bg-white p-4 border border-secondary-200`}
+                    style={{
+                      minHeight: `calc(100vh - 10rem - ${billDetailsHeight ?? 0}px)`, //is for mesh UI - border 1px y-axis, padding 1px y-axis
+                    }}
+                  >
+                    <p className="text-neutral-1100 text-xl font-medium mb-5">
+                      Bill Line Items
+                    </p>
+
+                    <BillItemsTable
+                      getValues={getValues}
+                      setValue={setValue}
+                      control={control}
+                      register={register}
+                      showItemsDescription={showItemsDescription}
+                    />
+
+                    <div className="flex items-center justify-between">
+                      {/* Notes */}
+                      <div className="w-1/2">
+                        <Label htmlFor="comments" text="Notes" />
+                        <TextAreaInput
+                          rows={4}
+                          register={register("comments")}
+                          id="comments"
+                          placeholder="Enter notes"
+                          error={errors.comments}
+                          value={getValues("comments") ?? undefined}
+                        />
+                      </div>
+
+                      {/* Bill Summary */}
+                      <div className="flex justify-end">
+                        <div className="p-4 w-72 font-medium text-sm bg-secondary-100 rounded-[20px]">
+                          <div className="grid grid-cols-2">
+                            <p className="text-neutral-1100">Sub total:</p>
+                            <p className="text-neutral-900 text-right">
+                              {formatNumber(subtotal, orgDetails?.currency)}
+                            </p>
+                          </div>
+                          <div className="grid items-center grid-cols-2 pb-2 mt-4 mb-2">
+                            <div>
+                              <p className="text-neutral-1100">Total tax:</p>
+                              <span className="text-xs">
+                                {formatNumber(
+                                  totalTaxamount,
+                                  orgDetails?.currency,
+                                )}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <NumberInput
+                                register={register("total_tax")}
+                                id="totalTax"
+                                error={errors.total_tax}
+                                value={getValues("total_tax")}
+                                onEnterPress={() => { }}
+                                allowDecimal
+                                className="text-right"
+                              />
+                              %
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 font-semibold">
+                            <p className="text-neutral-1100">Grand total:</p>
+                            <p className="text-neutral-900 text-right">
+                              {formatNumber(total, orgDetails?.currency)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+
               {fileUrl && showPdf && (
-                <div className="lg:w-1/3 scrollbar_none overflow-auto bg-white shadow-5xl rounded-md overflow-hidden h-fit">
-                  {files.status === "completed" ? (
+                <div className="relative lg:w-[30%] scrollbar_none rounded-[20px] bg-white border border-secondary-200 overflow-hidden">
+                  <p className="p-4 pb-0 text-neutral-1100 text-xl font-medium">
+                    Bill Preview
+                  </p>
+                  {files.status === "done" ? (
                     <>
                       <div className="flex justify-end py-1 pr-2">
                         <IconWrapper
@@ -595,228 +813,6 @@ const AddBillComponentWithParams = () => {
                   )}
                 </div>
               )}
-
-              {/* Bill form section */}
-              <form
-                className={
-                  fileUrl && showPdf ? "lg:w-2/3 mt-8 lg:mt-0" : "w-full"
-                }
-                onKeyDown={handleKeyDown}
-                onSubmit={handleSubmit(submitForm)}
-              >
-                <div>
-                  <div
-                    className={
-                      fileUrl && showPdf ? "w-full" : "lg:w-3/4 w-full"
-                    }
-                  >
-                    {/* Bill details fields */}
-                    <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-                      <div>
-                        <Label htmlFor="billNumber" text="Bill number" />
-                        <TextInput
-                          register={register("billNumber")}
-                          id="billNumber"
-                          placeholder="Enter bill no"
-                          error={errors.billNumber}
-                          value={getValues("billNumber")}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="vendor" text="Vendor" isRequired />
-                        <SelectComponent
-                          name="vendor"
-                          register={register}
-                          trigger={trigger}
-                          title="Vendor"
-                          error={errors?.vendor}
-                          options={vendorOptionList}
-                          placeholder="Select vendor"
-                          isClearable={true}
-                          getValues={getValues}
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="purchase_order" text="Purchase order" />
-                        <SelectComponent
-                          name="purchase_order"
-                          register={register}
-                          trigger={trigger}
-                          title="Purchase order"
-                          error={errors?.purchase_order}
-                          options={purchaseOrderOptionList}
-                          placeholder="Select purchase order"
-                          isClearable={true}
-                          getValues={getValues}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Bill date and due date fields */}
-                    <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-                      <div>
-                        <Label htmlFor="payment_terms" text="Payment terms" />
-                        <SelectComponent
-                          name="payment_terms"
-                          register={register}
-                          trigger={trigger}
-                          error={errors?.payment_terms}
-                          options={paymentTermsOptions}
-                          placeholder="Select payment terms"
-                          isClearable={true}
-                          getValues={getValues}
-                        />
-                      </div>
-                      <div>
-                        <Label
-                          htmlFor="bill_date"
-                          text="Bill date"
-                          isRequired
-                        />
-
-                        <DatePickerDemo
-                          register={register}
-                          name="bill_date"
-                          error={errors.bill_date}
-                          trigger={trigger}
-                          placeholder="Select bill date"
-                          title="Bill date"
-                          value={watch("bill_date")}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="due_date" text="Due date" isRequired />
-                        <DatePickerDemo
-                          register={register}
-                          name="due_date"
-                          error={errors.due_date}
-                          trigger={trigger}
-                          placeholder="Select due date"
-                          title="Due date"
-                          value={watch("due_date")}
-                          disabledBefore={
-                            watch("bill_date")
-                              ? new Date(watch("bill_date"))
-                              : undefined
-                          }
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Bill line items table */}
-                  <p className="text-slate-800 text-lg font-semibold mt-8 mb-6">
-                    Bill line items
-                  </p>
-
-                  <BillItemsTable
-                    getValues={getValues}
-                    setValue={setValue}
-                    control={control}
-                    register={register}
-                    showItemsDescription={showItemsDescription}
-                  />
-
-                  {/* Bill summary (subtotal, tax, total) */}
-                  <div className="flex justify-end">
-                    <div className="p-3 w-72 font-medium text-slate-600 text-sm bg-gray-50 rounded-md">
-                      <div className="grid grid-cols-2">
-                        <p>Sub total:</p>
-                        <p className="text-right">
-                          {formatNumber(subtotal, orgDetails?.currency)}
-                        </p>
-                      </div>
-                      <div className="grid items-center grid-cols-2 pb-2 mt-4 mb-3 border-b">
-                        <div>
-                          <p>Total tax:</p>
-                          <span className="text-xs">
-                            {formatNumber(totalTaxamount, orgDetails?.currency)}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <NumberInput
-                            register={register("total_tax")}
-                            id="totalTax"
-                            error={errors.total_tax}
-                            value={getValues("total_tax")}
-                            onEnterPress={() => {}}
-                            allowDecimal
-                            className="text-right"
-                          />
-                          %
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 text-slate-800 font-semibold">
-                        <p>Total:</p>
-                        <p className="text-right">
-                          {formatNumber(total, orgDetails?.currency)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3">
-                    <div>
-                      <Label htmlFor="comments" text="Notes" />
-                      <TextAreaInput
-                        rows={3}
-                        register={register("comments")}
-                        id="comments"
-                        placeholder="Enter notes"
-                        error={errors.comments}
-                        value={getValues("comments") ?? undefined}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Form action buttons */}
-                  <div className="flex items-center gap-3 mt-10">
-                    <div className="w-fit">
-                      <Button
-                        type="submit"
-                        text="Save"
-                        disabled={isLoaderFormSubmit}
-                        className="text-white"
-                        onClick={() => setSubmitType("in_review")}
-                        isLoading={
-                          submitType === "in_review" && isLoaderFormSubmit
-                        }
-                      />
-                    </div>
-
-                    {/* Show "Save as draft" if creating or bill is draft */}
-                    {(!idValue || billDetails?.status === "draft") && (
-                      <div className="w-fit">
-                        <Button
-                          text="Save as draft"
-                          type="submit"
-                          disabled={isLoaderFormSubmit}
-                          onClick={() => setSubmitType("draft")}
-                          isLoading={
-                            submitType === "draft" && isLoaderFormSubmit
-                          }
-                          isLoaderDark
-                          className="bg-transparent text-primary-500 border border-primary-500 disabled:hover:bg-transparent disabled:text-primary-500 hover:bg-primary-500 hover:text-white"
-                        />
-                      </div>
-                    )}
-                    <div className="w-fit">
-                      <Button
-                        text="Cancel"
-                        type="button"
-                        onClick={() =>
-                          idValue
-                            ? router.push(`/bill/view?id=${idValue}`)
-                            : router.push("/bill/list")
-                        }
-                        disabled={isLoaderFormSubmit}
-                        className="bg-transparent text-primary-500 border border-primary-500 disabled:hover:bg-transparent disabled:text-primary-500 hover:bg-primary-500 hover:text-white"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </form>
             </div>
           </div>
         </>
@@ -825,13 +821,11 @@ const AddBillComponentWithParams = () => {
   );
 };
 
-// Suspense wrapper for AddBillComponentWithParams
-const AddBillComponent = () => {
-  return (
-    <Suspense>
-      <AddBillComponentWithParams />
-    </Suspense>
-  );
-};
+// Suspense wrapper
+const AddBillComponent = () => (
+  <Suspense>
+    <AddBillComponentWithParams />
+  </Suspense>
+);
 
 export default AddBillComponent;
