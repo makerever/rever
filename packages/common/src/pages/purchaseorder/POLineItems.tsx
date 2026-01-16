@@ -3,17 +3,21 @@
 "use client";
 
 import { useFieldArray, useWatch } from "react-hook-form";
-import { TextAreaInput, NumberInput, IconWrapper } from "@rever/common";
-import { Plus, Trash } from "lucide-react";
+import {
+  TextAreaInput,
+  NumberInput,
+  IconWrapper,
+  Button,
+} from "@rever/common";
+import { Trash } from "lucide-react";
 import { poLineItemsTableProps } from "@rever/types";
-import { useEffect, useMemo } from "react";
-import { formatNumber } from "@rever/utils";
+import { useEffect, useMemo, useState } from "react";
+import { formatNumber, isNamedObject } from "@rever/utils";
 import { useUserStore } from "@rever/stores";
 
 const poItemHeaders = [
-  "#",
   "Description",
-  "Quantity",
+  "Qty",
   "Unit price",
   "Amount",
   "Action",
@@ -65,18 +69,17 @@ export default function POLineItemsTable({
   };
 
   return (
-    <div className="space-y-4">
-      <table className="table-fixed w-full text-left">
+    <div>
+      <table className="table-fixed w-full text-left border-separate border-spacing-x-4">
         <colgroup>
-          <col className="w-8" />
           <col className="w-3/12" />
         </colgroup>
-        <thead className="bg-gray-50">
+        <thead>
           <tr>
             {poItemHeaders.map((h, i) => (
               <th
                 key={i}
-                className={`px-2 py-4 text-xs text-slate-500 font-medium ${i < 2 ? "" : "text-right"}`}
+                className={`text-sm text-neutral-1100 font-semibold ${i < 1 ? "" : "text-right"}`}
               >
                 {h}
               </th>
@@ -91,14 +94,11 @@ export default function POLineItemsTable({
             const rowAmt = rowQty * rowUp;
 
             return (
-              <tr
-                key={field.id}
-                className="border-t transition duration-300 hover:bg-slate-50"
-              >
-                <td className="p-2 text-xs">{index + 1}</td>
-                <td className="p-2">
+              <tr key={field.id} className="">
+                <td>
                   <TextAreaInput
-                    rows={2}
+                    rows={1}
+                    className="mt-1.5"
                     id={`items.${index}.description`}
                     register={register(`items.${index}.description`)}
                     noErrorIcon={
@@ -107,8 +107,7 @@ export default function POLineItemsTable({
                     }
                   />
                 </td>
-
-                <td className="p-2">
+                <td>
                   <NumberInput
                     id={`items.${index}.quantity`}
                     register={register(`items.${index}.quantity`)}
@@ -120,7 +119,7 @@ export default function POLineItemsTable({
                     className="text-right"
                   />
                 </td>
-                <td className="p-2">
+                <td>
                   <NumberInput
                     id={`items.${index}.unit_price`}
                     register={register(`items.${index}.unit_price`)}
@@ -137,7 +136,7 @@ export default function POLineItemsTable({
                     {formatNumber(rowAmt, orgDetails?.currency)}
                   </p>
                 </td>
-                <td className="p-2">
+                <td>
                   <div className="flex justify-end">
                     <IconWrapper
                       onClick={() => remove(index)}
@@ -151,12 +150,13 @@ export default function POLineItemsTable({
           })}
         </tbody>
       </table>
-
-      <div
-        onClick={handleAddItem}
-        className="flex items-center w-fit text-xs font-semibold text-primary-500 cursor-pointer"
-      >
-        <Plus width={16} className="mr-1" /> New PO item
+      <div className="mt-4 px-4">
+        <Button
+          onClick={handleAddItem}
+          name="New PO item"
+          button_type="secondary"
+          icon_type="plus"
+        />
       </div>
     </div>
   );
