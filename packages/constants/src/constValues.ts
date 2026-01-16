@@ -10,6 +10,39 @@ export const tabOptions = [
   "Approved",
 ];
 
+// Tab options for UI navigation or filtering - Bill section
+export const tabOptionsBill = [
+  "All Bills",
+  "Under Review",
+  "Under Approval",
+  "Approved",
+  "Rejected",
+  "Ledger Entry",
+  "Draft",
+];
+
+// Tab options for UI navigation or filtering - PO section
+export const tabOptionsPO = [
+  "All POs",
+  "Under Review",
+  "Under Approval",
+  "Approved",
+  "Rejected",
+  "Ledger Entry",
+  "Draft",
+];
+
+// Tab options for UI navigation or filtering - Vendor credit section
+export const tabOptionsVendorCredit = [
+  "All Credits",
+  "Under Review",
+  "Under Approval",
+  "Approved",
+  "Rejected",
+  "Ledger Entry",
+  "Draft",
+];
+
 // Tab options for UI navigation or filtering
 export const memberTabOptions = ["Active members", "Invited members"];
 

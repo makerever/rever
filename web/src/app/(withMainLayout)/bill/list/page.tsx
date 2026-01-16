@@ -6,11 +6,11 @@ import {
   CheckBox,
   CustomTooltip,
   DataTable,
-  PageLoader,
+  DuplicateFlag,
   PillItem,
   UploadFilesModal,
 } from "@rever/common";
-import { tabOptions } from "@rever/constants";
+import { tabOptionsBill } from "@rever/constants";
 import { BILL_API, useApi } from "@rever/services";
 import { useUserStore } from "@rever/stores";
 import { Bill, BillApiResponse } from "@rever/types";
@@ -29,7 +29,7 @@ import { useEffect, useMemo, useState } from "react";
 const BillList = () => {
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<string | undefined>("Overview");
+  const [activeTab, setActiveTab] = useState<string | undefined>("All Bills");
   const [billData, setBillData] = useState<Bill[]>([]);
   const [search, setSearch] = useState("");
 
@@ -43,12 +43,12 @@ const BillList = () => {
 
   const orgDetails = useUserStore((state) => state.user?.organization);
 
-  const [isFileUploadModal, setIsFileUploadModal] = useState(false);
-
   const collator = useMemo(
     () => new Intl.Collator(undefined, { numeric: true, sensitivity: "base" }),
     [],
   );
+
+  const [isFileUploadModal, setIsFileUploadModal] = useState(false);
 
   // Define columns for the DataTable
   const columns: ColumnDef<Bill>[] = useMemo(
@@ -78,21 +78,16 @@ const BillList = () => {
                 checked={row.getIsSelected()}
                 onChange={row.getToggleSelectedHandler()}
               />
-              <div className="flex items-center ">
+              <div className="flex items-center gap-1.5">
+                {row?.original?.is_duplicate ? <DuplicateFlag /> : null}
                 <span
                   onClick={() =>
-                    router.push(`/bill/view/?id=${row.original.id}`)
+                    router.push(`/bill/view?id=${row.original.id}`)
                   }
-                  className="font-semibold cursor-pointer overflow-hidden text-ellipsis"
+                  className="underline cursor-pointer overflow-hidden text-ellipsis"
                 >
-                  {getValue() as string}{" "}
+                  {(getValue() as string) || "--"}{" "}
                 </span>
-                {row?.original?.is_duplicate ? (
-                  <PillItem
-                    name="Duplicate"
-                    className="text-red-500 bg-red-50"
-                  />
-                ) : null}
               </div>
             </div>
           );
@@ -142,7 +137,7 @@ const BillList = () => {
               }
               className="flex items-center gap-4"
             >
-              <span className="font-semibold cursor-pointer overflow-hidden text-ellipsis ">
+              <span className="underline cursor-pointer overflow-hidden text-ellipsis ">
                 {(getValue() as string) || "--"}
               </span>
             </div>
@@ -156,18 +151,21 @@ const BillList = () => {
         accessorFn: (row) => row.vendor?.name || "",
         sortingFn: "alphanumeric",
         sortDescFirst: false,
-        cell: ({ row, getValue }) => (
-          <div
-            onClick={() =>
-              router.push(`/vendor/view?id=${row.original.vendor?.id}`)
-            }
-            className="flex items-center gap-4"
-          >
-            <span className="font-semibold cursor-pointer overflow-hidden text-ellipsis ">
-              {(getValue() as string) || "--"}
-            </span>
-          </div>
-        ),
+        cell: ({ row, getValue }) =>
+          getValue() ? (
+            <div
+              onClick={() =>
+                router.push(`/vendor/view?id=${row.original.vendor?.id}`)
+              }
+              className="flex items-center gap-4"
+            >
+              <span className="underline cursor-pointer overflow-hidden text-ellipsis ">
+                {getValue() as string}
+              </span>
+            </div>
+          ) : (
+            "--"
+          ),
       },
       {
         accessorKey: "total",
@@ -195,13 +193,11 @@ const BillList = () => {
 
           return (
             <div className="flex items-center pr-2 justify-between w-32">
-              <span
-                className={`text-2xs border py-1 px-1.5 rounded-md ${getStatusClass(
-                  value,
-                )}`}
-              >
-                {value}
-              </span>
+              <PillItem
+                className={`${getStatusClass(getLabelForBillStatus(value) || "")}`}
+                isRounded={true}
+                name={getLabelForBillStatus(value || "")}
+              />
             </div>
           );
         },
@@ -215,16 +211,15 @@ const BillList = () => {
         header: "Status",
         sortDescFirst: false,
         cell: ({ row, getValue }) => {
-          const value = getLabelForBillStatus(getValue() as string);
+          const value = getValue() as string;
           return (
             <div className="flex items-center pr-2 justify-between">
-              <span
-                className={`text-2xs border py-1 px-1.5 rounded-md ${getStatusClass(
-                  value,
-                )}`}
-              >
-                {value}
-              </span>
+              <PillItem
+                className={`${getStatusClass(getLabelForBillStatus(value) || "")}`}
+                isRounded={true}
+                name={getLabelForBillStatus(value || "")}
+              />
+
               {row?.original.is_attachment && (
                 <CustomTooltip content="PDF attached">
                   <div>
@@ -264,14 +259,14 @@ const BillList = () => {
             total: val?.total || 0,
             is_attachment: val?.is_attachment,
             is_duplicate: val?.is_duplicate,
-            status: getLabelForBillStatus(val?.status),
+            status: val?.status,
             match_status: val?.match_status,
           };
         });
       setBillData(billData);
       setIsLoading(false);
     }
-  }, [bill, orgDetails?.currency, orgDetails?.date_format]);
+  }, [bill, orgDetails?.currency, orgDetails?.date_format, isLoading]);
 
   // Handler to redirect to bill creation page
   const handleRedirect = () => {
@@ -281,9 +276,11 @@ const BillList = () => {
   // Filter bills based on active tab and search input
   const filteredBills = useMemo(() => {
     const filteredByTab =
-      activeTab === "Overview"
+      activeTab === "All Bills"
         ? billData
-        : billData?.filter((bill) => bill.status === activeTab);
+        : billData?.filter(
+          (bill) => getLabelForBillStatus(bill?.status || "") === activeTab,
+        );
 
     if (!search.trim()) return filteredByTab;
 
@@ -305,32 +302,26 @@ const BillList = () => {
 
   return (
     <>
-      {/* Show table only when not loading */}
-      {isLoading ? (
-        <PageLoader />
-      ) : (
-        <DataTable
-          onActionBtClick={handleRedirect}
-          addBtnText="Create bill"
-          tableHeading="Bills"
-          tableData={filteredBills}
-          columns={columns}
-          tabNames={tabOptions}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          setSearch={setSearch}
-          search={search}
-          clearSearch={() => setSearch("")}
-          flowImageSrc="/images/flowImages/billMasterFlow.svg"
-          statusFilterLabel="Stages"
-          btnPopupItems={["Create bill", "Upload bills"]}
-          onBtnPopupItemsClick={(value) => {
-            if (value === "Upload bills") {
-              setIsFileUploadModal(true);
-            }
-          }}
-        />
-      )}
+      <DataTable
+        onActionBtClick={handleRedirect}
+        addBtnText="Create Bill"
+        uploadBtnText="Upload Bills"
+        tableHeading="Bills"
+        tableData={filteredBills}
+        columns={columns}
+        tabNames={tabOptionsBill}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        tabSeparatorAt={6}
+        setSearch={setSearch}
+        search={search}
+        clearSearch={() => setSearch("")}
+        flowImageSrc="/images/flowImages/billMasterFlow.svg"
+        onUploadBtnClick={() => setIsFileUploadModal(true)}
+        // isBillEmailConfigured={orgDetails?.ap_intake_email}
+        isBillEmailConfigured={""}
+        isLoading={isLoading}
+      />
 
       {isFileUploadModal ? (
         <UploadFilesModal
