@@ -17,7 +17,6 @@ export const tabOptionsBill = [
   "Under Approval",
   "Approved",
   "Rejected",
-  "Ledger Entry",
   "Draft",
 ];
 
@@ -28,18 +27,6 @@ export const tabOptionsPO = [
   "Under Approval",
   "Approved",
   "Rejected",
-  "Ledger Entry",
-  "Draft",
-];
-
-// Tab options for UI navigation or filtering - Vendor credit section
-export const tabOptionsVendorCredit = [
-  "All Credits",
-  "Under Review",
-  "Under Approval",
-  "Approved",
-  "Rejected",
-  "Ledger Entry",
   "Draft",
 ];
 

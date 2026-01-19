@@ -1,4 +1,4 @@
-import { AddressTypeProps } from "../vendor/type";
+import { AddressTypeProps, AuditValidationAddressTypeProps } from "../vendor/type";
 import {
   Control,
   UseFormGetValues,
@@ -8,8 +8,11 @@ import {
 import { addPurchaseOrderSchemaValues } from "@rever/validations";
 
 export type POLineItemsProps = {
+  showAuditHistory: boolean;
   poItems?: poItemTypeProps[];
   poDetails?: Partial<PurchaseOrder>;
+  itemsAuditValidation?: PoItemsAuditValidationType[] | boolean[];
+  auditValidation: PoAuditValidationType | null;
 };
 
 export type POAPIResponse = {
@@ -28,9 +31,9 @@ export type poItemTypeProps = {
 
 // Interface representing the structure of a PO object
 export interface PurchaseOrder {
-  id?: string | number;
+  id?: number;
   po_number?: string | undefined;
-  po_address?: AddressTypeProps | undefined;
+  billing_address?: AddressTypeProps | undefined;
   po?: string | undefined;
   vendor_id?: string;
   vendor?: { id: string | number; name: string } | null;
@@ -47,6 +50,39 @@ export interface PurchaseOrder {
   updated_at?: string;
   created_at?: string;
   is_attachment?: boolean;
+}
+
+export interface PoAuditValidationType {
+  id?: boolean;
+  po_number?: boolean;
+  billing_address?: AuditValidationAddressTypeProps | boolean;
+  po?: boolean;
+  vendor_id?: boolean;
+  vendor?: { id: boolean; name: boolean } | boolean;
+  payment_terms?: boolean;
+  po_date?: boolean;
+  delivery_date?: boolean;
+  sub_total?: boolean;
+  total_tax?: boolean;
+  tax_percentage?: boolean;
+  total?: boolean;
+  status: boolean;
+  comments?: boolean;
+  updated_at?: boolean;
+  created_at?: boolean;
+  is_attachment?: boolean;
+  items?: PoItemsAuditValidationType[];
+}
+
+export interface PoItemsAuditValidationType {
+  description?: boolean;
+  chart_of_account?: { id: boolean, name: boolean };
+  product_code?: boolean;
+  quantity?: boolean;
+  received_quantity?: boolean;
+  pending_approval_quantity?: boolean;
+  unit_price?: boolean;
+  amount?: boolean;
 }
 
 // Interface for props used in the View PO Details component
