@@ -75,17 +75,6 @@ const OrgProfile = ({
           </div>
         </div>
       </div>
-      {/* Invite members action */}
-
-      {hasPermission("members", "create") ? (
-        <div
-          onClick={() => routeAction && routeAction("/settings/members/invite")}
-          className="menu-item menu-item-sidebar"
-        >
-          <UserRoundPlus size={16} />
-          <p className="ms-1.5">Invite members</p>
-        </div>
-      ) : null}
 
       {/* Create bills action */}
       {hasPermission("bill", "create") ? (

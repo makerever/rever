@@ -152,7 +152,7 @@ const POApproval = () => {
       } else {
         showErrorToast(
           res?.data?.detail ||
-            "Cannot disable approval; some POs are still under approval.",
+          "Cannot disable approval; some POs are still under approval.",
         );
       }
     } catch {
@@ -184,9 +184,12 @@ const POApproval = () => {
   const autoSave = async (currentData: Approver[]) => {
     try {
       const validAssignments: ApproverAssignment[] = currentData
-        .filter((v) => v.approver?.value !== undefined)
+        .filter(
+          (v): v is Approver & { approver: { value: string | number } } =>
+            v.approver?.value !== undefined
+        )
         .map((v, i) => ({
-          approver: v.approver!.value,
+          approver: v.approver.value,
           level: i + 1,
         }));
 

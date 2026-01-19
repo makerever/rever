@@ -216,13 +216,11 @@ const AddPOComponentWithParams = () => {
         setValue("poNumber", response?.data?.po_number);
         setValue(
           "po_date",
-          response?.data?.po_date ? new Date(response?.data?.po_date) : null,
+          new Date(response?.data?.po_date),
         );
         setValue(
           "delivery_date",
-          response?.data?.delivery_date
-            ? new Date(response?.data?.delivery_date)
-            : null,
+          new Date(response?.data?.delivery_date)
         );
         setValue("payment_terms", response?.data?.payment_terms);
         setValue("vendor", response?.data.vendor?.id);
