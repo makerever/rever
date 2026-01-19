@@ -4,6 +4,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  AuthLayout,
   Button,
   Label,
   PasswordInput,
@@ -26,7 +27,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import Cookies from "js-cookie";
-import Image from "next/image";
 
 // Main Invitation component for completing user signup after invitation
 const Invitation = () => {
@@ -124,99 +124,80 @@ const Invitation = () => {
   return (
     <>
       {/* Page background and centered container */}
-      <div className="bg-gray-100 h-screen flex items-center flex-col justify-center">
-        <div className="bg-white lg:w-2/5 mx-4 shadow-lg rounded-lg p-8">
-          <div className="lg:w-3/5 w-4/5 flex items-center mb-4">
-            <Image
-              src="/images/reverLogoDark2.svg"
-              alt="Inviting user to Rever"
-              width={36}
-              height={36}
+
+      <AuthLayout
+        mainTitle="Welcome to Rever"
+        subTitle={"Fill up your details to get started"}
+      >
+        <form onSubmit={handleSubmit(handleInviteMember)}>
+          <div>
+            <Label htmlFor="organization" text="Organization Name" />
+            <TextInput
+              id="organization"
+              value={inviteUserDetails?.organization}
+              disabled={true}
             />
-            <p
-              className={`text-gray-800 font-medium dark:text-gray-400 ms-2 text-xl`}
-            >
-              Rever
-            </p>
           </div>
 
-          {/* Organization and invitation details */}
-          <p className="mt-8 text-md font-semibold text-gray-800">
-            {inviteUserDetails?.organization}
-          </p>
+          <div className="mt-4">
+            <Label htmlFor="email" text="Email" />
+            <TextInput
+              id="email"
+              value={inviteUserDetails?.email}
+              disabled={true}
+            />
+          </div>
 
-          <p className="mt-5 text-xs text-gray-600">
-            You’ve been invited to join Rever by{" "}
-            <span className="font-semibold">
-              {inviteUserDetails?.invited_by}
-            </span>
-          </p>
-          <p className="mt-1 text-xs text-gray-600">
-            We look forward to having you with us!
-          </p>
-
-          <p className="mt-2 text-xs text-gray-600">
-            Create a Rever account for the email address&nbsp;
-            <span className="font-semibold">
-              {inviteUserDetails?.email}
-            </span>{" "}
-            <br /> to accept the invitation.
-          </p>
-
-          {/* Signup form */}
-          <form onSubmit={handleSubmit(handleInviteMember)}>
-            <div className="grid grid-cols-2 gap-5 mt-6">
-              {/* First name input */}
-              <div>
-                <Label htmlFor="first_name" text="First name" isRequired />
-                <TextInput
-                  register={register("first_name")}
-                  id="first_name"
-                  placeholder="Enter first name"
-                  error={errors.first_name}
-                  value={getValues("first_name")}
-                />
-              </div>
-              {/* Last name input */}
-              <div>
-                <Label htmlFor="last_name" text="Last name" isRequired />
-                <TextInput
-                  register={register("last_name")}
-                  id="last_name"
-                  placeholder="Enter last name"
-                  error={errors.last_name}
-                  value={getValues("last_name")}
-                />
-              </div>
-            </div>
-
-            {/* Password input */}
-            <div className="mt-4">
-              <Label htmlFor="password" text="Password" />
-              <PasswordInput
-                register={register("password")}
-                id="password"
-                placeholder="Enter password"
-                error={touchedFields.password ? errors.password : undefined}
-                value={getValues("password")}
-                password={password}
-                showPasswordStrength
+          <div className="grid grid-cols-2 gap-5 mt-4">
+            {/* First name input */}
+            <div>
+              <Label htmlFor="first_name" text="First Name" isRequired />
+              <TextInput
+                register={register("first_name")}
+                id="first_name"
+                placeholder="Enter first name"
+                error={errors.first_name}
+              // value={getValues("first_name")}
               />
             </div>
-
-            {/* Submit button */}
-            <div className="grid grid-cols-2 w-fit gap-3 mt-6">
-              <Button
-                disabled={isDataValid}
-                type="submit"
-                text="Save"
-                className="text-white"
-                isLoading={isLoaderFormSubmit}
+            {/* Last name input */}
+            <div>
+              <Label htmlFor="last_name" text="Last Name" isRequired />
+              <TextInput
+                register={register("last_name")}
+                id="last_name"
+                placeholder="Enter last name"
+                error={errors.last_name}
+              // value={getValues("last_name")}
               />
             </div>
-          </form>
-        </div>
-      </div>
+          </div>
+
+          {/* Password input */}
+          <div className="mt-4 mb-5">
+            <Label htmlFor="password" text="Password" />
+            <PasswordInput
+              register={register("password")}
+              id="password"
+              placeholder="Enter password"
+              error={touchedFields.password ? errors.password : undefined}
+              value={getValues("password")}
+              password={password}
+              showPasswordStrength
+            />
+          </div>
+
+          {/* Submit button */}
+          <Button
+            type="submit"
+            name="Let's get started"
+            disabled={isDataValid}
+            button_type="primary"
+            icon_type={isLoaderFormSubmit ? "loader" : null}
+            width="w-full"
+          />
+        </form>
+      </AuthLayout>
     </>
   );
 };
