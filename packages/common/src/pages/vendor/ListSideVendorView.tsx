@@ -59,7 +59,7 @@ const ListSideVendorView = ({
         </div>
 
         {/* Vendor List */}
-        <div className="h-[640px] overflow-auto custom_scrollbar">
+        <div className="h-160 overflow-auto custom_scrollbar">
           {filteredData.length > 0 ? (
             filteredData.map((data, i) => (
               <div

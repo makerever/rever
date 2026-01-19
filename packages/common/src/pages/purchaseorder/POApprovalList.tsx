@@ -2,7 +2,7 @@
 
 "use client";
 
-import { CheckBox, PageLoader, Tabs } from "@rever/common";
+import { CheckBox, CustomTooltip, PillItem } from "@rever/common";
 import { DataTable } from "@rever/common";
 import { PURCHASE_ORDER_API, useApi } from "@rever/services";
 import { useUserStore } from "@rever/stores";
@@ -14,6 +14,7 @@ import {
   getStatusClass,
 } from "@rever/utils";
 import { ColumnDef, sortingFns } from "@tanstack/react-table";
+import { Paperclip } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -23,12 +24,10 @@ const POApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
 
   const [poApprovalList, setPoApprovalList] = useState<PurchaseOrder[]>([]);
 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
   const orgDetails = useUserStore((state) => state.user?.organization);
 
   // Fetch approval PO data using SWR
-  const { data: underApprovalPO } = useApi<PurchaseOrder[]>(
+  const { data: underApprovalPO, isLoading } = useApi<PurchaseOrder[]>(
     "approavls",
     `${PURCHASE_ORDER_API.UNDER_APPROVAL_PO}`,
   );
@@ -44,13 +43,12 @@ const POApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
           delivery_date: val?.delivery_date,
           vendor: val?.vendor,
           total: val?.total || 0,
-          status: getLabelForBillStatus(val?.status),
+          is_attachment: val?.is_attachment,
+          status: val?.status,
         }));
         setPoApprovalList(structuredData);
-        setIsLoading(false);
       } else {
         setPoApprovalList([]);
-        setIsLoading(false);
       }
     } else {
       setPoApprovalList([]);
@@ -96,9 +94,9 @@ const POApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
                 onClick={() =>
                   router.push(`/purchaseorder/${row?.original?.id}/review`)
                 }
-                className="font-semibold cursor-pointer overflow-hidden text-ellipsis"
+                className="underline cursor-pointer overflow-hidden text-ellipsis"
               >
-                {getValue() as string}
+                {(getValue() as string) || "--"}
               </span>
             </div>
           );
@@ -146,8 +144,8 @@ const POApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
             }
             className="flex items-center gap-4"
           >
-            <span className="font-semibold cursor-pointer overflow-hidden text-ellipsis">
-              {getValue() as string}
+            <span className="underline cursor-pointer overflow-hidden text-ellipsis">
+              {(getValue() as string) || "--"}
             </span>
           </div>
         ),
@@ -155,6 +153,7 @@ const POApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
       {
         accessorKey: "total",
         header: "Total amount",
+        accessorFn: (row) => Number(row.total) || 0,
         sortingFn: "basic",
         sortDescFirst: false,
         cell: ({ getValue }) => {
@@ -162,7 +161,7 @@ const POApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
           return (
             <div className="flex items-center gap-4 py-1">
               <span className="overflow-hidden text-ellipsis w-full">
-                {formatNumber(rawAmount, orgDetails?.currency)}
+                {formatNumber(rawAmount)}
               </span>
             </div>
           );
@@ -172,18 +171,24 @@ const POApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
         accessorKey: "status",
         header: "Status",
         sortDescFirst: false,
-        cell: ({ getValue }) => {
+        cell: ({ row, getValue }) => {
           const value = getValue() as string;
 
           return (
-            <div className="flex items-center pr-2 justify-between">
-              <span
-                className={`text-2xs border py-1 px-1.5 rounded-md ${getStatusClass(
-                  value,
-                )}`}
-              >
-                {value}
-              </span>
+            <div className="flex items-center pr-2 justify-between w-32">
+              <PillItem
+                className={`${getStatusClass(getLabelForBillStatus(value) || "")}`}
+                isRounded={true}
+                name={getLabelForBillStatus(value || "")}
+              />
+
+              {row?.original.is_attachment && (
+                <CustomTooltip content="PDF attached">
+                  <div>
+                    <Paperclip className="text-slate-400" width={14} />
+                  </div>
+                </CustomTooltip>
+              )}
             </div>
           );
         },
@@ -210,23 +215,19 @@ const POApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
 
   return (
     <>
-      {isLoading ? (
-        <PageLoader />
-      ) : (
-        <>
-          <>
-            <DataTable
-              noStatusFilter
-              tableHeading="PO approvals"
-              tableData={filteredPOApprovals}
-              columns={columns}
-              setSearch={setSearch}
-              search={search}
-              clearSearch={() => setSearch("")}
-            />
-          </>
-        </>
-      )}
+      <DataTable
+        noStatusFilter
+        tableHeading="Approvals"
+        tableData={filteredPOApprovals}
+        columns={columns}
+        setSearch={setSearch}
+        search={search}
+        clearSearch={() => setSearch("")}
+        isLoading={isLoading}
+        tabNames={tabs}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
     </>
   );
 };
