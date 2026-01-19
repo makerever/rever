@@ -5,17 +5,19 @@
 import {
   AuditHistory,
   Button,
-  CheckBox,
   DataTable,
-  IconWrapper,
+  DuplicateFlag,
   PageLoader,
   PdfViewer,
   PillItem,
+  PopupButton,
   SidePanel,
 } from "@rever/common";
 import { Label, CustomTooltip } from "@rever/common";
 import { ToggleSwitch } from "@rever/common";
 import {
+  checkAuditValidation,
+  deepMatchAuditVersion,
   formatDate,
   formatNumber,
   getLabelForBillStatus,
@@ -28,12 +30,13 @@ import {
   getLabelForTerm,
   // getStatusClass,
 } from "@rever/utils";
-import { Bill, ViewPODetailsProps } from "@rever/types";
+import { Bill, PoAuditValidationType, PopupButtonMenuProps, PurchaseOrder, ViewPODetailsProps } from "@rever/types";
 import {
+  Ellipsis,
   FileClock,
   FileSymlink,
   Paperclip,
-  SquarePen,
+  Pencil,
   Trash,
   X,
 } from "lucide-react";
@@ -42,9 +45,10 @@ import POLineItemsReadOnly from "./POLineItemViews";
 // import { Button } from "@rever/common";
 import { useUserStore } from "@rever/stores";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   getAssociateBillsByPoIDApi,
+  // getIndividualPOAuditApi,
   getPOAuditHistoryApi,
 } from "@rever/services";
 import { ColumnDef, sortingFns } from "@tanstack/react-table";
@@ -69,14 +73,29 @@ const ViewPODetails = ({
 
   const orgDetails = useUserStore((state) => state.user?.organization);
 
-  const [sidePanel, setSidePanel] = useState(false);
+  const [currentPoDetails, setCurrentPoDetails] = useState<Partial<PurchaseOrder>>(poDetails);
+  const [latestPoDetials, setLatestPoDetails] = useState<Partial<PurchaseOrder>>(poDetails);
+  const [auditValidation, setAuditValidation] = useState<PoAuditValidationType | null>(null);
+
   const [associateBillsSidePanel, setAssociateBillsSidePanel] = useState(false);
 
   const [auditData, setAuditData] = useState([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isAuditLoading, setIsAuditLoading] = useState<boolean>(true);
 
   const [associateBillsData, setAssociateBillsData] = useState<Bill[]>([]);
 
-  const [isAuditLoading, setIsAuditLoading] = useState<boolean>(true);
+  const [showBtnPopup, setShowBtnPopup] = useState<boolean>(false);
+  const [showAuditHistory, setShowAuditHistory] = useState<boolean>(false);
+
+  const [auditVersionDate, setAuditVersionDate] = useState<string | null>(null);
+  const [currentAuditVersion, setCurrentAuditVersion] = useState<number | null>(null);
+
+  const poDetailsSection = useRef<HTMLDivElement | null>(null);
+  const poLineItemsSection = useRef<HTMLDivElement | null>(null);
+
+  const [poLineItemsHeight, setPoLineItemsHeight] = useState<number | null>(null);
+  const [poDetailsHeight, setPoDetailsHeight] = useState<number | null>(null);
 
   const [isAssociateLoading, setIsAssociateLoading] = useState<boolean>(true);
 
@@ -84,6 +103,149 @@ const ViewPODetails = ({
     () => new Intl.Collator(undefined, { numeric: true, sensitivity: "base" }),
     [],
   );
+
+  // ---------- API HANDLERS ---------- //
+
+  const getBillAuditHistory = useCallback(async (id: number) => {
+    setIsLoading(true);
+    setIsAuditLoading(true);
+
+    const response = await getPOAuditHistoryApi(String(id));
+    if (response?.status === 200) {
+      setAuditData(response.data);
+      setCurrentAuditVersion(response.data?.[0]?.history_id ?? null);
+
+      const formattedDate = formatDate(
+        response.data?.[0]?.changed_on,
+        orgDetails?.date_format,
+        undefined,
+        false,
+        true,
+      );
+
+      setAuditVersionDate(formattedDate ?? null);
+    }
+    setIsAuditLoading(false);
+    setIsLoading(false);
+  }, [orgDetails?.date_format]);
+
+  // const fetchIndividualAuditHistory = useCallback(
+  //   async (historyId: number | null) => {
+  //     if (!latestPoDetials?.id || !historyId) return;
+
+  //     const response = await getIndividualPOAuditApi(latestPoDetials.id, historyId);
+  //     if (response?.status !== 200) return;
+
+  //     setCurrentPoDetails({
+  //       ...response.data,
+  //       id: latestPoDetials.id,
+  //     });
+
+  //     setIsAuditLoading(false);
+  //   },
+  //   [latestPoDetials?.id]
+  // );
+
+  const getAssociateBillsByPoID = useCallback(async (id: string) => {
+    const response = await getAssociateBillsByPoIDApi(id);
+    if (response?.status === 200) {
+      setAssociateBillsData(response.data);
+      setIsAssociateLoading(false);
+    }
+  }, []);
+
+  // ---------- HEIGHT UTIL ---------- //
+
+  const calculateHeights = useCallback(() => {
+    if (!poDetailsSection.current || !poLineItemsSection.current) return;
+
+    setPoDetailsHeight(poDetailsSection.current.offsetHeight);
+    setPoLineItemsHeight(poLineItemsSection.current.offsetHeight);
+  }, []);
+
+  // ---------- EFFECTS ---------- //
+
+  // Initial Load
+  useEffect(() => {
+    setCurrentPoDetails(poDetails);
+    setLatestPoDetails(poDetails);
+    getAssociateBillsByPoID(String(poDetails?.id));
+  }, []);
+
+  // Load audit list on open
+  useEffect(() => {
+    if (!showAuditHistory || !currentPoDetails?.id) return;
+    getBillAuditHistory(currentPoDetails.id);
+  }, [showAuditHistory, currentPoDetails?.id, getBillAuditHistory]);
+
+  // Fetch selected version
+  // useEffect(() => {
+  //   if (!currentAuditVersion) return;
+  //   fetchIndividualAuditHistory(currentAuditVersion);
+  // }, [currentAuditVersion, fetchIndividualAuditHistory]);
+
+  // Generate change validation object
+  useEffect(() => {
+    if (!latestPoDetials || !currentPoDetails) return;
+
+    const validation = deepMatchAuditVersion(latestPoDetials, currentPoDetails);
+    setAuditValidation(validation);
+
+  }, [currentPoDetails]);
+
+  // Calculate height after audit panel visible
+  useLayoutEffect(() => {
+    if (!showAuditHistory || isLoading) return;
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(calculateHeights);
+    });
+  }, [showAuditHistory, isLoading, calculateHeights]);
+
+  // Live resize tracking
+  useEffect(() => {
+    if (!poDetailsSection.current || !poLineItemsSection.current) return;
+    const observer = new ResizeObserver(calculateHeights);
+
+    observer.observe(poDetailsSection.current);
+    observer.observe(poLineItemsSection.current);
+
+    return () => observer.disconnect();
+  }, [calculateHeights]);
+
+  // Fetch associate bills again on id change
+  useEffect(() => {
+    if (poDetails?.id) getAssociateBillsByPoID(String(poDetails.id));
+  }, [poDetails?.id, getAssociateBillsByPoID]);
+
+  // ---------- HANDLERS ---------- //
+
+  // const handleClickAuditHistoryCard = async (historyId: number) => {
+  //   if (!latestPoDetials?.id) return;
+
+  //   const response = await getIndividualPOAuditApi(latestPoDetials.id, historyId);
+  //   if (response?.status !== 200) return;
+
+  //   setCurrentPoDetails({ ...response.data, id: latestPoDetials.id });
+  // };
+
+  const handleCloseAuditHistory = () => {
+    setShowAuditHistory(false);
+    setIsAuditLoading(false);
+    setCurrentPoDetails(latestPoDetials);
+    setCurrentAuditVersion(null);
+    setAuditVersionDate(null);
+  };
+
+  // ---------- DATA FILTER ---------- //
+
+  const filteredAssociateBills = useMemo(() => {
+    return associateBillsData.map((bill: Bill) => ({
+      ...bill,
+      status: getLabelForBillStatus(bill?.status),
+    }));
+  }, [associateBillsData]);
+
 
   // Define columns for the DataTable
   const columns: ColumnDef<Bill>[] = useMemo(
@@ -97,7 +259,7 @@ const ViewPODetails = ({
           return collator.compare(a, b);
         },
         sortDescFirst: false,
-        header: ({}) => (
+        header: ({ }) => (
           <div className="flex items-center gap-4">
             <span>Bill</span>
           </div>
@@ -105,21 +267,16 @@ const ViewPODetails = ({
         cell: ({ row, getValue }) => {
           return (
             <div className="flex items-center gap-4">
-              <div className="flex items-center ">
+              <div className="flex items-center gap-1.5">
+                {row?.original?.is_duplicate ? <DuplicateFlag /> : null}
                 <span
                   onClick={() =>
-                    router.push(`/bill/view/?id=${row.original.id}`)
+                    router.push(`/bill/view?id=${row.original.id}`)
                   }
-                  className="font-semibold cursor-pointer overflow-hidden text-ellipsis"
+                  className="underline cursor-pointer overflow-hidden text-ellipsis"
                 >
-                  {getValue() as string}{" "}
+                  {(getValue() as string) || "--"}{" "}
                 </span>
-                {row?.original?.is_duplicate ? (
-                  <PillItem
-                    name="Duplicate"
-                    className="text-red-500 bg-red-50"
-                  />
-                ) : null}
               </div>
             </div>
           );
@@ -154,25 +311,6 @@ const ViewPODetails = ({
         ),
       },
       {
-        accessorKey: "vendor",
-        header: "Vendor",
-        accessorFn: (row) => row.vendor?.name || "",
-        sortingFn: "alphanumeric",
-        sortDescFirst: false,
-        cell: ({ row, getValue }) => (
-          <div
-            onClick={() =>
-              router.push(`/vendor/view?id=${row.original.vendor?.id}`)
-            }
-            className="flex items-center gap-4"
-          >
-            <span className="font-semibold cursor-pointer overflow-hidden text-ellipsis ">
-              {(getValue() as string) || "--"}
-            </span>
-          </div>
-        ),
-      },
-      {
         accessorKey: "total",
         header: "Total amount",
         accessorFn: (row) => Number(row.total) || 0,
@@ -198,14 +336,11 @@ const ViewPODetails = ({
 
           return (
             <div className="flex items-center pr-2 justify-between w-32">
-              <span
-                className={`text-2xs border py-1 px-1.5 rounded-md ${getStatusClass(
-                  value,
-                )}`}
-              >
-                {value}
-              </span>
-
+              <PillItem
+                className={`${getStatusClass(value || "")}`}
+                isRounded={true}
+                name={value || ""}
+              />
               {row?.original.is_attachment ? (
                 <CustomTooltip content="PDF attached">
                   <div>
@@ -225,307 +360,344 @@ const ViewPODetails = ({
     [collator, orgDetails?.date_format, router],
   );
 
-  const getPOAuditHistory = useCallback(async (id: string) => {
-    const response = await getPOAuditHistoryApi(id);
-    if (response?.status === 200) {
-      setAuditData(response?.data);
-      setIsAuditLoading(false);
-    }
-  }, []);
+  //Options for popup button
+  const popupButtonItem: PopupButtonMenuProps[] = [
+    {
+      name: "Edit PO",
+      icon: <Pencil size={16} />,
+      isShown:
+        hasPermission("purchaseorder", "update") &&
+        poDetails?.status !== "approved" &&
+        poDetails?.status !== "under_approval",
+      onClick: () => {
+        router.push("/purchaseorder/edit?id=" + poDetails?.id);
+      },
+    },
+    {
+      name: "Associated bills",
+      icon: <FileSymlink size={16} />,
+      isShown: true,
+      onClick: () => setAssociateBillsSidePanel(true),
+    },
+    {
+      name: "Audit History",
+      icon: <FileClock width={16} />,
+      isShown: true,
+      onClick: () => {
+        setShowAuditHistory(true);
+        setShowBtnPopup(false);
+      },
+    },
+    {
+      name: "Delete PO",
+      icon: <Trash size={16} />,
+      isShown:
+        hasPermission("purchaseorder", "delete") &&
+        poDetails?.status !== "approved" &&
+        poDetails?.status !== "under_approval",
+      onClick: deletePO,
+    },
+  ];
 
-  const getAssociateBillsByPoID = useCallback(async (id: string) => {
-    const response = await getAssociateBillsByPoIDApi(id);
-    if (response?.status === 200) {
-      setAssociateBillsData(response?.data);
-      setIsAssociateLoading(false);
-    }
-  }, []);
+  const billingAddressField =
+    typeof auditValidation?.billing_address === 'object'
+      ? Boolean(
+        auditValidation?.billing_address?.city &&
+        auditValidation?.billing_address?.country &&
+        auditValidation?.billing_address?.line1 &&
+        auditValidation?.billing_address?.line2 &&
+        auditValidation?.billing_address?.state &&
+        auditValidation?.billing_address?.zip_code
+      )
+      : auditValidation?.billing_address;
 
-  // Fetch audit history
-  useEffect(() => {
-    if (poDetails?.id) {
-      getPOAuditHistory(String(poDetails?.id));
-    }
-  }, [poDetails?.id, getPOAuditHistory]);
-
-  // Fetch associate bills
-  useEffect(() => {
-    if (poDetails?.id) {
-      getAssociateBillsByPoID(String(poDetails?.id));
-    }
-  }, [poDetails?.id, getAssociateBillsByPoID]);
-
-  // Filter bills based on active tab and search input
-  const filteredAssociateBills = useMemo(() => {
-    return associateBillsData.map((bill: Bill) => {
-      return {
-        ...bill,
-        status: getLabelForBillStatus(bill?.status),
-      };
-    });
-  }, [associateBillsData]);
 
   return (
     <>
-      <div className="flex lg:gap-8">
-        <div>
-          {/* Header section: Bill number, status, PDF toggle, edit/delete icons */}
-          <div
-            className={`flex items-center justify-between mb-8 ${
-              showPdf && fileUrl ? "w-full" : "w-3/4"
-            }`}
-          >
-            <div className="flex items-center gap-1">
-              {/* PO number */}
-              <p className="text-slate-800 mr-1 text-lg font-semibold">
-                {poDetails?.po_number}
+      <div className="bg-secondary-200">
+        {/* Header section: Bill number, status, PDF toggle, edit/delete icons */}
+        <div className="bg-white rounded-b-[20px] p-4 pt-16 border border-secondary-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {/* Po number */}
+              <p className="text-neutral-1100 font-medium text-2xl">
+                {currentPoDetails?.po_number ?? ""}
               </p>
-
               {/* PO status label */}
-              <span
-                className={`text-2xs border py-1 px-1.5 rounded-md ${getStatusClass(
-                  getLabelForBillStatus(poDetails?.status || ""),
+              <PillItem
+                className={`${getStatusClass(
+                  getLabelForBillStatus(currentPoDetails?.status || ""),
                 )}`}
-              >
-                {getLabelForBillStatus(poDetails?.status || "")}
-              </span>
-
+                isRounded={true}
+                name={getLabelForBillStatus(currentPoDetails?.status || "")}
+              />
               {/* Toggle to show/hide PDF if fileUrl exists */}
-              {fileUrl ? (
-                <div className="ms-4 flex items-center">
+              {(fileUrl && !showAuditHistory) && (
+                <div className="flex items-center">
                   <ToggleSwitch isOn={showPdf} setIsOn={setShowPdf} />
-                  <p className="ms-2 text-xs text-slate-800 dark:text-gray-200">
+                  <p className="ms-2 text-xs text-neutral-1100 dark:text-gray-200">
                     {!showPdf ? "Show pdf" : "Hide pdf"}
                   </p>
                 </div>
-              ) : null}
+              )}
             </div>
-
-            {/* Edit and Delete icons (not shown for approval users or approved bills) */}
-            {!isUserApproval ? (
-              <>
-                <div className="flex items-center gap-1">
-                  <div className="flex items-center gap-1">
-                    <CustomTooltip content="Associate bills">
-                      <div>
-                        <IconWrapper
-                          onClick={() => setAssociateBillsSidePanel(true)}
-                          icon={<FileSymlink width={16} />}
-                        />
-                      </div>
-                    </CustomTooltip>
-                    <CustomTooltip content="Audit history">
-                      <div>
-                        <IconWrapper
-                          onClick={() => setSidePanel(true)}
-                          icon={<FileClock width={16} />}
-                        />
-                      </div>
-                    </CustomTooltip>
-                  </div>
-                  {poDetails?.status !== "approved" &&
-                  poDetails?.status !== "under_approval" ? (
-                    <div className="flex items-center gap-1">
-                      {hasPermission("purchaseorder", "update") ? (
-                        <CustomTooltip content="Edit PO">
-                          <div>
-                            <IconWrapper
-                              onClick={() =>
-                                router.push(
-                                  `/purchaseorder/edit/?id=${poDetails.id}&showPdf=${showPdf}`,
-                                )
-                              }
-                              icon={<SquarePen width={16} />}
-                            />
-                          </div>
-                        </CustomTooltip>
-                      ) : null}
-
-                      {hasPermission("purchaseorder", "delete") ? (
-                        <CustomTooltip content="Delete PO">
-                          <div>
-                            <IconWrapper
-                              onClick={deletePO}
-                              icon={<Trash width={16} />}
-                              className="hover:bg-red-100 hover:text-red-500"
-                            />
-                          </div>
-                        </CustomTooltip>
-                      ) : null}
+            {/* Dropdown button for actions */}
+            <div className="flex items-center justify-center gap-3">
+              {/* Approval actions for users who can approve/reject */}
+              {(currentPoDetails?.status !== "draft" && !showAuditHistory) &&
+                <>
+                  {currentPoDetails?.status === "under_approval" && isUserApproval ? (
+                    <div className="flex items-center gap-3 w-fit">
+                      <Button
+                        name="Approve"
+                        onClick={handleApprovalAction}
+                        disabled={isLoaderFormSubmit}
+                        button_type="primary"
+                        icon_type="approve"
+                      />
+                      <Button
+                        name="Reject"
+                        onClick={handleRejectionAction}
+                        disabled={isLoaderFormSubmit}
+                        button_type="danger"
+                        icon_type="reject"
+                      />
                     </div>
                   ) : null}
-                </div>
-              </>
-            ) : null}
-          </div>
-
-          <div className="lg:flex lg:gap-8">
-            {/* PDF preview section (if enabled) */}
-            {fileUrl && showPdf ? (
-              <div className="lg:w-2/5 bg-white shadow-5xl rounded-md overflow-hidden">
-                <div
-                  // style={{ height: "580px" }}
-                  className="scrollbar_none overflow-auto"
-                >
-                  <PdfViewer fileUrl={fileUrl} />
-                </div>
-              </div>
-            ) : null}
-
-            {/* PO details section */}
-            <div
-              className={
-                fileUrl && showPdf ? "lg:w-3/5 mt-8 lg:mt-0" : "lg:w-3/4"
+                  {/* Actions for PO in review: send for approval, approve, or reject */}
+                  {currentPoDetails?.status === "in_review" ? (
+                    <div className="flex items-center gap-3 w-fit">
+                      {isApproverAvailable ? (
+                        <Button
+                          name="Send for approval"
+                          onClick={handleSendPOApproval}
+                          disabled={isLoaderFormSubmit}
+                          button_type="primary"
+                          icon_type="approve"
+                        />
+                      ) : (
+                        <Button
+                          name="Approve"
+                          onClick={handleApprovePO}
+                          disabled={isLoaderFormSubmit}
+                          button_type="primary"
+                          icon_type="approve"
+                        />
+                      )}
+                      <Button
+                        name="Reject"
+                        onClick={handleRejectPO}
+                        disabled={isLoaderFormSubmit}
+                        button_type="danger"
+                        icon_type="reject"
+                      />
+                      <div className="h-8 w-px bg-secondary-200"></div>
+                    </div>
+                  ) : null}
+                </>
               }
+              {/* Edit and Delete icons (not shown for approval users or approved PO) */}
+              {!isUserApproval ? (
+                <div className="flex items-center gap-1">
+                  {
+                    !showAuditHistory ?
+                      <>
+                        <PopupButton
+                          btnPopupItems={popupButtonItem}
+                          children={
+                            <>
+                              <button
+                                className="popup-btn rounded-[8px] size-8 btn-secondary-outline"
+                                onClick={() => {
+                                  setShowBtnPopup(true);
+                                }}
+                              >
+                                <Ellipsis size={16} />
+                              </button>
+                            </>
+                          }
+                          onClose={() => {
+                            setShowBtnPopup(false);
+                          }}
+                          showBtnPopup={showBtnPopup}
+                        />
+                      </> :
+                      <>
+                        {
+                          auditVersionDate !== "--" &&
+                          <div className="font-medium text-neutral-1100 text-sm flex items-center justify-end gap-3">
+                            <p>
+                              <span>You are viewing </span>
+                              {auditVersionDate}
+                              <span> version</span>
+                            </p>
+                            <div
+                              className="popup-btn rounded-[8px] size-8 btn-secondary-outline"
+                              onClick={handleCloseAuditHistory}
+                            >
+                              <X width={16} />
+                            </div>
+                          </div>
+                        }
+                      </>
+                  }
+                </div>
+              ) : (
+                <></>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div className="lg:flex">
+            {/*PO details section */}
+            <div
+              className={(fileUrl && showPdf) || showAuditHistory ? "lg:w-[70%]" : "w-full"}
             >
               {/* Vendor, bill date, due date */}
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-5">
-                <div>
-                  <Label text="Vendor name" />
+              <div
+                ref={poDetailsSection}
+                className="grid grid-cols-1 gap-x-5 bg-white rounded-[20px] p-4 border border-secondary-200"
+              >
+                <p className="text-neutral-1100 text-xl mb-5 font-medium">
+                  PO Details
+                </p>
+                <div className="flex flex-row items-center border-b border-secondary-200 h-11">
+                  <Label
+                    text="Vendor name:"
+                    className="font-medium text-secondary-700 max-w-60 w-full"
+                  />
                   <p
-                    className={`${poDetails?.vendor?.name ? "text-blue-600" : "text-slate-800"} text-sm font-medium mb-5`}
+                    className={`${currentPoDetails?.vendor?.name ? "text-blue-600" : "text-neutral-1100"} text-sm font-medium`}
                   >
-                    {poDetails?.vendor?.name ? (
+                    {currentPoDetails?.vendor?.name ? (
                       <Link
-                        className="hover:underline"
-                        href={`/vendor/view?id=${poDetails?.vendor?.id}`}
+                        className={`underline text-blue-500 ${checkAuditValidation({ showAuditHistory, field: typeof auditValidation?.vendor === "object" ? auditValidation?.vendor?.name : auditValidation?.vendor })}`}
+                        href={`/vendor/view?id=${currentPoDetails?.vendor?.id}`}
                       >
-                        {poDetails?.vendor?.name}
+                        {currentPoDetails?.vendor?.name}
                       </Link>
                     ) : (
                       "--"
                     )}
                   </p>
                 </div>
-                <div>
-                  <Label text="PO date" />
-                  <p className="text-slate-800 text-sm font-medium mb-5">
-                    {formatDate(poDetails?.po_date, orgDetails?.date_format)}
+                <div className="flex flex-row items-center border-b border-secondary-200 py-1.5 h-11">
+                  <Label
+                    text="Total amount:"
+                    className="font-medium text-secondary-700 max-w-60 w-full"
+                  />
+                  <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.total })}`}>
+                    {currentPoDetails?.total || "--"}
                   </p>
                 </div>
-                <div>
-                  <Label text="Delivery date" />
-                  <p className="text-slate-800 text-sm font-medium mb-5">
+                <div className="flex flex-row items-center border-b border-secondary-200 py-1.5 h-11">
+                  <Label
+                    text="PO date:"
+                    className="font-medium text-secondary-700 max-w-60 w-full"
+                  />
+                  <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.po_date })}`}>
+                    {formatDate(currentPoDetails?.po_date, orgDetails?.date_format)}
+                  </p>
+                </div>
+                <div className="flex flex-row items-center border-b border-secondary-200 py-1.5 h-11">
+                  <Label
+                    text="Delivery date:"
+                    className="font-medium text-secondary-700 max-w-60 w-full"
+                  />
+                  <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.delivery_date })}`}>
                     {formatDate(
-                      poDetails?.delivery_date,
+                      currentPoDetails?.delivery_date,
                       orgDetails?.date_format,
                     )}
                   </p>
                 </div>
-                <div>
-                  <Label text="Vendor address" />
-                  <p className="text-slate-800 text-sm font-medium mb-5">
-                    {getCombineAddress(poDetails?.po_address)}
+                <div className="flex flex-row items-center border-b border-secondary-200 py-3">
+                  <Label
+                    text="Vendor address:"
+                    className="font-medium text-secondary-700 max-w-60 w-full"
+                  />
+                  <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: billingAddressField })}`}>
+                    {getCombineAddress(currentPoDetails?.billing_address)}
                   </p>
                 </div>
-
-                <div>
-                  <Label text="Payment terms" />
-                  <p className="text-slate-800 text-sm font-medium mb-5">
-                    {getLabelForTerm(poDetails.payment_terms || "")}
-                  </p>
-                </div>
-
-                <div>
-                  <Label text="Notes" />
-                  <p className="text-slate-800 text-sm font-medium line-clamp-2 mb-5">
-                    {poDetails?.comments || "--"}
+                <div className="flex flex-row items-center h-11">
+                  <Label
+                    text="Payment terms:"
+                    className="font-medium text-secondary-700 max-w-60 w-full"
+                  />
+                  <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.payment_terms })}`}>
+                    {getLabelForTerm(currentPoDetails.payment_terms || "")}
                   </p>
                 </div>
               </div>
 
               {/* PO line items table */}
-              <div className="mt-8">
-                <p className="text-slate-800 mb-6 text-lg font-semibold">
+              <div
+                ref={poLineItemsSection}
+                className={`bg-white rounded-[20px] border border-secondary-200 p-4`}
+                style={{
+                  minHeight: `calc(100vh - 10rem - ${poDetailsHeight ?? 0}px - 2px)`, //2px (348) is for mesh UI - border 1px y-axis, padding 1px y-axis
+                }}
+              >
+                <p className="text-neutral-1100 mb-5 text-xl font-medium">
                   PO line items
                 </p>
                 <POLineItemsReadOnly
-                  poDetails={poDetails}
-                  poItems={poDetails?.items}
+                  showAuditHistory={showAuditHistory}
+                  poDetails={currentPoDetails}
+                  poItems={currentPoDetails?.items}
+                  auditValidation={auditValidation}
+                  itemsAuditValidation={showAuditHistory ? auditValidation?.items : [true]}
                 />
               </div>
-
-              {/* Approval actions for users who can approve/reject */}
-              {poDetails?.status === "under_approval" && isUserApproval ? (
-                <div className="flex items-center gap-3 w-fit">
-                  <Button
-                    disabled={isLoaderFormSubmit}
-                    text="Approve"
-                    isDefault={false}
-                    onClick={handleApprovalAction}
-                    className="text-white whitespace-pre bg-green-500 hover:bg-green-600"
-                  />
-                  <Button
-                    disabled={isLoaderFormSubmit}
-                    text="Reject"
-                    onClick={handleRejectionAction}
-                    className="text-white bg-red-500 hover:bg-red-600"
-                  />
-                </div>
-              ) : null}
-
-              {/* Actions for bills in review: send for approval, approve, or reject */}
-              {poDetails?.status === "in_review" ? (
-                <div className="flex items-center gap-3 w-fit">
-                  {isApproverAvailable ? (
-                    <Button
-                      disabled={isLoaderFormSubmit}
-                      text="Send for approval"
-                      onClick={handleSendPOApproval}
-                      className="text-white whitespace-pre bg-green-500 hover:bg-green-600"
-                      isDefault={false}
-                    />
-                  ) : (
-                    <Button
-                      disabled={isLoaderFormSubmit}
-                      text="Approve"
-                      onClick={handleApprovePO}
-                      className="text-white whitespace-pre bg-green-500 hover:bg-green-600"
-                      isDefault={false}
-                    />
-                  )}
-                  <Button
-                    disabled={isLoaderFormSubmit}
-                    text="Reject"
-                    onClick={handleRejectPO}
-                    className="text-white bg-red-500 hover:bg-red-600"
-                  />
-                </div>
-              ) : null}
             </div>
+            {/* PDF preview section (if enabled) */}
+            {fileUrl && showPdf && (
+              <div className="relative lg:w-[30%] scrollbar_none rounded-[20px] bg-white border border-secondary-200 overflow-hidden">
+                <p className="p-4 mb-4 pb-0 text-neutral-1100 text-xl font-medium">
+                  PO Preview
+                </p>
+                <PdfViewer fileUrl={fileUrl} />
+              </div>
+            )}
+            {showAuditHistory && (
+              <div
+                className={`relative overflow-y-scroll lg:w-[30%] scrollbar_none rounded-[20px] bg-white border border-secondary-200`}
+                style={{
+                  maxHeight: `calc(${poDetailsHeight ?? 0}px + ${poLineItemsHeight ?? 0}px - 0.5px)`, //is for mesh UI - border 1px y-axis, padding 1px y-axis
+                }}
+              >
+                {/* <AuditHistory
+                  data={auditData}
+                  isLoading={isLoading || isAuditLoading}
+                  setAuditVersionDate={setAuditVersionDate}
+                  currentVersion={currentAuditVersion}
+                  setCurrentVersion={setCurrentAuditVersion}
+                  handleClickAuditHistoryCard={handleClickAuditHistoryCard}
+                /> */}
+              </div>
+            )}
           </div>
         </div>
       </div>
-
-      <SidePanel isOpen={sidePanel} onClose={() => setSidePanel(false)}>
-        <div className="p-6">
-          <div className="flex justify-between items-center">
-            <p className="text-slate-800 text-lg font-semibold">
-              Audit history
-            </p>
-            <IconWrapper
-              onClick={() => setSidePanel(false)}
-              icon={<X width={16} />}
-            />
-          </div>
-
-          <AuditHistory data={auditData} isLoading={isAuditLoading} />
-        </div>
-      </SidePanel>
 
       <SidePanel
         isOpen={associateBillsSidePanel}
         onClose={() => setAssociateBillsSidePanel(false)}
       >
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <p className="text-slate-800 text-lg font-semibold">
+        <div className="">
+          <div className="flex justify-between items-center p-4">
+            <p className="text-neutral-1100 text-lg font-semibold">
               Associate bills
             </p>
-            <IconWrapper
+            <div
+              className="popup-btn rounded-[8px] size-8 btn-secondary-outline"
               onClick={() => setAssociateBillsSidePanel(false)}
-              icon={<X width={16} />}
-            />
+            >
+              <X width={16} />
+            </div>
           </div>
           {isAssociateLoading ? (
             <PageLoader />
@@ -534,6 +706,7 @@ const ViewPODetails = ({
               hideExportIcon
               tableData={filteredAssociateBills}
               columns={columns}
+              isHeader={false}
             />
           )}
         </div>
