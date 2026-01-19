@@ -2,18 +2,23 @@
 
 "use client";
 
-import { CheckBox, PageLoader, Tabs } from "@rever/common";
+import { CheckBox, CustomTooltip, PillItem } from "@rever/common";
 import { DataTable } from "@rever/common";
 import { BILL_API, useApi } from "@rever/services";
 import { useUserStore } from "@rever/stores";
-import { ApprovalListAPIType, ApprovalTableList, ApprovalTypes } from "@rever/types";
+import {
+  ApprovalListAPIType,
+  ApprovalTableList,
+  ApprovalTypes,
+} from "@rever/types";
 import {
   formatDate,
   formatNumber,
   getLabelForBillStatus,
   getStatusClass,
 } from "@rever/utils";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, sortingFns } from "@tanstack/react-table";
+import { Paperclip } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -23,12 +28,10 @@ const BillApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
 
   const [approvalList, setApprovalList] = useState<ApprovalTableList[]>([]);
 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
   const orgDetails = useUserStore((state) => state.user?.organization);
 
   // Fetch approval bills data using SWR
-  const { data: underApprovalBills } = useApi<ApprovalListAPIType[]>(
+  const { data: underApprovalBills, isLoading } = useApi<ApprovalListAPIType[]>(
     "approavls",
     `${BILL_API.UNDER_APPROVAL_BILLS}`,
   );
@@ -41,24 +44,17 @@ const BillApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
           (val: ApprovalListAPIType) => ({
             id: val?.id,
             bill: val?.bill_number,
-            bill_date:
-              val?.bill_date &&
-              formatDate(val?.bill_date, orgDetails?.date_format),
-            due_date:
-              val?.due_date &&
-              formatDate(val?.due_date, orgDetails?.date_format),
+            bill_date: val?.bill_date,
+            due_date: val?.due_date,
             vendor: val?.vendor,
-            total: val?.total
-              ? formatNumber(val?.total, orgDetails?.currency)
-              : 0,
-            status: getLabelForBillStatus(val?.status),
+            total: val?.total || 0,
+            is_attachment: val?.is_attachment,
+            status: val?.status,
           }),
         );
         setApprovalList(structuredData);
-        setIsLoading(false);
       } else {
         setApprovalList([]);
-        setIsLoading(false);
       }
     } else {
       setApprovalList([]);
@@ -67,11 +63,23 @@ const BillApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
 
   const [search, setSearch] = useState<string>("");
 
+  const collator = useMemo(
+    () => new Intl.Collator(undefined, { numeric: true, sensitivity: "base" }),
+    [],
+  );
+
   // Define table columns using useMemo for performance
   const columns: ColumnDef<ApprovalTableList>[] = useMemo(
     () => [
       {
         accessorKey: "bill",
+        accessorFn: (row) => row.bill || "",
+        sortingFn: (rowA, rowB, columnId) => {
+          const a = rowA.getValue(columnId) as string;
+          const b = rowB.getValue(columnId) as string;
+          return collator.compare(a, b);
+        },
+        sortDescFirst: false,
         header: ({ table }) => (
           <div className="flex items-center gap-4">
             <CheckBox
@@ -90,40 +98,41 @@ const BillApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
               />
               <span
                 onClick={() => router.push(`/bill/${row?.original?.id}/review`)}
-                className="font-semibold cursor-pointer overflow-hidden text-ellipsis"
+                className="underline cursor-pointer overflow-hidden text-ellipsis"
               >
-                {getValue() as string}
+                {(getValue() as string) || "--"}
               </span>
             </div>
           );
         },
       },
-
       {
         accessorKey: "bill_date",
         header: "Bill date",
-        cell: ({ getValue }) => {
-          return (
-            <div className="flex items-center gap-4">
-              <span className="overflow-hidden text-ellipsis">
-                {getValue() as string}
-              </span>
-            </div>
-          );
-        },
+        accessorFn: (row) => (row?.bill_date ? new Date(row.bill_date) : null),
+        sortingFn: sortingFns.datetime,
+        sortDescFirst: false,
+        cell: ({ getValue }) => (
+          <div className="flex items-center gap-4">
+            <span className="overflow-hidden text-ellipsis ">
+              {formatDate(getValue() as Date, orgDetails?.date_format)}
+            </span>
+          </div>
+        ),
       },
       {
         accessorKey: "due_date",
         header: "Due date",
-        cell: ({ getValue }) => {
-          return (
-            <div className="flex items-center gap-4">
-              <span className="overflow-hidden text-ellipsis">
-                {getValue() as string}
-              </span>
-            </div>
-          );
-        },
+        accessorFn: (row) => (row.due_date ? new Date(row.due_date) : null),
+        sortingFn: sortingFns.datetime,
+        sortDescFirst: false,
+        cell: ({ getValue }) => (
+          <div className="flex items-center gap-4">
+            <span className="overflow-hidden text-ellipsis ">
+              {formatDate(getValue() as Date, orgDetails?.date_format)}
+            </span>
+          </div>
+        ),
       },
       {
         accessorKey: "vendor",
@@ -131,29 +140,34 @@ const BillApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
         accessorFn: (row) => row.vendor?.name || "",
         sortingFn: "alphanumeric",
         sortDescFirst: false,
-        cell: ({ row, getValue }) => {
-          return (
+        cell: ({ row, getValue }) =>
+          getValue() ? (
             <div
               onClick={() =>
                 router.push(`/vendor/view?id=${row.original.vendor?.id}`)
               }
               className="flex items-center gap-4"
             >
-              <span className="font-semibold cursor-pointer overflow-hidden text-ellipsis">
+              <span className="underline cursor-pointer overflow-hidden text-ellipsis ">
                 {getValue() as string}
               </span>
             </div>
-          );
-        },
+          ) : (
+            "--"
+          ),
       },
       {
         accessorKey: "total",
         header: "Total amount",
+        accessorFn: (row) => Number(row.total) || 0,
+        sortingFn: "basic",
+        sortDescFirst: false,
         cell: ({ getValue }) => {
+          const rawAmount = Number(getValue()) || 0;
           return (
             <div className="flex items-center gap-4">
-              <span className="overflow-hidden text-ellipsis">
-                {getValue() as string}
+              <span className="overflow-hidden text-ellipsis w-full">
+                {formatNumber(rawAmount)}
               </span>
             </div>
           );
@@ -162,18 +176,25 @@ const BillApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
       {
         accessorKey: "status",
         header: "Status",
-        cell: ({ getValue }) => {
+        sortDescFirst: false,
+        cell: ({ row, getValue }) => {
           const value = getValue() as string;
 
           return (
-            <div className="flex items-center gap-1">
-              <span
-                className={`text-2xs border py-1 px-1.5 rounded-md ${getStatusClass(
-                  value,
-                )}`}
-              >
-                {value}
-              </span>
+            <div className="flex items-center pr-2 justify-between w-32">
+              <PillItem
+                className={`${getStatusClass(getLabelForBillStatus(value) || "")}`}
+                isRounded={true}
+                name={getLabelForBillStatus(value || "")}
+              />
+
+              {row?.original.is_attachment && (
+                <CustomTooltip content="PDF attached">
+                  <div>
+                    <Paperclip className="text-slate-400" width={14} />
+                  </div>
+                </CustomTooltip>
+              )}
             </div>
           );
         },
@@ -183,7 +204,7 @@ const BillApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
         },
       },
     ],
-    [router],
+    [router, collator, orgDetails?.date_format],
   );
 
   // Filter approvals based on search input
@@ -200,21 +221,19 @@ const BillApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
 
   return (
     <>
-      {isLoading ? (
-        <PageLoader />
-      ) : (
-        <>
-          <DataTable
-            noStatusFilter
-            tableHeading="Bill approvals"
-            tableData={filteredBillApprovals}
-            columns={columns}
-            setSearch={setSearch}
-            search={search}
-            clearSearch={() => setSearch("")}
-          />
-        </>
-      )}
+      <DataTable
+        noStatusFilter
+        tableHeading="Approvals"
+        tableData={filteredBillApprovals}
+        columns={columns}
+        setSearch={setSearch}
+        search={search}
+        clearSearch={() => setSearch("")}
+        isLoading={isLoading}
+        tabNames={tabs}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
     </>
   );
 };

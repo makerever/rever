@@ -113,7 +113,7 @@ const ViewBillWithParams = () => {
         ) : (
           <div>
             <ViewBillDetails
-              deleteBill={() => {}}
+              deleteBill={() => { }}
               billDetails={billDetails}
               fileUrl={fileUrl}
               showPdf={showPdf}
@@ -143,17 +143,12 @@ const ViewBillWithParams = () => {
           />
           <div className="flex justify-end items-center gap-3 w-fit mt-3">
             <Button
-              disabled={isLoaderFormSubmit}
-              text="Reject"
+              name="Reject"
               onClick={rejectBill}
-              className="text-white bg-red-500 hover:bg-red-600"
-            />
-            {/* <Button
-              text="Cancel"
-              onClick={() => setConfirmBillReject(false)}
               disabled={isLoaderFormSubmit}
-              className="bg-transparent text-primary-500 border border-primary-500 disabled:hover:bg-transparent disabled:text-primary-500 hover:bg-primary-500 hover:text-white"
-            /> */}
+              button_type="danger"
+              icon_type="reject"
+            />
           </div>
         </div>
       </Modal>
