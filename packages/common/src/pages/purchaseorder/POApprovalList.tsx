@@ -6,7 +6,7 @@ import { CheckBox, PageLoader, Tabs } from "@rever/common";
 import { DataTable } from "@rever/common";
 import { PURCHASE_ORDER_API, useApi } from "@rever/services";
 import { useUserStore } from "@rever/stores";
-import { PurchaseOrder } from "@rever/types";
+import { ApprovalTypes, PurchaseOrder } from "@rever/types";
 import {
   formatDate,
   formatNumber,
@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 // Main component for displaying the approval list
-const POApprovalList = () => {
+const POApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
   const router = useRouter();
 
   const [poApprovalList, setPoApprovalList] = useState<PurchaseOrder[]>([]);

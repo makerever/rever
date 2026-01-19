@@ -2,7 +2,10 @@
 
 "use client";
 
-import { BillApprovalList, POApprovalList, Tabs } from "@rever/common";
+import {
+  BillApprovalList,
+  POApprovalList
+} from "@rever/common";
 import { approvalTabOptions } from "@rever/constants";
 import { useState } from "react";
 
@@ -12,16 +15,21 @@ const ApprovalList = () => {
 
   return (
     <>
-      <div className="mb-6">
-        <Tabs
-          tabNames={approvalTabOptions}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-        />
-      </div>
       <>
-        {activeTab === "PO approval" ? <POApprovalList /> : null}
-        {activeTab === "Bill approval" ? <BillApprovalList /> : null}
+        {activeTab === "PO approval" ? (
+          <POApprovalList
+            tabs={approvalTabOptions}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
+        ) : null}
+        {activeTab === "Bill approval" ? (
+          <BillApprovalList
+            tabs={approvalTabOptions}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
+        ) : null}
       </>
     </>
   );

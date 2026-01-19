@@ -122,32 +122,16 @@ export default function Inbox() {
 
   return (
     <>
-      <div>
-        <div className="flex items-center mb-4 justify-between">
-          <div className="mt-2 flex items-center justify-between">
-            <p className="mr-1 font-semibold text-gray-800 dark:text-white">
+      <div className="rounded-b-[20px] bg-white p-4 h-28 border border-secondary-200 flex items-end justify-start">
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 w-full h-8">
+          <div className="flex items-center gap-2">
+            <p className="text-neutral-1100 text-2xl font-medium">
               Notifications
             </p>
-            {unreadCount > 0 ? (
-              <PillItem
-                name={unreadCount > 99 ? `99+ Unread` : `${unreadCount} Unread`}
-                className="bg-primary-100 text-slate-800 text-xs px-2 py-1"
-              />
-            ) : null}
-          </div>
-          <div className="ms-3 w-28">
-            {/* <SelectComponent
-            value={selectedReadFilter}
-            handleChange={setSelectedReadFilter}
-            options={[
-              { value: "all", label: "All" },
-              { value: "read", label: "Read" },
-              { value: "unread", label: "Unread" },
-            ]}
-          /> */}
           </div>
         </div>
-
+      </div>
+      <div>
         {isLoading ? (
           <PageLoader />
         ) : (
@@ -159,7 +143,7 @@ export default function Inbox() {
           >
             {/* Left Pane - Messages List */}
             <div
-              className="overflow-auto h-[calc(100%-0px)] custom_scrollbar border shadow-lg transition duration-300 border-gray-200 rounded-lg bg-white dark:bg-gray-900 dark:border-gray-700"
+              className="overflow-auto h-[calc(100%-0px)] custom_scrollbar border transition duration-300 border-secondary-200 rounded-[20px] bg-white"
               style={{ width: `${width}px` }}
             >
               {/* <div className="pt-2 px-4">
@@ -176,18 +160,16 @@ export default function Inbox() {
                     <div
                       key={msg.id}
                       onClick={() => viewMessage(msg)}
-                      className={`select-none p-3 border-b cursor-pointer flex items-start gap-2 transition duration-300 hover:bg-slate-50 ${
-                        message?.id === msg.id
-                          ? "bg-primary-100 dark:bg-gray-800"
-                          : ""
+                      className={`select-none p-3 border-b cursor-pointer flex items-start gap-2 transition duration-300 hover:bg-secondary-100 ${
+                        message?.id === msg.id ? "bg-secondary-100" : ""
                       }`}
                     >
                       <div className="shrink-0">
                         <div
                           className={`flex items-center justify-center w-8 h-8 rounded-full text-xs ${
                             !msg.is_read
-                              ? "bg-primary-200 dark:bg-primary-200"
-                              : "bg-gray-100 dark:bg-gray-300"
+                              ? "bg-secondary-200"
+                              : "bg-secondary-100"
                           }`}
                         >
                           <Bell width={16} className="text-slate-800" />
@@ -196,14 +178,14 @@ export default function Inbox() {
 
                       <div className="min-w-0">
                         <p
-                          className={`${!msg.is_read ? "font-semibold text-slate-800" : "font-medium text-slate-700"} text-xs truncate`}
+                          className={`${!msg.is_read ? "font-semibold" : "font-medium"} text-neutral-1100 text-sm truncate`}
                         >
                           {msg.subject}
                         </p>
-                        <p className="text-2xs text-slate-500 truncate">
+                        <p className="text-xs text-neutral-700 truncate">
                           {msg.message}
                         </p>
-                        <p className="text-2xs text-slate-400 mt-1 truncate">
+                        <p className="text-xs text-neutral-700 mt-1 truncate">
                           {msg.time_since_created}
                         </p>
                       </div>
@@ -221,7 +203,7 @@ export default function Inbox() {
                       height={180}
                       unoptimized
                     />
-                    <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mt-6">
+                    <p className="text-xs font-medium text-neutral-700 mt-6">
                       No notifications found
                     </p>
                   </div>
@@ -238,7 +220,7 @@ export default function Inbox() {
             </div>
 
             {/* Right Pane - Message Detail */}
-            <div className="flex-1 min-w-[280px] p-4 border shadow-lg rounded-lg bg-white dark:bg-gray-900 dark:border-gray-700 dark:shadow-gray-800">
+            <div className="flex-1 min-w-70 p-4 border bg-white border-secondary-200 rounded-[20px]">
               {sinleMessageLoading ? (
                 <PageLoader />
               ) : (
@@ -249,16 +231,16 @@ export default function Inbox() {
                       <div className="flex justify-between items-center">
                         <div className="flex items-center">
                           <div
-                            className={`flex items-center justify-center min-w-10 min-h-10 rounded-full text-xs bg-gray-100 dark:bg-gray-300`}
+                            className={`flex items-center justify-center min-w-10 min-h-10 rounded-full text-xs bg-secondary-100`}
                           >
                             <Bell width={16} />
                           </div>
-                          <p className="text-sm font-medium ms-3 text-gray-800 dark:text-gray-400">
+                          <p className="text-sm font-medium ms-3 text-neutral-1100">
                             Notification
                           </p>
                         </div>
 
-                        <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center text-xs text-neutral-700">
                           <Clock width={16} />
                           <p className="ms-1">{message.time_since_created}</p>
 
@@ -271,10 +253,10 @@ export default function Inbox() {
                       </div>
 
                       <div className="mt-5">
-                        <p className="text-sm font-semibold text-gray-800 dark:text-gray-300">
+                        <p className="text-sm font-semibold text-neutral-1100">
                           {message.subject}
                         </p>
-                        <p className="mt-4 text-xs text-gray-700 dark:text-gray-400">
+                        <p className="mt-4 text-xs text-neutral-700">
                           {message.message}
                         </p>
                       </div>
@@ -283,8 +265,7 @@ export default function Inbox() {
                         <div className="w-fit mt-10">
                           <Button
                             type="submit"
-                            text="View"
-                            className="text-white"
+                            name="View"
                             onClick={() => {
                               user?.role === "finance_manager"
                                 ? router.push(
@@ -294,12 +275,13 @@ export default function Inbox() {
                                     `/${message?.object_name}/view?id=${message?.object_id}`,
                                   );
                             }}
+                            button_type="primary"
                           />
                         </div>
                       ) : null}
                     </div>
                   ) : (
-                    <div className="pt-36 flex flex-col items-center justify-center mt-6 text-xs font-medium text-gray-600 dark:text-gray-400">
+                    <div className="pt-36 flex flex-col items-center justify-center mt-6 text-xs font-medium text-neutral-700">
                       <BellPlus className="mb-2" width={32} height={32} />
                       Select a notification to view details.
                     </div>

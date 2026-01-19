@@ -544,3 +544,9 @@ export interface PopupButtonProps {
   showBtnPopup: boolean;
   btnPopupItems: PopupButtonMenuProps[];
 }
+
+export interface ApprovalTypes {
+  tabs: string[];
+  activeTab: string | undefined;
+  setActiveTab: (tab: string | undefined) => void;
+}
