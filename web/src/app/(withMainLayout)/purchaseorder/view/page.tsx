@@ -155,7 +155,7 @@ const ViewPOWithParams = () => {
         ) : (
           <div>
             <ViewPODetails
-              deletePO={() => setIsPopupOpen(true)}
+              deletePO={() => { setIsPopupOpen(true); }}
               poDetails={poDetails}
               fileUrl={fileUrl}
               showPdf={showPdf}

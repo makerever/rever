@@ -6,10 +6,10 @@ import {
   CheckBox,
   CustomTooltip,
   DataTable,
-  PageLoader,
+  PillItem,
   UploadFilesModal,
 } from "@rever/common";
-import { tabOptions } from "@rever/constants";
+import { tabOptionsPO } from "@rever/constants";
 import { useUserStore } from "@rever/stores";
 import { POAPIResponse, PurchaseOrder } from "@rever/types";
 import {
@@ -30,11 +30,12 @@ import { Paperclip } from "lucide-react";
 const PurchaseOrderList = () => {
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<string | undefined>("Overview");
+  const [activeTab, setActiveTab] = useState<string | undefined>("All POs");
   const [poData, setPOData] = useState<PurchaseOrder[]>([]);
   const [search, setSearch] = useState("");
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isFileUploadModal, setIsFileUploadModal] = useState(false);
 
   const { data: purchaseOrder, mutate } = useApi<POAPIResponse>(
     "purchaseOrder",
@@ -43,12 +44,11 @@ const PurchaseOrderList = () => {
 
   const orgDetails = useUserStore((state) => state.user?.organization);
 
-  const [isFileUploadModal, setIsFileUploadModal] = useState(false);
-
   const collator = useMemo(
     () => new Intl.Collator(undefined, { numeric: true, sensitivity: "base" }),
     [],
   );
+
 
   // Define columns for the DataTable
   const columns: ColumnDef<PurchaseOrder>[] = useMemo(
@@ -80,11 +80,11 @@ const PurchaseOrderList = () => {
               />
               <span
                 onClick={() =>
-                  router.push(`/purchaseorder/view/?id=${row.original.id}`)
+                  router.push(`/purchaseorder/view?id=${row.original.id}`)
                 }
-                className="font-semibold cursor-pointer overflow-hidden text-ellipsis"
+                className="underline cursor-pointer overflow-hidden text-ellipsis"
               >
-                {getValue() as string}
+                {(getValue() as string) || "--"}
               </span>
             </div>
           );
@@ -125,18 +125,21 @@ const PurchaseOrderList = () => {
         accessorFn: (row) => row.vendor?.name || "",
         sortingFn: "alphanumeric",
         sortDescFirst: false,
-        cell: ({ row, getValue }) => (
-          <div
-            onClick={() =>
-              router.push(`/vendor/view?id=${row.original.vendor?.id}`)
-            }
-            className="flex items-center gap-4"
-          >
-            <span className="font-semibold cursor-pointer overflow-hidden text-ellipsis">
-              {(getValue() as string) || "--"}
-            </span>
-          </div>
-        ),
+        cell: ({ row, getValue }) =>
+          getValue() ? (
+            <div
+              onClick={() =>
+                router.push(`/vendor/view?id=${row.original.vendor?.id}`)
+              }
+              className="flex items-center gap-4"
+            >
+              <span className="underline cursor-pointer overflow-hidden text-ellipsis">
+                {getValue() as string}
+              </span>
+            </div>
+          ) : (
+            "--"
+          ),
       },
       {
         accessorKey: "total",
@@ -163,22 +166,22 @@ const PurchaseOrderList = () => {
           const value = getValue() as string;
 
           return (
-            <div className="flex items-center pr-2 justify-between">
-              <span
-                className={`text-2xs border py-1 px-1.5 rounded-md ${getStatusClass(
-                  value,
-                )}`}
-              >
-                {value}
-              </span>
+            <div className="flex items-center pr-2 justify-between w-32">
+              <div className="flex items-center pr-2 justify-between w-32">
+                <PillItem
+                  className={`${getStatusClass(getLabelForBillStatus(value) || "")}`}
+                  isRounded={true}
+                  name={getLabelForBillStatus(value || "")}
+                />
+              </div>
 
-              {row?.original.is_attachment && (
+              {row?.original.is_attachment ? (
                 <CustomTooltip content="PDF attached">
                   <div>
                     <Paperclip className="text-slate-400" width={14} />
                   </div>
                 </CustomTooltip>
-              )}
+              ) : null}
             </div>
           );
         },
@@ -209,13 +212,13 @@ const PurchaseOrderList = () => {
             vendor: po?.vendor,
             total: po?.total || 0,
             is_attachment: po?.is_attachment,
-            status: getLabelForBillStatus(po?.status),
+            status: po?.status,
           };
         });
       setPOData(poData);
       setIsLoading(false);
     }
-  }, [purchaseOrder, orgDetails?.currency, orgDetails?.date_format]);
+  }, [purchaseOrder, orgDetails?.currency, orgDetails?.date_format, isLoading]);
 
   // Handler to redirect to bill creation page
   const handleRedirect = () => {
@@ -225,9 +228,19 @@ const PurchaseOrderList = () => {
   // Filter PO's based on active tab and search input
   const filteredPurchaseOrder = useMemo(() => {
     const filteredByTab =
-      activeTab === "Overview"
+      activeTab === "All POs"
         ? poData
-        : poData?.filter((po) => po.status === activeTab);
+        : poData?.filter(
+          (po) =>
+            po.status ===
+            (activeTab === "Approved POs"
+              ? "Approved"
+              : activeTab === "Rejected POs"
+                ? "Rejected"
+                : activeTab === "Draft POs"
+                  ? "Draft"
+                  : activeTab),
+        );
 
     if (!search.trim()) return filteredByTab;
 
@@ -248,33 +261,25 @@ const PurchaseOrderList = () => {
 
   return (
     <>
-      {/* Show table only when not loading */}
-      {isLoading ? (
-        <PageLoader />
-      ) : (
-        <DataTable
-          onActionBtClick={handleRedirect}
-          addBtnText={
-            hasPermission("purchaseorder", "create") ? "Create PO" : ""
-          }
-          tableHeading="Purchase orders"
-          tableData={filteredPurchaseOrder}
-          columns={columns}
-          tabNames={tabOptions}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          setSearch={setSearch}
-          search={search}
-          clearSearch={() => setSearch("")}
-          flowImageSrc="/images/flowImages/poMasterFlow.svg"
-          btnPopupItems={["Create PO", "Upload PO's"]}
-          onBtnPopupItemsClick={(value) => {
-            if (value === "Upload PO's") {
-              setIsFileUploadModal(true);
-            }
-          }}
-        />
-      )}
+      <DataTable
+        onActionBtClick={handleRedirect}
+        addBtnText={hasPermission("purchaseorder", "create") ? "Create PO" : ""}
+        tableHeading="Purchase orders"
+        uploadBtnText="Upload POs"
+        onUploadBtnClick={() => setIsFileUploadModal(true)}
+        tableData={filteredPurchaseOrder}
+        columns={columns}
+        tabNames={tabOptionsPO}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        tabSeparatorAt={6}
+        setSearch={setSearch}
+        search={search}
+        clearSearch={() => setSearch("")}
+        flowImageSrc="/images/flowImages/poMasterFlow.svg"
+        noStatusFilter={true}
+        isLoading={isLoading}
+      />
 
       {isFileUploadModal ? (
         <UploadFilesModal

@@ -8,7 +8,7 @@ import {
 } from "@rever/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import {
   Button,
@@ -22,19 +22,22 @@ import {
   SelectComponent,
   DatePickerDemo,
   NumberInput,
-  OutsideClickHandler,
-  UploadFileView,
   ToggleSwitch,
   IconWrapper,
   PageLoader,
   poExtractAnimation,
+  PillItem,
+  DropdownButton,
 } from "@rever/common";
 import { paymentTermsOptions } from "@rever/constants";
 import POItemsTable from "./POLineItems";
 import {
   formatNumber,
   getStatusLabelForExtraction,
+  isNamedObject,
   formatDate,
+  getStatusClass,
+  getLabelForBillStatus,
 } from "@rever/utils";
 import {
   Option,
@@ -48,9 +51,7 @@ import {
   CircleDashed,
   Download,
   Loader,
-  Paperclip,
   Trash,
-  Upload,
 } from "lucide-react";
 import {
   addPOAttachment,
@@ -98,8 +99,8 @@ const getStatusIcon = (status: string, error_message?: string) => {
   }
 };
 
-const MAX_ATTEMPTS = 20;
-const DELAY_MS = 2000;
+const MAX_POLL_ATTEMPTS = 20;
+const POLL_DELAY_MS = 2000;
 const PDF_TYPE = "application/pdf";
 
 const AddPOComponentWithParams = () => {
@@ -120,7 +121,6 @@ const AddPOComponentWithParams = () => {
       items: [
         {
           description: "",
-          product_code: "",
           quantity: "",
           unit_price: "",
           amount: "0",
@@ -147,6 +147,9 @@ const AddPOComponentWithParams = () => {
 
   const [idValue, setIdValue] = useState<string | null>(id);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [showBtnPopup, setShowBtnPopup] = useState<boolean>(false);
   const [isLoaderFormSubmit, setIsLoaderFormSubmit] = useState(false);
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [fileDetails, setFileDetails] = useState<File | null>(null);
@@ -155,6 +158,9 @@ const AddPOComponentWithParams = () => {
   const [showPdf, setShowPdf] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [poDetails, setPODetails] = useState<Partial<PurchaseOrder>>({});
+
+  const poDetailsSection = useRef<HTMLDivElement | null>(null);
+  const [poDetailsHeight, setPoDetailsHeight] = useState<number | null>(null);
   const [submitType, setSubmitType] = useState("");
   const [files, setFiles] = useState<{
     file?: File;
@@ -190,6 +196,13 @@ const AddPOComponentWithParams = () => {
     }
   }, [poDate]);
 
+  //to get current height of PO Detials section
+  useEffect(() => {
+    if (!isLoading) {
+      setPoDetailsHeight(poDetailsSection?.current?.offsetHeight ?? 0);
+    }
+  }, [isLoading]);
+
   //  FETCHERS
 
   const fetchPODetailsById = useCallback(
@@ -201,8 +214,16 @@ const AddPOComponentWithParams = () => {
           name: response?.data?.po_number,
         });
         setValue("poNumber", response?.data?.po_number);
-        setValue("po_date", new Date(response?.data.po_date));
-        setValue("delivery_date", new Date(response?.data.delivery_date));
+        setValue(
+          "po_date",
+          response?.data?.po_date ? new Date(response?.data?.po_date) : null,
+        );
+        setValue(
+          "delivery_date",
+          response?.data?.delivery_date
+            ? new Date(response?.data?.delivery_date)
+            : null,
+        );
         setValue("payment_terms", response?.data?.payment_terms);
         setValue("vendor", response?.data.vendor?.id);
         setValue("total_tax", response?.data?.tax_percentage);
@@ -214,7 +235,7 @@ const AddPOComponentWithParams = () => {
         if (responseFile?.status === 200) {
           setFileResponse(responseFile?.data?.results[0]);
           setFileUrl(responseFile?.data?.results[0]?.file);
-          setFiles({ status: "completed" });
+          setFiles({ status: "done" });
         }
         setIsLoading(false);
       } else {
@@ -236,7 +257,8 @@ const AddPOComponentWithParams = () => {
     }
   };
 
-  // PDF upload/preview handlers
+  //  FILES / PDF HANDLING
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = e.target.files?.[0];
     if (uploadedFile && uploadedFile.type === PDF_TYPE) {
@@ -248,18 +270,31 @@ const AddPOComponentWithParams = () => {
 
       if (!idValue) {
         setFiles({ status: "uploading" });
+
         const formData = new FormData();
         formData.append("file", uploadedFile);
-        formData.append("document_type", "purchase_order");
+        formData.append("document_type", "purchaseorder");
+
         const uploadRes = await uploadDocument(formData);
-        if (uploadRes?.status === 202) {
-          const { task_id } = uploadRes.data;
-          await pollDocumentStatus(task_id);
+        if (uploadRes?.status === 201) {
+          const { id } = uploadRes.data;
+          await pollDocumentStatus(id);
         } else {
-          setShowPdf(false);
-          setFileUrl(null);
-          setFileDetails(null);
-          showErrorToast("File must be under 5MB and limited to 5 pages");
+          if (
+            uploadRes &&
+            uploadRes?.data[0] ===
+            "Your subscription has expired. Please renew to continue."
+          ) {
+            showErrorToast(uploadRes?.data[0]);
+            setShowPdf(false);
+            setFileUrl(null);
+            setFileDetails(null);
+          } else {
+            setShowPdf(false);
+            setFileUrl(null);
+            setFileDetails(null);
+            showErrorToast("File must be under 5MB and limited to 5 pages");
+          }
         }
       }
     } else {
@@ -267,40 +302,32 @@ const AddPOComponentWithParams = () => {
     }
   };
 
-  // Polling document extraction status
   const pollDocumentStatus = async (id: string) => {
-    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
       try {
         const fileRes = await getDocument(id);
         if (fileRes.status !== 200) throw new Error("Fetch failed");
-        const responseData = fileRes.data;
+        const { status, target_object_id, error_message } = fileRes.data;
+        setFiles({ status });
 
-        setFiles({ status: responseData?.status });
-        if (["completed"].includes(responseData?.status)) {
-          if (
-            responseData?.status === "completed" &&
-            responseData?.document_id
-          ) {
-            setIdValue(responseData?.document_id);
-            setShowPdf(true);
-          }
+        if (status === "done" && target_object_id) {
+          setIdValue(target_object_id);
+          setShowPdf(true);
           break;
         }
-        if (["failed"].includes(responseData?.status)) {
+        if (status === "failed") {
           setShowPdf(false);
           setFileUrl(null);
           setFileDetails(null);
           showErrorToast(
-            responseData?.message
-              ? responseData?.message
-              : "File must be under 5MB and limited to 5 pages",
+            error_message || "File must be under 5MB and limited to 5 pages",
           );
           break;
         }
       } catch (err) {
         console.error("Polling error:", err);
       }
-      await new Promise((r) => setTimeout(r, DELAY_MS));
+      await new Promise((r) => setTimeout(r, POLL_DELAY_MS));
     }
   };
 
@@ -333,13 +360,21 @@ const AddPOComponentWithParams = () => {
     }
   };
 
-  const submitForm = async (data: addPurchaseOrderSchemaValues) => {
+  const triggerSubmit = (submitType: "draft" | "in_review") => {
+    setSubmitType(submitType);
+    handleSubmit((data) => submitForm(data, submitType))();
+    setShowBtnPopup(false);
+  };
+
+  const submitForm = async (
+    data: addPurchaseOrderSchemaValues,
+    submitType: string,
+  ) => {
     setIsLoaderFormSubmit(true);
 
     const poItemsList = data?.items?.map((val) => ({
       id: val.id || undefined,
       description: val.description,
-      product_code: val.product_code,
       quantity: val.quantity,
       unit_price: val.unit_price,
       amount: val.amount,
@@ -368,34 +403,14 @@ const AddPOComponentWithParams = () => {
       if (idValue) {
         const response = await updatePOApi(poDetailsPayload, idValue);
         if (response?.status === 200) {
-          if (fileDetails) {
-            const formData = new FormData();
-            formData.append("file", fileDetails);
-            const responseFile = await addPOAttachment(
-              formData,
-              response?.data?.id,
-            );
-            if (responseFile?.status === 201) {
-              setIsLoaderFormSubmit(false);
-              showSuccessToast("PO updated successfully");
-              router.push("/purchaseorder/list");
-            } else {
-              showErrorToast("Something went wrong!!");
-              router.push("/purchaseorder/list");
-            }
-          } else {
-            setIsLoaderFormSubmit(false);
-            showSuccessToast("PO updated successfully");
-            router.push("/purchaseorder/list");
-          }
+          showSuccessToast("PO updated successfully");
+          // router.push("/purchaseorder/list");
+          router.push(`/purchaseorder/view?id=${idValue}`);
         } else {
-          if (response?.data?.detail) {
-            showErrorToast(response?.data?.detail);
-          } else {
-            setShowItemsDescription(true);
-          }
-          setIsLoaderFormSubmit(false);
+          if (response?.data?.detail) showErrorToast(response?.data.detail);
+          else setShowItemsDescription(true);
         }
+        setIsLoaderFormSubmit(false);
       } else {
         const response = await createPOApi(poDetailsPayload);
         if (response?.status === 201) {
@@ -435,70 +450,256 @@ const AddPOComponentWithParams = () => {
         <PageLoader />
       ) : (
         <>
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex justify-between items-center">
-              <p className="text-slate-800 text-lg font-semibold">
-                Purchase order details
+          {/* Header section: PO number, status, PDF toggle, edit/delete icons */}
+          <div className="flex items-center justify-between bg-white rounded-b-[20px] p-4 pt-16 border border-secondary-200">
+            <div className="flex items-center gap-3">
+              {/* Po number */}
+              <p className="text-neutral-1100 font-medium text-2xl">
+                {poDetails?.po_number ?? "New PO"}
               </p>
+
+              {/* Toggle to show/hide PDF if fileUrl exists */}
               {fileUrl ? (
-                <div className="ms-4 flex items-center">
+                <div className="flex items-center">
                   <ToggleSwitch isOn={showPdf} setIsOn={setShowPdf} />
-                  <p className="ms-2 text-xs text-slate-800 dark:text-gray-200">
+                  <p className="ms-1.5 text-sm text-neutral-1100 font-medium">
                     {!showPdf ? "Show pdf" : "Hide pdf"}
                   </p>
                 </div>
               ) : null}
             </div>
-            {/* File upload or file preview actions */}
-            {!fileUrl ? (
-              <label>
-                <input
-                  onChange={handleFileChange}
-                  type="file"
-                  className="hidden"
-                  accept={PDF_TYPE}
-                />
-                <div className="bg-transparent flex items-center text-xs rounded-md transition duration-300 px-3 py-1 cursor-pointer text-primary-500 border border-primary-500 disabled:hover:bg-transparent disabled:text-primary-500 hover:bg-primary-500 hover:text-white">
-                  <Upload width={16} className="mr-1" /> Extract PDF
-                </div>
-              </label>
-            ) : (
-              files?.status === "completed" && (
-                <OutsideClickHandler
-                  onClose={() => setShowUploadFileView(false)}
-                >
-                  <div
-                    onClick={() => setShowUploadFileView(!showUploadFileView)}
-                    className="flex items-center text-primary-500 hover:text-primary-600 cursor-pointer text-sm"
-                  >
-                    <Paperclip width={16} className="mr-1" />1 file
+            {/* Dropdown button for actions */}
+            <div className="flex items-center justify-center gap-3">
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3">
+                {!fileUrl ? (
+                  <div>
+                    {/* Hidden file input */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="application/pdf"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+
+                    <Button
+                      name={idValue ? "Upload PO" : "Extract PO"}
+                      button_type="primary-outline"
+                      icon_type="upload"
+                      disabled={isLoaderFormSubmit}
+                      onClick={() => fileInputRef.current?.click()} // triggers file input
+                    />
                   </div>
-                  {showUploadFileView && (
-                    <div className="transition-allpdduration-300 ease-out">
-                      <UploadFileView
-                        removeFile={() => {
-                          if (idValue) deletePOAttachmentFunc();
-                          setFileUrl(null);
-                          setShowUploadFileView(false);
-                        }}
-                        fileName={
-                          fileDetails?.name ||
-                          fileResponse?.file_name ||
-                          "File 1"
+                ) : null}
+              </div>
+              {/* Form action buttons */}
+              <div className="flex items-center gap-3">
+                <div className="w-fit">
+                  <Button
+                    name="Cancel"
+                    onClick={() =>
+                      idValue
+                        ? router.push(`/purchaseorder/view?id=${idValue}`)
+                        : router.push("/purchaseorder/list")
+                    }
+                    disabled={isLoaderFormSubmit}
+                    button_type="secondary-outline"
+                  />
+                </div>
+                {!idValue || poDetails?.status === "draft" ? (
+                  <DropdownButton
+                    name="Save"
+                    onActionBtClick={() => {
+                      triggerSubmit("in_review");
+                    }}
+                    onClose={() => setShowBtnPopup(false)}
+                    onBtnPopupItemsClick={(val) => {
+                      if (val === "Save as draft") {
+                        triggerSubmit("draft");
+                      }
+                    }}
+                    onClickArrow={() => setShowBtnPopup(true)}
+                    showBtnPopup={showBtnPopup}
+                    btnPopupItems={["Save", "Save as draft"]}
+                    button_type="primary"
+                  />
+                ) : (
+                  <Button
+                    name="Save"
+                    onClick={() => triggerSubmit("in_review")}
+                    button_type="primary"
+                    icon_type={isLoaderFormSubmit ? "loader" : null}
+                    disabled={isLoaderFormSubmit}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+          <div>
+            <div className="lg:flex">
+              {/* PO form section */}
+              <form
+                className={
+                  fileUrl && showPdf ? "lg:w-[70%] mt-8 lg:mt-0" : "w-full"
+                }
+                onKeyDown={handleKeyDown}
+              >
+                {/* PO Details Section */}
+                <div
+                  ref={poDetailsSection}
+                  className={`rounded-[20px] bg-white p-4 border border-secondary-200`}
+                >
+                  {/* PO details fields */}
+                  <p className="text-neutral-1100 text-xl font-medium mb-5">
+                    PO Details
+                  </p>
+                  <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
+                    <div>
+                      <Label htmlFor="poNumber" text="PO number" />
+                      <TextInput
+                        register={register("poNumber")}
+                        id="poNumber"
+                        placeholder="Enter PO no"
+                        error={errors.poNumber}
+                        value={getValues("poNumber")}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="vendor" text="Vendor" isRequired />
+                      <SelectComponent
+                        name="vendor"
+                        register={register}
+                        trigger={trigger}
+                        title="Vendor"
+                        error={errors?.vendor}
+                        options={vendorOptionList}
+                        placeholder="Select vendor"
+                        isClearable={true}
+                        getValues={getValues}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="payment_terms" text="Payment terms" />
+                      <SelectComponent
+                        name="payment_terms"
+                        register={register}
+                        trigger={trigger}
+                        error={errors?.payment_terms}
+                        options={paymentTermsOptions}
+                        placeholder="Select payment terms"
+                        isClearable={true}
+                        getValues={getValues}
+                      />
+                    </div>
+                  </div>
+                  {/* PO date and due date fields */}
+                  <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
+                    <div>
+                      <Label htmlFor="po_date" text="PO date" />
+                      <DatePickerDemo
+                        register={register}
+                        name="po_date"
+                        error={errors.po_date}
+                        trigger={trigger}
+                        placeholder="Select PO date"
+                        title="PO date"
+                        value={watch("po_date") ?? undefined}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="delivery_date" text="Delivery date" />
+                      <DatePickerDemo
+                        register={register}
+                        name="delivery_date"
+                        error={errors.delivery_date}
+                        trigger={trigger}
+                        placeholder="Select delivery date"
+                        title="Delivery date"
+                        value={watch("delivery_date") ?? undefined}
+                        disabledBefore={
+                          watch("po_date") != null
+                            ? new Date(watch("po_date")!)
+                            : undefined
                         }
                       />
                     </div>
-                  )}
-                </OutsideClickHandler>
-              )
-            )}
-          </div>
-          <div>
-            <div className="lg:flex gap-10">
+                  </div>
+                </div>
+                {/* PO line items table */}
+                <div
+                  className={`rounded-[20px] bg-white py-4 border border-secondary-200`}
+                  style={{
+                    minHeight: `calc(100vh - 10rem - ${poDetailsHeight ?? 0}px - 2px)`, //2px (348) is for mesh UI - border 1px y-axis, padding 1px y-axis
+                  }}
+                >
+                  <p className="text-neutral-1100 text-xl font-medium mb-5 px-4">
+                    PO line items
+                  </p>
+                  <POItemsTable
+                    getValues={getValues}
+                    setValue={setValue}
+                    control={control}
+                    register={register}
+                    showItemsDescription={showItemsDescription}
+                  />
+                  <div className="flex items-center justify-between mt-5 px-4">
+                    <div className="w-1/2">
+                      <Label htmlFor="comments" text="Notes" />
+                      <TextAreaInput
+                        rows={4}
+                        register={register("comments")}
+                        id="comments"
+                        placeholder="Enter notes"
+                        error={errors.comments}
+                        value={getValues("comments") ?? undefined}
+                      />
+                    </div>
+                    {/* PO summary (subtotal, tax, total) */}
+                    <div className="p-3 w-72 font-medium text-sm bg-secondary-100 rounded-[20px] flex flex-col gap-5">
+                      <div className="grid grid-cols-2">
+                        <p className="text-neutral-1100">Sub total:</p>
+                        <p className="text-right text-neutral-900">
+                          {formatNumber(subtotal, orgDetails?.currency)}
+                        </p>
+                      </div>
+                      <div className="grid items-center grid-cols-2">
+                        <div className="flex flex-col text-neutral-1100">
+                          <p className="">Total tax:</p>
+                          <span className="text-xs">
+                            {formatNumber(totalTaxamount, orgDetails?.currency)}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <NumberInput
+                            register={register("total_tax")}
+                            id="totalTax"
+                            error={errors.total_tax}
+                            value={getValues("total_tax")}
+                            onEnterPress={() => { }}
+                            allowDecimal
+                            className="text-right"
+                          />
+                          %
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 font-semibold">
+                        <p className="text-neutral-1100">Grand total:</p>
+                        <p className="text-right text-neutral-900">
+                          {formatNumber(total, orgDetails?.currency)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
               {/* PDF preview section (if file uploaded and showPdf is true) */}
               {fileUrl && showPdf && (
-                <div className="lg:w-1/3 bg-white shadow-5xl rounded-md overflow-hidden h-fit">
-                  {files?.status === "completed" ? (
+                <div className="relative lg:w-[30%] scrollbar_none rounded-[20px] bg-white border border-secondary-200 overflow-hidden">
+                  <p className="p-4 pb-0 text-neutral-1100 text-xl font-medium">
+                    Purchase Order Preview
+                  </p>
+                  {files?.status === "done" ? (
                     <div className="flex justify-end py-1 pr-2">
                       <IconWrapper
                         icon={
@@ -521,7 +722,7 @@ const AddPOComponentWithParams = () => {
                   ) : null}
 
                   {/* PDF PREVIEW OR LOADING GIF */}
-                  {files?.status === "completed" ? (
+                  {files?.status === "done" ? (
                     <PdfViewer fileUrl={fileUrl} />
                   ) : (
                     <div className="flex flex-col items-center justify-center h-[580px]">
@@ -559,200 +760,6 @@ const AddPOComponentWithParams = () => {
                   )}
                 </div>
               )}
-
-              {/* PO form section */}
-              <form
-                className={
-                  fileUrl && showPdf ? "lg:w-2/3 mt-8 lg:mt-0" : "w-full"
-                }
-                onKeyDown={handleKeyDown}
-                onSubmit={handleSubmit(submitForm)}
-              >
-                <div>
-                  <div
-                    className={
-                      fileUrl && showPdf ? "w-full" : "lg:w-3/4 w-full"
-                    }
-                  >
-                    {/* PO details fields */}
-                    <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-                      <div>
-                        <Label htmlFor="poNumber" text="PO number" />
-                        <TextInput
-                          register={register("poNumber")}
-                          id="poNumber"
-                          placeholder="Enter PO no"
-                          error={errors.poNumber}
-                          value={getValues("poNumber")}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="vendor" text="Vendor" isRequired />
-                        <SelectComponent
-                          name="vendor"
-                          register={register}
-                          trigger={trigger}
-                          title="Vendor"
-                          error={errors?.vendor}
-                          options={vendorOptionList}
-                          placeholder="Select vendor"
-                          isClearable={true}
-                          getValues={getValues}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="payment_terms" text="Payment terms" />
-                        <SelectComponent
-                          name="payment_terms"
-                          register={register}
-                          trigger={trigger}
-                          error={errors?.payment_terms}
-                          options={paymentTermsOptions}
-                          placeholder="Select payment terms"
-                          isClearable={true}
-                          getValues={getValues}
-                        />
-                      </div>
-                    </div>
-                    {/* PO date and due date fields */}
-                    <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
-                      <div>
-                        <Label htmlFor="po_date" text="PO date" />
-                        <DatePickerDemo
-                          register={register}
-                          name="po_date"
-                          error={errors.po_date}
-                          trigger={trigger}
-                          placeholder="Select PO date"
-                          title="PO date"
-                          value={watch("po_date") ?? undefined}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="delivery_date" text="Delivery date" />
-                        <DatePickerDemo
-                          register={register}
-                          name="delivery_date"
-                          error={errors.delivery_date}
-                          trigger={trigger}
-                          placeholder="Select delivery date"
-                          title="Delivery date"
-                          value={watch("delivery_date") ?? undefined}
-                          disabledBefore={
-                            watch("po_date") != null
-                              ? new Date(watch("po_date")!)
-                              : undefined
-                          }
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  {/* PO line items table */}
-                  <p className="text-slate-800 text-lg font-semibold mt-8 mb-6">
-                    PO line items
-                  </p>
-                  <POItemsTable
-                    getValues={getValues}
-                    setValue={setValue}
-                    control={control}
-                    register={register}
-                    showItemsDescription={showItemsDescription}
-                  />
-                  {/* PO summary (subtotal, tax, total) */}
-                  <div className="flex justify-end">
-                    <div className="p-3 w-72 font-medium text-slate-600 text-sm bg-gray-50 rounded-md">
-                      <div className="grid grid-cols-2">
-                        <p>Sub total:</p>
-                        <p className="text-right">
-                          {formatNumber(subtotal, orgDetails?.currency)}
-                        </p>
-                      </div>
-                      <div className="grid items-center grid-cols-2 pb-2 mt-4 mb-3 border-b">
-                        <div>
-                          <p>Total tax:</p>
-                          <span className="text-xs">
-                            {formatNumber(totalTaxamount, orgDetails?.currency)}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <NumberInput
-                            register={register("total_tax")}
-                            id="totalTax"
-                            error={errors.total_tax}
-                            value={getValues("total_tax")}
-                            onEnterPress={() => {}}
-                            allowDecimal
-                            className="text-right"
-                          />
-                          %
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 text-slate-800 font-semibold">
-                        <p>Total:</p>
-                        <p className="text-right">
-                          {formatNumber(total, orgDetails?.currency)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3">
-                    <div>
-                      <Label htmlFor="comments" text="Notes" />
-                      <TextAreaInput
-                        rows={3}
-                        register={register("comments")}
-                        id="comments"
-                        placeholder="Enter notes"
-                        error={errors.comments}
-                        value={getValues("comments") ?? undefined}
-                      />
-                    </div>
-                  </div>
-                  {/* Form action buttons */}
-                  <div className="flex items-center gap-3 mt-6">
-                    <div className="w-fit">
-                      <Button
-                        type="submit"
-                        text="Save"
-                        disabled={isLoaderFormSubmit}
-                        className="text-white"
-                        onClick={() => setSubmitType("in_review")}
-                        isLoading={
-                          submitType === "in_review" && isLoaderFormSubmit
-                        }
-                      />
-                    </div>
-                    {(!idValue || poDetails?.status === "draft") && (
-                      <div className="w-fit">
-                        <Button
-                          text="Save as draft"
-                          type="submit"
-                          disabled={isLoaderFormSubmit}
-                          onClick={() => setSubmitType("draft")}
-                          isLoading={
-                            submitType === "draft" && isLoaderFormSubmit
-                          }
-                          isLoaderDark
-                          className="bg-transparent text-primary-500 border border-primary-500 disabled:hover:bg-transparent disabled:text-primary-500 hover:bg-primary-500 hover:text-white"
-                        />
-                      </div>
-                    )}
-                    <div className="w-fit">
-                      <Button
-                        text="Cancel"
-                        type="button"
-                        onClick={() =>
-                          idValue
-                            ? router.push(`/purchaseorder/view?id=${idValue}`)
-                            : router.push("/purchaseorder/list")
-                        }
-                        disabled={isLoaderFormSubmit}
-                        className="bg-transparent text-primary-500 border border-primary-500 disabled:hover:bg-transparent disabled:text-primary-500 hover:bg-primary-500 hover:text-white"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </form>
             </div>
           </div>
         </>
