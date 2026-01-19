@@ -6,7 +6,7 @@ import { CheckBox, PageLoader, Tabs } from "@rever/common";
 import { DataTable } from "@rever/common";
 import { BILL_API, useApi } from "@rever/services";
 import { useUserStore } from "@rever/stores";
-import { ApprovalListAPIType, ApprovalTableList } from "@rever/types";
+import { ApprovalListAPIType, ApprovalTableList, ApprovalTypes } from "@rever/types";
 import {
   formatDate,
   formatNumber,
@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 // Main component for displaying the approval list
-const BillApprovalList = () => {
+const BillApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
   const router = useRouter();
 
   const [approvalList, setApprovalList] = useState<ApprovalTableList[]>([]);
