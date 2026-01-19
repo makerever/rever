@@ -403,6 +403,7 @@ export interface ApprovalListAPIType {
   vendor_id?: string;
   vendor?: { id: string | number; name: string } | null;
   total?: number | string;
+  is_attachment?: boolean;
   status: string;
 }
 
@@ -412,6 +413,10 @@ export interface ApprovalTableList {
   bill: string;
   vendor?: { id: string | number; name: string } | null;
   status: string;
+  bill_date?: string;
+  due_date?: string;
+  is_attachment?: boolean;
+  total?: number | string;
 }
 
 // Interface for search input props

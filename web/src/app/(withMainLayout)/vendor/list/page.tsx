@@ -147,7 +147,7 @@ const VendorList = () => {
               <span
                 className={`text-2xs border py-1 px-1.5 rounded-md ${
                   isActive
-                    ? "text-green-600 bg-green-50 border-green-200"
+                    ? "text-green-600 bg-green-50 border-green-200 rounded-full"
                     : "text-red-500 bg-red-50 border-red-200"
                 }`}
               >

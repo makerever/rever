@@ -97,8 +97,8 @@ const ViewPOWithParams = () => {
           <div>
             <ViewPODetails
               showPdf={false}
-              setShowPdf={() => {}}
-              deletePO={() => {}}
+              setShowPdf={() => { }}
+              deletePO={() => { }}
               poDetails={poDetails}
               isLoaderFormSubmit={isLoaderFormSubmit}
               handleApprovalAction={handleApprovalAction}
@@ -124,10 +124,11 @@ const ViewPOWithParams = () => {
           />
           <div className="flex justify-end items-center gap-3 w-fit mt-3">
             <Button
-              disabled={isLoaderFormSubmit}
-              text="Reject"
+              name="Reject"
               onClick={rejectPO}
-              className="text-white bg-red-500 hover:bg-red-600"
+              disabled={isLoaderFormSubmit}
+              button_type="danger"
+              icon_type="reject"
             />
           </div>
         </div>
