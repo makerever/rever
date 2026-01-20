@@ -231,15 +231,7 @@ const PurchaseOrderList = () => {
       activeTab === "All POs"
         ? poData
         : poData?.filter(
-          (po) =>
-            po.status ===
-            (activeTab === "Approved POs"
-              ? "Approved"
-              : activeTab === "Rejected POs"
-                ? "Rejected"
-                : activeTab === "Draft POs"
-                  ? "Draft"
-                  : activeTab),
+          (po) => getLabelForBillStatus(po?.status || "") === activeTab,
         );
 
     if (!search.trim()) return filteredByTab;
@@ -272,7 +264,7 @@ const PurchaseOrderList = () => {
         tabNames={tabOptionsPO}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        tabSeparatorAt={6}
+        tabSeparatorAt={5}
         setSearch={setSearch}
         search={search}
         clearSearch={() => setSearch("")}
