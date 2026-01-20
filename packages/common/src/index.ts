@@ -86,7 +86,8 @@ export { default as ViewVendorDetails } from "./pages/vendor/ViewVendor";
 export * from "./components/GlobalErrorBoundary";
 
 export { default as SidePanel } from "./components/SidePanel";
-export { default as AuditHistory } from "./components/AuditHistory";
+export { default as AuditHistory } from "./components/AuditHistory/AuditHistory";
+export { default as AuditHistoryCard } from "./components/AuditHistory/AuditHistoryCard";
 
 export * from "./components/TooltipWrapper";
 export { default as BillApproval } from "./pages/bill/BillApproval";

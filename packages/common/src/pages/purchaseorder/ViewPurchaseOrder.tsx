@@ -48,7 +48,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   getAssociateBillsByPoIDApi,
-  // getIndividualPOAuditApi,
+  getIndividualPOAuditApi,
   getPOAuditHistoryApi,
 } from "@rever/services";
 import { ColumnDef, sortingFns } from "@tanstack/react-table";
@@ -129,22 +129,22 @@ const ViewPODetails = ({
     setIsLoading(false);
   }, [orgDetails?.date_format]);
 
-  // const fetchIndividualAuditHistory = useCallback(
-  //   async (historyId: number | null) => {
-  //     if (!latestPoDetials?.id || !historyId) return;
+  const fetchIndividualAuditHistory = useCallback(
+    async (historyId: number | null) => {
+      if (!latestPoDetials?.id || !historyId) return;
 
-  //     const response = await getIndividualPOAuditApi(latestPoDetials.id, historyId);
-  //     if (response?.status !== 200) return;
+      const response = await getIndividualPOAuditApi(latestPoDetials.id, historyId);
+      if (response?.status !== 200) return;
 
-  //     setCurrentPoDetails({
-  //       ...response.data,
-  //       id: latestPoDetials.id,
-  //     });
+      setCurrentPoDetails({
+        ...response.data,
+        id: latestPoDetials.id,
+      });
 
-  //     setIsAuditLoading(false);
-  //   },
-  //   [latestPoDetials?.id]
-  // );
+      setIsAuditLoading(false);
+    },
+    [latestPoDetials?.id]
+  );
 
   const getAssociateBillsByPoID = useCallback(async (id: string) => {
     const response = await getAssociateBillsByPoIDApi(id);
@@ -179,10 +179,10 @@ const ViewPODetails = ({
   }, [showAuditHistory, currentPoDetails?.id, getBillAuditHistory]);
 
   // Fetch selected version
-  // useEffect(() => {
-  //   if (!currentAuditVersion) return;
-  //   fetchIndividualAuditHistory(currentAuditVersion);
-  // }, [currentAuditVersion, fetchIndividualAuditHistory]);
+  useEffect(() => {
+    if (!currentAuditVersion) return;
+    fetchIndividualAuditHistory(currentAuditVersion);
+  }, [currentAuditVersion, fetchIndividualAuditHistory]);
 
   // Generate change validation object
   useEffect(() => {
@@ -220,14 +220,14 @@ const ViewPODetails = ({
 
   // ---------- HANDLERS ---------- //
 
-  // const handleClickAuditHistoryCard = async (historyId: number) => {
-  //   if (!latestPoDetials?.id) return;
+  const handleClickAuditHistoryCard = async (historyId: number) => {
+    if (!latestPoDetials?.id) return;
 
-  //   const response = await getIndividualPOAuditApi(latestPoDetials.id, historyId);
-  //   if (response?.status !== 200) return;
+    const response = await getIndividualPOAuditApi(latestPoDetials.id, historyId);
+    if (response?.status !== 200) return;
 
-  //   setCurrentPoDetails({ ...response.data, id: latestPoDetials.id });
-  // };
+    setCurrentPoDetails({ ...response.data, id: latestPoDetials.id });
+  };
 
   const handleCloseAuditHistory = () => {
     setShowAuditHistory(false);
@@ -669,14 +669,14 @@ const ViewPODetails = ({
                   maxHeight: `calc(${poDetailsHeight ?? 0}px + ${poLineItemsHeight ?? 0}px - 0.5px)`, //is for mesh UI - border 1px y-axis, padding 1px y-axis
                 }}
               >
-                {/* <AuditHistory
+                <AuditHistory
                   data={auditData}
                   isLoading={isLoading || isAuditLoading}
                   setAuditVersionDate={setAuditVersionDate}
                   currentVersion={currentAuditVersion}
                   setCurrentVersion={setCurrentAuditVersion}
                   handleClickAuditHistoryCard={handleClickAuditHistoryCard}
-                /> */}
+                />
               </div>
             )}
           </div>
