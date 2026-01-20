@@ -86,6 +86,12 @@ export const getAssociateBillsByPoIDApi = async (id: string) => {
   return response;
 };
 
+// Get Individual audit history for PO
+export const getIndividualPOAuditApi = async (bill_id: number, history_id: number) => {
+  const response = await axiosInstance.get(`/audit/purchaseorder/${bill_id}/history/${history_id}`);
+  return response;
+}
+
 // Add an attachment to a PO
 export const addPOAttachment = async (data: FormData, poId: string) => {
   const response = await axiosInstance.post(

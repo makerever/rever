@@ -154,15 +154,15 @@ type StatusClassMap = Record<string, string>;
 
 const statusClassMap: StatusClassMap = {
   // Green
-  Active: "text-green-800 bg-green-100 border-green-400 font-medium",
-  active: "text-green-800 bg-green-100 border-green-400 font-medium",
+  Active: "bg-pill-active text-pill-active-text",
+  active: "bg-pill-active text-pill-active-text",
   Confirmed: "text-green-800 bg-green-100 border-green-400 font-medium",
   done: "text-green-800 bg-green-100 border-green-400 font-medium",
   completed: "text-green-800 bg-green-100 border-green-400 font-medium",
 
   // Red
-  Inactive: "text-red-800 bg-red-100 border-red-400 font-medium",
-  inactive: "text-red-800 bg-red-100 border-red-400 font-medium",
+  Inactive: "bg-pill-inactive text-pill-inactive-text",
+  inactive: "bg-pill-inactive text-pill-inactive-text",
   failed: "text-red-800 bg-red-100 border-red-400 font-medium",
   Revoked: "text-red-800 bg-red-100 border-red-400 font-medium",
 

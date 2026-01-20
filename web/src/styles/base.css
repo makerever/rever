@@ -83,6 +83,9 @@
     --active-pill: #CAEEF7;
     --active-pill-text: #01242D;
 
+    --inactive-pill: #FCECD9;
+    --inactive-pill-text: #381C07;
+
 
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
@@ -189,6 +192,10 @@
     --neutral-1100: #0E1010;
 
     --active-pill: #CAEEF7;
+    --active-pill-text: #01242D;
+
+    --inactive-pill: #FCECD9;
+    --inactive-pill-text: #381C07;
 
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;

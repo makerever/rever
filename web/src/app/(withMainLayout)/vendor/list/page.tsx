@@ -2,14 +2,14 @@
 
 "use client";
 
-import { CheckBox, DataTable, PageLoader } from "@rever/common";
+import { CheckBox, DataTable, PageLoader, PillItem } from "@rever/common";
 import { useApi, VENDOR_API } from "@rever/services";
 import {
   VenderDataAPIType,
   VendorsAPIData,
   VendorTableList,
 } from "@rever/types";
-import { hasPermission } from "@rever/utils";
+import { getStatusClass, hasPermission } from "@rever/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -144,15 +144,11 @@ const VendorList = () => {
 
           return (
             <div className="flex items-center gap-1">
-              <span
-                className={`text-2xs border py-1 px-1.5 rounded-md ${
-                  isActive
-                    ? "text-green-600 bg-green-50 border-green-200 rounded-full"
-                    : "text-red-500 bg-red-50 border-red-200"
-                }`}
-              >
-                {value}
-              </span>
+              <PillItem
+                className={`${getStatusClass(isActive ? "Active" : "Inactive")}`}
+                isRounded={true}
+                name={isActive ? "Active" : "Inactive"}
+              />
             </div>
           );
         },
