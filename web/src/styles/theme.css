@@ -127,7 +127,10 @@
   --color-neutral-1100: var(--neutral-1100);
 
   --color-pill-active: var(--active-pill);
-  --color-active-pill-text: var(--active-pill-text);
+  --color-pill-active-text: var(--active-pill-text);
+
+  --color-pill-inactive: var(--inactive-pill);
+  --color-pill-inactive-text: var(--inactive-pill-text);
 
   /* ------------------------------------------------------------
      KEYFRAMES

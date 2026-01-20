@@ -1,7 +1,7 @@
 // TS common inteface objects
 
 import { ColumnDef } from "@tanstack/react-table";
-import { ReactNode } from "react";
+import { Dispatch, ReactNode, SetStateAction } from "react";
 import {
   FieldError,
   FieldValues,
@@ -479,19 +479,21 @@ type ChangeEntry = {
 
 // Types for audit history items
 export interface AuditHistoryItemsProps {
+  history_id: number | null;
   changed_on: string;
   changed_by: string;
   event: string;
-  field?: string;
-  new_value: Record<string, string>;
-  old_value: Record<string, string>;
-  changes: ChangeEntry[];
-  status: string;
+  is_current: boolean;
+  status: string
 }
 
 export type AuditHistoryDataProps = {
   data: AuditHistoryItemsProps[];
   isLoading?: boolean;
+  setAuditVersionDate: Dispatch<SetStateAction<string | null>>;
+  handleClickAuditHistoryCard: (id: number) => void;
+  currentVersion: number | null;
+  setCurrentVersion: Dispatch<SetStateAction<number | null>>;
 };
 
 export type LoaderContextType = {

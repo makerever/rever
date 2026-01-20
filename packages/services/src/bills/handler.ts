@@ -98,6 +98,12 @@ export const getBillAuditHistoryApi = async (id: number) => {
   return response;
 };
 
+// Get Audit History based on history ID
+export const getIndividualBillAuditApi = async (bill_id: number, history_id: number) => {
+  const response = await axiosInstance.get(`/audit/bill/${bill_id}/history/${history_id}`);
+  return response;
+}
+
 // Delete a specific attachment by its ID
 export const getMatchResultsApi = async (id: string) => {
   const response = await axiosInstance.get(
