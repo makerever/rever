@@ -123,7 +123,7 @@ const ViewVendorDetails = ({
           return collator.compare(a, b);
         },
         sortDescFirst: false,
-        header: ({}) => (
+        header: ({ }) => (
           <div className="flex items-center gap-4">
             <span>Bill</span>
           </div>
@@ -292,7 +292,7 @@ const ViewVendorDetails = ({
                 {vendorRecord?.vendor_name ?? ""}
               </p>
               <PillItem
-                className={`${vendorRecord?.is_active ? "bg-success-200 text-neutral-1100" : "bg-danger-200 text-neutral-1100"}`}
+                className={`${getStatusClass(vendorRecord?.is_active ? "Active" : "Inactive")}`}
                 isRounded={true}
                 name={vendorRecord?.is_active ? "Active" : "Inactive"}
               />

@@ -46,7 +46,7 @@ import { useUserStore } from "@rever/stores";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   getBillAuditHistoryApi,
-  // getIndividualBillAuditApi,
+  getIndividualBillAuditApi,
   getRequestConfirmationHistoryApi,
 } from "@rever/services";
 import Link from "next/link";
@@ -121,25 +121,25 @@ const ViewBillDetails = ({
     setIsLoading(false);
   }, []);
 
-  // const fetchIndividualAuditHistory = useCallback(
-  //   async (historyId: number | null) => {
-  //     if (!latestBillDetials?.id || !historyId) return;
+  const fetchIndividualAuditHistory = useCallback(
+    async (historyId: number | null) => {
+      if (!latestBillDetials?.id || !historyId) return;
 
-  //     const response = await getIndividualBillAuditApi(
-  //       latestBillDetials.id,
-  //       historyId
-  //     );
+      const response = await getIndividualBillAuditApi(
+        latestBillDetials.id,
+        historyId
+      );
 
-  //     if (response?.status !== 200) return;
+      if (response?.status !== 200) return;
 
-  //     setCurrentBillDetails({
-  //       ...response.data,
-  //       id: latestBillDetials.id,
-  //     });
-  //     setIsAuditLoading(false);
-  //   },
-  //   [latestBillDetials?.id]
-  // );
+      setCurrentBillDetails({
+        ...response.data,
+        id: latestBillDetials.id,
+      });
+      setIsAuditLoading(false);
+    },
+    [latestBillDetials?.id]
+  );
 
   const getRequestConfirmationHistory = useCallback(async () => {
     if (!currentBillDetails?.id) return;
@@ -180,10 +180,10 @@ const ViewBillDetails = ({
   }, [showAuditHistory, currentBillDetails?.id, getBillAuditHistory]);
 
   /*Load selected audit version data*/
-  // useEffect(() => {
-  //   if (!currentAuditVersion) return;
-  //   fetchIndividualAuditHistory(currentAuditVersion);
-  // }, [currentAuditVersion, fetchIndividualAuditHistory]);
+  useEffect(() => {
+    if (!currentAuditVersion) return;
+    fetchIndividualAuditHistory(currentAuditVersion);
+  }, [currentAuditVersion, fetchIndividualAuditHistory]);
 
   /*Recalculate audit validation when data changes*/
   useEffect(() => {
@@ -221,21 +221,21 @@ const ViewBillDetails = ({
 
   // -------------------- HANDLERS --------------------
 
-  // const handleClickAuditHistoryCard = async (historyId: number) => {
-  //   if (!latestBillDetials?.id) return;
+  const handleClickAuditHistoryCard = async (historyId: number) => {
+    if (!latestBillDetials?.id) return;
 
-  //   const response = await getIndividualBillAuditApi(
-  //     latestBillDetials.id,
-  //     historyId
-  //   );
+    const response = await getIndividualBillAuditApi(
+      latestBillDetials.id,
+      historyId
+    );
 
-  //   if (response?.status !== 200) return;
+    if (response?.status !== 200) return;
 
-  //   setCurrentBillDetails({
-  //     ...response.data,
-  //     id: latestBillDetials.id,
-  //   });
-  // };
+    setCurrentBillDetails({
+      ...response.data,
+      id: latestBillDetials.id,
+    });
+  };
 
   const handleCloseAuditHistory = () => {
     setShowAuditHistory(false);
@@ -664,14 +664,14 @@ const ViewBillDetails = ({
               maxHeight: `calc(${billDetailsHeight ?? 0}px + ${billLineItemsHeight ?? 0}px - 0.5px)`, //is for mesh UI - border 1px y-axis, padding 1px y-axis
             }}
           >
-            {/* <AuditHistory
+            <AuditHistory
               data={auditData}
               isLoading={isLoading || isAuditLoading}
               setAuditVersionDate={setAuditVersionDate}
               currentVersion={currentAuditVersion}
               setCurrentVersion={setCurrentAuditVersion}
               handleClickAuditHistoryCard={handleClickAuditHistoryCard}
-            /> */}
+            />
           </div>
         )}
       </div>
