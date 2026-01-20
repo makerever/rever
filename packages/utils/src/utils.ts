@@ -134,6 +134,7 @@ export const billStatusLabels: Record<string, string> = {
   rejected: "Rejected",
   closed: "Closed",
   active: "Active",
+  inactive: "Inactive",
   revoked: "Revoked",
   requested: "Pending",
   confirmed: "Confirmed",
