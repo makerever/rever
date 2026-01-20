@@ -312,7 +312,7 @@ const BillList = () => {
         tabNames={tabOptionsBill}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        tabSeparatorAt={6}
+        tabSeparatorAt={5}
         setSearch={setSearch}
         search={search}
         clearSearch={() => setSearch("")}
