@@ -178,6 +178,47 @@ const ViewPODetails = ({
     getBillAuditHistory(currentPoDetails.id);
   }, [showAuditHistory, currentPoDetails?.id, getBillAuditHistory]);
 
+  /*Recalculate audit validation when data changes*/
+  useEffect(() => {
+    if (!latestPoDetials || !currentPoDetails) return;
+
+    const normalizeBillingAddress = (address: any) => {
+      if (!address) return null;
+
+      const actualAddressFields = [
+        address.line1,
+        address.line2,
+        address.city,
+        address.state,
+        address.zip_code,
+        address.country,
+      ];
+
+      const hasAnyValue = actualAddressFields.some(
+        (field) => typeof field === "string" && field.trim() !== ""
+      );
+
+      return hasAnyValue ? address : null;
+    };
+
+    setAuditValidation(
+      deepMatchAuditVersion(
+        {
+          ...latestPoDetials,
+          billing_address: normalizeBillingAddress(
+            latestPoDetials.billing_address
+          ),
+        },
+        {
+          ...currentPoDetails,
+          billing_address: normalizeBillingAddress(
+            currentPoDetails.billing_address
+          ),
+        }
+      )
+    );
+  }, [latestPoDetials, currentPoDetails]);
+
   // Fetch selected version
   useEffect(() => {
     if (!currentAuditVersion) return;
@@ -400,16 +441,17 @@ const ViewPODetails = ({
   ];
 
   const billingAddressField =
-    typeof auditValidation?.billing_address === 'object'
-      ? Boolean(
-        auditValidation?.billing_address?.city &&
-        auditValidation?.billing_address?.country &&
-        auditValidation?.billing_address?.line1 &&
-        auditValidation?.billing_address?.line2 &&
-        auditValidation?.billing_address?.state &&
-        auditValidation?.billing_address?.zip_code
-      )
-      : auditValidation?.billing_address;
+    auditValidation?.billing_address === undefined
+      ? true // both the current and latest had missing billing_address
+      : typeof auditValidation.billing_address === "object"
+        ? !Object.values(auditValidation.billing_address)
+          .filter((v) => v !== undefined) // ignore undefined
+          .some(
+            (v) =>
+              v === false || //check the billing_address fileds
+              (typeof v === "string" && v.trim() !== "") // non-empty change
+          )
+        : auditValidation.billing_address;
 
 
   return (

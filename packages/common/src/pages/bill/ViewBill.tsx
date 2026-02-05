@@ -195,6 +195,46 @@ const ViewBillDetails = ({
 
   }, [latestBillDetials, currentBillDetails]);
 
+  useEffect(() => {
+    if (!latestBillDetials || !currentBillDetails) return;
+
+    const normalizeBillingAddress = (address: any) => {
+      if (!address) return null;
+
+      const actualAddressFields = [
+        address.line1,
+        address.line2,
+        address.city,
+        address.state,
+        address.zip_code,
+        address.country,
+      ];
+
+      const hasAnyValue = actualAddressFields.some(
+        (field) => typeof field === "string" && field.trim() !== ""
+      );
+
+      return hasAnyValue ? address : null;
+    };
+
+    setAuditValidation(
+      deepMatchAuditVersion(
+        {
+          ...latestBillDetials,
+          billing_address: normalizeBillingAddress(
+            latestBillDetials.billing_address
+          ),
+        },
+        {
+          ...currentBillDetails,
+          billing_address: normalizeBillingAddress(
+            currentBillDetails.billing_address
+          ),
+        }
+      )
+    );
+  }, [latestBillDetials, currentBillDetails]);
+
   /*Measure heights after audit panel render*/
   useLayoutEffect(() => {
     if (!showAuditHistory || isLoading) return;
@@ -249,7 +289,9 @@ const ViewBillDetails = ({
     {
       name: "Edit Bill",
       icon: <Pencil size={16} />,
-      isShown: hasPermission("bill", "update"),
+      isShown: hasPermission("bill", "update") &&
+        billDetails?.status !== "approved" &&
+        billDetails?.status !== "under_approval",
       onClick: () => {
         router.push("/bill/edit?id=" + currentBillDetails?.id);
       },
@@ -284,23 +326,26 @@ const ViewBillDetails = ({
     {
       name: "Delete Bill",
       icon: <Trash size={16} />,
-      isShown: true,
+      isShown:
+        hasPermission("purchaseorder", "delete") &&
+        billDetails?.status !== "approved" &&
+        billDetails?.status !== "under_approval",
       onClick: () => deleteBill(),
     },
   ];
 
   const billingAddressField =
-    typeof auditValidation?.billing_address === 'object'
-      ? Boolean(
-        auditValidation?.billing_address?.city &&
-        auditValidation?.billing_address?.country &&
-        auditValidation?.billing_address?.line1 &&
-        auditValidation?.billing_address?.line2 &&
-        auditValidation?.billing_address?.state &&
-        auditValidation?.billing_address?.zip_code
-      )
-      : auditValidation?.billing_address;
-
+    auditValidation?.billing_address === undefined
+      ? true // both the current and latest had missing billing_address
+      : typeof auditValidation.billing_address === "object"
+        ? !Object.values(auditValidation.billing_address)
+          .filter((v) => v !== undefined) // ignore undefined
+          .some(
+            (v) =>
+              v === false || //check the billing_address fileds
+              (typeof v === "string" && v.trim() !== "") // non-empty change
+          )
+        : auditValidation.billing_address;
 
   return (
     <>
@@ -557,7 +602,7 @@ const ViewBillDetails = ({
 
               <div className="flex flex-row items-center border-b border-secondary-200 py-3">
                 <Label
-                  text="Vendor Address:"
+                  text="Vendor address:"
                   className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
                 />
                 <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: billingAddressField })}`}>
