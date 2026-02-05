@@ -327,7 +327,7 @@ const ViewBillDetails = ({
       name: "Delete Bill",
       icon: <Trash size={16} />,
       isShown:
-        hasPermission("purchaseorder", "delete") &&
+        hasPermission("bill", "delete") &&
         billDetails?.status !== "approved" &&
         billDetails?.status !== "under_approval",
       onClick: () => deleteBill(),
