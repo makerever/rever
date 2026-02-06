@@ -12,8 +12,12 @@ import {
   showSuccessToast,
   TextInput,
 } from "@rever/common";
-import { useState } from "react";
-import { getLoggedInUserDetails, inviteUserApi } from "@rever/services";
+import { useEffect, useState } from "react";
+import {
+  getLoggedInUserDetails,
+  inviteUserApi,
+  updateMemberApi,
+} from "@rever/services";
 import { useUserStore } from "@rever/stores";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -187,7 +191,7 @@ function RoleDescriptions({ role }: RoleDescriptionsProps) {
   );
 }
 
-const InviteMember = ({ onClose }: InviteMemberProps) => {
+const InviteMember = ({ onClose, editMemberData }: InviteMemberProps) => {
   const userDetails = useUserStore((state) => state.user);
   const domain = userDetails?.email?.split("@")[1];
 
@@ -198,6 +202,7 @@ const InviteMember = ({ onClose }: InviteMemberProps) => {
     getValues,
     trigger,
     watch,
+    setValue,
   } = useForm({
     resolver: zodResolver(createInviteMemberSchema(domain ?? "")),
     mode: "onChange",
@@ -210,24 +215,52 @@ const InviteMember = ({ onClose }: InviteMemberProps) => {
   // Disable Save button if required fields are missing or submitting
   const isBtnDisabled = isLoaderFormSubmit;
 
+  useEffect(() => {
+    if (editMemberData) {
+      setValue("email", editMemberData.email);
+      setValue("role", editMemberData.role);
+    }
+  }, [editMemberData]);
+
   // Handle form submission for inviting or updating a member
   const handleInviteMember = async (data: inviteMemberSchemaValues) => {
     setIsLoaderFormSubmit(true);
-    // Invite new member
-    const response = await inviteUserApi(data);
-    if (response?.status === 202) {
-      const response = await getLoggedInUserDetails();
-      showSuccessToast("Invitation request sent");
+
+    if (editMemberData) {
+      // Update existing member
+      const response = await updateMemberApi(data, String(editMemberData.id));
       if (response?.status === 200) {
-        setUser(response?.data);
-        onClose();
+        const response = await getLoggedInUserDetails();
+        showSuccessToast("Member updated successfully");
+        if (response?.status === 200) {
+          setUser(response?.data);
+          onClose();
+        } else {
+          onClose();
+        }
       } else {
-        onClose();
+        if (response?.data?.role && response?.data?.role[0]) {
+          setIsLoaderFormSubmit(false);
+          showErrorToast("Cannot change role — User has pending approvals.");
+        }
       }
     } else {
-      if (response?.data?.detail) {
-        setIsLoaderFormSubmit(false);
-        showErrorToast("User already exists in your organization");
+      // Invite new member
+      const response = await inviteUserApi(data);
+      if (response?.status === 202) {
+        const response = await getLoggedInUserDetails();
+        showSuccessToast("Invitation request sent");
+        if (response?.status === 200) {
+          setUser(response?.data);
+          onClose();
+        } else {
+          onClose();
+        }
+      } else {
+        if (response?.data?.detail) {
+          setIsLoaderFormSubmit(false);
+          showErrorToast("User already exists in your organization");
+        }
       }
     }
   };
@@ -236,7 +269,9 @@ const InviteMember = ({ onClose }: InviteMemberProps) => {
     <>
       <div className="p-4 border-b flex justify-between items-center mb-4">
         <h2 className="text-xl text-neutral-1100 font-semibold overflow-hidden text-ellipsis mr-5 whitespace-pre">
-          Invite Member
+          {editMemberData
+            ? `Edit ${editMemberData.first_name} ${editMemberData.last_name}`
+            : "Invite member"}
         </h2>
         <button
           onClick={onClose}
@@ -260,7 +295,7 @@ const InviteMember = ({ onClose }: InviteMemberProps) => {
                 placeholder="Enter email"
                 error={errors.email}
                 value={getValues("email")}
-                disabled={false ? true : false}
+                disabled={editMemberData ? true : false}
               />
             </div>
             <div className="mt-4">
@@ -275,7 +310,7 @@ const InviteMember = ({ onClose }: InviteMemberProps) => {
                 error={errors.role}
                 options={memberRoleOptions}
                 placeholder="Select role"
-                // isClearable={true}
+              // isClearable={true}
               />
             </div>
           </div>
@@ -292,7 +327,7 @@ const InviteMember = ({ onClose }: InviteMemberProps) => {
 
             <Button
               type="submit"
-              name="Send Invite"
+              name={editMemberData ? "Save changes" : "Send invite"}
               disabled={isBtnDisabled}
               button_type="primary"
               icon_type={isLoaderFormSubmit ? "loader" : null}
