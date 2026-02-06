@@ -66,7 +66,7 @@ export function formatDate(
   }
 
   if (includeTime) {
-    result += ` at ${dt.toFormat("HH:mm a")}`;
+    result += ` at ${dt.toFormat("HH:mm")}`;
   }
 
   return result;
