@@ -9,6 +9,7 @@ import {
   InviteMemberModal,
   Modal,
   PillItem,
+  PopupButton,
   showErrorToast,
 } from "@rever/common";
 import { memberTabOptions } from "@rever/constants";
@@ -27,11 +28,13 @@ import {
   hasPermission,
 } from "@rever/utils";
 import { ColumnDef } from "@tanstack/react-table";
+import { EllipsisVertical, Pencil, Trash } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 const MembersList = () => {
   const user = useUserStore((state) => state.user);
   const updateUser = useUserStore.getState().setUser;
+  const [openRowId, setOpenRowId] = useState<string | null>(null);
 
   const columns: ColumnDef<MemberDataAPIType>[] = useMemo(
     () => [
@@ -94,6 +97,51 @@ const MembersList = () => {
           if (!filterValue?.length) return true;
           return filterValue.includes(row.getValue(columnId) as string);
         },
+      },
+      {
+        id: "actions",
+        header: "",
+        cell: ({ row }) =>
+          String(row?.original?.id) !== user?.id && user?.role === "admin" ? (
+            <div className="flex justify-end relative overflow-visible">
+              <PopupButton
+                btnPopupItems={[
+                  {
+                    name: "Edit",
+                    icon: <Pencil size={16} />,
+                    isShown: true,
+                    onClick: () => {
+                      handleEdit(row.original);
+                      setOpenRowId(null);
+                    },
+                  },
+                  {
+                    name: "Delete",
+                    icon: <Trash size={16} />,
+                    isShown: true,
+                    onClick: () => {
+                      handleDelete(row.original);
+                      setOpenRowId(null);
+                    },
+                  },
+                ]?.filter((item) => item.isShown)}
+                showBtnPopup={openRowId === row.id}
+                onClose={() =>
+                  setOpenRowId(openRowId === row.id ? null : openRowId)
+                }
+              >
+                <button
+                  className="popup-btn rounded-[8px] size-8"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenRowId(openRowId === row.id ? null : row.id);
+                  }}
+                >
+                  <EllipsisVertical size={16} />
+                </button>
+              </PopupButton>
+            </div>
+          ) : null,
       },
     ],
     [],
@@ -204,6 +252,9 @@ const MembersList = () => {
 
   const [inviteMemberModal, setInviteMemberModal] = useState(false);
 
+  const [editMemberData, setEditMemberData] =
+    useState<MemberDataAPIType | null>();
+
   // Fetch members list when component mounts or user changes
   useEffect(() => {
     getMembersList();
@@ -272,6 +323,12 @@ const MembersList = () => {
   const handleDelete = (row: MemberDataAPIType) => {
     setMemberId(String(row?.id));
     setIsPopupOpen(true);
+  };
+
+  // Edit member details (functionality to be implemented)
+  const handleEdit = (row: MemberDataAPIType) => {
+    setEditMemberData(row);
+    setInviteMemberModal(true);
   };
 
   // Delete member by ID and refresh list
