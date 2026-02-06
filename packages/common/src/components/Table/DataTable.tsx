@@ -41,7 +41,9 @@ import IconWrapper from "../IconWrapper";
 import { useUserStore } from "@rever/stores";
 
 export default function DataTable<
-  T extends { status: string; id?: string | number },
+  T extends {
+    [field: string]: any; status: string; id?: string | number
+  },
 >({
   isHeader = true,
   roundedBorder,
@@ -156,7 +158,18 @@ export default function DataTable<
             filtered[key as keyof T] = (
               row.original[key as keyof T] as { name: string }
             )?.name as never;
-          } else if (tableHeading === "Members" && key === "status") {
+          }
+          else if (key === "po_number") {
+            filtered["po_number" as keyof T] =
+              row.original?.purchase_order?.po_number;
+          }
+          else if (key === "status") {
+            filtered["stages" as keyof T] = row.original[key as keyof T];
+          }
+          else if (key === "match_status") {
+            filtered["status" as keyof T] = row.original[key as keyof T]
+          }
+          else if (tableHeading === "Members" && key === "status") {
             (filtered as Partial<T> & { role?: T["status"] }).role =
               row.original["status"];
           } else {
@@ -408,11 +421,11 @@ export default function DataTable<
                                   key={header.id}
                                   className={`px-3 py-2.5 font-semibold text-left whitespace-nowrap ${
                                     (
-                                      header.column.columnDef.meta as {
-                                        width?: string;
-                                      }
-                                    )?.width || "min-w-[120px]"
-                                  } ${header.column.columnDef.header === "Total amount" ? "flex justify-end ps-3 pr-10" : ""}`}
+                                    header.column.columnDef.meta as {
+                                      width?: string;
+                                    }
+                                  )?.width || "min-w-[120px]"
+                                    } ${header.column.columnDef.header === "Total amount" ? "flex justify-end ps-3 pr-10" : ""}`}
                                 >
                                   <div className="flex items-center gap-1.5">
                                     {flexRender(
@@ -425,7 +438,7 @@ export default function DataTable<
                                         className="cursor-pointer"
                                       >
                                         {header.column.getIsSorted() ===
-                                        "asc" ? (
+                                          "asc" ? (
                                           <ArrowUpWideNarrow width={14} />
                                         ) : header.column.getIsSorted() ===
                                           "desc" ? (
@@ -459,9 +472,9 @@ export default function DataTable<
                                   className={`${
                                     cell.column.columnDef.header ===
                                     "Total amount"
-                                      ? "text-right ps-3 pr-10"
-                                      : "px-3"
-                                  } py-2.5 border-t whitespace-nowrap max-w-40 overflow-hidden text-ellipsis`}
+                                    ? "text-right ps-3 pr-10"
+                                    : "px-3"
+                                    } py-2.5 border-t whitespace-nowrap max-w-40 overflow-hidden text-ellipsis`}
                                 >
                                   {flexRender(
                                     cell.column.columnDef.cell,

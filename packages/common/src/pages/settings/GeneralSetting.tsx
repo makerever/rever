@@ -290,7 +290,7 @@ const GeneralSettings = () => {
                   placeholder="Enter org email"
                   error={errors.email}
                   value={getValues("email")}
-                  disabled={!hasPermission("general", "update")}
+                  disabled={true}
                 />
               </div>
             </div>

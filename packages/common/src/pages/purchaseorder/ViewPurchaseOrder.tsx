@@ -370,7 +370,7 @@ const ViewPODetails = ({
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: "Stages",
         sortDescFirst: false,
         cell: ({ row, getValue }) => {
           const value = getValue() as string;

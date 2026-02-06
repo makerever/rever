@@ -311,7 +311,7 @@ export const getLineItemAuditClass = (
 //Get mismatch classname except lineitem
 export const checkAuditValidation = ({ showAuditHistory, field }: { showAuditHistory: boolean, field?: boolean }) => {
   if (showAuditHistory && !field) {
-    return "bg-indigo-100 border border-indigo-800"
+    return "bg-indigo-100 border border-indigo-800 px-1.5"
   }
   return ""
 }

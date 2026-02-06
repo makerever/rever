@@ -63,10 +63,10 @@ const UserProfile = ({ isSidebarCollapsed, handlClick }: SidebarProps) => {
         <div
           className="menu-item menu-item-sidebar"
           onClick={() => {
-            handlClick && handlClick("/preferences");
+            handlClick && handlClick("/settings/general");
           }}
         >
-          <p className="">Preferences</p>
+          <p className="">Settings</p>
         </div>
         {/* Stop showing subscription, members and documents fields for lite user */}
         {user?.role !== "lite_user" ? (

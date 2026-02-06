@@ -122,7 +122,7 @@ const BillList = () => {
         ),
       },
       {
-        accessorKey: "po",
+        accessorKey: "po_number",
         header: "PO",
         accessorFn: (row) => row.purchase_order?.po_number || "",
         sortingFn: "alphanumeric",
