@@ -1,3 +1,4 @@
+import { MemberDataAPIType } from "../settings/type";
 import { Bill } from "./../bill/type";
 
 // Interface representing the structure of a confirm receipt object
@@ -51,4 +52,5 @@ export interface confirmationHistory {
 export type InviteMemberProps = {
   onClose: () => void;
   reqConfirmed: () => void;
+  editMemberData?: MemberDataAPIType | null;
 };

@@ -144,7 +144,7 @@ const MembersList = () => {
           ) : null,
       },
     ],
-    [],
+    [openRowId, user?.id, user?.role],
   );
 
   const invitedMemberColumns: ColumnDef<InvitedMemberDataAPIType>[] = useMemo(
@@ -385,8 +385,6 @@ const MembersList = () => {
             tabNames={memberTabOptions}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
-            actions={hasPermission("members", "delete") ? true : false}
-            handleDelete={handleDelete}
             isMembers={true}
             setSearch={setSearch}
             search={search}
@@ -430,6 +428,7 @@ const MembersList = () => {
         className="lg:w-[35%] md:2/6 w-5/6"
       >
         <InviteMemberModal
+          editMemberData={editMemberData}
           onClose={() => setInviteMemberModal(false)}
           reqConfirmed={() => {
             setInviteMemberModal(false);

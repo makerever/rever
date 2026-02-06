@@ -2,25 +2,32 @@
 
 "use client";
 
-import { useEffect, useRef, ReactNode } from "react";
+import { useEffect, useRef, ReactNode, RefObject } from "react";
 
 interface OutsideClickHandlerProps {
   children: ReactNode;
   onClose: () => void;
+  refs?: RefObject<HTMLElement | null>[];
 }
 
 const OutsideClickHandler: React.FC<OutsideClickHandlerProps> = ({
   children,
   onClose,
+  refs = [],
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        wrapperRef.current &&
-        !wrapperRef.current.contains(event.target as Node)
-      ) {
+      const target = event.target as Node;
+
+      const clickedInsideWrapper = wrapperRef.current?.contains(target);
+
+      const clickedInsideExtraRefs = refs.some(
+        (ref) => ref.current && ref.current.contains(target),
+      );
+
+      if (!clickedInsideWrapper && !clickedInsideExtraRefs) {
         onClose();
       }
     };
@@ -30,7 +37,7 @@ const OutsideClickHandler: React.FC<OutsideClickHandlerProps> = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [onClose]);
+  }, [onClose, refs]);
 
   return <div ref={wrapperRef}>{children}</div>;
 };
