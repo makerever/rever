@@ -118,7 +118,7 @@ export default function RequestReceiptView({
 
             <div className="flex flex-row items-center border-b border-secondary-200 py-3">
               <Label
-                text="Bill Date:  "
+                text="Bill date:  "
                 className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
               />
               <p className="text-neutral-1100 text-sm">
@@ -128,7 +128,7 @@ export default function RequestReceiptView({
 
             <div className="flex flex-row items-center pt-3">
               <Label
-                text="Due Date:  "
+                text="Due date:  "
                 className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
               />
               <p className="text-neutral-1100 text-sm">
@@ -144,7 +144,7 @@ export default function RequestReceiptView({
           }}
         >
           <p className="text-neutral-1100 text-xl font-medium mb-4">
-            Bill Line Items
+            Bill line Items
           </p>
           <div className="rounded-xl border bg-white overflow-hidden">
             <table className="table-fixed w-full text-left">

@@ -256,7 +256,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                   >
                     <div className="w-full flex items-start justify-between">
                       <p className="text-neutral-1100 text-xl mb-5 font-medium">
-                        Vendor Details
+                        Vendor details
                       </p>
                     </div>
                     <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">

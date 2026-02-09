@@ -2500,13 +2500,13 @@ export const matchingOptions = [
       "Bills will be processed without comparing them against POs or receipts.",
   },
   {
-    label: "2-Way Match",
+    label: "2-Way match",
     value: "two_way",
     description:
       "Verify that the vendor invoice matches the corresponding PO for price and quantity.",
   },
   {
-    label: "3-Way Match",
+    label: "3-Way match",
     value: "three_way",
     description:
       "Verify that the goods were both ordered and received before the invoice is paid.",

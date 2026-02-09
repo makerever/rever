@@ -228,7 +228,7 @@ const GeneralSettings = () => {
           <div className="w-full rounded-[20px] border bg-white shadow-xs p-4 min-h-[calc(100vh-160px)]">
             <div className="flex flex-row items-center border-b border-secondary-200 pb-3">
               <Label
-                text="Organization Name:"
+                text="Organization name:"
                 className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
               />
               <div className="w-1/3">
@@ -244,7 +244,7 @@ const GeneralSettings = () => {
             </div>
             <div className="flex flex-row items-center border-b border-secondary-200 py-3">
               <Label
-                text="Base Currency:"
+                text="Base currency:"
                 className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
               />
               <div className="w-1/3">
@@ -262,7 +262,7 @@ const GeneralSettings = () => {
             </div>
             <div className="flex flex-row items-center border-b border-secondary-200 py-3">
               <Label
-                text="Date Format:"
+                text="Date format:"
                 className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
               />
               <div className="w-1/3">
@@ -318,7 +318,7 @@ const GeneralSettings = () => {
 
             <div className="flex flex-row items-center border-b border-secondary-200 py-3">
               <Label
-                text="Business Type:"
+                text="Business type:"
                 className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
               />
               <div className="w-1/3">

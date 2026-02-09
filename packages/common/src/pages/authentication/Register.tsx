@@ -173,7 +173,7 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
             </div> */}
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <Label htmlFor="first_name" text="First Name" isRequired />
+                <Label htmlFor="first_name" text="First name" isRequired />
                 <TextInput
                   register={register("first_name")}
                   id="first_name"
@@ -183,7 +183,7 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
                 />
               </div>
               <div>
-                <Label htmlFor="last_name" text="Last Name" isRequired />
+                <Label htmlFor="last_name" text="Last name" isRequired />
                 <TextInput
                   register={register("last_name")}
                   id="last_name"
@@ -195,7 +195,7 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
             </div>
 
             <div className="mb-5">
-              <Label htmlFor="org_name" text="Organization Name" isRequired />
+              <Label htmlFor="org_name" text="Organization name" isRequired />
               <TextInput
                 register={register("org_name")}
                 id="org_name"
@@ -234,7 +234,7 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
         {showStep === 2 && (
           <div className="grid grid-cols-1 gap-4 mb-4">
             <div>
-              <Label htmlFor="password" text="Create Password" />
+              <Label htmlFor="password" text="Create password" />
               <PasswordInput
                 register={register("password")}
                 id="password"
@@ -246,7 +246,7 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
               />
             </div>
             <div>
-              <Label htmlFor="confirmPassword" text="Confirm Password" />
+              <Label htmlFor="confirmPassword" text="Confirm password" />
               <PasswordInput
                 register={register("confirmPassword")}
                 id="confirmPassword"

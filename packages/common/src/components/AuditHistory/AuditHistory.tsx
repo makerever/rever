@@ -35,7 +35,7 @@ const AuditHistory = ({ data, isLoading, setAuditVersionDate, handleClickAuditHi
         <>
           <div className="p-4">
             <p className="mb-4 pb-0 text-neutral-1100 text-xl font-medium">
-              Audit History
+              Audit history
             </p>
             <div className="">
               {

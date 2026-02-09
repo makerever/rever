@@ -256,12 +256,12 @@ const Home = () => {
               value={billSummaryData?.total}
             />
             <Card
-              heading="Under Review"
+              heading="Under review"
               icon={<FileClock width={20} />}
               value={billSummaryData?.in_review}
             />
             <Card
-              heading="Under Approval"
+              heading="Under approval"
               icon={<FileCheck width={20} />}
               value={billSummaryData?.under_approval}
             />
@@ -276,7 +276,7 @@ const Home = () => {
           <div className="lg:w-2/3">
             {/* Bar chart for analytics */}
             <BarChart
-              heading="Total Bills"
+              heading="Total bills"
               months={barGraphData?.months}
               years={barGraphData?.years}
               totalAmount={barGraphData?.totalAmount}
@@ -293,11 +293,11 @@ const Home = () => {
               isDataLoading={isPieChartLoading}
               heading="Bills by stage"
               labels={[
-                "Under Review",
-                "Under Approval",
+                "Under review",
+                "Under approval",
                 "Approved",
                 "Rejected",
-                "Ledger Entry",
+                "Ledger entry",
               ]}
               colors={["#F5D670", "#79D7EC", "#AAD57B", "#E57C98", "#8582E5"]}
               barChartFilter={radialChartFilter}

@@ -12,9 +12,9 @@ export const tabOptions = [
 
 // Tab options for UI navigation or filtering - Bill section
 export const tabOptionsBill = [
-  "All Bills",
-  "Under Review",
-  "Under Approval",
+  "All bills",
+  "Under review",
+  "Under approval",
   "Approved",
   "Rejected",
   "Draft",
@@ -23,8 +23,8 @@ export const tabOptionsBill = [
 // Tab options for UI navigation or filtering - PO section
 export const tabOptionsPO = [
   "All POs",
-  "Under Review",
-  "Under Approval",
+  "Under review",
+  "Under approval",
   "Approved",
   "Rejected",
   "Draft",
