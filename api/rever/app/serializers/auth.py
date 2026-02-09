@@ -185,3 +185,31 @@ class OrganizationUserUpdateSerializer(serializers.ModelSerializer):
         model = User
         fields = ["first_name", "last_name", "email", "role"]
         extra_kwargs = {"email": {"required": True}}
+
+    def validate_role(self, new_role):
+        """
+        Validate role change to ensure users with pending approvals cannot be demoted.
+        """
+        user = self.instance
+        if not user:
+            return new_role
+
+        old_role = user.role
+        approver_roles = {User.Role.SUPER_ADMIN, User.Role.FINANCE_MANAGER}
+        non_approver_roles = {User.Role.MEMBER, User.Role.LITE_USER}
+
+        # Only check when demoting from approver role to non-approver role
+        if old_role not in approver_roles or new_role not in non_approver_roles:
+            return new_role
+
+        from rever.utils.workflows import get_pending_approvals_for_user
+
+        pending = get_pending_approvals_for_user(user)
+        if pending:
+            details = ", ".join(f"{count} {model}(s)" for model, count in pending.items())
+            raise serializers.ValidationError(
+                f"Cannot change role: User has pending approvals ({details}). "
+                "Please reassign or complete them first."
+            )
+
+        return new_role
