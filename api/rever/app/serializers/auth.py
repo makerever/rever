@@ -188,18 +188,15 @@ class OrganizationUserUpdateSerializer(serializers.ModelSerializer):
 
     def validate_role(self, new_role):
         """
-        Validate role change to ensure users with pending approvals cannot be demoted.
+        Validate role change to ensure finance managers with pending approvals
+        cannot change role. Only FM can approve bills in the UI.
         """
         user = self.instance
         if not user:
             return new_role
 
-        old_role = user.role
-        approver_roles = {User.Role.SUPER_ADMIN, User.Role.FINANCE_MANAGER}
-        non_approver_roles = {User.Role.MEMBER, User.Role.LITE_USER}
-
-        # Only check when demoting from approver role to non-approver role
-        if old_role not in approver_roles or new_role not in non_approver_roles:
+        # Only check when changing FROM finance_manager (the only role that can approve)
+        if user.role != User.Role.FINANCE_MANAGER or new_role == User.Role.FINANCE_MANAGER:
             return new_role
 
         from rever.utils.workflows import get_pending_approvals_for_user
