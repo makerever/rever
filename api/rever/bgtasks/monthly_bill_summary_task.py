@@ -16,6 +16,7 @@ def generate_monthly_bill_summary(
     today = now().date()
     first_day_of_this_month = today.replace(day=1)
     num_months = {
+        "this_month": 2,
         "last_3_months": 3,
         "last_6_months": 6,
         "last_12_months": 12,
