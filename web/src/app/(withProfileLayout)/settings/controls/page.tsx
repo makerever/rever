@@ -104,7 +104,7 @@ const Controls = () => {
       </div>
 
       <div className="w-full rounded-[20px] border bg-white shadow-xs p-4 min-h-[calc(100vh-162px)]">
-        <p className="text-neutral-1100 text-xl font-medium mb-5">Match Type</p>
+        <p className="text-neutral-1100 text-xl font-medium mb-5">Match type</p>
         {matchingOptions.map((val) => (
           <label
             key={val.value}
@@ -134,7 +134,7 @@ const Controls = () => {
           <RadioBtn isDisable checked={false} onChange={() => {}} />
           <div>
             <p className="mb-1 text-xs font-semibold text-slate-800">
-              4-Way Match
+              4-Way match
             </p>
             <p className="text-2xs text-slate-600">
               Verify that the goods received meet specific quality standards.

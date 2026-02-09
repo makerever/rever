@@ -66,7 +66,7 @@ const ChangePassword = () => {
         <div className="flex items-center justify-between w-full h-8">
           <div className="flex items-center gap-3">
             <p className="text-neutral-1100 text-2xl font-medium">
-              Change Password
+              Change password
             </p>
           </div>
         </div>

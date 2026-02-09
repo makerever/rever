@@ -131,7 +131,7 @@ const Invitation = () => {
       >
         <form onSubmit={handleSubmit(handleInviteMember)}>
           <div>
-            <Label htmlFor="organization" text="Organization Name" />
+            <Label htmlFor="organization" text="Organization name" />
             <TextInput
               id="organization"
               value={inviteUserDetails?.organization}
@@ -151,7 +151,7 @@ const Invitation = () => {
           <div className="grid grid-cols-2 gap-5 mt-4">
             {/* First name input */}
             <div>
-              <Label htmlFor="first_name" text="First Name" isRequired />
+              <Label htmlFor="first_name" text="First name" isRequired />
               <TextInput
                 register={register("first_name")}
                 id="first_name"
@@ -162,7 +162,7 @@ const Invitation = () => {
             </div>
             {/* Last name input */}
             <div>
-              <Label htmlFor="last_name" text="Last Name" isRequired />
+              <Label htmlFor="last_name" text="Last name" isRequired />
               <TextInput
                 register={register("last_name")}
                 id="last_name"

@@ -421,7 +421,7 @@ const ViewPODetails = ({
       onClick: () => setAssociateBillsSidePanel(true),
     },
     {
-      name: "Audit History",
+      name: "Audit history",
       icon: <FileClock width={16} />,
       isShown: true,
       onClick: () => {
@@ -603,7 +603,7 @@ const ViewPODetails = ({
                 className="grid grid-cols-1 gap-x-5 bg-white rounded-[20px] p-4 border border-secondary-200"
               >
                 <p className="text-neutral-1100 text-xl mb-5 font-medium">
-                  PO Details
+                  PO details
                 </p>
                 <div className="flex flex-row items-center border-b border-secondary-200 h-11">
                   <Label
@@ -699,7 +699,7 @@ const ViewPODetails = ({
             {fileUrl && showPdf && (
               <div className="relative lg:w-[30%] scrollbar_none rounded-[20px] bg-white border border-secondary-200 overflow-hidden">
                 <p className="p-4 mb-4 pb-0 text-neutral-1100 text-xl font-medium">
-                  PO Preview
+                  PO preview
                 </p>
                 <PdfViewer fileUrl={fileUrl} />
               </div>

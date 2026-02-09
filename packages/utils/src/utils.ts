@@ -126,10 +126,10 @@ export const getLabelForTerm = (value: string) =>
 // Function to list label for bill status
 export const billStatusLabels: Record<string, string> = {
   draft: "Draft",
-  in_review: "Under Review",
-  under_approval: "Under Approval",
+  in_review: "Under review",
+  under_approval: "Under approval",
   approved: "Approved",
-  posted: "Ledger Entry",
+  posted: "Ledger entry",
   failed: "Failed",
   rejected: "Rejected",
   closed: "Closed",
@@ -171,10 +171,10 @@ const statusClassMap: StatusClassMap = {
   Pending: "bg-yellow-100",
   Assigned: "bg-yellow-100",
 
-  "Under Review": "bg-yellow-100",
-  "Under Approval": "bg-cyan-100",
+  "Under review": "bg-yellow-100",
+  "Under approval": "bg-cyan-100",
   Draft: "bg-secondary-200",
-  "Ledger Entry": "bg-purple-100",
+  "Ledger entry": "bg-purple-100",
   Rejected: "bg-pink-100",
   Approved: "bg-lime-100",
 

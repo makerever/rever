@@ -326,12 +326,12 @@ const ViewVendorDetails = ({
             className="border border-secondary-200 rounded-[20px] bg-white p-4"
           >
             <p className="text-neutral-1100 text-xl mb-5 font-medium">
-              Vendor Details
+              Vendor details
             </p>
             <div className="grid grid-cols-1 gap-x-5">
               <div className="flex flex-row items-center border-b border-secondary-200 h-11">
                 <Label
-                  text="Company Name:"
+                  text="Company name:"
                   className="max-w-60 w-full text-secondary-700"
                 />
                 <p className="text-neutral-1100 text-sm font-medium">
@@ -377,7 +377,7 @@ const ViewVendorDetails = ({
               </div>
               <div className="flex flex-row items-center border-b border-secondary-200 pt-3 pb-2 h-11">
                 <Label
-                  text="Vendor Address:"
+                  text="Vendor address:"
                   className="max-w-60 w-full text-secondary-700"
                 />
                 <p className="text-neutral-1100 text-sm font-medium">
@@ -399,7 +399,7 @@ const ViewVendorDetails = ({
               </div>
               <div className="flex flex-row items-center pt-3 h-11">
                 <Label
-                  text="Payment Terms:"
+                  text="Payment terms:"
                   className="max-w-60 w-full text-secondary-700"
                 />
                 <p className="text-neutral-1100 text-sm font-medium">
@@ -416,7 +416,7 @@ const ViewVendorDetails = ({
             }}
           >
             <p className="text-neutral-1100 text-xl mb-5 font-medium">
-              Bank Account Details
+              Bank account details
             </p>
             <div className="grid grid-cols-1 gap-x-5">
               <div className="flex flex-row items-center border-b border-secondary-200 h-11">

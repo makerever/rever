@@ -576,7 +576,7 @@ const AddBillComponentWithParams = () => {
                   >
                     {/* Bill details fields */}
                     <p className="text-neutral-1100 text-xl font-medium mb-5">
-                      Bill Details
+                      Bill details
                     </p>
                     <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
                       <div>
@@ -680,7 +680,7 @@ const AddBillComponentWithParams = () => {
                     }}
                   >
                     <p className="text-neutral-1100 text-xl font-medium mb-5">
-                      Bill Line Items
+                      Bill line Items
                     </p>
 
                     <BillItemsTable
@@ -753,7 +753,7 @@ const AddBillComponentWithParams = () => {
               {fileUrl && showPdf && (
                 <div className="relative lg:w-[30%] scrollbar_none rounded-[20px] bg-white border border-secondary-200 overflow-hidden">
                   <p className="p-4 pb-0 text-neutral-1100 text-xl font-medium">
-                    Bill Preview
+                    Bill preview
                   </p>
                   {files.status === "done" ? (
                     <>

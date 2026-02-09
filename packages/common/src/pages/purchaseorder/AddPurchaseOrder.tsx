@@ -550,7 +550,7 @@ const AddPOComponentWithParams = () => {
                 >
                   {/* PO details fields */}
                   <p className="text-neutral-1100 text-xl font-medium mb-5">
-                    PO Details
+                    PO details
                   </p>
                   <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
                     <div>
@@ -695,7 +695,7 @@ const AddPOComponentWithParams = () => {
               {fileUrl && showPdf && (
                 <div className="relative lg:w-[30%] scrollbar_none rounded-[20px] bg-white border border-secondary-200 overflow-hidden">
                   <p className="p-4 pb-0 text-neutral-1100 text-xl font-medium">
-                    Purchase Order Preview
+                    Purchase order preview
                   </p>
                   {files?.status === "done" ? (
                     <div className="flex justify-end py-1 pr-2">

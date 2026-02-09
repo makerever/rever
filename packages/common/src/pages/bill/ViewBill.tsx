@@ -315,7 +315,7 @@ const ViewBillDetails = ({
         currentBillDetails?.status !== "in_review",
     },
     {
-      name: "Audit History",
+      name: "Audit history",
       icon: <FileClock width={16} />,
       isShown: true,
       onClick: () => {
@@ -539,7 +539,7 @@ const ViewBillDetails = ({
             className={`border border-secondary-200 rounded-[20px] bg-white p-4`}
           >
             <p className="text-neutral-1100 text-xl mb-5 font-medium">
-              Bill Details
+              Bill details
             </p>
             <div className="grid grid-cols-1 gap-x-5">
               <div className="flex flex-row items-center border-b border-secondary-200 pb-3">
@@ -563,7 +563,7 @@ const ViewBillDetails = ({
 
               <div className="flex flex-row items-center border-b border-secondary-200 py-3">
                 <Label
-                  text="Purchase Order:"
+                  text="Purchase order:"
                   className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
                 />
                 <p className={`text-neutral-1100 text-sm font-medium ${checkAuditValidation({ showAuditHistory, field: typeof auditValidation?.purchase_order === "object" ? auditValidation?.purchase_order?.po_number : auditValidation?.purchase_order })}`}>
@@ -582,7 +582,7 @@ const ViewBillDetails = ({
 
               <div className="flex flex-row items-center border-b border-secondary-200 py-3">
                 <Label
-                  text="Bill Date:"
+                  text="Bill date:"
                   className={`max-w-60 w-full text-secondary-700 mb-0 font-medium `}
                 />
                 <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.bill_date })}`}>
@@ -592,7 +592,7 @@ const ViewBillDetails = ({
 
               <div className="flex flex-row items-center border-b border-secondary-200 py-3">
                 <Label
-                  text="Due Date:"
+                  text="Due date:"
                   className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
                 />
                 <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.due_date })}`}>
@@ -612,7 +612,7 @@ const ViewBillDetails = ({
 
               <div className="flex flex-row items-center py-3">
                 <Label
-                  text="Payment Terms:"
+                  text="Payment terms:"
                   className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
                 />
                 <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.payment_terms })}`}>
@@ -630,7 +630,7 @@ const ViewBillDetails = ({
             }}
           >
             <p className="text-neutral-1100 text-xl font-medium mb-5">
-              Bill Line Items
+              Bill line Items
             </p>
 
             <BillLineItemsReadOnly
@@ -696,7 +696,7 @@ const ViewBillDetails = ({
         {fileUrl && showPdf && (
           <div className="relative lg:w-[30%] scrollbar_none rounded-[20px] bg-white border border-secondary-200 overflow-hidden">
             <p className="p-4 mb-4 pb-0 text-neutral-1100 text-xl font-medium">
-              Bill Preview
+              Bill preview
             </p>
 
             <PdfViewer fileUrl={fileUrl} />

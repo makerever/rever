@@ -29,7 +29,7 @@ import { useEffect, useMemo, useState } from "react";
 const BillList = () => {
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<string | undefined>("All Bills");
+  const [activeTab, setActiveTab] = useState<string | undefined>("All bills");
   const [billData, setBillData] = useState<Bill[]>([]);
   const [search, setSearch] = useState("");
 
@@ -276,7 +276,7 @@ const BillList = () => {
   // Filter bills based on active tab and search input
   const filteredBills = useMemo(() => {
     const filteredByTab =
-      activeTab === "All Bills"
+      activeTab === "All bills"
         ? billData
         : billData?.filter(
           (bill) => getLabelForBillStatus(bill?.status || "") === activeTab,
@@ -304,8 +304,8 @@ const BillList = () => {
     <>
       <DataTable
         onActionBtClick={handleRedirect}
-        addBtnText="Create Bill"
-        uploadBtnText="Upload Bills"
+        addBtnText="Create bill"
+        uploadBtnText="Upload bills"
         tableHeading="Bills"
         tableData={filteredBills}
         columns={columns}
