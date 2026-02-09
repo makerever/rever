@@ -28,6 +28,7 @@ export const overviewOptions = [
 
 // Overview filter options for analytics or dashboard
 export const barChartOptions = [
+  { label: "This month", value: "this_month" },
   { label: "Last 3 months", value: "last_3_months" },
   { label: "Last 6 months", value: "last_6_months" },
   { label: "Last 12 months", value: "last_12_months" },
