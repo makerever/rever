@@ -182,9 +182,10 @@ export default function Inbox() {
                         >
                           {msg.subject}
                         </p>
-                        <p className="text-xs text-neutral-700 truncate">
-                          {msg.message}
-                        </p>
+                        <p 
+                          className="text-xs text-neutral-700 truncate"
+                          dangerouslySetInnerHTML={{__html:msg.message}}  
+                        />
                         <p className="text-xs text-neutral-700 mt-1 truncate">
                           {msg.time_since_created}
                         </p>
@@ -256,9 +257,10 @@ export default function Inbox() {
                         <p className="text-sm font-semibold text-neutral-1100">
                           {message.subject}
                         </p>
-                        <p className="mt-4 text-xs text-neutral-700">
-                          {message.message}
-                        </p>
+                        <p 
+                          className="mt-4 text-xs text-neutral-700"
+                          dangerouslySetInnerHTML={{ __html: message.message }}
+                        />
                       </div>
 
                       {message?.object_id ? (

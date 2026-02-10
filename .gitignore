@@ -62,6 +62,9 @@ celerybeat-schedule
 *.log
 logs/
 
+# Local email development (file-based email backend)
+sent_emails/
+
 # OS cruft
 Thumbs.db
 

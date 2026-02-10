@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sent Bill Approval</title>
+    <title>{{display_name}} Awaiting Your Approval</title>
     <style type="text/css" emogrify="no">
         #outlook a {
             padding: 0;
@@ -520,45 +520,24 @@
                                                                                             <tr>
                                                                                                 <td
                                                                                                     style="padding-bottom: 15px;">
-                                                                                                    <span
-                                                                                                        style="text-transform: capitalize;">{{member}}</span>
-                                                                                                    has sent you a
-                                                                                                    bill approval.
-
+                                                                                                    {{display_name}} <span
+                                                                                                        style="font-weight: bold;">{{identifier}}</span>
+                                                                                                    from {% if vendor_url %}<a href="{{vendor_url}}" style="font-weight: bold; color: #3f76ff; text-decoration: underline;">{{vendor_name}}</a>{% else %}<span style="font-weight: bold;">{{vendor_name}}</span>{% endif %}
+                                                                                                    has been submitted for approval and is currently
+                                                                                                    awaiting your review.
                                                                                                 </td>
                                                                                             </tr>
                                                                                             <tr>
                                                                                                 <td
-                                                                                                    style="padding-bottom: 15px;">
-                                                                                                    Click the link below to review and approve :
-                                                                                                </td>
-                                                                                            </tr>
-                                                                                            <tr>
-                                                                                                <td
-                                                                                                    style="padding-bottom: 15px;">
+                                                                                                    style="padding-bottom: 15px; padding-top: 10px;">
                                                                                                     <a href="{{link}}"
-                                                                                                        style="text-decoration: none; color: #09C16B;">Click
-                                                                                                        here</a>
+                                                                                                        style="display: inline-block; background-color: #3f76ff; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+                                                                                                        Review {{display_name}}</a>
                                                                                                 </td>
                                                                                             </tr>
                                                                                             <tr>
-                                                                                                <td>
-                                                                                                    <table
-                                                                                                        cellspacing="0"
-                                                                                                        cellpadding="0"
-                                                                                                        border="0">
-                                                                                                        <tr>
-                                                                                                            <td>Thanks,
-                                                                                                            </td>
-                                                                                                        </tr>
-                                                                                                        <tr>
-                                                                                                            <td
-                                                                                                                style="font-weight: bold;">
-                                                                                                                Team
-                                                                                                                Rever!
-                                                                                                            </td>
-                                                                                                        </tr>
-                                                                                                    </table>
+                                                                                                <td style="padding-top: 20px;">
+                                                                                                    <span style="font-weight: bold;">Team Rever</span>
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </table>
