@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sent Bill Approved</title>
+    <title>{{display_name}} {{action}}</title>
     <style type="text/css" emogrify="no">
         #outlook a {
             padding: 0;
@@ -520,46 +520,40 @@
                                                                                             <tr>
                                                                                                 <td
                                                                                                     style="padding-bottom: 15px;">
-                                                                                                    The <span
-                                                                                                        style="font-weight: bold;">Bill
-                                                                                                        {{bill}}</span>
-                                                                                                    you've submitted for
-                                                                                                    approval has been
-                                                                                                    <span
-                                                                                                        style="font-weight: bold;">approved</span>
+                                                                                                    {{display_name}} <span
+                                                                                                        style="font-weight: bold;">{{identifier}}</span>
+                                                                                                    from {% if vendor_url %}<a href="{{vendor_url}}" style="font-weight: bold; color: #3f76ff; text-decoration: underline;">{{vendor_name}}</a>{% else %}<span style="font-weight: bold;">{{vendor_name}}</span>{% endif %}
+                                                                                                    has been {{action}}
+                                                                                                    by <span
+                                                                                                        style="font-weight: bold;">{{actioned_by}}</span>
                                                                                                 </td>
                                                                                             </tr>
                                                                                             <tr>
                                                                                                 <td
-                                                                                                    style="padding-bottom: 15px;">
-                                                                                                    Comments:
+                                                                                                    style="padding-bottom: 15px; padding-top: 10px;">
+                                                                                                    <a href="{{link}}"
+                                                                                                        style="display: inline-block; background-color: #3f76ff; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">View
+                                                                                                        {{display_name}}</a>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                            {% if comments %}
+                                                                                            <tr>
+                                                                                                <td
+                                                                                                    style="padding-bottom: 15px; padding-top: 10px;">
+                                                                                                    <span
+                                                                                                        style="font-weight: bold;">Comments:</span><br />
                                                                                                     {{comments}}
                                                                                                 </td>
                                                                                             </tr>
+                                                                                            {% endif %}
                                                                                             <tr>
-                                                                                                <td>
-                                                                                                    <table
-                                                                                                        cellspacing="0"
-                                                                                                        cellpadding="0"
-                                                                                                        border="0">
-                                                                                                        <tr>
-                                                                                                            <td>Thanks,
-                                                                                                            </td>
-                                                                                                        </tr>
-                                                                                                        <tr>
-                                                                                                            <td
-                                                                                                                style="font-weight: bold;">
-                                                                                                                Team
-                                                                                                                Rever!
-                                                                                                            </td>
-                                                                                                        </tr>
-                                                                                                    </table>
+                                                                                                <td style="padding-top: 20px;">
+                                                                                                    <span style="font-weight: bold;">Team Rever</span>
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </table>
                                                                                     </td>
                                                                                 </tr>
-                                                                               
                                                                             </table>
                                                                         </td>
                                                                     </tr>

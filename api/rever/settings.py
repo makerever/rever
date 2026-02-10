@@ -87,6 +87,9 @@ REST_FRAMEWORK = {
 }
 
 EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
+# File-based email backend for local development
+# Set EMAIL_BACKEND=django.core.mail.backends.filebased.EmailBackend in .env to use
+EMAIL_FILE_PATH = config("EMAIL_FILE_PATH", default=str(BASE_DIR / "sent_emails"))
 
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", default="").split(",")

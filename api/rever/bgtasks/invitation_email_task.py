@@ -16,7 +16,7 @@ def send_invitation_email(recipient_email, role, org_name, link):
         "emails/invitations/member_invitation.html",
         {"role": role, "email": recipient_email, "org_name": org_name, "link": link},
     )
-    text_content = f"Hello,\n\nYou have been invited to join {org_name} as a {role}.\nPlease accept the invitation at the following link: {link}\n\nThank you!"  # noqa: E501
+    text_content = f"Hello,<br><br>You have been invited to join {org_name} as a {role}.<br>Please accept the invitation at the following link: {link}<br><br>Thank you!"  # noqa: E501
     try:
         email = EmailMultiAlternatives(subject, text_content, from_email, to)
         email.attach_alternative(html_content, "text/html")

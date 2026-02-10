@@ -28,6 +28,30 @@ from rever.utils.approval_notification import (
 from rever.utils.workflows import has_objects_under_approval
 
 
+def _get_bill_details(obj, model_name):
+    """Extract identifier, vendor_name, and vendor_id from the object."""
+    identifier = None
+    vendor_name = None
+    vendor_id = None
+
+    m = model_name.lower()
+    if m == "bill":
+        identifier = getattr(obj, "bill_number", None) or f"#{obj.id}"
+    elif m == "purchaseorder":
+        identifier = getattr(obj, "po_number", None) or f"#{obj.id}"
+    elif m == "vendorcredit":
+        identifier = getattr(obj, "credit_note_number", None) or f"#{obj.id}"
+    else:
+        identifier = f"#{obj.id}"
+
+    vendor = getattr(obj, "vendor", None)
+    if vendor:
+        vendor_name = vendor.vendor_name
+        vendor_id = str(vendor.id)
+
+    return identifier, vendor_name, vendor_id
+
+
 class ApprovalConfigAPIView(BaseAPIView):
     def get(self, request):
         organization = self.get_organization()
@@ -285,6 +309,7 @@ class ApprovalLogAPIView(BaseAPIView):
         )
 
         # Notify L1 approver (optional)
+        bill_number, vendor_name, vendor_id = _get_bill_details(obj, model_name)
         if (
             hasattr(first_level_flow.approver, "user_notification_preference")
             and first_level_flow.approver.user_notification_preference.notify_on_approval_request
@@ -295,6 +320,9 @@ class ApprovalLogAPIView(BaseAPIView):
                 object_id=str(obj.id),
                 model_name=model_name,
                 requested_by=user.get_full_name(),
+                bill_number=bill_number,
+                vendor_name=vendor_name,
+                vendor_id=vendor_id,
             )
         create_approval_notification(
             approver=first_level_flow.approver,
@@ -414,6 +442,7 @@ class ApprovalActionAPIView(BaseAPIView):
                     requester=user,  # Current approver who sent to next level
                 )
                 # Notify next approver (optional)
+                bill_number, vendor_name, vendor_id = _get_bill_details(obj, model_name)
                 if (
                     hasattr(next_flow.approver, "user_notification_preference")
                     and next_flow.approver.user_notification_preference.notify_on_approval_request
@@ -424,6 +453,9 @@ class ApprovalActionAPIView(BaseAPIView):
                         object_id=str(obj.id),
                         model_name=model_name,
                         requested_by=user.get_full_name(),
+                        bill_number=bill_number,
+                        vendor_name=vendor_name,
+                        vendor_id=vendor_id,
                     )
                 return Response(
                     {
@@ -467,12 +499,18 @@ class ApprovalActionAPIView(BaseAPIView):
                     and hasattr(sent_action.approval_sent_by, "user_notification_preference")
                     and sent_action.approval_sent_by.user_notification_preference.notify_on_approval_result  # noqa: E501
                 ):
+                    bill_number, vendor_name, vendor_id = _get_bill_details(obj, model_name)
                     send_approval_status_email.delay(
                         model_name=model_name,
                         action_type="approve",
                         comment=comment,
                         to_email=sent_action.approval_sent_by.email,
                         to_name=sent_action.approval_sent_by.get_full_name(),
+                        bill_number=bill_number,
+                        vendor_name=vendor_name,
+                        actioned_by=user.get_full_name(),
+                        object_id=str(obj.id),
+                        vendor_id=vendor_id,
                     )
 
                 return Response({"detail": f"{model_name.title()} fully approved."}, status=200)
@@ -493,7 +531,8 @@ class ApprovalActionAPIView(BaseAPIView):
                 .first()
             )
 
-            # 🆕 CREATE IN-APP NOTIFICATION FOR REJECTION
+            # CREATE IN-APP NOTIFICATION FOR REJECTION
+            bill_number, vendor_name, vendor_id = _get_bill_details(obj, model_name)
             if sent_action and sent_action.approval_sent_by:
                 create_approval_result_notification(
                     recipient=sent_action.approval_sent_by,
@@ -517,6 +556,11 @@ class ApprovalActionAPIView(BaseAPIView):
                     comment=comment,
                     to_email=sent_action.approval_sent_by.email,
                     to_name=sent_action.approval_sent_by.get_full_name(),
+                    bill_number=bill_number,
+                    vendor_name=vendor_name,
+                    actioned_by=user.get_full_name(),
+                    object_id=str(obj.id),
+                    vendor_id=vendor_id,
                 )
 
             return Response(

@@ -29,10 +29,10 @@ def receipt_assignment_email(recipient_email, recipient_name, bill_id, bill_numb
 
     html_content = render_to_string("emails/receipts/assignment.html", ctx)
     text_content = (
-        f"Hello {recipient_name},\n\n"
-        f"You've been assigned to confirm receipt/quantities for Bill {bill_number}.\n"
-        f"Vendor: {vendor_name or 'N/A'}\n"
-        f"Review and confirm: {bill_url}\n"
+        f"Hello {recipient_name},<br><br>"
+        f"You've been assigned to confirm receipt/quantities for Bill {bill_number}.<br>"
+        f"Vendor: {vendor_name or 'N/A'}<br>"
+        f"Review and confirm: {bill_url}<br>"
     )
     try:
         email = EmailMultiAlternatives(subject, text_content, from_email, to)
@@ -66,9 +66,9 @@ def receipt_reminder_email(recipient_email, recipient_name, bill_id, bill_number
 
     html_content = render_to_string("emails/receipts/reminder.html", ctx)
     text_content = (
-        f"Hello {recipient_name},\n\n"
-        f"This is a reminder to confirm Bill {bill_number}.\n"
-        f"Review and confirm: {bill_url}\n"
+        f"Hello {recipient_name},<br><br>"
+        f"This is a reminder to confirm Bill {bill_number}.<br>"
+        f"Review and confirm: {bill_url}<br>"
     )
     try:
         email = EmailMultiAlternatives(subject, text_content, from_email, to)
@@ -106,11 +106,11 @@ def receipt_confirmation_email(
 
     html_content = render_to_string("emails/receipts/confirmation.html", ctx)
     text_content = (
-        f"Hello {recipient_name},\n\n"
+        f"Hello {recipient_name},<br><br>"
         f"The Bill {bill_number} you've requested for receipt has been confirmed by "
-        f"{confirmer_name}.\n"
-        f"Vendor: {vendor_name or 'N/A'}\n"
-        f"Comments: {comments or ''}\n"
+        f"{confirmer_name}.<br>"
+        f"Vendor: {vendor_name or 'N/A'}<br>"
+        f"Comments: {comments or ''}<br>"
     )
     try:
         email = EmailMultiAlternatives(subject, text_content, from_email, to)
