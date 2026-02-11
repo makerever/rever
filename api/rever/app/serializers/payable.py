@@ -1,3 +1,4 @@
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 
 from rever.db.models import (
@@ -9,6 +10,22 @@ from rever.db.models import (
     PurchaseOrderItem,
     Vendor,
 )
+from rever.db.models.approval import ApprovalLog
+
+
+def _get_reject_reason(obj):
+    if obj.status != "rejected":
+        return None
+    return (
+        ApprovalLog.objects.filter(
+            content_type=ContentType.objects.get_for_model(obj),
+            object_id=obj.id,
+            action_type="rejected",
+        )
+        .order_by("-created_at")
+        .values_list("comment", flat=True)
+        .first()
+    )
 
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -94,6 +111,7 @@ class BillSerializer(serializers.ModelSerializer):
     billing_address = AddressSerializer(source="vendor.billing_address", read_only=True)
     shipping_address = AddressSerializer(source="organization.address", read_only=True)
     items = BillItemSerializer(many=True)
+    reject_reason = serializers.SerializerMethodField()
 
     vendor = VendorNestedSerializer(read_only=True)
 
@@ -158,6 +176,9 @@ class BillSerializer(serializers.ModelSerializer):
             }
         return None
 
+    def get_reject_reason(self, obj):
+        return _get_reject_reason(obj)
+
     def create(self, validated):
         items_data = validated.pop("items", [])
         # create the Bill (auto-number logic in model.save())
@@ -217,6 +238,7 @@ class PurchaseOrderSerializer(serializers.ModelSerializer):
     shipping_address = AddressSerializer(source="organization.address", read_only=True)
 
     items = PurchaseOrderItemSerializer(many=True)
+    reject_reason = serializers.SerializerMethodField()
     vendor = VendorNestedSerializer(read_only=True)
 
     vendor_id = serializers.PrimaryKeyRelatedField(
@@ -243,6 +265,9 @@ class PurchaseOrderSerializer(serializers.ModelSerializer):
         if vendor.organization != user_org:
             raise serializers.ValidationError("Vendor does not belong to your organization.")
         return vendor
+    
+    def get_reject_reason(self, obj):
+        return _get_reject_reason(obj)
 
     def create(self, validated_data):
         items_data = validated_data.pop("items", [])
@@ -287,6 +312,7 @@ class VendorListSerializer(serializers.ModelSerializer):
 class BillListSerializer(serializers.ModelSerializer):
     vendor = VendorNestedSerializer(read_only=True)
     purchase_order = PurchaseOrderMinimalSerializer(read_only=True)
+    reject_reason = serializers.SerializerMethodField()
 
     class Meta:
         model = Bill
@@ -309,11 +335,16 @@ class BillListSerializer(serializers.ModelSerializer):
             "match_status",
             "organization",
             "created_at",
+            "reject_reason",
         ]
+
+    def get_reject_reason(self, obj):
+        return _get_reject_reason(obj)
 
 
 class PurchaseOrderListSerializer(serializers.ModelSerializer):
     vendor = VendorNestedSerializer(read_only=True)
+    reject_reason = serializers.SerializerMethodField()
 
     class Meta:
         model = PurchaseOrder
@@ -332,4 +363,7 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
             "organization",
             "is_attachment",
             "created_at",
+            "reject_reason",
         ]
+    def get_reject_reason(self, obj):
+        return _get_reject_reason(obj)

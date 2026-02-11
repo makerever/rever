@@ -177,13 +177,29 @@ export default function poLineItemsReadOnly({
         </table>
       </div>
       <div className="mt-5 flex items-start justify-between flex-row">
-        <div>
-          <div className="max-w-60 w-full">
+        <div className="w-full flex flex-col">
+          {/* Reject remarks */}
+          {!showAuditHistory &&
+            <>
+              {(poDetails?.reject_reason !== null) &&
+                <div className="mb-4">
+                  <Label
+                    text="Rejection reason:"
+                    className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
+                  />
+                  <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.reject_reason })}`}>
+                    {poDetails?.reject_reason || "--"}
+                  </p>
+                </div>}
+            </>
+          }
+          {/* Notes */}
+          <div className="">
             <Label
               text="Notes:"
-              className="font-medium text-secondary-700 max-w-60 w-full"
+              className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
             />
-            <p className="text-slate-800 text-sm font-medium line-clamp-2 mb-5">
+            <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.comments })}`}>
               {poDetails?.comments || "--"}
             </p>
           </div>

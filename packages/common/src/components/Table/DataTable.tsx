@@ -163,7 +163,8 @@ export default function DataTable<
             filtered["po_number" as keyof T] =
               row.original?.purchase_order?.po_number;
           }
-          else if (key === "status") {
+          //in vendor there is not field called stages, so this action can be ignored for vendor
+          else if (key === "status" && (!accessorKeys.includes("vendorName"))) {
             filtered["stages" as keyof T] = row.original[key as keyof T];
           }
           else if (key === "match_status") {
@@ -419,8 +420,7 @@ export default function DataTable<
                               {headerGroup.headers.map((header) => (
                                 <th
                                   key={header.id}
-                                  className={`px-3 py-2.5 font-semibold text-left whitespace-nowrap ${
-                                    (
+                                  className={`px-3 py-2.5 font-semibold text-left whitespace-nowrap ${(
                                     header.column.columnDef.meta as {
                                       width?: string;
                                     }
@@ -469,8 +469,7 @@ export default function DataTable<
                               {row.getVisibleCells().map((cell) => (
                                 <td
                                   key={cell.id}
-                                  className={`${
-                                    cell.column.columnDef.header ===
+                                  className={`${cell.column.columnDef.header ===
                                     "Total amount"
                                     ? "text-right ps-3 pr-10"
                                     : "px-3"
