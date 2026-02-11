@@ -50,6 +50,7 @@ export interface PurchaseOrder {
   updated_at?: string;
   created_at?: string;
   is_attachment?: boolean;
+  reject_reason?: string;
 }
 
 export interface PoAuditValidationType {
@@ -72,6 +73,7 @@ export interface PoAuditValidationType {
   created_at?: boolean;
   is_attachment?: boolean;
   items?: PoItemsAuditValidationType[];
+  reject_reason?: boolean;
 }
 
 export interface PoItemsAuditValidationType {

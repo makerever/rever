@@ -641,15 +641,35 @@ const ViewBillDetails = ({
             />
 
             <div className="mt-5 flex items-start justify-between">
-              {/* Notes */}
-              <div className="w-1/2">
-                <Label
-                  text="Notes:"
-                  className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
-                />
-                <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.comments })}`}>
-                  {currentBillDetails?.comments || "--"}
-                </p>
+              <div className="w-full flex flex-col">
+                {/* Reject remarks */}
+                {
+                  !showAuditHistory &&
+                  <>
+                    {
+                      currentBillDetails?.reject_reason !== null &&
+                      <div className="mb-4">
+                        <Label
+                          text="Rejection reason:"
+                          className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
+                        />
+                        <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.reject_reason })}`}>
+                          {currentBillDetails?.reject_reason || "--"}
+                        </p>
+                      </div>
+                    }
+                  </>
+                }
+                {/* Notes */}
+                <div className="">
+                  <Label
+                    text="Notes:"
+                    className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
+                  />
+                  <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.comments })}`}>
+                    {currentBillDetails?.comments || "--"}
+                  </p>
+                </div>
               </div>
 
               {/* Bill Summary */}

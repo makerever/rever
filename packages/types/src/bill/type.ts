@@ -44,6 +44,7 @@ export interface BillAuditValidationType {
   match_status?: boolean;
   receipt_comment?: boolean;
   items?: BillItemsAuditValidationType[];
+  reject_reason?: boolean;
 }
 
 export type BillItemsAuditValidationType = {
@@ -85,6 +86,7 @@ export interface Bill {
   items?: BillItemTypeProps[];
   created_at?: string;
   is_duplicate?: boolean;
+  reject_reason?: string;
 }
 
 export type BillItemTypeProps = {
