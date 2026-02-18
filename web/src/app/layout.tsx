@@ -9,6 +9,7 @@ import {
   HydrationLoader,
   SafeHydrate,
 } from "@rever/common";
+import { I18nProvider } from "@rever/i18n";
 
 const geist = Geist({ subsets: ["latin"] });
 
@@ -38,7 +39,9 @@ export default function RootLayout({
       <body className={`${geist.className} scale-wrapper`}>
         <SafeHydrate>
           <HydrationLoader>
-            <GlobalErrorBoundary>{children}</GlobalErrorBoundary>
+            <I18nProvider>
+              <GlobalErrorBoundary>{children}</GlobalErrorBoundary>
+            </I18nProvider>
           </HydrationLoader>
           {/* <ThemeProvider /> */}
           <Toaster position="bottom-right" duration={2500} />

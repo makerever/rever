@@ -28,6 +28,7 @@ const nextConfig = {
     "@rever/types",
     "@rever/utils",
     "@rever/validations",
+    "@rever/i18n"
   ],
 };
 
