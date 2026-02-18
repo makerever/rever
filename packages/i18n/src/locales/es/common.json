@@ -1,0 +1,259 @@
+{
+  "welcome": "Bienvenido a Rever",
+  "placeholders": {
+    "search": "Buscar",
+    "email_input": "nombre@empresa.com",
+    "first_name": "Ingresa el nombre",
+    "last_name": "Ingresa el apellido",
+    "organization": "Ingresa el nombre de la organización",
+    "password": "Ingresa la contraseña",
+    "confirm_password": "Confirma la contraseña",
+    "select_base_currency": "Selecciona la moneda base",
+    "select_date_format": "Selecciona el formato de fecha",
+    "enter_email": "Ingresa el correo electrónico",
+    "business_type": "Selecciona el tipo de negocio",
+    "select_industry": "Selecciona la industria",
+    "select_country": "Selecciona el país",
+    "select_state": "Selecciona el estado",
+    "select_city": "Selecciona la ciudad",
+    "enter_zipcode": "Ingresa el código postal",
+    "select_language": "Selecciona el idioma",
+    "search_total_bills": "Buscar facturas totales",
+    "global_search": "Buscar cualquier cosa",
+    "search_bill": "Buscar facturas",
+    "bill": {
+      "enter_bill": "Ingresar número de factura",
+      "select_vendor": "Seleccionar proveedor",
+      "select_po": "Seleccionar orden de compra",
+      "select_pt": "Seleccionar términos de pago",
+      "select_bill_date": "Seleccionar fecha de factura",
+      "select_due_date": "Seleccionar fecha de vencimiento",
+      "select_coa": "Seleccionar PDC"
+    }
+  },
+  "buttons": {
+    "continue": "Continuar",
+    "register": "Registrar",
+    "back": "Atrás",
+    "save": "Guardar",
+    "save_draft": "Guardar como borrador",
+    "cancel": "Cancelar"
+  },
+  "sidebar": {
+    "home": "Inicio",
+    "expenses": {
+      "expenses": "Gastos",
+      "bills": "Facturas",
+      "purchase_order": "Órdenes de compra",
+      "vendors": "Proveedores",
+      "approvals": "Aprobaciones",
+      "coa": "Plan de cuentas",
+      "confirmations": "Confirmaciones"
+    },
+    "inbox": "Bandeja",
+    "settings": {
+      "settings": "Configuración",
+      "general": "General",
+      "controls": "Controles",
+      "members": "Miembros",
+      "approvals": "Aprobaciones",
+      "integrations": "Integraciones",
+      "subscription": "Suscripción",
+      "usage": "Uso"
+    }
+  },
+  "profile_sidebar": {
+    "profile": "Perfil",
+    "security": "Seguridad",
+    "notification": "Notificaciones",
+    "appereance": "Apariencia",
+    "back_home": "Volver al inicio",
+    "back_confirmations": "Volver a confirmaciones"
+  },
+  "global_search": {
+    "vendors": "Proveedores",
+    "po": "Órdenes de compra",
+    "bills": "Facturas",
+    "members": "Miembros",
+    "create_po": "Crear orden de compra",
+    "create_bill": "Crear factura",
+    "inbox": "Bandeja",
+    "profile": "Perfil",
+    "change_password": "Cambiar contraseña"
+  },
+  "subscription": {
+    "plan": {
+      "documents_left": "documentos restantes"
+    }
+  },
+  "dropdown": {
+    "overview_options": {
+      "this_month": "Este mes",
+      "last_3_months": "Últimos 3 meses",
+      "last_6_months": "Últimos 6 meses",
+      "last_12_months": "Últimos 12 meses"
+    },
+    "dashboard_options": {
+      "overview": "Resumen",
+      "2way_match": "Coincidencia 2 vías",
+      "3way_match": "Coincidencia 3 vías"
+    }
+  },
+  "general": {
+    "first_heading": "Configuración general",
+    "org_name": "Nombre de la organización",
+    "base_currency": "Moneda base",
+    "date_format": "Formato de fecha",
+    "email": "Correo electrónico",
+    "phone_number": "Número de teléfono",
+    "business_type": "Tipo de negocio",
+    "industry": "Industria",
+    "second_heading": "Dirección de la empresa",
+    "country": "País",
+    "state": "Estado",
+    "city": "Ciudad",
+    "zipcode": "Código postal"
+  },
+  "profile": {
+    "heading": "Perfil",
+    "profile_settings": "Configuración perfil",
+    "first_name": "Nombre",
+    "last_name": "Apellido",
+    "email": "Correo electrónico",
+    "timezone": "Zona horaria",
+    "role": "Rol",
+    "language": "Idioma"
+  },
+  "home": {
+    "page_name": "Inicio",
+    "reset_filters": "Restablecer filtros",
+    "cards": {
+      "overview": {
+        "total": "Total",
+        "under_review": "En revisión",
+        "under_approval": "En aprobación",
+        "approved": "Aprobado",
+        "ledger_entry": "Asiento contable",
+        "rejected": "Rechazado"
+      },
+      "2_way": {
+        "total_bills": {
+          "heading": "Facturas totales",
+          "tooltip": "Los datos excluyen facturas en borrador"
+        },
+        "bills_with_po": {
+          "heading": "Facturas con OC",
+          "tooltip": "Facturas vinculadas a una orden de compra"
+        },
+        "bills_without_po": {
+          "heading": "Facturas sin OC",
+          "tooltip": "Facturas sin orden de compra"
+        },
+        "duplicate_bills": {
+          "heading": "Facturas duplicadas",
+          "tooltip": "Facturas marcadas como duplicadas"
+        }
+      }
+    },
+    "bill_match_status": {
+      "heading": "Estado coincidencia",
+      "tooltip": {
+        "body": "Cómo coinciden las facturas con la orden de compra:",
+        "exact_match": {
+          "heading": "Coincidencia exacta",
+          "body": "La factura coincide perfectamente con la orden de compra."
+        },
+        "partial_match": {
+          "heading": "Coincidencia parcial",
+          "body": "Algunos detalles difieren."
+        },
+        "mismatch": {
+          "heading": "Desajuste",
+          "body": "Existen diferencias significativas."
+        }
+      }
+    },
+    "match_status_trend": {
+      "heading": "Tendencia coincidencia",
+      "exact_match": "Coincidencia exacta",
+      "partial_match": "Coincidencia parcial",
+      "mismatch": "Desajuste",
+      "tooltip": "Vista histórica del rendimiento de coincidencia de facturas para seguir tendencias con el tiempo"
+    },
+    "bills_by_stage": {
+      "heading": "Facturas por etapa",
+      "tooltip": "Facturas clasificadas según su etapa actual en el flujo de aprobación"
+    },
+    "analytics": "Analítica",
+    "insights": "Perspectivas",
+    "Total bills": "Facturas totales",
+    "Bills with PO": "Facturas con OC",
+    "Bills without PO": "Facturas sin OC",
+    "Duplicate bills": "Facturas duplicadas"
+  },
+  "data_table": {
+    "empty": "Esta sección está vacía actualmente.",
+    "message": "Puedes explorar otras secciones mientras tanto.",
+    "pagination": {
+      "items_per_page": "Elementos por página",
+      "page": "Página",
+      "of": "de",
+      "selected": "Seleccionada"
+    }
+  },
+  "bills": {
+    "heading": "Facturas",
+    "forward_bill": "Reenvía tus facturas para crear gastos automáticamente en:",
+    "stage": {
+      "Overview": "Resumen",
+      "Under review": "En revisión",
+      "Under approval": "En aprobación",
+      "Approved": "Aprobado",
+      "Ledger entry": "Asiento contable",
+      "Rejected": "Rechazado"
+    },
+    "filter": {
+      "status": "Estado"
+    },
+    "buttons": {
+      "create_bill": "Crear factura",
+      "upload_bills": "Subir facturas"
+    },
+    "table_headers": {
+      "bill": "Factura",
+      "bill_date": "Fecha de factura",
+      "due_date": "Fecha de vencimiento",
+      "po": "Orden de compra",
+      "vendor": "Proveedor",
+      "total_amount": "Monto total",
+      "stages": "Etapas",
+      "status": "Estado"
+    }
+  },
+  "create_bill": {
+    "heading": "Detalles de la factura",
+    "bill_name": "Número de factura",
+    "vendor": "Proveedor",
+    "purchase_order": "Orden de compra",
+    "payment_terms": "Términos de pago",
+    "bill_date": "Fecha de factura",
+    "due_date": "Fecha de vencimiento",
+    "bill_line_items": {
+      "heading": "Líneas de factura",
+      "description": "Descripción",
+      "coa": "Plan de cuentas",
+      "product_code": "Código de producto",
+      "qty": "Cantidad",
+      "unit_price": "Precio unitario",
+      "amount": "Importe",
+      "action": "Acción"
+    },
+    "new_item": "Nuevo artículo de factura",
+    "sub_total": "Sub total",
+    "total_tax": "Impuesto total",
+    "total": "Total",
+    "notes": "Notas",
+    "enter_notes": "Ingresar notas",
+    "extract_pdf": "Extraer PDF"
+  }
+}

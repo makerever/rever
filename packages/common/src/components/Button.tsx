@@ -1,6 +1,5 @@
-// Reusable component for a standard button
-
-import { ReactElement } from "react";
+import React, { ReactElement } from "react";
+// import "@/app/styles/globals.css";
 import {
   Plus,
   Upload,

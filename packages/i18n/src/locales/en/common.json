@@ -1,0 +1,259 @@
+{
+  "welcome": "Welcome to Rever inside welcome",
+  "placeholders": {
+    "search": "Search",
+    "email_input": "name@company.com",
+    "first_name": "Enter first name",
+    "last_name": "Enter last name",
+    "organization": "Enter organization name",
+    "password": "Enter password",
+    "confirm_password": "Enter confirm password",
+    "select_base_currency": "Select base currency",
+    "select_date_format": "Select date format",
+    "enter_email": "Enter email",
+    "business_type": "Select business type",
+    "select_industry": "Select industry",
+    "select_country": "Select country",
+    "select_state": "Select state",
+    "select_city": "Select city",
+    "enter_zipcode": "Enter zipcode",
+    "select_language": "Select language",
+    "search_total_bills": "Search total bills",
+    "global_search": "Search anything",
+    "search_bill": "Search bills",
+    "bill": {
+      "enter_bill": "Enter bill no",
+      "select_vendor": "Select vendor",
+      "select_po": "Select purchase order",
+      "select_pt": "Select payment terms",
+      "select_bill_date": "Select bill date",
+      "select_due_date": "Select due date",
+      "select_coa": "Select COA"
+    }
+  },
+  "buttons": {
+    "continue": "Continue",
+    "register": "Register",
+    "back": "Back",
+    "save": "Save",
+    "save_draft": "Save as draft",
+    "cancel": "Cancel"
+  },
+  "sidebar": {
+    "home": "Home",
+    "expenses": {
+      "expenses": "Expenses",
+      "bills": "Bills",
+      "purchase_order": "Purchase orders",
+      "vendors": "Vendors",
+      "approvals": "Approvals",
+      "coa": "Chart of accounts",
+      "confirmations": "Confirmations"
+    },
+    "inbox": "Inobx",
+    "settings": {
+      "settings": "Settings",
+      "general": "General",
+      "controls": "Controls",
+      "members": "Members",
+      "approvals": "Approvals",
+      "integrations": "Integrations",
+      "subscription": "Subscription",
+      "usage": "Usage"
+    }
+  },
+  "profile_sidebar": {
+    "profile": "Profile",
+    "security": "Security",
+    "notification": "Notification",
+    "appereance": "Appereance",
+    "back_home": "Back to home",
+    "back_confirmations": "Back to confirmations"
+  },
+  "global_search": {
+    "vendors": "Vendors",
+    "po": "PO's",
+    "bills": "Bills",
+    "members": "Members",
+    "create_po": "Create PO",
+    "create_bill": "Create bill",
+    "inbox": "Inobx",
+    "profile": "Profile",
+    "change_password": "Change password"
+  },
+  "subscription": {
+    "plan": {
+      "documents_left": "documents left"
+    }
+  },
+  "dropdown": {
+    "overview_options": {
+      "this_month": "This month",
+      "last_3_months": "Last 3 months",
+      "last_6_months": "Last_6_months",
+      "last_12_months": "Last 12 months"
+    },
+    "dashboard_options": {
+      "overview": "Overview",
+      "2way_match": "2-way match",
+      "3way_match": "3-way match"
+    }
+  },
+  "general": {
+    "first_heading": "General settings",
+    "org_name": "Organization name",
+    "base_currency": "Base currency",
+    "date_format": "Date format",
+    "email": "Email",
+    "phone_number": "Phone Number",
+    "business_type": "Business type",
+    "industry": "Industry",
+    "second_heading": "Company address",
+    "country": "Country",
+    "state": "State",
+    "city": "City",
+    "zipcode": "Zipcode"
+  },
+  "profile": {
+    "heading": "Profile",
+    "profile_settings": "Profile settings",
+    "first_name": "First name",
+    "last_name": "Last name",
+    "email": "Email",
+    "timezone": "Timezone",
+    "role": "Role",
+    "language": "Language"
+  },
+  "home": {
+    "page_name": "Home",
+    "reset_filters": "Reset filters",
+    "cards": {
+      "overview": {
+        "total": "Total",
+        "under_review": "Under review",
+        "under_approval": "Under approval",
+        "approved": "Approved",
+        "ledger_entry": "Ledger entry",
+        "rejected": "Rejected"
+      },
+      "2_way": {
+        "total_bills": {
+          "heading": "Total bills",
+          "tooltip": "Data excludes draft bills"
+        },
+        "bills_with_po": {
+          "heading": "Bills with PO",
+          "tooltip": "Bills that are linked to a PO"
+        },
+        "bills_without_po": {
+          "heading": "Bills without PO",
+          "tooltip": "Bills with no PO"
+        },
+        "duplicate_bills": {
+          "heading": "Duplicate bills",
+          "tooltip": "Bills flagged as duplicates"
+        }
+      }
+    },
+    "bill_match_status": {
+      "heading": "Bill match status",
+      "tooltip": {
+        "body": "How bills match the PO:",
+        "exact_match": {
+          "heading": "Exact Match",
+          "body": "Bill matches PO perfectly."
+        },
+        "partial_match": {
+          "heading": "Partial Match",
+          "body": "Some details differ."
+        },
+        "mismatch": {
+          "heading": "Mismatch",
+          "body": "Significant differences exist."
+        }
+      }
+    },
+    "match_status_trend": {
+      "heading": "Match status trend",
+      "exact_match": "Exact match",
+      "partial_match": "Partial match",
+      "mismatch": "Mismatch",
+      "tooltip": "Historical view of your bill matching performance to track trends over time"
+    },
+    "bills_by_stage": {
+      "heading": "Bills by stage",
+      "tooltip": "Bills segregated by their current stage in the approval workflow"
+    },
+    "analytics": "Analytics",
+    "insights": "Insights",
+    "Total bills": "Total bills",
+    "Bills with PO": "Bills with PO",
+    "Bills without PO": "Bills without PO",
+    "Duplicate bills": "Duplicate bills"
+  },
+  "data_table": {
+    "empty": "This section is currently empty.",
+    "message": "Feel free to explore other sections in the meantime.",
+    "pagination": {
+      "items_per_page": "Items per page",
+      "page": "Page",
+      "of": "of",
+      "selected": "Selected"
+    }
+  },
+  "bills": {
+    "heading": "Bills",
+    "forward_bill": "Forward your bills to create expenses automatically at:",
+    "stage": {
+      "Overview": "Overview",
+      "Under review": "Under review",
+      "Under approval": "Under approval",
+      "Approved": "Approved",
+      "Ledger entry": "Ledger entry",
+      "Rejected": "Rejected"
+    },
+    "filter": {
+      "status": "Status"
+    },
+    "buttons": {
+      "create_bill": "Create bill",
+      "upload_bills": "Upload bills"
+    },
+    "table_headers": {
+      "bill": "Bill",
+      "bill_date": "Bill date",
+      "due_date": "Due date",
+      "po": "PO",
+      "vendor": "Vendor",
+      "total_amount": "Total amount",
+      "stages": "Stages",
+      "status": "Status"
+    }
+  },
+  "create_bill": {
+    "heading": "Bill details",
+    "bill_name": "Bill number",
+    "vendor": "Vendor",
+    "purchase_order": "Purchase order",
+    "payment_terms": "Payment terms",
+    "bill_date": "Bill date",
+    "due_date": "Due date",
+    "bill_line_items": {
+      "heading": "Bill line items",
+      "description": "Description",
+      "coa": "Chart of Accounts",
+      "product_code": "Product code",
+      "qty": "Qty",
+      "unit_price": "Unit price",
+      "amount": "Amount",
+      "action": "Action"
+    },
+    "new_item": "New bill item",
+    "sub_total": "Sub total",
+    "total_tax": "Total tax",
+    "total": "Total",
+    "notes": "Notes",
+    "enter_notes": "Enter notes",
+    "extract_pdf": "Extract PDF"
+  }
+}

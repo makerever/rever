@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { SingleValue } from "react-select";
+import { useTranslate } from "@rever/i18n";
 
 // Home page main component
 const Home = () => {
@@ -42,6 +43,7 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isBarChartLoading, setIsBarChartLoading] = useState<boolean>(true);
   const [isPieChartLoading, setIsPieChartLoading] = useState<boolean>(true);
+  const translate = useTranslate();
 
   const [billSummaryData, setBillsSummaryData] = useState({
     total: {
@@ -229,7 +231,7 @@ const Home = () => {
       <div className="rounded-b-[20px] bg-white p-4 h-28 border border-secondary-200 flex items-end justify-start">
         {/* Header section with overview title and filter */}
         <div className="flex items-center justify-between w-full h-8">
-          <p className="text-neutral-1100 text-2xl font-medium">Overview</p>
+          <p className="text-neutral-1100 text-2xl font-medium">{translate('dropdown.dashboard_options.overview')}</p>
           <div className="w-40">
             {/* Dropdown for overview filter */}
             <SelectComponent
