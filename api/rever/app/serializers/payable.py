@@ -1,4 +1,7 @@
+from decimal import Decimal
+
 from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
 from rest_framework import serializers
 
 from rever.db.models import (
@@ -9,6 +12,8 @@ from rever.db.models import (
     PurchaseOrder,
     PurchaseOrderItem,
     Vendor,
+    VendorCredit,
+    VendorCreditItem,
 )
 from rever.db.models.approval import ApprovalLog
 
@@ -367,3 +372,166 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
         ]
     def get_reject_reason(self, obj):
         return _get_reject_reason(obj)
+    
+
+
+
+class VendorCreditItemSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(required=False)
+    line_number = serializers.IntegerField(source="sequence", read_only=True)
+
+    class Meta:
+        model = VendorCreditItem
+        fields = "__all__"
+        read_only_fields = ["created_at", "updated_at", "vendor_credit"]
+
+
+class VendorCreditSerializer(serializers.ModelSerializer):
+    vendor = VendorNestedSerializer(read_only=True)
+    reject_reason = serializers.SerializerMethodField()
+    vendor_id = serializers.PrimaryKeyRelatedField(
+        source="vendor",
+        queryset=Vendor.objects.all(),
+        write_only=True,
+        error_messages={
+            "does_not_exist": "Vendor not found.",
+            "incorrect_type": "Vendor ID must be a valid UUID.",
+        },
+    )
+
+    items = VendorCreditItemSerializer(many=True, required=False)
+
+    class Meta:
+        model = VendorCredit
+        fields = [
+            "id",
+            "organization",
+            "vendor",
+            "vendor_address",
+            "customer_name",
+            "customer_address",
+            "reason",
+            "vendor_id",
+            "items",
+            "credit_note_number",
+            "sub_total",
+            "tax_percentage",
+            "total_tax",
+            "total",
+            "notes",
+            "txn_date",
+            "status",
+            "reject_reason",
+            "is_attachment",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = [
+            "created_at",
+            "updated_at",
+            "organization",
+        ]
+
+    def validate_vendor(self, vendor):
+        user_org = self.context["request"].user.organization
+        if vendor.organization_id != user_org.id:
+            raise serializers.ValidationError("Vendor does not belong to your organization.")
+        return vendor
+
+    def validate(self, attrs):
+        vendor = attrs.get("vendor") or getattr(self.instance, "vendor", None)
+        if vendor:
+            user_org = self.context["request"].user.organization
+            if vendor.organization_id != user_org.id:
+                raise serializers.ValidationError(
+                    {"vendor_id": "Vendor does not belong to your organization."}
+                )
+        return attrs
+
+    def get_reject_reason(self, obj):
+        return _get_reject_reason(obj)
+
+    def _calculate_totals(self, items_data):
+        """
+        Calculate sub_total and total from items data.
+
+        Args:
+            items_data: List of item dictionaries with 'total_amount' field
+
+        Returns:
+            dict: Dictionary with 'sub_total' and 'total' keys
+        """
+        subtotal = sum((item.get("total_amount", Decimal("0.00"))) for item in items_data)
+
+        return {
+            "sub_total": subtotal,
+            "total": subtotal,
+        }
+
+    @transaction.atomic
+    def create(self, validated_data):
+        items_data = validated_data.pop("items", [])
+
+        # Calculate totals BEFORE creating the vendor credit to avoid duplicate history records
+        totals = self._calculate_totals(items_data)
+        validated_data.update(totals)
+
+        # Single save - only one history record
+        vendor_credit = VendorCredit.objects.create(**validated_data)
+
+        for item in items_data:
+            VendorCreditItem.objects.create(vendor_credit=vendor_credit, **item)
+
+        return vendor_credit
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        items_data = validated_data.pop("items", None)
+
+        if items_data is not None:
+            # Calculate totals BEFORE updating to avoid duplicate history records
+            totals = self._calculate_totals(items_data)
+            validated_data.update(totals)
+
+            # Delete old items
+            instance.items.all().delete()
+
+            # Single save with updated totals - only one history record
+            instance = super().update(instance, validated_data)
+
+            # Create new items
+            for item in items_data:
+                VendorCreditItem.objects.create(vendor_credit=instance, **item)
+        else:
+            # No items update, just update other fields
+            instance = super().update(instance, validated_data)
+
+        return instance
+
+
+class VendorCreditListSerializer(serializers.ModelSerializer):
+    vendor = VendorNestedSerializer(read_only=True)
+    reject_reason = serializers.SerializerMethodField()
+
+    class Meta:
+        model = VendorCredit
+        fields = [
+            "id",
+            "vendor",
+            "credit_note_number",
+            "sub_total",
+            "tax_percentage",
+            "total_tax",
+            "total",
+            "status",
+            "txn_date",
+            "organization",
+            "is_attachment",
+            "created_at",
+            "reject_reason",
+        ]
+
+    def get_reject_reason(self, obj):
+        return _get_reject_reason(obj)
+    
+    
