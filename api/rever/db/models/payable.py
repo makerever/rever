@@ -16,7 +16,7 @@ from rever.utils.bill_constants import (
     RECEIPT_STATUS_CHOICES,
     STATUS_CHOICES,
 )
-from rever.utils.payable_constants import PO_STATUS_CHOICES
+from rever.utils.payable_constants import PO_STATUS_CHOICES, LineDetailType, VendorCreditStatus
 
 from .auth import Organization
 from .base import BaseModel
@@ -626,3 +626,79 @@ class ReceiptConfirmationTask(BaseModel):
     def save(self, *args, **kwargs):
         self.full_clean()
         return super().save(*args, **kwargs)
+
+class VendorCredit(BaseModel):
+    organization = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, related_name="vendor_credits", db_index=True
+    )
+    vendor = models.ForeignKey(
+        Vendor,
+        on_delete=models.PROTECT,
+        related_name="vendor_credits",
+        db_index=True,
+        null=True,
+        blank=True,
+    )
+
+    credit_note_number = models.CharField(max_length=128, null=True, blank=True)
+
+    sub_total = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    total_tax = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+    total = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+
+    notes = models.TextField(null=True, blank=True)
+
+    vendor_address = models.TextField(blank=True)
+    customer_name = models.CharField(max_length=255, blank=True)
+    customer_address = models.TextField(blank=True)
+    reason = models.TextField(blank=True)
+
+    status = models.CharField(
+        max_length=32,
+        choices=VendorCreditStatus.choices,
+        default=VendorCreditStatus.DRAFT,
+        db_index=True,
+    )
+    txn_date = models.DateField(default=timezone.now, db_index=True)
+    is_attachment = models.BooleanField(default=False)
+    history = HistoricalRecords(inherit=True, table_name="vendor_credit_history")
+
+    class Meta:
+        db_table = "vendor_credits"
+
+class VendorCreditItem(BaseModel):
+    vendor_credit = models.ForeignKey(
+        VendorCredit, on_delete=models.CASCADE, related_name="items", db_index=True
+    )
+    sequence = models.PositiveIntegerField(default=1, help_text="Display order")
+
+    description = models.TextField(null=True, blank=True)
+    detail_type = models.CharField(
+        max_length=32, choices=LineDetailType.choices, default=LineDetailType.ACCOUNT_BASED
+    )
+
+    uom = models.CharField(max_length=20, blank=True, null=True)
+    product_code = models.CharField(max_length=50, blank=True, null=True)
+
+    quantity = models.DecimalField(
+        max_digits=18,
+        decimal_places=6,
+        default=Decimal("1.000000"),
+        validators=[MinValueValidator(Decimal("0"))],
+    )
+    unit_price = models.DecimalField(
+        max_digits=18,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0"))],
+    )
+    total_amount = models.DecimalField(max_digits=18, decimal_places=2, default=Decimal("0.00"))
+    history = HistoricalRecords(inherit=True, table_name="vendor_credit__item_history")
+
+    class Meta:
+        db_table = "vendor_credit_items"
+        ordering = ["sequence"]
+        indexes = [
+            models.Index(fields=["vendor_credit", "sequence"]),
+        ]

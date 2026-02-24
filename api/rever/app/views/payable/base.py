@@ -19,13 +19,25 @@ from rever.app.serializers import (
     PurchaseOrderListSerializer,
     PurchaseOrderMinimalSerializer,
     PurchaseOrderSerializer,
+    VendorCreditItemSerializer,
+    VendorCreditListSerializer,
+    VendorCreditSerializer,
     VendorListSerializer,
     VendorSerializer,
 )
 from rever.app.views.base import BaseAPIView
 from rever.app.views.base_viewsets import BaseModelViewSet
 from rever.bgtasks import generate_bill_summary, generate_monthly_bill_summary
-from rever.db.models import Bill, BillItem, MatchResult, PurchaseOrder, PurchaseOrderItem, Vendor
+from rever.db.models import (
+    Bill,
+    BillItem,
+    MatchResult,
+    PurchaseOrder,
+    PurchaseOrderItem,
+    Vendor,
+    VendorCredit,
+    VendorCreditItem,
+)
 from rever.services.matching.drag_drop import pair_bill_item_with_po_item
 from rever.utils.bill_constants import STATUS_CHOICES
 from rever.utils.cache import clear_report_cache
@@ -518,3 +530,92 @@ class MatchResultDnDViewSet(BaseModelViewSet):
             logger.exception("DnD assign: serialization error")
             # Always return a Response to avoid None
             return Response({"detail": "Assigned, but failed to serialize context."}, status=200)
+
+
+class VendorCreditViewSet(BaseModelViewSet):
+    serializer_class = VendorCreditSerializer
+
+    def get_queryset(self):
+        qs = (
+            VendorCredit.objects.filter(organization=self.request.user.organization)
+            .order_by("-created_at")
+        )
+
+        params = self.request.query_params
+        status_param = params.get("status")
+        if status_param:
+            qs = qs.filter(status=status_param)
+
+        # Example toggle: include_inactive if you have that field on VC
+        if params.get("include_inactive") != "true" and hasattr(VendorCredit, "is_active"):
+            qs = qs.filter(is_active=True)
+
+        return qs
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return VendorCreditListSerializer
+        return super().get_serializer_class()
+
+    def perform_create(self, serializer):
+        serializer.save(organization=self.request.user.organization)
+
+    def perform_update(self, serializer):
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        instance.delete()
+
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request, *args, **kwargs)
+        except IntegrityError:
+            return Response(
+                {
+                    "detail": (
+                        "A vendor credit with this number may already exist in your organization."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    def update(self, request, *args, **kwargs):
+        try:
+            return super().update(request, *args, **kwargs)
+        except IntegrityError:
+            return Response(
+                {"detail": "Conflict while updating vendor credit."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
+class VendorCreditItemViewSet(BaseModelViewSet):
+    serializer_class = VendorCreditItemSerializer
+
+    def get_queryset(self):
+        return (
+            VendorCreditItem.objects.filter(
+                vendor_credit__organization=self.request.user.organization
+            )
+            .select_related("vendor_credit")
+            .order_by("vendor_credit_id", "sequence")
+        )
+
+    def perform_create(self, serializer):
+        vc = serializer.validated_data["vendor_credit"]
+        if vc.organization != self.request.user.organization:
+            from rest_framework.exceptions import PermissionDenied
+
+            raise PermissionDenied("Cannot add item to a vendor credit in another organization.")
+        serializer.save()
+
+    def perform_update(self, serializer):
+        vc = serializer.validated_data.get("vendor_credit", serializer.instance.vendor_credit)
+        if vc.organization != self.request.user.organization:
+            from rest_framework.exceptions import PermissionDenied
+
+            raise PermissionDenied(
+                "Cannot modify item of a vendor credit in another organization."
+            )
+        serializer.save()
+

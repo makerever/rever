@@ -46,6 +46,8 @@ from .payable.base import (
     MonthlyBillSummaryAsyncAPIView,
     PurchaseOrderItemViewSet,
     PurchaseOrderViewSet,
+    VendorCreditItemViewSet,
+    VendorCreditViewSet,
     VendorViewSet,
 )
 from .receipt.base import (

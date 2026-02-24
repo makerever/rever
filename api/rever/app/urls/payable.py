@@ -9,6 +9,8 @@ from rever.app.views import (
     MonthlyBillSummaryAsyncAPIView,
     PurchaseOrderItemViewSet,
     PurchaseOrderViewSet,
+    VendorCreditItemViewSet,
+    VendorCreditViewSet,
     VendorViewSet,
 )
 
@@ -19,6 +21,8 @@ router.register(r"bill-items", BillItemViewSet, basename="billitem")
 router.register(r"purchase-orders", PurchaseOrderViewSet, basename="purchase-order")
 router.register(r"purchase-order-items", PurchaseOrderItemViewSet, basename="purchase-order-item")
 router.register(r"matching/dnd", MatchResultDnDViewSet, basename="matching-dnd")
+router.register(r"vendor-credits", VendorCreditViewSet, basename="vendor-credit")
+router.register(r"vendor-credit-items", VendorCreditItemViewSet, basename="vendor-credit-item")
 
 urlpatterns = [
     path("bills/summary/", BillSummaryAsyncAPIView.as_view(), name="bill-summary-async"),

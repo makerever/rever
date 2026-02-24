@@ -83,7 +83,7 @@ def build_audit_response(
 
     model_name = model_name.lower()
 
-    if model_name in ("bill", "purchaseorder"):
+    if model_name in ("bill", "purchaseorder", "vendorcredit"):
         response["items"] = items
 
         vendor = None
@@ -160,7 +160,7 @@ class AuditVersionDetailView(APIView):
         lower_model_name = model_name.lower()
         items_output = None
 
-        if lower_model_name in ("bill", "purchaseorder"):
+        if lower_model_name in ("bill", "purchaseorder", "vendorcredit"):
             if lower_model_name == "bill":
                 line_item_model_name = "BillItem"
                 parent_id_field = "bill_id"
@@ -168,6 +168,10 @@ class AuditVersionDetailView(APIView):
             elif lower_model_name == "purchaseorder":
                 line_item_model_name = "PurchaseOrderItem"
                 parent_id_field = "purchase_order_id"
+
+            elif lower_model_name == "vendorcredit":
+                line_item_model_name = "VendorCreditItem"
+                parent_id_field = "vendor_credit_id"
 
             item_model = get_model_by_name(line_item_model_name)
 
@@ -196,7 +200,11 @@ class AuditVersionDetailView(APIView):
                     selected_version_by_item[line_item_id] = item_hist
 
             selected_items = list(selected_version_by_item.values())
-            selected_items.sort(key=lambda line_item: line_item.line_number)
+            if lower_model_name in ("bill", "purchaseorder"):
+                selected_items.sort(key=lambda line_item: line_item.line_number)
+
+            elif lower_model_name == "vendorcredit":
+                selected_items.sort(key=lambda line_item: line_item.sequence)
 
             item_field_names = [field.name for field in item_model._meta.fields]
 

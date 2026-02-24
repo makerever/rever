@@ -12,4 +12,6 @@ from .payable import (
     PurchaseOrderItem,
     ReceiptConfirmationTask,
     Vendor,
+    VendorCredit,
+    VendorCreditItem,
 )
