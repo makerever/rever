@@ -270,7 +270,7 @@ class PurchaseOrderSerializer(serializers.ModelSerializer):
         if vendor.organization != user_org:
             raise serializers.ValidationError("Vendor does not belong to your organization.")
         return vendor
-    
+
     def get_reject_reason(self, obj):
         return _get_reject_reason(obj)
 
@@ -370,10 +370,9 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
             "created_at",
             "reject_reason",
         ]
+
     def get_reject_reason(self, obj):
         return _get_reject_reason(obj)
-    
-
 
 
 class VendorCreditItemSerializer(serializers.ModelSerializer):
@@ -533,5 +532,3 @@ class VendorCreditListSerializer(serializers.ModelSerializer):
 
     def get_reject_reason(self, obj):
         return _get_reject_reason(obj)
-    
-    

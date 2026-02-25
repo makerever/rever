@@ -111,8 +111,10 @@ class PurchaseOrderResultSerializer(serializers.ModelSerializer):
             "items",
         ]
 
+
 class VendorCreditItemSerializer(serializers.ModelSerializer):
     line_number = serializers.IntegerField(source="sequence", read_only=True)
+
     class Meta:
         model = VendorCreditItem
         fields = [
@@ -126,6 +128,7 @@ class VendorCreditItemSerializer(serializers.ModelSerializer):
             "sequence",
             "line_number",
         ]
+
 
 class VendorCreditResultSerializer(serializers.ModelSerializer):
     items = VendorCreditItemSerializer(many=True, read_only=True)
@@ -154,7 +157,7 @@ class DocumentExtractionListSerializer(serializers.ModelSerializer):
 
     # Generic extracted data (from OCR)
     document_number_extracted = serializers.SerializerMethodField()
-    
+
     # Linked record info
     document_id = serializers.SerializerMethodField()
     document_number_final = serializers.SerializerMethodField()
@@ -208,13 +211,13 @@ class DocumentExtractionListSerializer(serializers.ModelSerializer):
 
 class DocumentExtractionDetailSerializer(serializers.ModelSerializer):
     """Detailed serializer for DocumentExtraction showing raw OCR and parsed JSON"""
-    
+
     bill_number_final = serializers.CharField(source="bill.bill_number", read_only=True)
     po_number_final = serializers.CharField(source="purchase_order.po_number", read_only=True)
     credit_note_number_final = serializers.CharField(
-        source="vendor_credit.credit_note_number",
-        read_only=True
+        source="vendor_credit.credit_note_number", read_only=True
     )
+
     class Meta:
         model = DocumentExtraction
         fields = [
@@ -244,6 +247,3 @@ class DocumentExtractionDetailSerializer(serializers.ModelSerializer):
             "vendor_credit",
             "credit_note_number_final",
         ]
-
-
-

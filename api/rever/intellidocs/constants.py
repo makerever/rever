@@ -8,6 +8,7 @@ from django.db import models
 
 class DocumentType(models.TextChoices):
     """Document type enum."""
+
     BILL = "bill", "Bill"
     PURCHASE_ORDER = "purchase_order", "Purchase Order"
     VENDOR_CREDIT = "vendor_credit", "Vendor Credit"
@@ -15,6 +16,7 @@ class DocumentType(models.TextChoices):
 
 class ProcessingStatus(models.TextChoices):
     """Document processing status enum."""
+
     PENDING = "pending", "Pending"
     PROCESSING = "processing", "Processing"
     COMPLETED = "completed", "Completed"
@@ -23,6 +25,7 @@ class ProcessingStatus(models.TextChoices):
 
 class LineItemStatus(models.TextChoices):
     """Line item status enum."""
+
     OPEN = "open", "Open"
     PARTIAL = "partial", "Partial"
     CLOSED = "closed", "Closed"
@@ -30,6 +33,7 @@ class LineItemStatus(models.TextChoices):
 
 class ExtractionEngine(models.TextChoices):
     """OCR/Extraction engine enum."""
+
     OLLAMA = "ollama", "Ollama"
     TESSERACT = "tesseract", "Tesseract"
     GOOGLE_VISION = "google_vision", "Google Vision"

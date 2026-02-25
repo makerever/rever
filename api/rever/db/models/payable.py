@@ -627,6 +627,7 @@ class ReceiptConfirmationTask(BaseModel):
         self.full_clean()
         return super().save(*args, **kwargs)
 
+
 class VendorCredit(BaseModel):
     organization = models.ForeignKey(
         Organization, on_delete=models.CASCADE, related_name="vendor_credits", db_index=True
@@ -666,6 +667,7 @@ class VendorCredit(BaseModel):
 
     class Meta:
         db_table = "vendor_credits"
+
 
 class VendorCreditItem(BaseModel):
     vendor_credit = models.ForeignKey(

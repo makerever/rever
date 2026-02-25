@@ -247,7 +247,7 @@ def _create_po_record(
     """
     Create PurchaseOrder from extracted data.
     If a PO with the same number already exists for this organization, returns the existing one.
-    
+
     Returns:
         Tuple of (PurchaseOrder, is_new) where is_new is True if PO was created, False if existing.
     """
@@ -258,23 +258,23 @@ def _create_po_record(
     total = clean_decimal(amounts.get("total")) or Decimal("0")
     sub_total = clean_decimal(amounts.get("subtotal")) or total
     tax_amount = clean_decimal(amounts.get("tax")) or Decimal("0")
-    
+
     ocr_po_number = clean_string(truncate_string(parsed_data.get("po_number"), 50))
-    
+
     # Check for duplicate PO
     if ocr_po_number:
         existing_po = PurchaseOrder.objects.filter(
             organization=organization,
             po_number__iexact=ocr_po_number,
         ).first()
-        
+
         if existing_po:
             logger.warning(
                 f"Duplicate PO detected: {ocr_po_number} already exists (ID: {existing_po.id}). "
                 f"Returning existing PO instead of creating new one."
             )
             return existing_po, False  # Return existing, not new
-    
+
     po = PurchaseOrder.objects.create(
         organization=organization,
         vendor=matched_vendor,
@@ -287,16 +287,16 @@ def _create_po_record(
         status="draft",
         is_attachment=True,
     )
-    
+
     logger.info(f"Created PO: {po.po_number} (ID: {po.id})")
     return po, True  # Return new PO
+
 
 def _create_vendor_credit_record(
     organization,
     parsed_data,
     matched_vendor=None,
 ):
-
     credit_note_number = parsed_data.get("credit_note_number")
     txn_date = parse_date(parsed_data.get("credit_note_date")) or timezone.now().date()
 
@@ -307,9 +307,9 @@ def _create_vendor_credit_record(
         vendor=matched_vendor,
         credit_note_number=credit_note_number,
         tax_percentage=clean_decimal(amounts.get("tax_percentage")),
-        sub_total = abs(clean_decimal(amounts.get("subtotal") or 0)),
-        total_tax = abs(clean_decimal(amounts.get("tax") or 0)),
-        total = abs(clean_decimal(amounts.get("total") or 0)),
+        sub_total=abs(clean_decimal(amounts.get("subtotal") or 0)),
+        total_tax=abs(clean_decimal(amounts.get("tax") or 0)),
+        total=abs(clean_decimal(amounts.get("total") or 0)),
         txn_date=txn_date,
         status="draft",
         is_attachment=True,
@@ -350,7 +350,7 @@ def _create_line_items(
 ) -> list[BillItem | PurchaseOrderItem]:
     """
     Generic function to create line items for Bill or PurchaseOrder.
-    
+
     Args:
         parent_object: The Bill or PurchaseOrder instance
         item_model: BillItem or PurchaseOrderItem class
@@ -479,55 +479,49 @@ def process_document_ocr_task(
             document_type=document_type,
         )
 
-        
         matched_vendor = None
         vendor_created = False
         vendor_confidence = 0.0
-        
+
         # 5. Match Vendor (Common for both)
         # Note: Bills can look up PO vendor. POs rely on vendor name.
         matched_po = None
         if document_type == "bill":
-             matched_po = _match_purchase_order(organization_id, parsed_data.get("purchase_order"))
-        
+            matched_po = _match_purchase_order(organization_id, parsed_data.get("purchase_order"))
+
         matched_vendor, vendor_created, vendor_confidence = _match_vendor(
             organization, parsed_data.get("vendor", {}) or {}, matched_po
         )
-
 
         # 6. Create Record (Atomic)
         with transaction.atomic():
             if document_type == "bill":
                 bill = _create_bill_record(organization, matched_vendor, parsed_data, matched_po)
                 created_document = bill
-                
+
                 extraction.bill = bill
                 extraction.save(update_fields=["bill"])
 
-                _create_line_items(
-                    bill, BillItem, parsed_data.get("line_items", []), "bill"
-                )
+                _create_line_items(bill, BillItem, parsed_data.get("line_items", []), "bill")
                 # Create Attachment (Generic)
                 _create_attachment(organization, bill, file_path, file_name)
-                
+
             elif document_type == "purchase_order":
                 po, is_new_po = _create_po_record(organization, matched_vendor, parsed_data)
                 created_document = po
-                
+
                 extraction.purchase_order = po
                 extraction.save(update_fields=["purchase_order"])
-                
+
                 if is_new_po:
                     _create_line_items(
-                        po, PurchaseOrderItem,
-                        parsed_data.get("line_items", []), "purchase_order"
+                        po, PurchaseOrderItem, parsed_data.get("line_items", []), "purchase_order"
                     )
                     _create_attachment(organization, po, file_path, file_name)
                 else:
                     logger.info(f"Skipping line item creation for existing PO: {po.po_number}")
 
             elif document_type == "vendor_credit":
-
                 vendor_credit = _create_vendor_credit_record(
                     organization,
                     parsed_data,
@@ -562,7 +556,7 @@ def process_document_ocr_task(
             ocr_engine=ocr_result.get("engine", "unknown"),
             details=log_details,
         )
-        
+
         if document_type == "bill":
             doc_number = created_document.bill_number
         elif document_type == "purchase_order":

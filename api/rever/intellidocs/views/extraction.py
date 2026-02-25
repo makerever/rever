@@ -37,8 +37,9 @@ class DocumentExtractionViewSet(BaseModelViewSet):
         """
         queryset = super().get_queryset()
         if self.action == "list":
-            return queryset.select_related("bill", "purchase_order", "vendor_credit"
-            ).order_by("-created_at")
+            return queryset.select_related("bill", "purchase_order", "vendor_credit").order_by(
+                "-created_at"
+            )
         return queryset
 
     def retrieve(self, request, *args, **kwargs):
