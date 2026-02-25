@@ -1,9 +1,14 @@
-from rever.app.serializers.payable import BillSerializer, PurchaseOrderSerializer
-from rever.db.models import ApprovalFlow, Bill, PurchaseOrder
+from rever.app.serializers.payable import (
+    BillSerializer,
+    PurchaseOrderSerializer,
+    VendorCreditSerializer,
+)
+from rever.db.models import ApprovalFlow, Bill, PurchaseOrder, VendorCredit
 
 APPROVAL_MODEL_MAP = {
     "bill": {"model": Bill, "serializer": BillSerializer},
     "purchaseorder": {"model": PurchaseOrder, "serializer": PurchaseOrderSerializer},
+    "vendorcredit": {"model": VendorCredit, "serializer": VendorCreditSerializer},
 }
 
 

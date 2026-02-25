@@ -47,10 +47,11 @@ def _register_parsers() -> None:
     """Register all parsers. Called at module load time."""
     from rever.intellidocs.parsers.bill_parser import BillParser
     from rever.intellidocs.parsers.purchase_order_parser import PurchaseOrderParser
+    from rever.intellidocs.parsers.vendor_credit_parser import VendorCreditParser
 
     DocumentParserFactory.register("bill", BillParser)
     DocumentParserFactory.register("purchase_order", PurchaseOrderParser)
-
+    DocumentParserFactory.register("vendor_credit", VendorCreditParser)
 
 # Auto-register parsers on import
 _register_parsers()

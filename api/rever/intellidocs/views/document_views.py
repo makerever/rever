@@ -13,13 +13,14 @@ from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 
 from rever.app.views.base import BaseAPIView
-from rever.db.models.payable import Bill, PurchaseOrder
+from rever.db.models.payable import Bill, PurchaseOrder, VendorCredit
 from rever.intellidocs.constants import DocumentType, ProcessingStatus
 from rever.intellidocs.models import OCRLog
 from rever.intellidocs.serializers import (
     BillResultSerializer,
     DocumentUploadSerializer,
     PurchaseOrderResultSerializer,
+    VendorCreditResultSerializer,
 )
 from rever.intellidocs.tasks import process_document_ocr_task
 
@@ -29,6 +30,7 @@ logger = logging.getLogger(__name__)
 RESULT_SERIALIZER_MAP = {
     DocumentType.BILL: (Bill, BillResultSerializer),
     DocumentType.PURCHASE_ORDER: (PurchaseOrder, PurchaseOrderResultSerializer),
+    DocumentType.VENDOR_CREDIT: (VendorCredit, VendorCreditResultSerializer),
 }
 
 

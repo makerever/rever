@@ -72,6 +72,7 @@ class DocumentExtraction(BaseDocument):
     class DocumentType(models.TextChoices):
         BILL = "bill", "Bill"
         PURCHASE_ORDER = "purchase_order", "Purchase Order"
+        VENDOR_CREDIT = "vendor_credit", "Vendor Credit"
 
     organization = models.ForeignKey(
         "db.Organization", on_delete=models.CASCADE, related_name="document_extractions"
@@ -93,8 +94,17 @@ class DocumentExtraction(BaseDocument):
         related_name="extractions",
     )
 
+    vendor_credit = models.ForeignKey(
+    "db.VendorCredit",
+    on_delete=models.SET_NULL,
+    null=True,
+    blank=True,
+    related_name="extractions",
+    )
+
     bill_number = models.CharField(max_length=100, blank=True, null=True)
     po_number = models.CharField(max_length=100, blank=True, null=True)
+    credit_note_number = models.CharField(max_length=100, blank=True, null=True)
     vendor_name = models.CharField(max_length=255, blank=True, null=True)
     bill_date = models.DateField(null=True, blank=True)
     due_date = models.DateField(null=True, blank=True)

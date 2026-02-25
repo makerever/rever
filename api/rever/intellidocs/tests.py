@@ -7,9 +7,17 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from rever.db.models.payable import Bill, BillItem, Organization, PurchaseOrder, Vendor
+from rever.db.models.payable import (
+    Bill,
+    BillItem,
+    Organization,
+    PurchaseOrder,
+    Vendor,
+    VendorCredit,
+)
 from rever.intellidocs.models import DocumentExtraction
 from rever.intellidocs.parsers.bill_parser import BillParser
+from rever.intellidocs.parsers.vendor_credit_parser import VendorCreditParser
 from rever.intellidocs.services.vendor_matcher import VendorMatcher
 from rever.intellidocs.tasks import process_document_ocr_task
 
@@ -463,6 +471,118 @@ class DocumentOCRTaskTest(TestCase):
         # Verify OCR Log records failure
         log = DocumentExtraction.objects.filter(file_name="invoice_fail.pdf").first()
         assert log.status == "failed"
+
+    @patch("rever.intellidocs.tasks.OCRService")
+    @patch("rever.intellidocs.tasks.DocumentParserFactory")
+    @patch("rever.intellidocs.tasks.VendorMatcher")
+    def test_9_vendor_credit_happy_path(
+        self, mock_vendor_matcher, mock_factory, mock_ocr_service
+    ):
+        """Test 9: Basic Vendor Credit Happy Path"""
+        print("\n--- Test 9: Vendor Credit Happy Path ---")
+
+        # Mock OCR
+        mock_ocr_service.return_value.process_document.return_value = {
+            "text": "Credit Note CN-001 from Xolo",
+            "engine": "test",
+        }
+
+        # Mock Parser
+        mock_factory.get_parser.return_value.parse.return_value = {
+            "credit_note_number": "CN-001",
+            "credit_note_date": "2025-03-01",
+            "vendor": {"name": "Xolo"},
+            "amounts": {
+                "subtotal": "200.00",
+                "tax": "20.00",
+                "total": "220.00",
+                "tax_percentage": "10",
+            },
+            "line_items": [
+                {
+                    "description": "Refund Item",
+                    "quantity": "2",
+                    "unit_price": "100.00",
+                    "amount": "200.00",
+                }
+            ],
+        }
+
+        # Mock Vendor Match
+        mock_vendor_matcher.return_value.find_vendor.return_value = (
+            self.vendor,
+            1.0,
+            "Exact match",
+        )
+
+        result = process_document_ocr_task(
+            file_path=self.test_file_path,
+            file_name="credit_note.pdf",
+            organization_id=self.organization.id,
+            task_id=str(uuid.uuid4()),
+            document_type="vendor_credit",
+        )
+
+        assert result["status"] == "success"
+        assert result["document_number"] == "CN-001"
+
+        # Verify DB
+        vc = VendorCredit.objects.get(credit_note_number="CN-001")
+        assert vc.vendor == self.vendor
+        assert vc.total == Decimal("220.00")
+        assert vc.sub_total == Decimal("200.00")
+        assert vc.tax_percentage == Decimal("10")
+
+        assert vc.items.count() == 1
+        item = vc.items.first()
+        assert item.quantity == Decimal("2")
+        assert item.unit_price == Decimal("100.00")
+        assert item.total_amount == Decimal("200.00")
+
+        # Verify Extraction Link
+        extraction = DocumentExtraction.objects.get(vendor_credit=vc)
+        assert extraction.credit_note_number == "CN-001"
+        assert extraction.total_amount == Decimal("220.00")
+    
+    @patch("rever.intellidocs.tasks.OCRService")
+    @patch("rever.intellidocs.tasks.DocumentParserFactory")
+    @patch("rever.intellidocs.tasks.VendorMatcher")
+    def test_10_vendor_credit_no_vendor_match(
+        self, mock_vendor_matcher, mock_factory, mock_ocr_service
+    ):
+        """Test 11: Vendor Credit Without Vendor Match"""
+
+        mock_ocr_service.return_value.process_document.return_value = {
+            "text": "Credit without vendor",
+            "engine": "test",
+        }
+
+        mock_factory.get_parser.return_value.parse.return_value = {
+            "credit_note_number": "CN-NO-VENDOR",
+            "vendor": {"name": "Unknown Vendor"},
+            "amounts": {"total": "100.00"},
+        }
+
+        mock_vendor_matcher.return_value.find_vendor.return_value = (
+            None,
+            0.0,
+            "No match",
+        )
+
+        result = process_document_ocr_task(
+            file_path=self.test_file_path,
+            file_name="credit_no_vendor.pdf",
+            organization_id=self.organization.id,
+            task_id=str(uuid.uuid4()),
+            document_type="vendor_credit",
+        )
+
+        assert result["status"] == "success"
+
+        vc = VendorCredit.objects.get(credit_note_number="CN-NO-VENDOR")
+        assert vc.vendor is None
+        assert vc.total == Decimal("100.00")
+        
 class VendorMatcherTest(TestCase):
     """
     Unit tests for VendorMatcher using RapidFuzz.
@@ -746,3 +866,86 @@ class DocumentAPIURLTest(TestCase):
         pk = uuid.uuid4()
         url = reverse("document-extraction-detail", args=[pk])
         assert url == f"/api/intellidocs/extractions/{pk}/"
+
+class VendorCreditParserTest(TestCase):
+    """
+    Unit tests for VendorCreditParser.
+    Tests extraction logic for credit notes / vendor credits.
+    """
+
+    def setUp(self):
+
+        self.parser = VendorCreditParser()
+        self.sample_text = """
+        Credit Note No: CN-1001
+        Date: Jan 10, 2025
+        """
+
+    def test_fallback_parse(self):
+        """Test fallback parsing extracts credit note number"""
+        print("\n--- Test: Vendor Credit Fallback ---")
+
+        result = self.parser._fallback_parse(self.sample_text)
+
+        assert result.get("credit_note_number") == "CN-1001"
+        assert result.get("total") is None
+
+    # CREDIT NOTE NUMBER FORMATS
+
+    def test_credit_note_number_formats(self):
+        """Test various credit note number formats"""
+        print("\n--- Test: Credit Note Number Formats ---")
+
+        cases = [
+            ("Credit Note No: CN-999", "CN-999"),
+            ("Credit Memo # CM-123", "CM-123"),
+            ("Credit Note Number: ABC-789", "ABC-789"),
+        ]
+
+        for text, expected in cases:
+            context = f"Header\n{text}\nDate: 2024-01-01"
+            result = self.parser._extract_document_number(
+                context,
+                self.parser.CREDIT_NOTE_PATTERNS,
+            )
+            print(f"  '{text}' -> '{result}' (expected: '{expected}')")
+            assert result == expected
+
+    # VALIDATION & CLEANING
+
+    def test_validate_and_clean(self):
+        """Test data cleaning logic"""
+        print("\n--- Test: Validate & Clean ---")
+
+        raw_data = {
+            "credit_note_number": "Credit",  # Should be invalid
+            "vendor": {"name": "Test Vendor LLC", "address": "123 Street"},
+            "customer": {"name": "Client Co"},
+            "amounts": {"total": "100.00"},
+            "currency": "United States Dollar",
+            "line_items": [
+                {
+                    "description": "Item 1",
+                    "quantity": "2",
+                    "unit_price": "50.00",
+                    "amount": "100.00",
+                }
+            ],
+        }
+
+        cleaned = self.parser._validate_and_clean(raw_data)
+
+        # credit_note_number should be None (generic word)
+        assert cleaned["credit_note_number"] is None
+
+        # Currency truncated to 10 chars
+        assert cleaned["currency"] == "United Sta"
+        assert len(cleaned["currency"]) == 10
+
+        # Line items cleaned
+        assert len(cleaned["line_items"]) == 1
+        item = cleaned["line_items"][0]
+        assert item["quantity"] == 2
+        assert item["unit_price"] == 50
+        assert item["amount"] == 100
+

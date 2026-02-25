@@ -14,7 +14,14 @@ from django.utils import timezone
 
 from rever.db.models.attachment import Attachment
 from rever.db.models.auth import Organization
-from rever.db.models.payable import Bill, BillItem, PurchaseOrder, PurchaseOrderItem
+from rever.db.models.payable import (
+    Bill,
+    BillItem,
+    PurchaseOrder,
+    PurchaseOrderItem,
+    VendorCredit,
+    VendorCreditItem,
+)
 from rever.intellidocs.constants import ProcessingStatus
 from rever.intellidocs.models import DocumentExtraction
 
@@ -96,6 +103,7 @@ def _create_document_extraction(
 
     ext_bill_number = parsed_data.get("bill_number")
     ext_po_number = parsed_data.get("purchase_order") or parsed_data.get("po_number")
+    ext_credit_note_number = parsed_data.get("credit_note_number")
     ext_vendor_name = parsed_data.get("vendor", {}).get("name")
     ext_total = parsed_data.get("amounts", {}).get("total")
 
@@ -120,6 +128,7 @@ def _create_document_extraction(
         document_type=document_type,
         bill_number=ext_bill_number,
         po_number=ext_po_number,
+        credit_note_number=ext_credit_note_number,
         vendor_name=ext_vendor_name,
         bill_date=ext_bill_date,
         due_date=ext_due_date,
@@ -281,6 +290,56 @@ def _create_po_record(
     
     logger.info(f"Created PO: {po.po_number} (ID: {po.id})")
     return po, True  # Return new PO
+
+def _create_vendor_credit_record(
+    organization,
+    parsed_data,
+    matched_vendor=None,
+):
+
+    credit_note_number = parsed_data.get("credit_note_number")
+    txn_date = parse_date(parsed_data.get("credit_note_date")) or timezone.now().date()
+
+    amounts = parsed_data.get("amounts", {}) or {}
+
+    vendor_credit = VendorCredit.objects.create(
+        organization=organization,
+        vendor=matched_vendor,
+        credit_note_number=credit_note_number,
+        tax_percentage=clean_decimal(amounts.get("tax_percentage")),
+        sub_total = abs(clean_decimal(amounts.get("subtotal") or 0)),
+        total_tax = abs(clean_decimal(amounts.get("tax") or 0)),
+        total = abs(clean_decimal(amounts.get("total") or 0)),
+        txn_date=txn_date,
+        status="draft",
+        is_attachment=True,
+    )
+
+    line_items = parsed_data.get("line_items", [])
+
+    items_to_create = []
+
+    for idx, item in enumerate(line_items, 1):
+        quantity = clean_decimal(item.get("quantity"))
+        unit_price = clean_decimal(item.get("unit_price"))
+        amount = clean_decimal(item.get("amount")) or (quantity * unit_price)
+
+        items_to_create.append(
+            VendorCreditItem(
+                vendor_credit=vendor_credit,
+                sequence=idx,
+                description=item.get("description"),
+                quantity=abs(quantity),
+                unit_price=abs(unit_price),
+                total_amount=abs(amount),
+                uom=item.get("uom", "pcs"),
+                product_code=item.get("product_code", ""),
+            )
+        )
+
+    VendorCreditItem.objects.bulk_create(items_to_create)
+
+    return vendor_credit
 
 
 def _create_line_items(
@@ -467,6 +526,21 @@ def process_document_ocr_task(
                 else:
                     logger.info(f"Skipping line item creation for existing PO: {po.po_number}")
 
+            elif document_type == "vendor_credit":
+
+                vendor_credit = _create_vendor_credit_record(
+                    organization,
+                    parsed_data,
+                    matched_vendor,
+                )
+
+                created_document = vendor_credit
+
+                extraction.vendor_credit = vendor_credit
+                extraction.save(update_fields=["vendor_credit"])
+
+                _create_attachment(organization, vendor_credit, file_path, file_name)
+
         total_time = time.time() - start_time
 
         # 7. Log Success
@@ -491,8 +565,10 @@ def process_document_ocr_task(
         
         if document_type == "bill":
             doc_number = created_document.bill_number
-        else:
+        elif document_type == "purchase_order":
             doc_number = created_document.po_number
+        elif document_type == "vendor_credit":
+            doc_number = created_document.credit_note_number
 
         logger.info(
             f"{document_type.title()} processing completed: {doc_number} in {total_time:.2f}s"
