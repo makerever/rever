@@ -30,6 +30,16 @@ export const tabOptionsPO = [
   "Draft",
 ];
 
+// Tab options for UI navigation or filtering - Vendor credit section
+export const tabOptionsVendorCredit = [
+  "All vendor credits",
+  "Under review",
+  "Under approval",
+  "Approved",
+  "Rejected",
+  "Draft",
+];
+
 // Tab options for UI navigation or filtering
 export const memberTabOptions = ["Active members", "Invited members"];
 
@@ -41,6 +51,7 @@ export const roleBasedAccess: Record<Role, string[]> = {
     "/vendor/list",
     "/bill/list",
     "/purchaseorder/list",
+    "/vendorcredit/list",
     "/settings/general",
     "/settings/controls",
     "/settings/approvals",
@@ -55,6 +66,7 @@ export const roleBasedAccess: Record<Role, string[]> = {
     "/vendor/list",
     "/bill/list",
     "/purchaseorder/list",
+    "/vendorcredit/list",
     "/settings/general",
     "/settings/controls",
     "/settings/members",
@@ -83,7 +95,11 @@ export const roleBasedAccess: Record<Role, string[]> = {
 };
 
 // Tab options for approvals
-export const approvalTabOptions = ["PO approval", "Bill approval"];
+export const approvalTabOptions = [
+  "PO approval",
+  "Bill approval",
+  "Vendor credit approval",
+];
 
 // Table headers for the bill match items
 export const billMatchHeaders = ["Description", "Qty", "Unit price", "Amount"];

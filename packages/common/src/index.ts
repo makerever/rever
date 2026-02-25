@@ -123,3 +123,10 @@ export { default as PopupButton } from "./components/popupButton/PopupButton";
 export { default as PopupMenu } from "./components/popupButton/PopupMenu";
 
 export { default as DuplicateFlag } from "./components/DuplicateFlag";
+
+// Vendor Credit Exports
+export { default as AddVendorCreditComponent } from "./pages/vendorcredit/AddVendorCredit";
+export { default as VendorCreditLineItems } from "./pages/vendorcredit/VendorCreditLineItems";
+export { default as ViewVendorCreditDetails } from "./pages/vendorcredit/ViewVendorCredit";
+export { default as VendorCreditApproval } from "./pages/vendorcredit/VendorCreditApproval";
+export { default as VendorCreditApprovalList } from "./pages/vendorcredit/VendorCreditApprovalList";

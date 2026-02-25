@@ -2,7 +2,7 @@
 
 import { Bill, DragNDropMatchProps } from "@rever/types";
 import axiosInstance from "../api/axios";
-import { ATTACHMENT_API, BILL_API } from "../api/urls";
+import { ATTACHMENT_API, BILL_API, INTELLIDOCS_API } from "../api/urls";
 import { ApproveRejectBillProps } from "@rever/types";
 
 // Fetch the list of all bills
@@ -121,7 +121,7 @@ export const dragNDropMatchApi = async (billData: DragNDropMatchProps) => {
 // Upload a bill file
 export const uploadDocument = async (data: FormData) => {
   const response = await axiosInstance.post(
-    `${BILL_API.UPLOAD_DOCUMENT}`,
+    `${INTELLIDOCS_API.UPLOAD_DOCUMENT}`,
     data,
     {
       headers: {
@@ -134,6 +134,6 @@ export const uploadDocument = async (data: FormData) => {
 
 // Get uploaded bill document
 export const getDocument = async (id: string) => {
-  const response = await axiosInstance.get(`${BILL_API.GET_DOCUMENT}${id}/`);
+  const response = await axiosInstance.get(`${INTELLIDOCS_API.GET_DOCUMENT}${id}/`);
   return response;
 };

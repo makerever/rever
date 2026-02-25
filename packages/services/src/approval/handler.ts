@@ -1,4 +1,4 @@
-import { EnableApprovalProps } from "@rever/types";
+import { AssignApproverPayload, EnableApprovalProps } from "@rever/types";
 import axiosInstance from "../api/axios";
 import { APPROVAL_API } from "../api/urls";
 import { addApproverSchemaValues } from "@rever/validations";
@@ -37,7 +37,7 @@ export const disableApprovalStatusApi = async (model_name: string) => {
 /**
  * Assign an approver by sending data to the API
  */
-export const assignApproverApi = async (data: addApproverSchemaValues) => {
+export const assignApproverApi = async (data: AssignApproverPayload) => {
   const response = await axiosInstance.post(
     `${APPROVAL_API.ASSIGN_APPROVER}?model_name=${data.model_name}`,
     data,

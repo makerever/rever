@@ -10,3 +10,4 @@ export * from "./notification/handler";
 export * from "./vendors/handler";
 export * from "./purchaseorders/handler";
 export * from "./requestConfirmation/handler";
+export * from "./vendorcredits/handler";
