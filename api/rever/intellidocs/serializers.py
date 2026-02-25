@@ -5,7 +5,14 @@ Handles serialization for document upload and OCR results (Bills and Purchase Or
 
 from rest_framework import serializers
 
-from rever.db.models.payable import Bill, BillItem, PurchaseOrder, PurchaseOrderItem
+from rever.db.models.payable import (
+    Bill,
+    BillItem,
+    PurchaseOrder,
+    PurchaseOrderItem,
+    VendorCredit,
+    VendorCreditItem,
+)
 from rever.intellidocs.models import DocumentExtraction
 
 
@@ -14,9 +21,9 @@ class DocumentUploadSerializer(serializers.Serializer):
 
     file = serializers.FileField()
     document_type = serializers.ChoiceField(
-        choices=["bill", "purchase_order"],
+        choices=["bill", "purchase_order", "vendor_credit"],
         default="bill",
-        help_text="Type of document: 'bill' or 'purchase_order'",
+        help_text="Type of document: 'bill' or 'purchase_order' or 'vendor_credit'",
     )
 
 
@@ -104,6 +111,43 @@ class PurchaseOrderResultSerializer(serializers.ModelSerializer):
             "items",
         ]
 
+class VendorCreditItemSerializer(serializers.ModelSerializer):
+    line_number = serializers.IntegerField(source="sequence", read_only=True)
+    class Meta:
+        model = VendorCreditItem
+        fields = [
+            "id",
+            "description",
+            "quantity",
+            "unit_price",
+            "total_amount",
+            "uom",
+            "product_code",
+            "sequence",
+            "line_number",
+        ]
+
+class VendorCreditResultSerializer(serializers.ModelSerializer):
+    items = VendorCreditItemSerializer(many=True, read_only=True)
+    vendor_name = serializers.CharField(source="vendor.vendor_name", read_only=True)
+
+    class Meta:
+        model = VendorCredit
+        fields = [
+            "id",
+            "credit_note_number",
+            "txn_date",
+            "vendor_name",
+            "sub_total",
+            "tax_percentage",
+            "total_tax",
+            "total",
+            "reason",
+            "notes",
+            "status",
+            "items",
+        ]
+
 
 class DocumentExtractionListSerializer(serializers.ModelSerializer):
     """List serializer for DocumentExtraction - consistent for all document types"""
@@ -137,6 +181,8 @@ class DocumentExtractionListSerializer(serializers.ModelSerializer):
             return obj.bill_number
         elif obj.document_type == "purchase_order":
             return obj.po_number
+        elif obj.document_type == "vendor_credit":
+            return obj.credit_note_number
         return None
 
     def get_document_id(self, obj):
@@ -145,6 +191,8 @@ class DocumentExtractionListSerializer(serializers.ModelSerializer):
             return str(obj.bill.id)
         elif obj.document_type == "purchase_order" and obj.purchase_order:
             return str(obj.purchase_order.id)
+        elif obj.document_type == "vendor_credit" and obj.vendor_credit:
+            return str(obj.vendor_credit.id)
         return None
 
     def get_document_number_final(self, obj):
@@ -153,6 +201,8 @@ class DocumentExtractionListSerializer(serializers.ModelSerializer):
             return obj.bill.bill_number
         elif obj.document_type == "purchase_order" and obj.purchase_order:
             return obj.purchase_order.po_number
+        elif obj.document_type == "vendor_credit" and obj.vendor_credit:
+            return str(obj.vendor_credit.id)
         return None
 
 
@@ -161,7 +211,10 @@ class DocumentExtractionDetailSerializer(serializers.ModelSerializer):
     
     bill_number_final = serializers.CharField(source="bill.bill_number", read_only=True)
     po_number_final = serializers.CharField(source="purchase_order.po_number", read_only=True)
-
+    credit_note_number_final = serializers.CharField(
+        source="vendor_credit.credit_note_number",
+        read_only=True
+    )
     class Meta:
         model = DocumentExtraction
         fields = [
@@ -187,6 +240,9 @@ class DocumentExtractionDetailSerializer(serializers.ModelSerializer):
             "document_type",
             "bill_number_final",
             "po_number_final",
+            "credit_note_number",
+            "vendor_credit",
+            "credit_note_number_final",
         ]
 
 

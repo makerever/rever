@@ -10,6 +10,7 @@ class DocumentType(models.TextChoices):
     """Document type enum."""
     BILL = "bill", "Bill"
     PURCHASE_ORDER = "purchase_order", "Purchase Order"
+    VENDOR_CREDIT = "vendor_credit", "Vendor Credit"
 
 
 class ProcessingStatus(models.TextChoices):
