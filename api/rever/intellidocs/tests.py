@@ -475,19 +475,15 @@ class DocumentOCRTaskTest(TestCase):
     @patch("rever.intellidocs.tasks.OCRService")
     @patch("rever.intellidocs.tasks.DocumentParserFactory")
     @patch("rever.intellidocs.tasks.VendorMatcher")
-    def test_9_vendor_credit_happy_path(
-        self, mock_vendor_matcher, mock_factory, mock_ocr_service
-    ):
+    def test_9_vendor_credit_happy_path(self, mock_vendor_matcher, mock_factory, mock_ocr_service):
         """Test 9: Basic Vendor Credit Happy Path"""
         print("\n--- Test 9: Vendor Credit Happy Path ---")
 
-        # Mock OCR
         mock_ocr_service.return_value.process_document.return_value = {
             "text": "Credit Note CN-001 from Xolo",
             "engine": "test",
         }
 
-        # Mock Parser
         mock_factory.get_parser.return_value.parse.return_value = {
             "credit_note_number": "CN-001",
             "credit_note_date": "2025-03-01",
@@ -508,7 +504,6 @@ class DocumentOCRTaskTest(TestCase):
             ],
         }
 
-        # Mock Vendor Match
         mock_vendor_matcher.return_value.find_vendor.return_value = (
             self.vendor,
             1.0,
@@ -526,7 +521,6 @@ class DocumentOCRTaskTest(TestCase):
         assert result["status"] == "success"
         assert result["document_number"] == "CN-001"
 
-        # Verify DB
         vc = VendorCredit.objects.get(credit_note_number="CN-001")
         assert vc.vendor == self.vendor
         assert vc.total == Decimal("220.00")
@@ -539,11 +533,10 @@ class DocumentOCRTaskTest(TestCase):
         assert item.unit_price == Decimal("100.00")
         assert item.total_amount == Decimal("200.00")
 
-        # Verify Extraction Link
         extraction = DocumentExtraction.objects.get(vendor_credit=vc)
         assert extraction.credit_note_number == "CN-001"
         assert extraction.total_amount == Decimal("220.00")
-    
+
     @patch("rever.intellidocs.tasks.OCRService")
     @patch("rever.intellidocs.tasks.DocumentParserFactory")
     @patch("rever.intellidocs.tasks.VendorMatcher")
@@ -582,7 +575,8 @@ class DocumentOCRTaskTest(TestCase):
         vc = VendorCredit.objects.get(credit_note_number="CN-NO-VENDOR")
         assert vc.vendor is None
         assert vc.total == Decimal("100.00")
-        
+
+
 class VendorMatcherTest(TestCase):
     """
     Unit tests for VendorMatcher using RapidFuzz.
@@ -867,14 +861,9 @@ class DocumentAPIURLTest(TestCase):
         url = reverse("document-extraction-detail", args=[pk])
         assert url == f"/api/intellidocs/extractions/{pk}/"
 
+
 class VendorCreditParserTest(TestCase):
-    """
-    Unit tests for VendorCreditParser.
-    Tests extraction logic for credit notes / vendor credits.
-    """
-
     def setUp(self):
-
         self.parser = VendorCreditParser()
         self.sample_text = """
         Credit Note No: CN-1001
@@ -882,7 +871,6 @@ class VendorCreditParserTest(TestCase):
         """
 
     def test_fallback_parse(self):
-        """Test fallback parsing extracts credit note number"""
         print("\n--- Test: Vendor Credit Fallback ---")
 
         result = self.parser._fallback_parse(self.sample_text)
@@ -890,10 +878,7 @@ class VendorCreditParserTest(TestCase):
         assert result.get("credit_note_number") == "CN-1001"
         assert result.get("total") is None
 
-    # CREDIT NOTE NUMBER FORMATS
-
     def test_credit_note_number_formats(self):
-        """Test various credit note number formats"""
         print("\n--- Test: Credit Note Number Formats ---")
 
         cases = [
@@ -911,10 +896,7 @@ class VendorCreditParserTest(TestCase):
             print(f"  '{text}' -> '{result}' (expected: '{expected}')")
             assert result == expected
 
-    # VALIDATION & CLEANING
-
     def test_validate_and_clean(self):
-        """Test data cleaning logic"""
         print("\n--- Test: Validate & Clean ---")
 
         raw_data = {
@@ -935,17 +917,13 @@ class VendorCreditParserTest(TestCase):
 
         cleaned = self.parser._validate_and_clean(raw_data)
 
-        # credit_note_number should be None (generic word)
         assert cleaned["credit_note_number"] is None
 
-        # Currency truncated to 10 chars
         assert cleaned["currency"] == "United Sta"
         assert len(cleaned["currency"]) == 10
 
-        # Line items cleaned
         assert len(cleaned["line_items"]) == 1
         item = cleaned["line_items"][0]
         assert item["quantity"] == 2
         assert item["unit_price"] == 50
         assert item["amount"] == 100
-

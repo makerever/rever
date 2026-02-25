@@ -15,15 +15,12 @@ class VendorCreditParser(BaseParser):
         result = self.parse_with_llm(text)
         if result:
             logger.info(
-                f"Ollama parsing successful: "
-                f"{len(result.get('line_items', []))} line items"
+                f"Ollama parsing successful: {len(result.get('line_items', []))} line items"
             )
             return result
 
         logger.warning("Ollama not available or failed, using fallback regex parser")
         return self._fallback_parse(text)
-
-    # LLM PROMPT
 
     def _get_prompt(self, text: str) -> str:
         return f"""
@@ -48,7 +45,7 @@ Return this exact JSON structure:
         "address": "customer address"
     }},
     "amounts": {{
-        "subtotal": "number only",
+        "subtotal": "number only, no currency",
         "tax": "number only",
         "tax_percentage": "tax percentage if available",
         "total": "number only"
@@ -56,12 +53,12 @@ Return this exact JSON structure:
     "line_items": [
         {{
             "line_number": "line number if present",
-            "description": "item description",
+            "description": "product/service description",
             "quantity": "number",
             "unit_price": "number",
-            "uom": "unit of measure",
-            "product_code": "product code",
-            "amount": "number"
+            "uom": "unit of measure (pcs, kg, hours, etc.)",
+            "product_code": "product/SKU code if present",
+            "amount": "number (quantity * unit_price)"
         }}
     ],
     "currency": "USD/INR/EUR/GBP",
@@ -72,7 +69,10 @@ Return this exact JSON structure:
 IMPORTANT:
 1. Credit note number may appear as CN, Credit Memo, Credit Note No, etc.
 2. Extract ONLY company name for vendor.name.
-3. Return ONLY valid JSON.
+3. All amounts must be numbers only (no currency symbols, commas)
+4. Line items should be actual products/services with proper descriptions
+5. For each line item, ensure quantity, unit_price and amount are numbers
+6. Return ONLY valid JSON, no explanations or markdown
 """
 
     def _validate_and_clean(self, data: dict) -> dict:
@@ -88,7 +88,6 @@ IMPORTANT:
             "notes": data.get("notes"),
         }
 
-        # Validate credit note number isn't generic
         if result["credit_note_number"]:
             val = str(result["credit_note_number"]).strip()
             if val.lower() in ["credit", "credit note", "memo", "number"]:
@@ -96,13 +95,11 @@ IMPORTANT:
 
         return result
 
-    # FALLBACK PARSING
-
     CREDIT_NOTE_PATTERNS = [
-    r"(?:Credit\s*Note\s*)(CN[-\w]*\d+[-\w]*)",
-    r"Credit\s*Note\s*(?:No\.?|Number)?\s*[:#]?\s*([A-Z0-9\-_/]*\d+[A-Z0-9\-_/]*)",
-    r"Credit\s*Memo\s*(?:No\.?|Number)?\s*[:#]?\s*([A-Z0-9\-_/]*\d+[A-Z0-9\-_/]*)",
-    r"\b(CN[-:\s]*[A-Z0-9\-_/]*\d+[A-Z0-9\-_/]*)\b",
+        r"(?:Credit\s*Note\s*)(CN[-\w]*\d+[-\w]*)",
+        r"Credit\s*Note\s*(?:No\.?|Number)?\s*[:#]?\s*([A-Z0-9\-_/]*\d+[A-Z0-9\-_/]*)",
+        r"Credit\s*Memo\s*(?:No\.?|Number)?\s*[:#]?\s*([A-Z0-9\-_/]*\d+[A-Z0-9\-_/]*)",
+        r"\b(CN[-:\s]*[A-Z0-9\-_/]*\d+[A-Z0-9\-_/]*)\b",
     ]
 
     def _fallback_parse(self, text: str) -> dict:
@@ -111,7 +108,6 @@ IMPORTANT:
             "credit_note_number": self._extract_credit_note_number(text),
             "total": None,
         }
-    
+
     def _extract_credit_note_number(self, text: str) -> str | None:
         return self._extract_document_number(text, self.CREDIT_NOTE_PATTERNS)
-    
