@@ -9,6 +9,7 @@ PO_STATUS_CHOICES = [
     ("closed", "Closed"),
 ]
 
+
 class VendorCreditStatus(models.TextChoices):
     DRAFT = "draft", "Draft"
     AUTHORIZED = "authorized", "Authorized"
@@ -20,6 +21,7 @@ class VendorCreditStatus(models.TextChoices):
     UNDER_APPROVAL = "under_approval", "Under Approval"
     APPROVED = "approved", "Approved"
     REJECTED = "rejected", "Rejected"
+
 
 class LineDetailType(models.TextChoices):
     ACCOUNT_BASED = "account_based", "Account Based"

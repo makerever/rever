@@ -32,8 +32,7 @@ class DocumentParserFactory:
         if document_type not in cls._registry:
             registered = list(cls._registry.keys())
             raise ValueError(
-                f"Unknown document type: {document_type}. "
-                f"Registered types: {registered}"
+                f"Unknown document type: {document_type}. Registered types: {registered}"
             )
         return cls._registry[document_type]()
 
@@ -53,6 +52,6 @@ def _register_parsers() -> None:
     DocumentParserFactory.register("purchase_order", PurchaseOrderParser)
     DocumentParserFactory.register("vendor_credit", VendorCreditParser)
 
+
 # Auto-register parsers on import
 _register_parsers()
-

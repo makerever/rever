@@ -536,9 +536,8 @@ class VendorCreditViewSet(BaseModelViewSet):
     serializer_class = VendorCreditSerializer
 
     def get_queryset(self):
-        qs = (
-            VendorCredit.objects.filter(organization=self.request.user.organization)
-            .order_by("-created_at")
+        qs = VendorCredit.objects.filter(organization=self.request.user.organization).order_by(
+            "-created_at"
         )
 
         params = self.request.query_params
@@ -618,4 +617,3 @@ class VendorCreditItemViewSet(BaseModelViewSet):
                 "Cannot modify item of a vendor credit in another organization."
             )
         serializer.save()
-
