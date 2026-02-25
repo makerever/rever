@@ -10,3 +10,4 @@ export * from "./profileSettingSchema";
 export * from "./registerSchema";
 export * from "./resetPasswordSchema";
 export * from "./addPurchaseOrderSchema";
+export * from "./addVendorCreditSchema";

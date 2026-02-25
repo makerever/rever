@@ -1,11 +1,7 @@
 // Page to show approvals UI
 
 "use client";
-import {
-  BillApproval,
-  POApproval,
-  Tabs,
-} from "@rever/common";
+import { BillApproval, POApproval, Tabs, VendorCreditApproval } from "@rever/common";
 import { approvalTabOptions } from "@rever/constants";
 import { useState } from "react";
 
@@ -32,6 +28,9 @@ function Approvals() {
         <div className="p-4">
           {activeTab === "PO approval" ? <POApproval /> : null}
           {activeTab === "Bill approval" ? <BillApproval /> : null}
+          {activeTab === "Vendor credit approval" ? (
+            <VendorCreditApproval />
+          ) : null}
         </div>
       </div>
     </>

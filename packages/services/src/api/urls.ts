@@ -38,6 +38,19 @@ export const BILL_API = {
   BARGRAPH_DATA: "/bills/summary/monthly/",
   MATCH_RESULTS: "/match-results/",
   MATCH_DND: "/matching/dnd/assign/",
+};
+
+// Vendor credit API Endpoints
+export const VENOR_CREDIT_API = {
+  MANAGE_VENDOR_CREDIT: "/vendor-credits/",
+  SEND_VENDOR_CREDIT_APPROVAL: "/approval/send/vendorcredit/",
+  UNDER_APPROVAL_VENDOR_CREDITS: "/approval/assigned/vendorcredit/",
+  APPROVE_REJECT_VENDOR_CREDIT: "/approval/action/vendorcredit/",
+  AUDIT_HISTORY: "/audit/vendorcredit/",
+};
+
+// INTELLIDOCS (document extraction) API Endpoints
+export const INTELLIDOCS_API = {
   UPLOAD_DOCUMENT: "/intellidocs/upload/",
   GET_DOCUMENT: "/intellidocs/status/",
 };

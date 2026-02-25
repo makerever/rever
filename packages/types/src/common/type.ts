@@ -390,6 +390,7 @@ export type Resource =
   | "members"
   | "general"
   | "purchaseorder"
+  | "vendorcredit"
   | "inbox";
 // Type for action
 export type Action = "view" | "create" | "update" | "delete";

@@ -113,7 +113,7 @@ export interface ApprovalListProps {
 }
 
 export interface ApproverAssignment {
-  approver: string | number;
+  approver: string | number | undefined;
   level: number;
 }
 

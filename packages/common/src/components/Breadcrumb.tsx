@@ -13,6 +13,7 @@ import {
   Inbox,
   Settings,
   LayoutDashboard,
+  NotepadText,
 } from "lucide-react";
 import { useBreadcrumbStore } from "@rever/stores";
 
@@ -74,6 +75,40 @@ const breadcrumbMap: Record<string, Crumb[]> = {
       href: (data) => `/bill/view?id=${data?.id}`,
     },
     { label: "View match", href: "" },
+  ],
+  "/vendorcredit/list": [
+    { label: "Vendor credits", icon: <NotepadText size={16} />, href: "" },
+  ],
+  "/vendorcredit/add": [
+    {
+      label: "Vendor credits",
+      icon: <NotepadText size={16} />,
+      href: "/vendorcredit/list",
+    },
+    { label: "Create vendor credit", icon: "", href: "" },
+  ],
+  "/vendorcredit/view": [
+    {
+      label: "Vendor credits",
+      icon: <NotepadText size={16} />,
+      href: "/vendorcredit/list",
+    },
+    {
+      label: (data) => data?.name || "",
+      href: "",
+    },
+  ],
+  "/vendorcredit/edit": [
+    {
+      label: "Vendor credits",
+      icon: <NotepadText size={16} />,
+      href: "/vendorcredit/list",
+    },
+    {
+      label: (data) => data?.name || "--",
+      href: (data) => `/vendorcredit/view?id=${data?.id}`,
+    },
+    { label: "Update", href: "" },
   ],
   "/request-receipt/list": [
     { label: "Confirmations", icon: <ReceiptText size={16} />, href: "" },

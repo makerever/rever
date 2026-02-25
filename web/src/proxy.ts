@@ -12,20 +12,6 @@ const PUBLIC_ROUTES = [
   "/privacy-policy",
   "/eula",
 ];
-const MAIN_ROUTES = [
-  "/home",
-  "/inbox",
-  "/settings",
-  "/vendor",
-  "/purchaseorder",
-  "/bill",
-  "/approvals",
-  "/request-receipt",
-  "/404",
-  "/not-access",
-];
-const PROFILE_ROUTES = ["/profile", "/security", "/appearance", "/preferences"];
-const VALID_ROUTES = [...PUBLIC_ROUTES, ...MAIN_ROUTES, ...PROFILE_ROUTES];
 
 // Ignore system/static paths
 const IGNORED_PATH_PREFIXES = [
@@ -65,6 +51,10 @@ const ROLE_BASED_RESTRICTIONS: Record<string, string[]> = {
     "/bill/view",
     "/bill/add",
     "/bill/edit",
+    "/vendorcredit/list",
+    "/vendorcredit/view",
+    "/vendorcredit/add",
+    "/vendorcredit/edit",
     "/settings/approvals",
     "/settings/members/invite",
     "/request-receipt/list",
@@ -83,7 +73,10 @@ const ROLE_BASED_RESTRICTIONS: Record<string, string[]> = {
     "/bill/view",
     "/bill/add",
     "/bill/edit",
-    "/coa/list",
+    "/vendorcredit/list",
+    "/vendorcredit/view",
+    "/vendorcredit/add",
+    "/vendorcredit/edit",
     "/approvals/list/review",
     "/approvals/list/review/match",
     "/settings/general",
@@ -91,9 +84,6 @@ const ROLE_BASED_RESTRICTIONS: Record<string, string[]> = {
     "/settings/approvals",
     "/settings/members",
     "/settings/members/invite",
-    "/settings/integrations",
-    "/settings/subscriptions",
-    "/settings/usage",
   ],
 };
 
@@ -105,7 +95,7 @@ const matchesRoute = (pathname: string, routes: string[]) =>
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   const token = req.cookies.get("token")?.value;
@@ -141,11 +131,7 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  // 5. Fallback to 404 if route is invalid
-  if (!matchesRoute(pathname, VALID_ROUTES)) {
-    return NextResponse.redirect(new URL("/404", req.url));
-  }
-
+  // 5. Unknown routes — let Next.js handle with not-found.tsx
   return NextResponse.next();
 }
 
