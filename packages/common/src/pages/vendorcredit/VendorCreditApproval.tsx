@@ -1,4 +1,4 @@
-// Component for bill approval
+// Component for vendor credit approval
 
 "use client";
 
@@ -37,14 +37,14 @@ import type {
   Option,
 } from "@rever/types";
 
-const model_name = "bill";
+const model_name = "vendorcredit";
 
 interface Approver {
   approver: Option | null;
   level?: number;
 }
 
-const BillApproval = () => {
+const VendorCreditApproval = () => {
   const user = useUserStore((state) => state.user);
   const [isOn, setIsOn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -184,12 +184,9 @@ const BillApproval = () => {
   const autoSave = async (currentData: Approver[]) => {
     try {
       const validAssignments: ApproverAssignment[] = currentData
-        .filter(
-          (v): v is Approver & { approver: { value: string | number } } =>
-            v.approver?.value !== undefined
-        )
+        .filter((v) => v.approver?.value !== undefined)
         .map((v, i) => ({
-          approver: v.approver.value,
+          approver: v.approver!.value,
           level: i + 1,
         }));
 
@@ -237,10 +234,10 @@ const BillApproval = () => {
             <ToggleSwitch isOn={isOn} setIsOn={handleToggle} />
             <div className="ms-3 -mt-0.5">
               <p className="font-medium text-sm text-neutral-1100 dark:text-gray-200">
-                Enable bill approval workflow
+                Enable vendor credit approval workflow
               </p>
               <p className="mt-1 font-medium text-xs text-secondary-700 dark:text-gray-200">
-                Allow finance managers to streamline the bill approval process.
+                Allow finance managers to streamline the vendor credit approval process.
               </p>
             </div>
           </div>
@@ -305,7 +302,7 @@ const BillApproval = () => {
             <div className="relative w-full mt-4 h-100">
               <Image
                 alt="PO Approval Flow"
-                src="/images/flowImages/billApprovalFlow.svg"
+                src="/images/flowImages/poApprovalFlow.svg"
                 fill
                 className="object-contain"
               />
@@ -326,4 +323,4 @@ const BillApproval = () => {
   );
 };
 
-export default BillApproval;
+export default VendorCreditApproval;

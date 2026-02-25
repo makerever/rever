@@ -12,6 +12,10 @@
   "dependencies": {
     "@rever/types": "workspace:*",
     "country-state-city": "^3.2.1",
-    "lucide-react": "^0.513.0"
+    "lucide-react": "^0.513.0",
+    "react": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0"
   }
 }

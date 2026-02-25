@@ -54,6 +54,15 @@ export const sidebarLinks: SidebarLinkProps[] = [
         url: ["/vendor/list", "/vendor/add", "/vendor/view", "/vendor/update"],
       },
       {
+        name: "Vendor credits", // Vendor management routes
+        url: [
+          "/vendorcredit/list",
+          "/vendorcredit/add",
+          "/vendorcredit/view",
+          "/vendorcredit/edit",
+        ],
+      },
+      {
         name: "Approvals", // Approval process routes
         key: "review",
         url: ["/approvals/list/review", "/bill"],
@@ -141,6 +150,7 @@ export const payablePathNameUrl = [
   "bill",
   "approvals",
   "request-receipt",
+  "vendorcredit",
 ];
 
 // All route paths related to settings for sidebar highlighting

@@ -9,3 +9,4 @@ export * from "./vendor/type";
 export * from "./purchaseorder/type";
 export * from "./inbox/type";
 export * from "./receipt/type";
+export * from "./vendorcredit/type";

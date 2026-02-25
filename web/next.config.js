@@ -20,6 +20,13 @@ const nextConfig = {
     };
     return config;
   },
+  turbopack: {
+    resolveAlias: {
+      fs: { browser: "" },
+      path: { browser: "" },
+      canvas: { browser: "" },
+    },
+  },
   transpilePackages: [
     "@rever/common",
     "@rever/constants",

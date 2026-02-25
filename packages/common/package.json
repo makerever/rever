@@ -30,11 +30,11 @@
     "js-cookie": "^3.0.5",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.513.0",
-    "next": "15.4.10",
-    "react": "^18.3.1",
+    "next": "^16.0.0",
+    "react": "^19.1.0",
     "react-apexcharts": "^1.7.0",
     "react-day-picker": "^8.10.1",
-    "react-dom": "^18.3.1",
+    "react-dom": "^19.1.0",
     "react-error-boundary": "^6.0.0",
     "react-hook-form": "^7.56.1",
     "react-pdf": "9.0.0",
@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@types/js-cookie": "^3.0.6",
-    "@types/react": "19.1.5",
-    "@types/react-dom": "^18.3.7"
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19"
   }
 }

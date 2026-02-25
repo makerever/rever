@@ -12,11 +12,11 @@
   "dependencies": {
     "@rever/validations": "workspace:*",
     "@tanstack/react-table": "^8.21.3",
-    "react": "^18.3.1",
+    "react": "^19.1.0",
     "react-hook-form": "^7.56.1",
     "react-select": "^5.10.1"
   },
   "devDependencies": {
-    "@types/react": "19.1.5"
+    "@types/react": "^19.2.0"
   }
 }
