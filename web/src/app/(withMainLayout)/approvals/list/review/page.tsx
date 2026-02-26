@@ -4,7 +4,8 @@
 
 import {
   BillApprovalList,
-  POApprovalList
+  POApprovalList,
+  VendorCreditApprovalList
 } from "@rever/common";
 import { approvalTabOptions } from "@rever/constants";
 import { useState } from "react";
@@ -25,6 +26,13 @@ const ApprovalList = () => {
         ) : null}
         {activeTab === "Bill approval" ? (
           <BillApprovalList
+            tabs={approvalTabOptions}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
+        ) : null}
+        {activeTab === "Vendor credit approval" ? (
+          <VendorCreditApprovalList
             tabs={approvalTabOptions}
             activeTab={activeTab}
             setActiveTab={setActiveTab}

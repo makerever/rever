@@ -271,7 +271,7 @@ const VendorCreditList = () => {
           }}
           maxFiles={50}
           acceptedFormats="application/pdf"
-          document_type="vendorcredit"
+          document_type="vendor_credit"
         />
       ) : null}
     </>
