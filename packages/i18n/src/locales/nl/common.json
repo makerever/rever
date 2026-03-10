@@ -1,0 +1,422 @@
+{
+  "welcome": "Welkom bij Rever inside welcome",
+  "placeholders": {
+    "search": "Zoeken",
+    "email_input": "naam@bedrijf.nl",
+    "first_name": "Voer voornaam in",
+    "last_name": "Voer achternaam in",
+    "organization": "Voer organisatienaam in",
+    "password": "Voer wachtwoord in",
+    "confirm_password": "Bevestig wachtwoord",
+    "select_base_currency": "Selecteer basisvaluta",
+    "select_date_format": "Selecteer datumnotatie",
+    "enter_email": "Voer e-mail in",
+    "business_type": "Selecteer bedrijfstype",
+    "select_industry": "Selecteer sector",
+    "select_country": "Selecteer land",
+    "select_state": "Selecteer provincie",
+    "select_city": "Selecteer stad",
+    "enter_zipcode": "Voer postcode in",
+    "select_language": "Selecteer taal",
+    "search_total_bills": "Zoek alle facturen",
+    "global_search": "Zoek alles",
+    "search_bill": "Zoek facturen",
+    "bill": {
+      "enter_bill": "Voer factuurnummer in",
+      "select_vendor": "Selecteer leverancier",
+      "select_po": "Selecteer inkooporder",
+      "select_pt": "Selecteer betalingsvoorwaarden",
+      "select_bill_date": "Selecteer factuurdatum",
+      "select_due_date": "Selecteer vervaldatum",
+      "select_coa": "Selecteer rekeningschema"
+    }
+  },
+  "buttons": {
+    "continue": "Doorgaan",
+    "register": "Registreren",
+    "back": "Terug",
+    "save": "Opslaan",
+    "save_draft": "Opslaan als concept",
+    "cancel": "Annuleren"
+  },
+  "sidebar": {
+    "home": "Home",
+    "expenses": {
+      "expenses": "Uitgaven",
+      "bills": "Facturen",
+      "purchase_order": "Inkooporders",
+      "vendors": "Leveranciers",
+      "approvals": "Goedkeuringen",
+      "coa": "Rekeningschema",
+      "confirmations": "Bevestigingen"
+    },
+    "inbox": "Inbox",
+    "settings": {
+      "settings": "Instellingen",
+      "general": "Algemeen",
+      "controls": "Controles",
+      "members": "Leden",
+      "approvals": "Goedkeuringen",
+      "integrations": "Integraties",
+      "subscription": "Abonnement",
+      "usage": "Gebruik"
+    }
+  },
+  "profile_sidebar": {
+    "profile": "Profiel",
+    "security": "Beveiliging",
+    "notification": "Melding",
+    "appereance": "Uiterlijk",
+    "back_home": "Terug naar home",
+    "back_confirmations": "Terug naar bevestigingen"
+  },
+  "global_search": {
+    "vendors": "Leveranciers",
+    "po": "Inkooporders",
+    "bills": "Facturen",
+    "members": "Leden",
+    "create_po": "Inkooporder maken",
+    "create_bill": "Factuur maken",
+    "inbox": "Inbox",
+    "profile": "Profiel",
+    "change_password": "Wachtwoord wijzigen"
+  },
+  "subscription": {
+    "plan": {
+      "documents_left": "documenten over"
+    }
+  },
+  "dropdown": {
+    "overview_options": {
+      "this_month": "Deze maand",
+      "last_3_months": "Laatste 3 maanden",
+      "last_6_months": "Laatste 6 maanden",
+      "last_12_months": "Laatste 12 maanden"
+    },
+    "dashboard_options": {
+      "overview": "Overzicht",
+      "2way_match": "2-way match",
+      "3way_match": "3-way match"
+    }
+  },
+  "general": {
+    "first_heading": "Algemene instellingen",
+    "org_name": "Organisatienaam",
+    "base_currency": "Basisvaluta",
+    "date_format": "Datumnotatie",
+    "email": "E-mail",
+    "phone_number": "Telefoonnummer",
+    "business_type": "Bedrijfstype",
+    "industry": "Sector",
+    "second_heading": "Bedrijfsadres",
+    "country": "Land",
+    "state": "Provincie",
+    "city": "Stad",
+    "zipcode": "Postcode"
+  },
+  "profile": {
+    "heading": "Profiel",
+    "profile_settings": "Profielinstellingen",
+    "first_name": "Voornaam",
+    "last_name": "Achternaam",
+    "email": "E-mail",
+    "timezone": "Tijdzone",
+    "role": "Rol",
+    "language": "Taal"
+  },
+  "home": {
+    "page_name": "Home",
+    "reset_filters": "Filters herstellen",
+    "cards": {
+      "overview": {
+        "total": "Totaal",
+        "under_review": "In beoordeling",
+        "under_approval": "In afwachting van goedkeuring",
+        "approved": "Goedgekeurd",
+        "ledger_entry": "Grootboekboeking",
+        "rejected": "Afgewezen"
+      },
+      "2_way": {
+        "total_bills": {
+          "heading": "Totaal facturen",
+          "tooltip": "Gegevens exclusief conceptfacturen"
+        },
+        "bills_with_po": {
+          "heading": "Facturen met PO",
+          "tooltip": "Facturen gekoppeld aan een PO"
+        },
+        "bills_without_po": {
+          "heading": "Facturen zonder PO",
+          "tooltip": "Facturen zonder PO"
+        },
+        "duplicate_bills": {
+          "heading": "Dubbele facturen",
+          "tooltip": "Facturen gemarkeerd als duplicaten"
+        }
+      }
+    },
+    "bill_match_status": {
+      "heading": "Factuur match status",
+      "tooltip": {
+        "body": "Hoe facturen overeenkomen met de PO:",
+        "exact_match": {
+          "heading": "Exacte match",
+          "body": "Factuur komt perfect overeen met PO."
+        },
+        "partial_match": {
+          "heading": "Gedeeltelijke match",
+          "body": "Sommige details verschillen."
+        },
+        "mismatch": {
+          "heading": "Mismatch",
+          "body": "Er zijn aanzienlijke verschillen."
+        }
+      }
+    },
+    "match_status_trend": {
+      "heading": "Trend match status",
+      "exact_match": "Exacte match",
+      "partial_match": "Gedeeltelijke match",
+      "mismatch": "Mismatch",
+      "tooltip": "Historisch overzicht van factuurmatch-prestaties om trends te volgen"
+    },
+    "bills_by_stage": {
+      "heading": "Facturen per stadium",
+      "tooltip": "Facturen gescheiden door hun huidige stadium in de goedkeuringsworkflow"
+    },
+    "analytics": "Analyse",
+    "insights": "Inzichten",
+    "Total bills": "Totaal facturen",
+    "Bills with PO": "Facturen met PO",
+    "Bills without PO": "Facturen zonder PO",
+    "Duplicate bills": "Dubbele facturen"
+  },
+  "data_table": {
+    "empty": "Deze sectie is momenteel leeg.",
+    "message": "Verken gerust andere secties in de tussentijd.",
+    "pagination": {
+      "items_per_page": "Items per pagina",
+      "page": "Pagina",
+      "of": "van",
+      "selected": "Geselecteerd"
+    }
+  },
+  "bills": {
+    "heading": "Facturen",
+    "forward_bill": "Stuur uw facturen door om automatisch uitgaven te maken naar:",
+    "stage": {
+      "Overview": "Overzicht",
+      "Under review": "In beoordeling",
+      "Under approval": "In afwachting van goedkeuring",
+      "Approved": "Goedgekeurd",
+      "Ledger entry": "Grootboekboeking",
+      "Rejected": "Afgewezen"
+    },
+    "filter": {
+      "status": "Status"
+    },
+    "buttons": {
+      "create_bill": "Factuur maken",
+      "upload_bills": "Facturen uploaden"
+    },
+    "table_headers": {
+      "bill": "Factuur",
+      "bill_date": "Factuurdatum",
+      "due_date": "Vervaldatum",
+      "po": "PO",
+      "vendor": "Leverancier",
+      "total_amount": "Totaalbedrag",
+      "stages": "Stadia",
+      "status": "Status"
+    }
+  },
+  "create_bill": {
+    "heading": "Factuurdetails",
+    "bill_name": "Factuurnummer",
+    "vendor": "Leverancier",
+    "purchase_order": "Inkooporder",
+    "payment_terms": "Betalingsvoorwaarden",
+    "bill_date": "Factuurdatum",
+    "due_date": "Vervaldatum",
+    "bill_line_items": {
+      "heading": "Factuurregels",
+      "description": "Beschrijving",
+      "coa": "Rekeningschema",
+      "product_code": "Productcode",
+      "qty": "Aantal",
+      "unit_price": "Eenheidsprijs",
+      "amount": "Bedrag",
+      "action": "Actie"
+    },
+    "new_item": "Nieuw factuuritem",
+    "sub_total": "Subtotaal",
+    "total_tax": "Totaal belasting",
+    "total": "Totaal",
+    "notes": "Notities",
+    "enter_notes": "Voer notities in",
+    "extract_pdf": "PDF extraheren"
+  },
+  "purchase_order": {
+    "heading": "Inkooporders",
+    "buttons": {
+      "upload_po": "PO's uploaden",
+      "create_po": "Inkooporder maken"
+    },
+    "stagebar": {
+      "all_vendor_credits": "Alle leverancierskredieten",
+      "under_review": "In beoordeling",
+      "under_approval": "In afwachting van goedkeuring",
+      "approved": "Goedgekeurd",
+      "rejected": "Afgewezen",
+      "draft": "Concept"
+    },
+    "search": "Zoek inkooporders",
+    "export": "Gegevens exporteren",
+    "table_headers": {
+      "po": "PO",
+      "po_date": "PO datum",
+      "delivery_date": "Leverdatum",
+      "vendor": "Leverancier",
+      "total_amount": "Totaalbedrag",
+      "status": "Stadia"
+    },
+    "create_po": {
+      "heading": "Nieuwe PO",
+      "po_number": "PO nummer",
+      "vendor": "Leverancier",
+      "payment_terms": "Betalingsvoorwaarden",
+      "po_date": "PO datum",
+      "delivery_date": "Leverdatum",
+      "po_line_items": {
+        "heading": "PO regels",
+        "description": "Beschrijving",
+        "coa": "Rekeningschema",
+        "qty": "Aantal",
+        "unit_price": "Eenheidsprijs",
+        "amount": "Bedrag",
+        "action": "Actie"
+      },
+      "new_item": "Nieuw PO item",
+      "sub_total": "Subtotaal",
+      "total_tax": "Totaal belasting",
+      "total": "Totaal",
+      "grand_total": "Eindtotaal",
+      "notes": "Notities",
+      "enter_notes": "Voer notities in"
+    }
+  },
+  "vendors": {
+    "heading": "Leveranciers",
+    "status": {
+      "Heading": "Status",
+      "active": "Actief",
+      "inactive": "Inactief"
+    },
+    "buttons": {
+      "create_vendor": "Leverancier maken"
+    },
+    "table_headers": {
+      "vendor": "Leverancier",
+      "company_name": "Bedrijfsnaam",
+      "email": "E-mail",
+      "tax_id": "BTW-ID",
+      "status": "Status"
+    },
+    "rows_per_page": "Rijen per pagina",
+    "create_vendor": {
+      "heading": "Nieuwe leverancier",
+      "vendor_details": {
+        "heading": "Leverancierdetails",
+        "vendor_name": "Naam leverancier",
+        "company_name": "Bedrijfsnaam",
+        "email": "E-mail",
+        "mobile": "Mobiel",
+        "tax_id": "BTW-ID",
+        "website": "Website",
+        "payment_terms": "Betalingsvoorwaarden"
+      },
+      "vendor_address": {
+        "heading": "Adres leverancier",
+        "address_line_1": "Adresregel 1",
+        "address_line_2": "Adresregel 2",
+        "country": "Land",
+        "state": "Provincie",
+        "city": "Stad",
+        "zipcode": "Postcode"
+      },
+      "bank_account_details": {
+        "heading": "Bankgegevens",
+        "account_holder_name": "Naam rekeninghouder",
+        "bank_name": "Banknaam",
+        "account_number": "Rekeningnummer"
+      }
+    },
+    "vendor_credit": {
+      "heading": "Leverancierskrediet",
+      "buttons": {
+        "create_vendor_credit": "Leverancierskrediet maken",
+        "upload_vendor_credit": "Leverancierskrediet uploaden"
+      },
+      "stagebar": {
+        "all_vendor_credits": "Alle leverancierskredieten",
+        "under_review": "In beoordeling",
+        "under_approval": "In afwachting van goedkeuring",
+        "approved": "Goedgekeurd",
+        "rejected": "Afgewezen",
+        "draft": "Concept"
+      },
+      "search": "Zoek leverancierskredieten",
+      "export": "Gegevens exporteren",
+      "table_headers": {
+        "vendor_credit": "Leverancierskrediet",
+        "vendor_credit_date": "Datum leverancierskrediet",
+        "vendor": "Leverancier",
+        "total_amount": "Totaalbedrag",
+        "stages": "Status"
+      },
+      "rows_per_page": "Rijen per pagina",
+      "upload_vendor_credit": {
+        "heading": "Bestanden uploaden",
+        "subheading": "Selecteer bestanden om te uploaden",
+        "input_label": "Klik of sleep bestanden hierheen",
+        "input_helper_text": "Upload tot 50 bestanden, elk maximaal 5 MB"
+      },
+      "create_vendor_credit": {
+        "heading": "Nieuw leverancierskrediet",
+        "buttons": {
+          "extract_vendor_credit": "Leverancier extraheren",
+          "cancel": "Annuleren",
+          "save": {
+            "heading": "Opslaan",
+            "save": "Opslaan",
+            "save_as_draft": "Opslaan als concept"
+          }
+        },
+        "vendor_credit_details": {
+          "heading": "Kredietdetails",
+          "vendor_credit_number": "Kredietnummer",
+          "vendor": "Leverancier",
+          "vendor_credit_date": "Kredietdatum"
+        },
+        "vendor_credit_line_items": {
+          "heading": "Kredietregels",
+          "description": "Beschrijving",
+          "qty": "Aantal",
+          "unit_price": "Eenheidsprijs",
+          "amount": "Bedrag",
+          "action": "Actie"
+        },
+        "new_item": "Nieuw kredietitem",
+        "sub_total": "Subtotaal",
+        "total_tax": "Totaal belasting",
+        "grand_total": "Eindtotaal",
+        "total": "Totaal",
+        "notes": "Notities",
+        "enter_notes": "Voer notities in"
+      }
+    },
+    "inbox": {
+      "heading": "Inbox"
+    }
+  }
+}

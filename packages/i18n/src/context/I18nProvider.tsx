@@ -4,12 +4,14 @@ import { ReactNode, useEffect } from 'react';
 import { IntlProvider } from 'next-intl';
 import en from "../locales/en/common.json";
 import es from "../locales/es/common.json";
+import de from "../locales/de/common.json";
+import nl from "../locales/nl/common.json";
 import { useUserStore } from "@rever/stores";
 
-type Locale = 'en' | 'es';
+type Locale = 'en' | 'es' | 'de' | 'nl';
 
 //available translation messages by locale
-const messages = { en, es };
+const messages = { en, es, de, nl };
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   // Retrieve the user object from the Zustand store

@@ -50,7 +50,7 @@
       "coa": "Chart of accounts",
       "confirmations": "Confirmations"
     },
-    "inbox": "Inobx",
+    "inbox": "Inbox",
     "settings": {
       "settings": "Settings",
       "general": "General",
@@ -90,7 +90,7 @@
     "overview_options": {
       "this_month": "This month",
       "last_3_months": "Last 3 months",
-      "last_6_months": "Last_6_months",
+      "last_6_months": "Last 6 months",
       "last_12_months": "Last 12 months"
     },
     "dashboard_options": {
@@ -255,5 +255,172 @@
     "notes": "Notes",
     "enter_notes": "Enter notes",
     "extract_pdf": "Extract PDF"
+  },
+  "purchase_order": {
+    "heading": "Purchase orders",
+    "buttons": {
+      "upload_po": "Upload POs",
+      "create_po": "Create purchase order"
+    },
+    "stagebar":{
+      "all_vendor_credits": "All vendor credits",
+      "under_review": "Under review",
+      "under_approval": "Under approval",
+      "approved": "Approved",
+      "rejected":"Rejected",
+      "draft": "Draft"
+    },
+    "search": "Search purchase orders",
+    "export": "Export data",
+    "table_headers": {
+      "po": "PO",
+      "po_date": "PO date",
+      "delivery_date": "Delivery date",
+      "vendor": "Vendor",
+      "total_amount": "Total amount",
+      "status": "Stages"
+    },
+    "create_po": {
+      "heading": "New PO",
+      "po_number": "PO number",
+      "vendor": "Vendor",
+      "payment_terms": "Payment terms",
+      "po_date": "PO date",
+      "delivery_date": "Delivery date",
+      "po_line_items": {
+        "heading": "PO line items",
+        "description": "Description",
+        "coa": "Chart of Accounts",
+        "qty": "Qty",
+        "unit_price": "Unit price",
+        "amount": "Amount",
+        "action": "Action"
+      },
+      "new_item": "New PO item",
+      "sub_total": "Sub total",
+      "total_tax": "Total tax",
+      "total": "Total",
+      "grand_total": "Grand total",
+      "notes": "Notes",
+      "enter_notes": "Enter notes"
+    }
+  },
+  "vendors": {
+    "heading": "Vendors",
+    "status": {
+      "Heading": "Status",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "buttons": {
+      "create_vendor": "Create vendor"
+    },
+    "table_headers": {
+      "vendor": "Vendor",
+      "company_name": "Company name",
+      "email": "Email",
+      "tax_id": "Tax ID",
+      "status": "Status"
+    },
+    "rows_per_page": "Rows per page",
+    "create_vendor": {
+      "heading": "New vendor",
+      "vendor_details":{
+        "heading": "Vendor details",
+        "vendor_name": "Vendor name",
+        "company_name": "Company name",
+        "email": "Email",
+        "mobile": "Mobile",
+        "tax_id": "Tax ID",
+        "website": "Website",
+        "payment_terms": "Payment terms"
+      },
+      "vendor_address": {
+        "heading": "Vendor address",
+        "address_line_1": "Address line 1",
+        "address_line_2": "Address line 2",
+        "country": "Country",
+        "state": "State",
+        "city": "City",
+        "zipcode": "Zipcode"
+      },
+      "bank_account_details": {
+        "heading": "Bank account details",
+        "account_holder_name": "Account holder name",
+        "bank_name": "Bank name",
+        "account_number": "Account number"
+      }
+    },
+    "vendor_credit": {
+      "heading": "Vendor credit",
+      "buttons": {
+        "create_vendor_credit": "Create vendor credit",
+        "upload_vendor_credit": "Upload vendor credit"
+      },
+      "stagebar":{
+        "all_vendor_credits": "All vendor credits",
+        "under_review": "Under review",
+        "under_approval": "Under approval",
+        "approved": "Approved",
+        "rejected":"Rejected",
+        "draft": "Draft"
+      },
+      "search": "Search vendor credits",
+      "export": "Export data",
+      "table_headers": {
+        "vendor_credit": "Vendor credit",
+        "vendor_credit_date": "Vendor credit date",
+        "vendor": "Vendor",
+        "total_amount": "Total amount",
+        "stages": "Status"
+      },
+      "rows_per_page": "Rows per page",
+      "upload_vendor_credit": {
+        "heading": "Upload files",
+        "subheading": "Select files to upload the files of your choice",
+        "input_label": "Click or drop files here to upload",
+        "input_helper_text": "Upload up to 50 files, each not exceeding 5 MB in size"
+      },
+      "create_vendor_credit": {
+        "heading": "New vendor credit",
+        "buttons":{
+          "extract_vendor_credit": "Extract vendor",
+          "cancel": "Cancel",
+          "save":{
+            "heading": "Save",
+            "save": "Save",
+            "save_as_draft":"Save as draft"
+          }
+        },
+        "vendor_credit_details":{
+          "heading": "Vendor credit details",
+          "vendor_credit_number": "Vendor credit number",
+          "vendor": "Vendor",
+          "vendor_credit_date": "Vendor credit date"
+        },
+        "vendor_credit_line_items": {
+          "heading": "Vendor credit line items",
+          "description": "Description",
+          "qty": "Qty",
+          "unit_price": "Unit price",
+          "amount": "Amount",
+          "action": "Action"
+        },
+        "new_item": "New vendor credit item",
+        "sub_total": "Sub total",
+        "total_tax": "Total tax",
+        "grand_total": "Grand total",
+        "total": "Total",
+        "notes": "Notes",
+        "enter_notes": "Enter notes"
+      }
+
+
+    },
+    "inbox": {
+      "heading": "Inbox"
+    }
+  
   }
+
 }

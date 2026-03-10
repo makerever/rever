@@ -3,32 +3,32 @@
   "placeholders": {
     "search": "Buscar",
     "email_input": "nombre@empresa.com",
-    "first_name": "Ingresa el nombre",
-    "last_name": "Ingresa el apellido",
-    "organization": "Ingresa el nombre de la organización",
-    "password": "Ingresa la contraseña",
-    "confirm_password": "Confirma la contraseña",
-    "select_base_currency": "Selecciona la moneda base",
-    "select_date_format": "Selecciona el formato de fecha",
-    "enter_email": "Ingresa el correo electrónico",
-    "business_type": "Selecciona el tipo de negocio",
-    "select_industry": "Selecciona la industria",
-    "select_country": "Selecciona el país",
-    "select_state": "Selecciona el estado",
-    "select_city": "Selecciona la ciudad",
-    "enter_zipcode": "Ingresa el código postal",
-    "select_language": "Selecciona el idioma",
-    "search_total_bills": "Buscar facturas totales",
+    "first_name": "Ingrese nombre",
+    "last_name": "Ingrese apellido",
+    "organization": "Ingrese nombre de la organización",
+    "password": "Ingrese contraseña",
+    "confirm_password": "Confirmar contraseña",
+    "select_base_currency": "Seleccionar moneda base",
+    "select_date_format": "Seleccionar formato de fecha",
+    "enter_email": "Ingrese correo electrónico",
+    "business_type": "Seleccionar tipo de negocio",
+    "select_industry": "Seleccionar industria",
+    "select_country": "Seleccionar país",
+    "select_state": "Seleccionar estado",
+    "select_city": "Seleccionar ciudad",
+    "enter_zipcode": "Ingrese código postal",
+    "select_language": "Seleccionar idioma",
+    "search_total_bills": "Buscar total de facturas",
     "global_search": "Buscar cualquier cosa",
     "search_bill": "Buscar facturas",
     "bill": {
-      "enter_bill": "Ingresar número de factura",
+      "enter_bill": "Ingrese número de factura",
       "select_vendor": "Seleccionar proveedor",
       "select_po": "Seleccionar orden de compra",
       "select_pt": "Seleccionar términos de pago",
       "select_bill_date": "Seleccionar fecha de factura",
       "select_due_date": "Seleccionar fecha de vencimiento",
-      "select_coa": "Seleccionar PDC"
+      "select_coa": "Seleccionar catálogo de cuentas"
     }
   },
   "buttons": {
@@ -47,10 +47,10 @@
       "purchase_order": "Órdenes de compra",
       "vendors": "Proveedores",
       "approvals": "Aprobaciones",
-      "coa": "Plan de cuentas",
+      "coa": "Catálogo de cuentas",
       "confirmations": "Confirmaciones"
     },
-    "inbox": "Bandeja",
+    "inbox": "Bandeja de entrada",
     "settings": {
       "settings": "Configuración",
       "general": "General",
@@ -65,7 +65,7 @@
   "profile_sidebar": {
     "profile": "Perfil",
     "security": "Seguridad",
-    "notification": "Notificaciones",
+    "notification": "Notificación",
     "appereance": "Apariencia",
     "back_home": "Volver al inicio",
     "back_confirmations": "Volver a confirmaciones"
@@ -77,7 +77,7 @@
     "members": "Miembros",
     "create_po": "Crear orden de compra",
     "create_bill": "Crear factura",
-    "inbox": "Bandeja",
+    "inbox": "Bandeja de entrada",
     "profile": "Perfil",
     "change_password": "Cambiar contraseña"
   },
@@ -94,9 +94,9 @@
       "last_12_months": "Últimos 12 meses"
     },
     "dashboard_options": {
-      "overview": "Resumen",
-      "2way_match": "Coincidencia 2 vías",
-      "3way_match": "Coincidencia 3 vías"
+      "overview": "Resumen general",
+      "2way_match": "Cotejo de 2 vías",
+      "3way_match": "Cotejo de 3 vías"
     }
   },
   "general": {
@@ -116,7 +116,7 @@
   },
   "profile": {
     "heading": "Perfil",
-    "profile_settings": "Configuración perfil",
+    "profile_settings": "Configuración del perfil",
     "first_name": "Nombre",
     "last_name": "Apellido",
     "email": "Correo electrónico",
@@ -133,12 +133,12 @@
         "under_review": "En revisión",
         "under_approval": "En aprobación",
         "approved": "Aprobado",
-        "ledger_entry": "Asiento contable",
+        "ledger_entry": "Entrada de libro mayor",
         "rejected": "Rechazado"
       },
       "2_way": {
         "total_bills": {
-          "heading": "Facturas totales",
+          "heading": "Total de facturas",
           "tooltip": "Los datos excluyen facturas en borrador"
         },
         "bills_with_po": {
@@ -156,60 +156,60 @@
       }
     },
     "bill_match_status": {
-      "heading": "Estado coincidencia",
+      "heading": "Estado de cotejo de facturas",
       "tooltip": {
-        "body": "Cómo coinciden las facturas con la orden de compra:",
+        "body": "Cómo coincide la factura con la OC:",
         "exact_match": {
           "heading": "Coincidencia exacta",
-          "body": "La factura coincide perfectamente con la orden de compra."
+          "body": "La factura coincide perfectamente con la OC."
         },
         "partial_match": {
           "heading": "Coincidencia parcial",
           "body": "Algunos detalles difieren."
         },
         "mismatch": {
-          "heading": "Desajuste",
+          "heading": "Discrepancia",
           "body": "Existen diferencias significativas."
         }
       }
     },
     "match_status_trend": {
-      "heading": "Tendencia coincidencia",
+      "heading": "Tendencia del estado de cotejo",
       "exact_match": "Coincidencia exacta",
       "partial_match": "Coincidencia parcial",
-      "mismatch": "Desajuste",
-      "tooltip": "Vista histórica del rendimiento de coincidencia de facturas para seguir tendencias con el tiempo"
+      "mismatch": "Discrepancia",
+      "tooltip": "Vista histórica del rendimiento del cotejo de facturas para rastrear tendencias en el tiempo"
     },
     "bills_by_stage": {
       "heading": "Facturas por etapa",
-      "tooltip": "Facturas clasificadas según su etapa actual en el flujo de aprobación"
+      "tooltip": "Facturas segregadas por su etapa actual en el flujo de trabajo de aprobación"
     },
     "analytics": "Analítica",
-    "insights": "Perspectivas",
-    "Total bills": "Facturas totales",
-    "Bills with PO": "Facturas con OC",
-    "Bills without PO": "Facturas sin OC",
+    "insights": "Información",
+    "Total bills": "Total de facturas",
+    "Bills with PO": "Facturas con orden de compra",
+    "Bills without PO": "Facturas sin orden de compra",
     "Duplicate bills": "Facturas duplicadas"
   },
   "data_table": {
-    "empty": "Esta sección está vacía actualmente.",
-    "message": "Puedes explorar otras secciones mientras tanto.",
+    "empty": "Esta sección está actualmente vacía.",
+    "message": "Siéntase libre de explorar otras secciones mientras tanto.",
     "pagination": {
       "items_per_page": "Elementos por página",
       "page": "Página",
       "of": "de",
-      "selected": "Seleccionada"
+      "selected": "Seleccionado"
     }
   },
   "bills": {
     "heading": "Facturas",
-    "forward_bill": "Reenvía tus facturas para crear gastos automáticamente en:",
+    "forward_bill": "Reenvíe sus facturas para crear gastos automáticamente en:",
     "stage": {
       "Overview": "Resumen",
       "Under review": "En revisión",
       "Under approval": "En aprobación",
       "Approved": "Aprobado",
-      "Ledger entry": "Asiento contable",
+      "Ledger entry": "Entrada de libro mayor",
       "Rejected": "Rechazado"
     },
     "filter": {
@@ -223,7 +223,7 @@
       "bill": "Factura",
       "bill_date": "Fecha de factura",
       "due_date": "Fecha de vencimiento",
-      "po": "Orden de compra",
+      "po": "OC",
       "vendor": "Proveedor",
       "total_amount": "Monto total",
       "stages": "Etapas",
@@ -239,21 +239,184 @@
     "bill_date": "Fecha de factura",
     "due_date": "Fecha de vencimiento",
     "bill_line_items": {
-      "heading": "Líneas de factura",
+      "heading": "Partidas de la factura",
       "description": "Descripción",
-      "coa": "Plan de cuentas",
+      "coa": "Catálogo de cuentas",
       "product_code": "Código de producto",
-      "qty": "Cantidad",
+      "qty": "Cant.",
       "unit_price": "Precio unitario",
-      "amount": "Importe",
+      "amount": "Monto",
       "action": "Acción"
     },
-    "new_item": "Nuevo artículo de factura",
-    "sub_total": "Sub total",
+    "new_item": "Nuevo ítem de factura",
+    "sub_total": "Subtotal",
     "total_tax": "Impuesto total",
     "total": "Total",
     "notes": "Notas",
-    "enter_notes": "Ingresar notas",
+    "enter_notes": "Ingrese notas",
     "extract_pdf": "Extraer PDF"
+  },
+  "purchase_order": {
+    "heading": "Órdenes de compra",
+    "buttons": {
+      "upload_po": "Subir OC",
+      "create_po": "Crear orden de compra"
+    },
+    "stagebar": {
+      "all_vendor_credits": "Todos los créditos de proveedor",
+      "under_review": "En revisión",
+      "under_approval": "En aprobación",
+      "approved": "Aprobado",
+      "rejected": "Rechazado",
+      "draft": "Borrador"
+    },
+    "search": "Buscar órdenes de compra",
+    "export": "Exportar datos",
+    "table_headers": {
+      "po": "OC",
+      "po_date": "Fecha de OC",
+      "delivery_date": "Fecha de entrega",
+      "vendor": "Proveedor",
+      "total_amount": "Monto total",
+      "status": "Etapas"
+    },
+    "create_po": {
+      "heading": "Nueva OC",
+      "po_number": "Número de OC",
+      "vendor": "Proveedor",
+      "payment_terms": "Términos de pago",
+      "po_date": "Fecha de OC",
+      "delivery_date": "Fecha de entrega",
+      "po_line_items": {
+        "heading": "Partidas de la OC",
+        "description": "Descripción",
+        "coa": "Catálogo de cuentas",
+        "qty": "Cant.",
+        "unit_price": "Precio unitario",
+        "amount": "Monto",
+        "action": "Acción"
+      },
+      "new_item": "Nuevo ítem de OC",
+      "sub_total": "Subtotal",
+      "total_tax": "Impuesto total",
+      "total": "Total",
+      "grand_total": "Total general",
+      "notes": "Notas",
+      "enter_notes": "Ingrese notas"
+    }
+  },
+  "vendors": {
+    "heading": "Proveedores",
+    "status": {
+      "Heading": "Estado",
+      "active": "Activo",
+      "inactive": "Inactivo"
+    },
+    "buttons": {
+      "create_vendor": "Crear proveedor"
+    },
+    "table_headers": {
+      "vendor": "Proveedor",
+      "company_name": "Nombre de la empresa",
+      "email": "Correo electrónico",
+      "tax_id": "ID de impuesto",
+      "status": "Estado"
+    },
+    "rows_per_page": "Filas por página",
+    "create_vendor": {
+      "heading": "Nuevo proveedor",
+      "vendor_details": {
+        "heading": "Detalles del proveedor",
+        "vendor_name": "Nombre del proveedor",
+        "company_name": "Nombre de la empresa",
+        "email": "Correo electrónico",
+        "mobile": "Móvil",
+        "tax_id": "ID de impuesto",
+        "website": "Sitio web",
+        "payment_terms": "Términos de pago"
+      },
+      "vendor_address": {
+        "heading": "Dirección del proveedor",
+        "address_line_1": "Línea de dirección 1",
+        "address_line_2": "Línea de dirección 2",
+        "country": "País",
+        "state": "Estado",
+        "city": "Ciudad",
+        "zipcode": "Código postal"
+      },
+      "bank_account_details": {
+        "heading": "Detalles de la cuenta bancaria",
+        "account_holder_name": "Nombre del titular de la cuenta",
+        "bank_name": "Nombre del banco",
+        "account_number": "Número de cuenta"
+      }
+    },
+    "vendor_credit": {
+      "heading": "Crédito de proveedor",
+      "buttons": {
+        "create_vendor_credit": "Crear crédito de proveedor",
+        "upload_vendor_credit": "Subir crédito de proveedor"
+      },
+      "stagebar": {
+        "all_vendor_credits": "Todos los créditos de proveedor",
+        "under_review": "En revisión",
+        "under_approval": "En aprobación",
+        "approved": "Aprobado",
+        "rejected": "Rechazado",
+        "draft": "Borrador"
+      },
+      "search": "Buscar créditos de proveedor",
+      "export": "Exportar datos",
+      "table_headers": {
+        "vendor_credit": "Crédito de proveedor",
+        "vendor_credit_date": "Fecha de crédito",
+        "vendor": "Proveedor",
+        "total_amount": "Monto total",
+        "stages": "Estado"
+      },
+      "rows_per_page": "Filas por página",
+      "upload_vendor_credit": {
+        "heading": "Subir archivos",
+        "subheading": "Seleccione los archivos que desee subir",
+        "input_label": "Haga clic o arrastre archivos aquí para subir",
+        "input_helper_text": "Suba hasta 50 archivos, cada uno de máximo 5 MB"
+      },
+      "create_vendor_credit": {
+        "heading": "Nuevo crédito de proveedor",
+        "buttons": {
+          "extract_vendor_credit": "Extraer proveedor",
+          "cancel": "Cancelar",
+          "save": {
+            "heading": "Guardar",
+            "save": "Guardar",
+            "save_as_draft": "Guardar como borrador"
+          }
+        },
+        "vendor_credit_details": {
+          "heading": "Detalles del crédito",
+          "vendor_credit_number": "Número de crédito",
+          "vendor": "Proveedor",
+          "vendor_credit_date": "Fecha de crédito"
+        },
+        "vendor_credit_line_items": {
+          "heading": "Partidas del crédito",
+          "description": "Descripción",
+          "qty": "Cant.",
+          "unit_price": "Precio unitario",
+          "amount": "Monto",
+          "action": "Acción"
+        },
+        "new_item": "Nuevo ítem de crédito",
+        "sub_total": "Subtotal",
+        "total_tax": "Impuesto total",
+        "grand_total": "Total general",
+        "total": "Total",
+        "notes": "Notas",
+        "enter_notes": "Ingrese notas"
+      }
+    },
+    "inbox": {
+      "heading": "Bandeja de entrada"
+    }
   }
 }
