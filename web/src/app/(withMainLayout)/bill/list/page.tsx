@@ -24,10 +24,11 @@ import { ColumnDef, sortingFns } from "@tanstack/react-table";
 import { Paperclip } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-
+import { useTranslate } from "@rever/i18n";
 // Main component for displaying the bill list
 const BillList = () => {
   const router = useRouter();
+  const translate = useTranslate();
 
   const [activeTab, setActiveTab] = useState<string | undefined>("All bills");
   const [billData, setBillData] = useState<Bill[]>([]);
@@ -95,7 +96,7 @@ const BillList = () => {
       },
       {
         accessorKey: "bill_date",
-        header: "Bill date",
+        header: translate('bills.table_headers.bill_date'),
         accessorFn: (row) => (row.bill_date ? new Date(row.bill_date) : null),
         sortingFn: sortingFns.datetime,
         sortDescFirst: false,
@@ -109,7 +110,7 @@ const BillList = () => {
       },
       {
         accessorKey: "due_date",
-        header: "Due date",
+        header: translate('bills.table_headers.due_date'),
         accessorFn: (row) => (row.due_date ? new Date(row.due_date) : null),
         sortingFn: sortingFns.datetime,
         sortDescFirst: false,
@@ -123,7 +124,7 @@ const BillList = () => {
       },
       {
         accessorKey: "po_number",
-        header: "PO",
+        header: translate('bills.table_headers.po'),
         accessorFn: (row) => row.purchase_order?.po_number || "",
         sortingFn: "alphanumeric",
         sortDescFirst: false,
@@ -147,7 +148,7 @@ const BillList = () => {
       },
       {
         accessorKey: "vendor",
-        header: "Vendor",
+        header: translate('bills.table_headers.vendor'),
         accessorFn: (row) => row.vendor?.name || "",
         sortingFn: "alphanumeric",
         sortDescFirst: false,
@@ -169,7 +170,7 @@ const BillList = () => {
       },
       {
         accessorKey: "total",
-        header: "Total amount",
+        header: translate('bills.table_headers.total_amount'),
         accessorFn: (row) => Number(row.total) || 0,
         sortingFn: "basic",
         sortDescFirst: false,
@@ -186,7 +187,7 @@ const BillList = () => {
       },
       {
         accessorKey: "status",
-        header: "Stages",
+        header: translate('bills.table_headers.stages'),
         sortDescFirst: false,
         cell: ({ getValue }) => {
           const value = getValue() as string;
@@ -208,7 +209,7 @@ const BillList = () => {
       },
       {
         accessorKey: "match_status",
-        header: "Status",
+        header: translate('bills.table_headers.status'),
         sortDescFirst: false,
         cell: ({ row, getValue }) => {
           const value = getValue() as string;
@@ -236,7 +237,7 @@ const BillList = () => {
         },
       },
     ],
-    [collator, orgDetails?.date_format, router],
+    [collator, orgDetails?.date_format, router, translate],
   );
 
   // Effect to process and set bill data when API data changes
@@ -304,9 +305,9 @@ const BillList = () => {
     <>
       <DataTable
         onActionBtClick={handleRedirect}
-        addBtnText="Create bill"
-        uploadBtnText="Upload bills"
-        tableHeading="Bills"
+        addBtnText={translate('bills.buttons.create_bill')}
+        uploadBtnText={translate('bills.buttons.upload_bills')}
+        tableHeading={translate('bills.heading')}
         tableData={filteredBills}
         columns={columns}
         tabNames={tabOptionsBill}

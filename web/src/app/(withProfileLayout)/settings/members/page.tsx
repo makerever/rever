@@ -30,11 +30,14 @@ import {
 import { ColumnDef } from "@tanstack/react-table";
 import { EllipsisVertical, Pencil, Trash } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslate } from "@rever/i18n";
 
 const MembersList = () => {
   const user = useUserStore((state) => state.user);
   const updateUser = useUserStore.getState().setUser;
   const [openRowId, setOpenRowId] = useState<string | null>(null);
+  
+  const translate = useTranslate();
 
   const columns: ColumnDef<MemberDataAPIType>[] = useMemo(
     () => [
@@ -63,7 +66,7 @@ const MembersList = () => {
       },
       {
         accessorKey: "last_name",
-        header: "Last name",
+        header: translate('profile.last_name'),
         cell: ({ getValue }) => (
           <div className="flex items-center gap-4">
             <span className="overflow-hidden text-ellipsis">
@@ -74,7 +77,7 @@ const MembersList = () => {
       },
       {
         accessorKey: "email",
-        header: "Email",
+        header: translate('profile.email'),
         cell: ({ getValue }) => (
           <div className="flex items-center gap-4">
             <span className="overflow-hidden text-ellipsis">
@@ -85,7 +88,7 @@ const MembersList = () => {
       },
       {
         accessorKey: "status",
-        header: "Role",
+        header: translate('profile.role'),
         cell: ({ getValue }) => (
           <div className="flex items-center gap-4">
             <span className="overflow-hidden text-ellipsis">
@@ -144,7 +147,7 @@ const MembersList = () => {
           ) : null,
       },
     ],
-    [openRowId, user?.id, user?.role],
+    [openRowId, user?.id, user?.role, translate],
   );
 
   const invitedMemberColumns: ColumnDef<InvitedMemberDataAPIType>[] = useMemo(
@@ -185,7 +188,7 @@ const MembersList = () => {
       },
       {
         accessorKey: "organization",
-        header: "Organization name",
+        header: translate('general.org_name'),
         cell: ({ getValue }) => (
           <div className="flex items-center gap-4">
             <span className="overflow-hidden text-ellipsis">
@@ -197,7 +200,7 @@ const MembersList = () => {
 
       {
         accessorKey: "status",
-        header: "Role",
+        header: translate('profile.role'),
         cell: ({ getValue }) => {
           const value = getValue() as string;
 
@@ -214,7 +217,7 @@ const MembersList = () => {
       },
       {
         accessorKey: "invite_status",
-        header: "Status",
+        header: translate('bills.filter.status'),
         sortDescFirst: false,
         cell: ({ getValue }) => {
           const value = getValue() as string;
@@ -231,7 +234,7 @@ const MembersList = () => {
         },
       },
     ],
-    [],
+    [translate],
   );
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -379,7 +382,7 @@ const MembersList = () => {
             addBtnText={
               hasPermission("members", "create") ? "Invite members" : ""
             }
-            tableHeading="Members"
+            tableHeading={translate('global_search.members')}
             tableData={filteredMembers}
             columns={columns}
             tabNames={memberTabOptions}
@@ -398,7 +401,7 @@ const MembersList = () => {
             addBtnText={
               hasPermission("members", "create") ? "Invite members" : ""
             }
-            tableHeading="Members"
+            tableHeading={translate('global_search.members')}
             tableData={filteredInvitedMembers}
             columns={invitedMemberColumns}
             tabNames={memberTabOptions}

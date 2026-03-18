@@ -15,10 +15,12 @@ import { formatDate, getLabelForBillStatus } from "@rever/utils";
 import { ColumnDef, sortingFns } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslate } from "@rever/i18n";
 
 const RequestReceiptList = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const translate = useTranslate();
 
   const [activeTab, setActiveTab] = useState<string | undefined>("Open");
   const [search, setSearch] = useState("");
@@ -104,7 +106,7 @@ const RequestReceiptList = () => {
       },
       {
         accessorKey: "bill_date",
-        header: "Bill date",
+        header: translate('bills.table_headers.bill_date'),
         accessorFn: (row) => (row.bill_date ? new Date(row.bill_date) : null),
         sortingFn: sortingFns.datetime,
         sortDescFirst: false,
@@ -151,7 +153,7 @@ const RequestReceiptList = () => {
 
       {
         accessorKey: "vendor",
-        header: "Vendor",
+        header: translate('bills.table_headers.vendor'),
         accessorFn: (row) => row?.vendor_name || "",
         sortingFn: "alphanumeric",
         sortDescFirst: false,
@@ -167,7 +169,7 @@ const RequestReceiptList = () => {
           ),
       },
     ],
-    [collator, orgDetails?.date_format, router],
+    [collator, orgDetails?.date_format, router, translate],
   );
 
   // Effect to structure and set request confirmation list data when API data changes

@@ -1,0 +1,561 @@
+{
+  "welcome": "Welkom bij Rever binnen welcome",
+  "placeholders": {
+    "search": "Zoeken",
+    "email_input": "naam@bedrijf.com",
+    "first_name": "Voornaam invoeren",
+    "last_name": "Achternaam invoeren",
+    "organization": "Organisatienaam invoeren",
+    "password": "Wachtwoord invoeren",
+    "confirm_password": "Bevestig wachtwoord",
+    "select_base_currency": "Selecteer basisvaluta",
+    "select_date_format": "Selecteer datumnotatie",
+    "enter_email": "E-mail invoeren",
+    "business_type": "Selecteer bedrijfstype",
+    "select_industry": "Selecteer branche",
+    "select_country": "Selecteer land",
+    "select_state": "Selecteer provincie/staat",
+    "select_city": "Selecteer stad",
+    "enter_zipcode": "Postcode invoeren",
+    "select_language": "Selecteer taal",
+    "search_total_bills": "Zoek totale facturen",
+    "global_search": "Zoek alles",
+    "search_bill": "Zoek facturen",
+    "bill": {
+      "enter_bill": "Factuurnummer invoeren",
+      "select_vendor": "Selecteer leverancier",
+      "select_po": "Selecteer inkooporder",
+      "select_pt": "Selecteer betalingsvoorwaarden",
+      "select_bill_date": "Selecteer factuurdatum",
+      "select_due_date": "Selecteer vervaldatum",
+      "select_coa": "Selecteer rekeningschema"
+    }
+  },
+  "buttons": {
+    "continue": "Doorgaan",
+    "register": "Registreren",
+    "back": "Terug",
+    "save": "Opslaan",
+    "save_draft": "Opslaan als concept",
+    "cancel": "Annuleren"
+  },
+  "sidebar": {
+    "home": "Home",
+    "expenses": {
+      "expenses": "Uitgaven",
+      "bills": "Facturen",
+      "purchase_order": "Inkooporders",
+      "vendors": "Leveranciers",
+      "approvals": "Goedkeuringen",
+      "coa": "Rekeningschema",
+      "confirmations": "Bevestigingen"
+    },
+    "inbox": "Inbox",
+    "settings": {
+      "settings": "Instellingen",
+      "general": "Algemeen",
+      "controls": "Controles",
+      "members": "Leden",
+      "approvals": "Goedkeuringen",
+      "integrations": "Integraties",
+      "subscription": "Abonnement",
+      "usage": "Gebruik"
+    }
+  },
+  "profile_sidebar": {
+    "profile": "Profiel",
+    "security": "Beveiliging",
+    "notification": "Melding",
+    "appereance": "Uiterlijk",
+    "back_home": "Terug naar home",
+    "back_confirmations": "Terug naar bevestigingen",
+    "logout": "Uitloggen"
+  },
+  "global_search": {
+    "vendors": "Leveranciers",
+    "po": "PO's",
+    "bills": "Facturen",
+    "members": "Leden",
+    "create_po": "PO aanmaken",
+    "create_bill": "Factuur aanmaken",
+    "inbox": "Inbox",
+    "profile": "Profiel",
+    "change_password": "Wachtwoord wijzigen"
+  },
+  "subscription": {
+    "plan": {
+      "documents_left": "documenten over"
+    }
+  },
+  "dropdown": {
+    "overview_options": {
+      "this_month": "Deze maand",
+      "last_3_months": "Laatste 3 maanden",
+      "last_6_months": "Laatste 6 maanden",
+      "last_12_months": "Laatste 12 maanden"
+    },
+    "dashboard_options": {
+      "overview": "Overzicht",
+      "2way_match": "2-weg match",
+      "3way_match": "3-weg match"
+    }
+  },
+  "general": {
+    "first_heading": "Algemene instellingen",
+    "org_name": "Organisatienaam",
+    "base_currency": "Basisvaluta",
+    "date_format": "Datumnotatie",
+    "email": "E-mail",
+    "phone_number": "Telefoonnummer",
+    "business_type": "Bedrijfstype",
+    "industry": "Branche",
+    "second_heading": "Bedrijfsadres",
+    "country": "Land",
+    "state": "Staat/Provincie",
+    "city": "Stad",
+    "zipcode": "Postcode"
+  },
+  "profile": {
+    "heading": "Profiel",
+    "profile_settings": "Profielinstellingen",
+    "first_name": "Voornaam",
+    "last_name": "Achternaam",
+    "email": "E-mail",
+    "timezone": "Tijdzone",
+    "role": "Rol",
+    "language": "Taal"
+  },
+  "home": {
+    "page_name": "Home",
+    "reset_filters": "Filters resetten",
+    "cards": {
+      "overview": {
+        "total": "Totaal",
+        "under_review": "In beoordeling",
+        "under_approval": "In goedkeuring",
+        "approved": "Goedgekeurd",
+        "ledger_entry": "Grootboekboeking",
+        "rejected": "Afgewezen"
+      },
+      "2_way": {
+        "total_bills": {
+          "heading": "Totaal facturen",
+          "tooltip": "Gegevens exclusief conceptfacturen"
+        },
+        "bills_with_po": {
+          "heading": "Facturen met PO",
+          "tooltip": "Facturen gekoppeld aan een PO"
+        },
+        "bills_without_po": {
+          "heading": "Facturen zonder PO",
+          "tooltip": "Facturen zonder PO"
+        },
+        "duplicate_bills": {
+          "heading": "Dubbele facturen",
+          "tooltip": "Facturen gemarkeerd als duplicaten"
+        }
+      }
+    },
+    "bill_match_status": {
+      "heading": "Factuur match status",
+      "tooltip": {
+        "body": "Hoe facturen overeenkomen met de PO:",
+        "exact_match": {
+          "heading": "Exacte match",
+          "body": "Factuur komt perfect overeen met PO."
+        },
+        "partial_match": {
+          "heading": "Gedeeltelijke match",
+          "body": "Sommige details wijken af."
+        },
+        "mismatch": {
+          "heading": "Mismatch",
+          "body": "Er zijn aanzienlijke verschillen."
+        }
+      }
+    },
+    "match_status_trend": {
+      "heading": "Match status trend",
+      "exact_match": "Exacte match",
+      "partial_match": "Gedeeltelijke match",
+      "mismatch": "Mismatch",
+      "tooltip": "Historisch overzicht van uw factuurmatching om trends te volgen"
+    },
+    "bills_by_stage": {
+      "heading": "Facturen per fase",
+      "tooltip": "Facturen gesorteerd op hun huidige fase in de goedkeuringsworkflow"
+    },
+    "analytics": "Analyse",
+    "insights": "Inzichten",
+    "Total bills": "Totaal facturen",
+    "Bills with PO": "Facturen met PO",
+    "Bills without PO": "Facturen zonder PO",
+    "Duplicate bills": "Dubbele facturen"
+  },
+  "data_table": {
+    "empty": "Deze sectie is momenteel leeg.",
+    "message": "Verken gerust andere secties in de tussentijd.",
+    "pagination": {
+      "items_per_page": "Items per pagina",
+      "page": "Pagina",
+      "of": "van",
+      "selected": "Geselecteerd"
+    }
+  },
+  "bills": {
+    "heading": "Facturen",
+    "forward_bill": "Stuur uw facturen door om automatisch uitgaven aan te maken op:",
+    "stage": {
+      "overview": "Overzicht",
+      "under_review": "In beoordeling",
+      "under_approval": "In goedkeuring",
+      "approved": "Goedgekeurd",
+      "ledger_entry": "Grootboekboeking",
+      "rejected": "Afgewezen"
+    },
+    "filter": {
+      "status": "Status"
+    },
+    "buttons": {
+      "create_bill": "Factuur aanmaken",
+      "upload_bills": "Facturen uploaden"
+    },
+    "table_headers": {
+      "bill": "Factuur",
+      "bill_date": "Factuurdatum",
+      "due_date": "Vervaldatum",
+      "po": "PO",
+      "vendor": "Leverancier",
+      "total_amount": "Totaalbedrag",
+      "stages": "Fases",
+      "status": "Status"
+    }
+  },
+  "create_bill": {
+    "heading": "Factuurdetails",
+    "bill_name": "Factuurnummer",
+    "vendor": "Leverancier",
+    "purchase_order": "Inkooporder",
+    "payment_terms": "Betalingsvoorwaarden",
+    "bill_date": "Factuurdatum",
+    "due_date": "Vervaldatum",
+    "bill_line_items": {
+      "heading": "Factuurregels",
+      "description": "Omschrijving",
+      "coa": "Rekeningschema",
+      "product_code": "Productcode",
+      "qty": "Aant.",
+      "unit_price": "Eenheidsprijs",
+      "amount": "Bedrag",
+      "action": "Actie"
+    },
+    "new_item": "Nieuw factuuritem",
+    "sub_total": "Subtotaal",
+    "total_tax": "Totaal belasting",
+    "total": "Totaal",
+    "notes": "Notities",
+    "enter_notes": "Notities invoeren",
+    "extract_pdf": "PDF extraheren"
+  },
+  "purchase_order": {
+    "heading": "Inkooporders",
+    "po_details": "PO details",
+    "associate_bills": "Facturen koppelen",
+    "buttons": {
+      "upload_po": "PO's uploaden",
+      "create_po": "Inkooporder aanmaken"
+    },
+    "stagebar": {
+      "all_vendor_credits": "Alle leverancierskredieten",
+      "under_review": "In beoordeling",
+      "under_approval": "In goedkeuring",
+      "approved": "Goedgekeurd",
+      "rejected": "Afgewezen",
+      "draft": "Concept"
+    },
+    "search": "Zoek inkooporders",
+    "export": "Gegevens exporteren",
+    "table_headers": {
+      "po": "PO",
+      "po_date": "PO datum",
+      "delivery_date": "Leverdatum",
+      "vendor": "Leverancier",
+      "total_amount": "Totaalbedrag",
+      "status": "Fases"
+    },
+    "create_po": {
+      "heading": "Nieuwe PO",
+      "po_number": "PO nummer",
+      "vendor": "Leverancier",
+      "payment_terms": "Betalingsvoorwaarden",
+      "po_date": "PO datum",
+      "delivery_date": "Leverdatum",
+      "po_line_items": {
+        "heading": "PO regels",
+        "description": "Omschrijving",
+        "coa": "Rekeningschema",
+        "qty": "Aant.",
+        "unit_price": "Eenheidsprijs",
+        "amount": "Bedrag",
+        "action": "Actie"
+      },
+      "new_item": "Nieuw PO item",
+      "sub_total": "Subtotaal",
+      "total_tax": "Totaal belasting",
+      "total": "Totaal",
+      "grand_total": "Eindtotaal",
+      "notes": "Notities",
+      "enter_notes": "Notities invoeren"
+    },
+    "po_preview": "PO voorbeeld",
+    "consumed": "Verbruikt",
+    "available": "Beschikbaar",
+    "view_po": {
+      "no_pos": "Geen items om weer te geven.",
+      "grand_total": "Eindtotaal",
+      "total_tax": "Totaal belasting",
+      "sub_total": "Subtotaal"
+    },
+    "rejection_reason": "Reden van afwijzing",
+    "notes": "Notities:"
+  },
+  "vendors": {
+    "heading": "Leveranciers",
+    "status": {
+      "Heading": "Status",
+      "active": "Actief",
+      "inactive": "Inactief"
+    },
+    "buttons": {
+      "create_vendor": "Leverancier aanmaken"
+    },
+    "table_headers": {
+      "vendor": "Leverancier",
+      "company_name": "Bedrijfsnaam",
+      "email": "E-mail",
+      "tax_id": "Btw-ID",
+      "status": "Status"
+    },
+    "rows_per_page": "Rijen per pagina",
+    "view_vendors": {
+      "no_vendors": "Geen leveranciers gevonden",
+      "search_vendors": "Zoek leveranciers"
+    },
+    "create_vendor": {
+      "heading": "Nieuwe leverancier",
+      "vendor_details": {
+        "heading": "Leverancierdetails",
+        "vendor_name": "Naam leverancier",
+        "company_name": "Bedrijfsnaam",
+        "email": "E-mail",
+        "mobile": "Mobiel",
+        "tax_id": "Btw-ID",
+        "website": "Website",
+        "payment_terms": "Betalingsvoorwaarden",
+        "contact": "Contact"
+      },
+      "vendor_address": {
+        "heading": "Adres leverancier",
+        "address_line_1": "Adresregel 1",
+        "address_line_2": "Adresregel 2",
+        "country": "Land",
+        "state": "Provincie",
+        "city": "Stad",
+        "zipcode": "Postcode"
+      },
+      "bank_account_details": {
+        "heading": "Bankrekeninggegevens",
+        "account_holder_name": "Naam rekeninghouder",
+        "bank_name": "Banknaam",
+        "account_number": "Rekeningnummer"
+      }
+    },
+    "vendor_credit": {
+      "heading": "Leverancierskrediet",
+      "buttons": {
+        "create_vendor_credit": "Leverancierskrediet aanmaken",
+        "upload_vendor_credit": "Leverancierskrediet uploaden"
+      },
+      "stagebar": {
+        "all_vendor_credits": "Alle leverancierskredieten",
+        "under_review": "In beoordeling",
+        "under_approval": "In goedkeuring",
+        "approved": "Goedgekeurd",
+        "rejected": "Afgewezen",
+        "draft": "Concept"
+      },
+      "search": "Zoek leverancierskredieten",
+      "export": "Gegevens exporteren",
+      "table_headers": {
+        "vendor_credit": "Leverancierskrediet",
+        "vendor_credit_date": "Datum krediet",
+        "vendor": "Leverancier",
+        "total_amount": "Totaalbedrag",
+        "stages": "Status"
+      },
+      "rows_per_page": "Rijen per pagina",
+      "upload_vendor_credit": {
+        "heading": "Bestanden uploaden",
+        "subheading": "Selecteer bestanden om te uploaden",
+        "input_label": "Klik of sleep bestanden hierheen",
+        "input_helper_text": "Upload tot 50 bestanden, elk max. 5 MB"
+      },
+      "create_vendor_credit": {
+        "heading": "Nieuw leverancierskrediet",
+        "buttons": {
+          "extract_vendor_credit": "Leverancier extraheren",
+          "cancel": "Annuleren",
+          "save": {
+            "heading": "Opslaan",
+            "save": "Opslaan",
+            "save_as_draft": "Opslaan als concept"
+          }
+        },
+        "vendor_credit_details": {
+          "heading": "Details krediet",
+          "vendor_credit_number": "Kredietnummer",
+          "vendor": "Leverancier",
+          "vendor_credit_date": "Datum krediet"
+        },
+        "vendor_credit_line_items": {
+          "heading": "Kredietregels",
+          "description": "Omschrijving",
+          "qty": "Aant.",
+          "unit_price": "Eenheidsprijs",
+          "amount": "Bedrag",
+          "action": "Actie"
+        },
+        "new_item": "Nieuw kredietitem",
+        "sub_total": "Subtotaal",
+        "total_tax": "Totaal belasting",
+        "grand_total": "Eindtotaal",
+        "total": "Totaal",
+        "notes": "Notities",
+        "enter_notes": "Notities invoeren"
+      }
+    },
+    "inbox": {
+      "heading": "Inbox"
+    }
+  },
+  "payment_terms_options": {
+    "net15": "Netto 15 dagen",
+    "net30": "Netto 30 dagen",
+    "net45": "Netto 45 dagen",
+    "due": "Betaalbaar bij ontvangst"
+  },
+  "member_role_options": {
+    "admin": "Admin",
+    "finance_manager": "Financieel manager",
+    "accountant": "Accountant",
+    "viewer": "Lezer",
+    "lite_user": "Lite gebruiker"
+  },
+  "overview_options": {
+    "this_month": "Deze maand",
+    "last_3_months": "Laatste 3 maanden",
+    "last_6_months": "Laatste 6 maanden",
+    "last_12_months": "Laatste 12 maanden"
+  },
+  "bank_account_types": {
+    "savings": "Spaarrekening",
+    "current": "Betaalrekening",
+    "checking": "Rekening-courant",
+    "personal": "Persoonlijk"
+  },
+  "business_types": {
+    "private_limited": "B.V.",
+    "public_limited": "N.V.",
+    "partnership": "VOF",
+    "proprietorship": "Eenmanszaak",
+    "llc": "LLC",
+    "other": "Overig",
+    "s_corp": "S-Corp",
+    "c_corp": "C-Corp",
+    "non_profit": "Non-profit",
+    "government_agency": "Overheidsinstelling"
+  },
+  "matching_options": {
+    "none": "Geen",
+    "no_match_description": "Facturen worden verwerkt zonder vergelijking met PO's.",
+    "two_way": "2-weg match",
+    "three_way": "3-weg match",
+    "two_way_description": "Controleer of factuur overeenkomt met PO voor prijs en aantal.",
+    "three_way_description": "Controleer of goederen besteld én ontvangen zijn voor de factuur betaald wordt."
+  },
+  "confirmations": {
+    "request_confirmation": "Bevestiging aanvragen",
+    "view_confirmations": "Bekijk bevestigingen",
+    "title": "Bevestig",
+    "delete": "Verwijderen"
+  },
+  "search": {
+    "search_filters": "Zoekfilters"
+  },
+  "help_support": {
+    "documentation": "Documentatie",
+    "email_us": "E-mail ons"
+  },
+  "confirm_deletion": {
+    "confirm": "bevestig",
+    "delete": "Verwijderen"
+  },
+  "invite_member": {
+    "heading": "Lid uitnodigen",
+    "about": "Rever zorgt voor veilige, rolgebaseerde toegang om uw crediteurenproces te stroomlijnen.",
+    "roles": {
+      "member_role": "Rol lid",
+      "select_role": "Selecteer rol",
+      "admin": {
+        "heading": "Admin",
+        "admin_can": "Admin kan:",
+        "description1": "- Dashboard bekijken met inzichten over facturen.",
+        "description2": "- Leveranciers beheren en de factuurworkflow overzien.",
+        "description3": "- Goedkeuringsworkflows en instellingen beheren.",
+        "description4": "- Goedkeuringsregels configureren.",
+        "admin_cannot": "Admin kan niet:",
+        "description5": "- Factuur goedkeuren als goedkeurder, maar kan wel goedkeurder herverdelen."
+      },
+      "finance_manager": {
+        "heading": "Financieel Manager",
+        "finance_manager_can": "Financieel manager kan:",
+        "description1": "- Dashboard bekijken met factuurinzichten.",
+        "description2": "- Facturen beoordelen, goedkeuren of afwijzen.",
+        "description3": "- Leveranciers-, leden- en organisatiegegevens inzien.",
+        "finance_manager_cannot": "Financieel manager kan niet:",
+        "description4": "- Leveranciers of facturen aanmaken of wijzigen.",
+        "description5": "- Toegang tot gebruikersbeheer en organisatie-instellingen."
+      },
+      "member": {
+        "heading": "Lid",
+        "memeber_can": "Lid kan:",
+        "description1": "- Dashboard bekijken met status van facturen.",
+        "description2": "- Leveranciersprofielen aanmaken en onderhouden.",
+        "description3": "- Facturen aanmaken, wijzigen, verwijderen en indienen.",
+        "description4": "- Teamleden en organisatiedetails bekijken.",
+        "memeber_cannot": "Lid kan niet:",
+        "description5": "- Acties goedkeuren (integriteit van proces).",
+        "description6": "- Leden uitnodigen of goedkeuringsinstellingen wijzigen."
+      },
+      "lite_user": {
+        "heading": "Lite Gebruiker",
+        "select_lite_user": "Selecteer lite gebruiker",
+        "lite_user_can": "LITE gebruiker kan:",
+        "description1": "- Ontvangstbevestigingen bevestigen.",
+        "description2": "- Specifieke documenten of transacties inzien voor bevestiging.",
+        "lite_user_cannot": "LITE gebruiker kan niet:",
+        "description3": "- Facturen aanmaken, beoordelen of goedkeuren.",
+        "description4": "- Toegang tot financiële dashboards of geavanceerde rapporten.",
+        "description5": "- Leveranciers of instellingen beheren."
+      }
+    },
+    "success_message": {
+      "memeber_update_success": "Lid succesvol bijgewerkt",
+      "invitation_sent": "Uitnodigingsverzoek verzonden"
+    },
+    "error_message": {
+      "memeber_update_failed": "Rol kan niet worden gewijzigd — gebruiker heeft openstaande goedkeuringen.",
+      "invitation_failed": "Gebruiker bestaat al in uw organisatie"
+    }
+  }
+}

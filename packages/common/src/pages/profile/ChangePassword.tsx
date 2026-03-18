@@ -10,6 +10,7 @@ import {
 } from "@rever/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useTranslate } from "@rever/i18n";
 import { Label } from "@rever/common";
 import { PasswordInput } from "@rever/common";
 import { Button } from "@rever/common";

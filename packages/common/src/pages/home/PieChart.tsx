@@ -8,7 +8,8 @@ import { CustomTooltip, PageLoader, SelectComponent } from "@rever/common";
 import { useSidebarStore } from "@rever/stores";
 import { useState, useRef, useMemo, useCallback } from "react";
 import { Info } from "lucide-react";
-import { overviewOptions } from "@rever/constants";
+import { overviewOptions as overViewOptionsBase } from "@rever/constants";
+import { useTranslate } from "@rever/i18n";
 
 // Dynamically import ApexCharts to prevent SSR issues
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
@@ -57,7 +58,7 @@ const PieChart = ({
 
   // Prevent rapid multiple clicks while ApexCharts is updating
   const isUpdatingRef = useRef(false);
-
+  const translate = useTranslate();
   // This ensures legends only show for visible pie slices
   const filteredData = useMemo(() => {
     const filtered = series.reduce<{
@@ -80,7 +81,9 @@ const PieChart = ({
     );
     return filtered;
   }, [series, labels, colors]);
-
+  const overviewOptions = overViewOptionsBase.map((option)=>{
+      return{...option, label:translate('overview_options.' + option.value)}
+    })
   const {
     series: filteredSeries,
     labels: filteredLabels,

@@ -32,6 +32,7 @@ import { getAssociateBillsByVendorIDApi } from "@rever/services";
 import { ColumnDef, sortingFns } from "@tanstack/react-table";
 import { useUserStore } from "@rever/stores";
 import { useRouter } from "next/navigation";
+import { useTranslate } from "@rever/i18n";
 
 const ViewVendorDetails = ({
   vendorData,
@@ -40,7 +41,7 @@ const ViewVendorDetails = ({
   // setSidePanel,
 }: ViewVendorDetailsProps) => {
   const router = useRouter();
-
+  const translate = useTranslate();
   const [vendorRecord, setVendorRecord] = useState<
     VenderDataAPIType | undefined
   >(vendorData);
@@ -148,7 +149,7 @@ const ViewVendorDetails = ({
       },
       {
         accessorKey: "bill_date",
-        header: "Bill date",
+        header: translate('bills.table_headers.bill_date'),
         accessorFn: (row) => (row.bill_date ? new Date(row.bill_date) : null),
         sortingFn: sortingFns.datetime,
         sortDescFirst: false,
@@ -162,7 +163,7 @@ const ViewVendorDetails = ({
       },
       {
         accessorKey: "due_date",
-        header: "Due date",
+        header: translate('bills.table_headers.due_date'),
         accessorFn: (row) => (row.due_date ? new Date(row.due_date) : null),
         sortingFn: sortingFns.datetime,
         sortDescFirst: false,
@@ -176,7 +177,7 @@ const ViewVendorDetails = ({
       },
       {
         accessorKey: "po",
-        header: "PO",
+        header: translate('bills.table_headers.po'),
         accessorFn: (row) => row.purchase_order?.po_number || "",
         sortingFn: "alphanumeric",
         sortDescFirst: false,
@@ -200,7 +201,7 @@ const ViewVendorDetails = ({
       },
       {
         accessorKey: "total",
-        header: "Total amount",
+        header: translate('bills.table_headers.total_amount'),
         accessorFn: (row) => Number(row.total) || 0,
         sortingFn: "basic",
         sortDescFirst: false,
@@ -217,7 +218,7 @@ const ViewVendorDetails = ({
       },
       {
         accessorKey: "status",
-        header: "Stages",
+        header: translate('bills.table_headers.status'),
         sortDescFirst: false,
         cell: ({ row, getValue }) => {
           const value = getValue() as string;
@@ -326,12 +327,12 @@ const ViewVendorDetails = ({
             className="border border-secondary-200 rounded-[20px] bg-white p-4"
           >
             <p className="text-neutral-1100 text-xl mb-5 font-medium">
-              Vendor details
+              {translate('vendors.create_vendor.vendor_details.heading')}
             </p>
             <div className="grid grid-cols-1 gap-x-5">
               <div className="flex flex-row items-center border-b border-secondary-200 h-11">
                 <Label
-                  text="Company name:"
+                  text={translate('vendors.create_vendor.vendor_details.company_name')+ ":"}
                   className="max-w-60 w-full text-secondary-700"
                 />
                 <p className="text-neutral-1100 text-sm font-medium">
@@ -340,7 +341,7 @@ const ViewVendorDetails = ({
               </div>
               <div className="flex flex-row items-center border-b border-secondary-200 pt-3 pb-2 h-11">
                 <Label
-                  text="Email:"
+                  text={translate('vendors.create_vendor.vendor_details.email') + ":"}
                   className="max-w-60 w-full text-secondary-700"
                 />
                 <p className="text-neutral-1100 text-sm">
@@ -349,7 +350,7 @@ const ViewVendorDetails = ({
               </div>
               <div className="flex flex-row items-center border-b border-secondary-200 pt-3 pb-2 h-11">
                 <Label
-                  text="Contact:"
+                  text={translate('vendors.create_vendor.vendor_details.mobile') + ":"}
                   className="max-w-60 w-full text-secondary-700"
                 />
                 <p className="text-neutral-1100 text-sm font-medium">
@@ -359,7 +360,7 @@ const ViewVendorDetails = ({
 
               <div className="flex flex-row items-center border-b border-secondary-200 pt-3 pb-2 h-11">
                 <Label
-                  text="Tax ID:"
+                  text={translate('vendors.create_vendor.vendor_details.tax_id') + ":"}
                   className="max-w-60 w-full text-secondary-700"
                 />
                 <p className="text-neutral-1100 text-sm font-medium">
@@ -368,7 +369,7 @@ const ViewVendorDetails = ({
               </div>
               <div className="flex flex-row items-center border-b border-secondary-200 pt-3 pb-2 h-11">
                 <Label
-                  text="Website:"
+                  text={translate('vendors.create_vendor.vendor_details.contact') + ":"}
                   className="max-w-60 w-full text-secondary-700"
                 />
                 <p className="text-neutral-1100 text-sm font-medium">
@@ -377,7 +378,7 @@ const ViewVendorDetails = ({
               </div>
               <div className="flex flex-row items-center border-b border-secondary-200 pt-3 pb-2 h-11">
                 <Label
-                  text="Vendor address:"
+                  text={translate('vendors.create_vendor.vendor_address.heading') + ":"}
                   className="max-w-60 w-full text-secondary-700"
                 />
                 <p className="text-neutral-1100 text-sm font-medium">
@@ -399,7 +400,7 @@ const ViewVendorDetails = ({
               </div>
               <div className="flex flex-row items-center pt-3 h-11">
                 <Label
-                  text="Payment terms:"
+                  text={translate('vendors.create_vendor.vendor_details.payment_terms') + ":"}
                   className="max-w-60 w-full text-secondary-700"
                 />
                 <p className="text-neutral-1100 text-sm font-medium">
@@ -416,12 +417,12 @@ const ViewVendorDetails = ({
             }}
           >
             <p className="text-neutral-1100 text-xl mb-5 font-medium">
-              Bank account details
+              {translate('vendors.create_vendor.bank_account_details.heading')}
             </p>
             <div className="grid grid-cols-1 gap-x-5">
               <div className="flex flex-row items-center border-b border-secondary-200 h-11">
                 <Label
-                  text="Account holder name"
+                  text={translate('vendors.create_vendor.bank_account_details.account_holder_name') + ":"}
                   className="max-w-60 w-full text-secondary-700"
                 />
                 <p className="text-neutral-1100 text-sm">
@@ -430,7 +431,7 @@ const ViewVendorDetails = ({
               </div>
               <div className="flex flex-row items-center border-b border-secondary-200 pt-3 pb-2 h-11">
                 <Label
-                  text="Account number"
+                  text={translate('vendors.create_vendor.bank_account_details.account_number') + ":"}
                   className="max-w-60 w-full text-secondary-700"
                 />
                 <p className="text-neutral-1100 text-sm">
@@ -439,7 +440,7 @@ const ViewVendorDetails = ({
               </div>
               <div className="flex flex-row items-center pt-3 pb-2">
                 <Label
-                  text="Bank name"
+                  text={translate('vendors.create_vendor.bank_account_details.bank_name') + ":"}
                   className="max-w-60 w-full text-secondary-700"
                 />
                 <p className="text-neutral-1100 text-sm">

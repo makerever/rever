@@ -7,11 +7,12 @@ import { useUserStore } from "@rever/stores";
 import { SidebarProps } from "@rever/types";
 import { useLoader } from "@rever/common";
 import { getFirstLetter, getLabelForRoles } from "@rever/utils";
-
+import { useTranslate } from "@rever/i18n";
 const UserProfile = ({ isSidebarCollapsed, handlClick }: SidebarProps) => {
   const logoutUser = useUserStore((state) => state.logout);
   const user = useUserStore((state) => state.user);
   const { setShow } = useLoader();
+  const translate = useTranslate();
 
   const logOut = () => {
     setShow(true);
@@ -58,7 +59,7 @@ const UserProfile = ({ isSidebarCollapsed, handlClick }: SidebarProps) => {
             handlClick && handlClick("/profile");
           }}
         >
-          <p>Profile</p>
+          <p>{translate('profile_sidebar.profile')}</p>
         </div>
         <div
           className="menu-item menu-item-sidebar"
@@ -66,7 +67,7 @@ const UserProfile = ({ isSidebarCollapsed, handlClick }: SidebarProps) => {
             handlClick && handlClick("/settings/general");
           }}
         >
-          <p className="">Settings</p>
+          <p className="">{translate('sidebar.settings.settings')}</p>
         </div>
         {/* Stop showing subscription, members and documents fields for lite user */}
         {user?.role !== "lite_user" ? (
@@ -78,14 +79,14 @@ const UserProfile = ({ isSidebarCollapsed, handlClick }: SidebarProps) => {
                 handlClick && handlClick("/settings/members");
               }}
             >
-              <p className="">Members</p>
+              <p className="">{translate('sidebar.settings.members')}</p>
             </div>
           </>
         ) : null}
       </div>
       <div className="px-1.5 pt-2">
         <div onClick={logOut} className="menu-item menu-item-sidebar-danger">
-          <p className="">Logout</p>
+          <p className="">{translate('profile_sidebar.logout')}</p>
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@rever/common";
 import { PlusCircle, Search, X } from "lucide-react";
 import { CheckBox } from "@rever/common";
 import { getStatusClass } from "@rever/utils";
+import { useTranslate } from "@rever/i18n";
 
 export interface StatusFilterProps<T extends { status: string }> {
   data: T[];
@@ -22,7 +23,7 @@ export function StatusFilter<T extends { status: string }>({
   filterHeading = "Status",
 }: StatusFilterProps<T>) {
   const [search, setSearch] = React.useState("");
-
+  const translate = useTranslate();
   // Compute counts for each status
   const counts = React.useMemo(() => {
     const c: Record<string, number> = {};
@@ -93,7 +94,7 @@ export function StatusFilter<T extends { status: string }>({
           />
           <input
             type="text"
-            placeholder="Search filters"
+            placeholder={translate('search.search_filters')}
             onChange={(e) => setSearch(e.target.value)}
             className="px-7 disabled:bg-gray-100 rounded-md font-light h-8 border text-2xs w-full focus:outline-none text-slate-800"
           />

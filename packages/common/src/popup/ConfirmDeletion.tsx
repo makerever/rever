@@ -3,19 +3,22 @@
 import { ConfirmationPopupProps } from "@rever/types";
 import { Loader, X } from "lucide-react";
 import Button from "../components/Button";
+import { useTranslate } from "@rever/i18n";
+
 
 // ConfirmationPopup component displays a modal for confirming deletion or other actions
 const ConfirmationPopup: React.FC<ConfirmationPopupProps> = ({
-  title = "Confirm",
+  title = "confirmations.title",
   isOpen,
   onClose,
   onConfirm,
   message,
   saveButton,
-  buttonText = "Delete",
+  buttonText = "confirmations.delete",
   isConfirmLoading,
 }) => {
   // If popup is not open, render nothing
+  const translate = useTranslate();
   if (!isOpen) return null;
 
   return (
@@ -23,7 +26,7 @@ const ConfirmationPopup: React.FC<ConfirmationPopupProps> = ({
       <div className="rounded-lg bg-white dark:bg-gray-600 w-96">
         <div className="p-4 border-b flex justify-between items-center">
           <h2 className="text-xl text-neutral-1100 font-semibold overflow-hidden text-ellipsis mr-5 whitespace-pre">
-            {title}
+            {translate(title)}
           </h2>
           <button
             onClick={onClose}
@@ -65,7 +68,7 @@ const ConfirmationPopup: React.FC<ConfirmationPopupProps> = ({
             )}
           </button> */}
           <Button
-            name={buttonText}
+            name={translate(buttonText)}
             onClick={onConfirm}
             disabled={isConfirmLoading}
             button_type={saveButton ? "primary" : "danger"}

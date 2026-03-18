@@ -14,6 +14,7 @@ import { poLineItemsTableProps } from "@rever/types";
 import { useEffect, useMemo, useState } from "react";
 import { formatNumber, isNamedObject } from "@rever/utils";
 import { useUserStore } from "@rever/stores";
+import { useTranslate } from "@rever/i18n";
 
 const poItemHeaders = [
   "Description",
@@ -22,6 +23,7 @@ const poItemHeaders = [
   "Amount",
   "Action",
 ];
+const translate = useTranslate();
 
 export default function POLineItemsTable({
   control,

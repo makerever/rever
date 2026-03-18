@@ -13,10 +13,11 @@ import { getLabelForBillStatus, getStatusClass, hasPermission } from "@rever/uti
 import { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import useTranslate from "@rever/i18n/src/hooks/useTranslate";
 
 const VendorList = () => {
   const router = useRouter();
-
+  const translate = useTranslate();
   const [vendorList, setVendorList] = useState<VendorTableList[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -41,7 +42,7 @@ const VendorList = () => {
           companyName: item.company_name || "--",
           email: item.email || "--",
           taxId: item.tax_id || "--",
-          status: item.is_active ? "Active" : "Inactive",
+          status: item.is_active ? translate('vendors.heading.active') : translate('vendors.heading.inactive'),
           website: item?.website,
           mobile: item.mobile || "--",
           accountNumber: item.account_number || "",
@@ -59,7 +60,7 @@ const VendorList = () => {
       setVendorList(structuredData);
       setIsLoading(false);
     }
-  }, [vendors]);
+  }, [vendors, translate]);
 
   const [search, setSearch] = useState<string>("");
 
@@ -98,7 +99,7 @@ const VendorList = () => {
       },
       {
         accessorKey: "companyName",
-        header: "Company name",
+        header: translate('vendors.table_headers.company_name'),
         cell: ({ getValue }) => {
           return (
             <div className="flex items-center gap-4">
@@ -111,7 +112,7 @@ const VendorList = () => {
       },
       {
         accessorKey: "email",
-        header: "Email",
+        header: translate('vendors.table_headers.email'),
         cell: ({ getValue }) => {
           return (
             <div className="flex items-center gap-4">
@@ -124,7 +125,7 @@ const VendorList = () => {
       },
       {
         accessorKey: "taxId",
-        header: "Tax ID",
+        header: translate('vendors.table_headers.tax_id'),
         cell: ({ getValue }) => {
           return (
             <div className="flex items-center gap-4">
@@ -137,7 +138,7 @@ const VendorList = () => {
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: translate('vendors.table_headers.status'),
         cell: ({ getValue }) => {
           const value = getValue() as string;
           const isActive = value.toLowerCase();
@@ -158,7 +159,7 @@ const VendorList = () => {
         },
       },
     ],
-    [router],
+    [router, translate],
   );
 
   // Redirect to add vendor page
@@ -190,7 +191,7 @@ const VendorList = () => {
         <DataTable
           onActionBtClick={handleRedirect}
           addBtnText={hasPermission("vendor", "create") ? "Create vendor" : ""}
-          tableHeading="Vendors"
+          tableHeading={translate('vendors.heading')}
           tableData={filteredVendors}
           columns={columns}
           setSearch={setSearch}

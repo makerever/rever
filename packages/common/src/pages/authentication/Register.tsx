@@ -11,6 +11,7 @@ import { ChevronLeft } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, registerSchemaValues } from "@rever/validations";
 import { PasswordInput } from "@rever/common";
+import { useTranslate } from "@rever/i18n";
 import { registerSteps } from "@rever/constants";
 import { useRouter } from "next/navigation";
 import { RegisterStepProps } from "@rever/types";
@@ -39,7 +40,7 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
     resolver: zodResolver(registerSchema),
     mode: "onChange",
   });
-
+  
   // Watch form fields for changes
   const first_name = watch("first_name");
   const last_name = watch("last_name");
@@ -47,9 +48,10 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
   const password = watch("password");
   const confirmPassword = watch("confirmPassword");
   const org_currency = watch("currency");
-
+  
   const router = useRouter();
-
+  const translate = useTranslate();
+  
   // Local state for UI logic
   const [isMounted, setIsMounted] = useState(false); // For SSR/CSR hydration
   const [isLoaderFormSubmit, setIsLoaderFormSubmit] = useState(false); // Loader state for form submission
@@ -177,17 +179,17 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
                 <TextInput
                   register={register("first_name")}
                   id="first_name"
-                  placeholder="Enter first name"
+                  placeholder={translate('placeholders.first_name')}
                   error={errors.first_name}
                   value={getValues("first_name")}
                 />
               </div>
               <div>
-                <Label htmlFor="last_name" text="Last name" isRequired />
+                <Label htmlFor="last_name" text={translate('profile.last_name')} isRequired />
                 <TextInput
                   register={register("last_name")}
                   id="last_name"
-                  placeholder="Enter last name"
+                  placeholder={translate('placeholders.last_name')}
                   error={errors.last_name}
                   value={getValues("last_name")}
                 />
@@ -195,11 +197,11 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
             </div>
 
             <div className="mb-5">
-              <Label htmlFor="org_name" text="Organization name" isRequired />
+              <Label htmlFor="org_name" text={translate('placeholders.organization')} isRequired />
               <TextInput
                 register={register("org_name")}
                 id="org_name"
-                placeholder="Enter organization name"
+                placeholder={translate('placeholders.organization')}
                 error={errors.org_name}
                 value={getValues("org_name")}
                 onEnterPress={() => {
@@ -213,18 +215,18 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
             <div className="mb-5">
               <Label
                 htmlFor="base_currency"
-                text="Organization currency"
+                text={translate('general.base_currency')}
                 isRequired
               />
               <SelectComponent
-                title="Currency"
+                title={translate('general.base_currency')}
                 name="currency"
                 register={register}
                 trigger={trigger}
                 error={errors?.currency}
                 getValues={getValues}
                 options={currencyOptions}
-                placeholder="Select organization currency"
+                placeholder={translate('placeholders.select_base_currency')}
               />
             </div>
           </>
@@ -234,7 +236,7 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
         {showStep === 2 && (
           <div className="grid grid-cols-1 gap-4 mb-4">
             <div>
-              <Label htmlFor="password" text="Create password" />
+              <Label htmlFor="password" text={translate('placeholders.password')} />
               <PasswordInput
                 register={register("password")}
                 id="password"
@@ -246,7 +248,7 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
               />
             </div>
             <div>
-              <Label htmlFor="confirmPassword" text="Confirm password" />
+              <Label htmlFor="confirmPassword" text={translate('placeholders.confirm_password')} />
               <PasswordInput
                 register={register("confirmPassword")}
                 id="confirmPassword"
@@ -263,7 +265,7 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
           <Button
             type="submit"
             disabled={isPasswordValid || isConfirmPasswordValid}
-            name="Let's get started"
+            name={translate('buttons.register')}
             button_type="primary"
             icon_type={isLoaderFormSubmit ? "loader" : null}
             width="w-full"
@@ -276,7 +278,7 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
           <Button
             onClick={goToNextStep}
             disabled={isProfileValid || !isOrgNameValid}
-            name="Continue"
+            name={translate('buttons.continue')}
             button_type="primary"
             width="w-full"
           />
@@ -288,7 +290,7 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
             <Button
               onClick={goToPreviousStep}
               disabled={isLoaderFormSubmit}
-              name="Go back"
+              name={translate('buttons.back')}
               button_type="secondary-outline"
               width="w-full"
             />

@@ -10,6 +10,7 @@ import { useEffect, useState, useRef } from "react";
 import {
   profileSettingSchema,
 } from "@rever/validations";
+import { useTranslate } from "@rever/i18n";
 import { useUserStore } from "@rever/stores";
 import { SelectComponent } from "@rever/common";
 import { getLoggedInUserDetails, updateProfileApi } from "@rever/services";
@@ -18,6 +19,7 @@ import { showErrorToast, showSuccessToast } from "@rever/common";
 import { PageLoader } from "@rever/common";
 
 const ProfileSettings = () => {
+  const translate = useTranslate();
   const {
     register,
     handleSubmit,
@@ -150,14 +152,14 @@ const ProfileSettings = () => {
                 <div className="border-b border-neutral-200 pb-3 flex items-center">
                   <Label
                     htmlFor="first_name"
-                    text="First name:"
+                    text={translate('profile.first_name')+":"}
                     className="text-neutral-700 font-medium text-sm max-w-60 w-full"
                   />
                   <div className="max-w-80 w-full">
                     <TextInput
                       register={register("first_name")}
                       id="first_name"
-                      placeholder="Enter first name"
+                      placeholder={translate('placeholders.first_name')}
                       error={errors.first_name}
                       value={getValues("first_name")}
                     />
@@ -166,14 +168,14 @@ const ProfileSettings = () => {
                 <div className="border-b border-neutral-200 py-3 flex items-center">
                   <Label
                     htmlFor="last_name"
-                    text="Last name:"
+                    text={translate('profile.last_name')+":"}
                     className="text-neutral-700 font-medium text-sm max-w-60 w-full"
                   />
                   <div className="max-w-80 w-full">
                     <TextInput
                       register={register("last_name")}
                       id="last_name"
-                      placeholder="Enter last name"
+                      placeholder={translate('placeholders.last_name')}
                       error={errors.last_name}
                       value={getValues("last_name")}
                     />
@@ -182,7 +184,7 @@ const ProfileSettings = () => {
                 <div className="border-b border-neutral-200 py-3 flex items-center">
                   <Label
                     htmlFor="email"
-                    text="Email:"
+                    text={translate('profile.email')+":"}
                     className="text-neutral-700 font-medium text-sm max-w-60 w-full"
                   />
                   <div className="max-w-80 w-full">
@@ -190,7 +192,7 @@ const ProfileSettings = () => {
                       register={register("email")}
                       id="email"
                       disabled
-                      placeholder="Enter email"
+                      placeholder={translate('placeholders.enter_email')}
                       error={errors.email}
                       value={getValues("email")}
                     />
@@ -200,7 +202,7 @@ const ProfileSettings = () => {
                 <div className="flex items-center pt-3">
                   <Label
                     htmlFor="timezone"
-                    text="Timezone:"
+                    text={translate('profile.timezone')+":"}
                     className="text-neutral-700 font-medium text-sm max-w-60 w-full"
                   />
                   <div className="max-w-80 w-full">

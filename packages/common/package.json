@@ -17,6 +17,7 @@
     "@radix-ui/react-slot": "^1.2.2",
     "@radix-ui/react-tooltip": "^1.2.7",
     "@rever/constants": "workspace:*",
+    "@rever/i18n": "workspace:*",
     "@rever/services": "workspace:*",
     "@rever/stores": "workspace:*",
     "@rever/types": "workspace:*",

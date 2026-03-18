@@ -39,6 +39,7 @@ import { exportToExcel, hasPermission } from "@rever/utils";
 import Image from "next/image";
 import IconWrapper from "../IconWrapper";
 import { useUserStore } from "@rever/stores";
+import { useTranslate } from "@rever/i18n";
 
 export default function DataTable<
   T extends {
@@ -82,7 +83,7 @@ export default function DataTable<
   const user = useUserStore((state) => state.user);
 
   const [data, setData] = React.useState<T[]>(() => []);
-
+  const translate = useTranslate();
   React.useEffect(() => {
     if (tableData) {
       setData(tableData);
@@ -377,7 +378,7 @@ export default function DataTable<
                         <Button
                           icon_type="download"
                           button_type="secondary"
-                          name="Export data"
+                          name={translate('vendors.vendor_credit.export')}
                           onClick={handleExport}
                           disabled={!selectedRowsData.length}
                         />
@@ -470,7 +471,7 @@ export default function DataTable<
                                 <td
                                   key={cell.id}
                                   className={`${cell.column.columnDef.header ===
-                                    "Total amount"
+                                    translate('vendors.vendor_credit.table_headers.total_amount')
                                     ? "text-right ps-3 pr-10"
                                     : "px-3"
                                     } py-2.5 border-t whitespace-nowrap max-w-40 overflow-hidden text-ellipsis`}

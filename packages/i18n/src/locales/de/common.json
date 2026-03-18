@@ -1,0 +1,561 @@
+{
+  "welcome": "Willkommen bei Rever innerhalb von welcome",
+  "placeholders": {
+    "search": "Suchen",
+    "email_input": "name@unternehmen.de",
+    "first_name": "Vorname eingeben",
+    "last_name": "Nachname eingeben",
+    "organization": "Organisationsnamen eingeben",
+    "password": "Passwort eingeben",
+    "confirm_password": "Passwort bestätigen",
+    "select_base_currency": "Basiswährung auswählen",
+    "select_date_format": "Datumsformat auswählen",
+    "enter_email": "E-Mail eingeben",
+    "business_type": "Geschäftstyp auswählen",
+    "select_industry": "Branche auswählen",
+    "select_country": "Land auswählen",
+    "select_state": "Bundesland auswählen",
+    "select_city": "Stadt auswählen",
+    "enter_zipcode": "Postleitzahl eingeben",
+    "select_language": "Sprache auswählen",
+    "search_total_bills": "Gesamtrechnungen suchen",
+    "global_search": "Alles suchen",
+    "search_bill": "Rechnungen suchen",
+    "bill": {
+      "enter_bill": "Rechnungsnummer eingeben",
+      "select_vendor": "Lieferant auswählen",
+      "select_po": "Bestellung auswählen",
+      "select_pt": "Zahlungsbedingungen auswählen",
+      "select_bill_date": "Rechnungsdatum auswählen",
+      "select_due_date": "Fälligkeitsdatum auswählen",
+      "select_coa": "Kontenplan auswählen"
+    }
+  },
+  "buttons": {
+    "continue": "Weiter",
+    "register": "Registrieren",
+    "back": "Zurück",
+    "save": "Speichern",
+    "save_draft": "Als Entwurf speichern",
+    "cancel": "Abbrechen"
+  },
+  "sidebar": {
+    "home": "Startseite",
+    "expenses": {
+      "expenses": "Ausgaben",
+      "bills": "Rechnungen",
+      "purchase_order": "Bestellungen",
+      "vendors": "Lieferanten",
+      "approvals": "Genehmigungen",
+      "coa": "Kontenplan",
+      "confirmations": "Bestätigungen"
+    },
+    "inbox": "Posteingang",
+    "settings": {
+      "settings": "Einstellungen",
+      "general": "Allgemein",
+      "controls": "Kontrollen",
+      "members": "Mitglieder",
+      "approvals": "Genehmigungen",
+      "integrations": "Integrationen",
+      "subscription": "Abonnement",
+      "usage": "Nutzung"
+    }
+  },
+  "profile_sidebar": {
+    "profile": "Profil",
+    "security": "Sicherheit",
+    "notification": "Benachrichtigung",
+    "appereance": "Erscheinungsbild",
+    "back_home": "Zurück zur Startseite",
+    "back_confirmations": "Zurück zu Bestätigungen",
+    "logout": "Abmelden"
+  },
+  "global_search": {
+    "vendors": "Lieferanten",
+    "po": "Bestellungen",
+    "bills": "Rechnungen",
+    "members": "Mitglieder",
+    "create_po": "Bestellung erstellen",
+    "create_bill": "Rechnung erstellen",
+    "inbox": "Posteingang",
+    "profile": "Profil",
+    "change_password": "Passwort ändern"
+  },
+  "subscription": {
+    "plan": {
+      "documents_left": "verbleibende Dokumente"
+    }
+  },
+  "dropdown": {
+    "overview_options": {
+      "this_month": "Diesen Monat",
+      "last_3_months": "Letzte 3 Monate",
+      "last_6_months": "Letzte 6 Monate",
+      "last_12_months": "Letzte 12 Monate"
+    },
+    "dashboard_options": {
+      "overview": "Übersicht",
+      "2way_match": "2-Wege-Abgleich",
+      "3way_match": "3-Wege-Abgleich"
+    }
+  },
+  "general": {
+    "first_heading": "Allgemeine Einstellungen",
+    "org_name": "Name der Organisation",
+    "base_currency": "Basiswährung",
+    "date_format": "Datumsformat",
+    "email": "E-Mail",
+    "phone_number": "Telefonnummer",
+    "business_type": "Geschäftstyp",
+    "industry": "Branche",
+    "second_heading": "Unternehmensadresse",
+    "country": "Land",
+    "state": "Bundesland",
+    "city": "Stadt",
+    "zipcode": "Postleitzahl"
+  },
+  "profile": {
+    "heading": "Profil",
+    "profile_settings": "Profileinstellungen",
+    "first_name": "Vorname",
+    "last_name": "Nachname",
+    "email": "E-Mail",
+    "timezone": "Zeitzone",
+    "role": "Rolle",
+    "language": "Sprache"
+  },
+  "home": {
+    "page_name": "Startseite",
+    "reset_filters": "Filter zurücksetzen",
+    "cards": {
+      "overview": {
+        "total": "Gesamt",
+        "under_review": "In Prüfung",
+        "under_approval": "In Genehmigung",
+        "approved": "Genehmigt",
+        "ledger_entry": "Hauptbucheintrag",
+        "rejected": "Abgelehnt"
+      },
+      "2_way": {
+        "total_bills": {
+          "heading": "Rechnungen gesamt",
+          "tooltip": "Daten ohne Entwürfe"
+        },
+        "bills_with_po": {
+          "heading": "Rechnungen mit Bestellung",
+          "tooltip": "Mit einer Bestellung verknüpfte Rechnungen"
+        },
+        "bills_without_po": {
+          "heading": "Rechnungen ohne Bestellung",
+          "tooltip": "Rechnungen ohne Bestellung"
+        },
+        "duplicate_bills": {
+          "heading": "Doppelte Rechnungen",
+          "tooltip": "Als Duplikate markierte Rechnungen"
+        }
+      }
+    },
+    "bill_match_status": {
+      "heading": "Rechnungsabgleich-Status",
+      "tooltip": {
+        "body": "Abgleich von Rechnung und Bestellung:",
+        "exact_match": {
+          "heading": "Genaue Übereinstimmung",
+          "body": "Rechnung stimmt perfekt mit der Bestellung überein."
+        },
+        "partial_match": {
+          "heading": "Teilweise Übereinstimmung",
+          "body": "Einige Details weichen ab."
+        },
+        "mismatch": {
+          "heading": "Abweichung",
+          "body": "Es bestehen erhebliche Unterschiede."
+        }
+      }
+    },
+    "match_status_trend": {
+      "heading": "Trend des Abgleichstatus",
+      "exact_match": "Genaue Übereinstimmung",
+      "partial_match": "Teilweise Übereinstimmung",
+      "mismatch": "Abweichung",
+      "tooltip": "Historische Ansicht Ihrer Rechnungsabgleich-Leistung zur Verfolgung von Trends"
+    },
+    "bills_by_stage": {
+      "heading": "Rechnungen nach Phase",
+      "tooltip": "Rechnungen sortiert nach ihrer aktuellen Phase im Genehmigungsworkflow"
+    },
+    "analytics": "Analyse",
+    "insights": "Einblicke",
+    "Total bills": "Rechnungen gesamt",
+    "Bills with PO": "Rechnungen mit Bestellung",
+    "Bills without PO": "Rechnungen ohne Bestellung",
+    "Duplicate bills": "Doppelte Rechnungen"
+  },
+  "data_table": {
+    "empty": "Dieser Bereich ist momentan leer.",
+    "message": "Erkunden Sie in der Zwischenzeit gerne andere Bereiche.",
+    "pagination": {
+      "items_per_page": "Einträge pro Seite",
+      "page": "Seite",
+      "of": "von",
+      "selected": "Ausgewählt"
+    }
+  },
+  "bills": {
+    "heading": "Rechnungen",
+    "forward_bill": "Leiten Sie Ihre Rechnungen weiter, um automatisch Ausgaben zu erstellen unter:",
+    "stage": {
+      "overview": "Übersicht",
+      "under_review": "In Prüfung",
+      "under_approval": "In Genehmigung",
+      "approved": "Genehmigt",
+      "ledger_entry": "Hauptbucheintrag",
+      "rejected": "Abgelehnt"
+    },
+    "filter": {
+      "status": "Status"
+    },
+    "buttons": {
+      "create_bill": "Rechnung erstellen",
+      "upload_bills": "Rechnungen hochladen"
+    },
+    "table_headers": {
+      "bill": "Rechnung",
+      "bill_date": "Rechnungsdatum",
+      "due_date": "Fälligkeitsdatum",
+      "po": "Bestellung",
+      "vendor": "Lieferant",
+      "total_amount": "Gesamtbetrag",
+      "stages": "Phasen",
+      "status": "Status"
+    }
+  },
+  "create_bill": {
+    "heading": "Rechnungsdetails",
+    "bill_name": "Rechnungsnummer",
+    "vendor": "Lieferant",
+    "purchase_order": "Bestellung",
+    "payment_terms": "Zahlungsbedingungen",
+    "bill_date": "Rechnungsdatum",
+    "due_date": "Fälligkeitsdatum",
+    "bill_line_items": {
+      "heading": "Rechnungspositionen",
+      "description": "Beschreibung",
+      "coa": "Kontenplan",
+      "product_code": "Produktcode",
+      "qty": "Menge",
+      "unit_price": "Einzelpreis",
+      "amount": "Betrag",
+      "action": "Aktion"
+    },
+    "new_item": "Neue Rechnungsposition",
+    "sub_total": "Zwischensumme",
+    "total_tax": "Steuer gesamt",
+    "total": "Gesamt",
+    "notes": "Notizen",
+    "enter_notes": "Notizen eingeben",
+    "extract_pdf": "PDF extrahieren"
+  },
+  "purchase_order": {
+    "heading": "Bestellungen",
+    "po_details": "Bestelldetails",
+    "associate_bills": "Rechnungen zuordnen",
+    "buttons": {
+      "upload_po": "Bestellungen hochladen",
+      "create_po": "Bestellung erstellen"
+    },
+    "stagebar": {
+      "all_vendor_credits": "Alle Lieferantengutschriften",
+      "under_review": "In Prüfung",
+      "under_approval": "In Genehmigung",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt",
+      "draft": "Entwurf"
+    },
+    "search": "Bestellungen suchen",
+    "export": "Daten exportieren",
+    "table_headers": {
+      "po": "Bestellung",
+      "po_date": "Bestelldatum",
+      "delivery_date": "Lieferdatum",
+      "vendor": "Lieferant",
+      "total_amount": "Gesamtbetrag",
+      "status": "Phasen"
+    },
+    "create_po": {
+      "heading": "Neue Bestellung",
+      "po_number": "Bestellnummer",
+      "vendor": "Lieferant",
+      "payment_terms": "Zahlungsbedingungen",
+      "po_date": "Bestelldatum",
+      "delivery_date": "Lieferdatum",
+      "po_line_items": {
+        "heading": "Bestellpositionen",
+        "description": "Beschreibung",
+        "coa": "Kontenplan",
+        "qty": "Menge",
+        "unit_price": "Einzelpreis",
+        "amount": "Betrag",
+        "action": "Aktion"
+      },
+      "new_item": "Neue Bestellposition",
+      "sub_total": "Zwischensumme",
+      "total_tax": "Steuer gesamt",
+      "total": "Gesamt",
+      "grand_total": "Gesamtsumme",
+      "notes": "Notizen",
+      "enter_notes": "Notizen eingeben"
+    },
+    "po_preview": "Bestellvorschau",
+    "consumed": "Verbraucht",
+    "available": "Verfügbar",
+    "view_po": {
+      "no_pos": "Keine Positionen zum Anzeigen.",
+      "grand_total": "Gesamtsumme",
+      "total_tax": "Steuer gesamt",
+      "sub_total": "Zwischensumme"
+    },
+    "rejection_reason": "Ablehnungsgrund",
+    "notes": "Notizen:"
+  },
+  "vendors": {
+    "heading": "Lieferanten",
+    "status": {
+      "Heading": "Status",
+      "active": "Aktiv",
+      "inactive": "Inaktiv"
+    },
+    "buttons": {
+      "create_vendor": "Lieferant erstellen"
+    },
+    "table_headers": {
+      "vendor": "Lieferant",
+      "company_name": "Unternehmensname",
+      "email": "E-Mail",
+      "tax_id": "Steuernummer",
+      "status": "Status"
+    },
+    "rows_per_page": "Zeilen pro Seite",
+    "view_vendors": {
+      "no_vendors": "Keine Lieferanten gefunden",
+      "search_vendors": "Lieferanten suchen"
+    },
+    "create_vendor": {
+      "heading": "Neuer Lieferant",
+      "vendor_details": {
+        "heading": "Lieferantendetails",
+        "vendor_name": "Lieferantenname",
+        "company_name": "Unternehmensname",
+        "email": "E-Mail",
+        "mobile": "Mobil",
+        "tax_id": "Steuernummer",
+        "website": "Webseite",
+        "payment_terms": "Zahlungsbedingungen",
+        "contact": "Kontakt"
+      },
+      "vendor_address": {
+        "heading": "Lieferantenadresse",
+        "address_line_1": "Adresszeile 1",
+        "address_line_2": "Adresszeile 2",
+        "country": "Land",
+        "state": "Bundesland",
+        "city": "Stadt",
+        "zipcode": "Postleitzahl"
+      },
+      "bank_account_details": {
+        "heading": "Bankverbindung",
+        "account_holder_name": "Kontoinhaber",
+        "bank_name": "Bankname",
+        "account_number": "Kontonummer"
+      }
+    },
+    "vendor_credit": {
+      "heading": "Lieferantengutschrift",
+      "buttons": {
+        "create_vendor_credit": "Gutschrift erstellen",
+        "upload_vendor_credit": "Gutschrift hochladen"
+      },
+      "stagebar": {
+        "all_vendor_credits": "Alle Gutschriften",
+        "under_review": "In Prüfung",
+        "under_approval": "In Genehmigung",
+        "approved": "Genehmigt",
+        "rejected": "Abgelehnt",
+        "draft": "Entwurf"
+      },
+      "search": "Gutschriften suchen",
+      "export": "Daten exportieren",
+      "table_headers": {
+        "vendor_credit": "Gutschrift",
+        "vendor_credit_date": "Gutschriftsdatum",
+        "vendor": "Lieferant",
+        "total_amount": "Gesamtbetrag",
+        "stages": "Status"
+      },
+      "rows_per_page": "Zeilen pro Seite",
+      "upload_vendor_credit": {
+        "heading": "Dateien hochladen",
+        "subheading": "Wählen Sie Dateien zum Hochladen aus",
+        "input_label": "Klicken oder Dateien hierher ziehen",
+        "input_helper_text": "Bis zu 50 Dateien, jeweils max. 5 MB"
+      },
+      "create_vendor_credit": {
+        "heading": "Neue Gutschrift",
+        "buttons": {
+          "extract_vendor_credit": "Lieferant extrahieren",
+          "cancel": "Abbrechen",
+          "save": {
+            "heading": "Speichern",
+            "save": "Speichern",
+            "save_as_draft": "Als Entwurf speichern"
+          }
+        },
+        "vendor_credit_details": {
+          "heading": "Gutschriftsdetails",
+          "vendor_credit_number": "Gutschriftsnummer",
+          "vendor": "Lieferant",
+          "vendor_credit_date": "Gutschriftsdatum"
+        },
+        "vendor_credit_line_items": {
+          "heading": "Gutschriftspositionen",
+          "description": "Beschreibung",
+          "qty": "Menge",
+          "unit_price": "Einzelpreis",
+          "amount": "Betrag",
+          "action": "Aktion"
+        },
+        "new_item": "Neue Gutschriftsposition",
+        "sub_total": "Zwischensumme",
+        "total_tax": "Steuer gesamt",
+        "grand_total": "Gesamtsumme",
+        "total": "Gesamt",
+        "notes": "Notizen",
+        "enter_notes": "Notizen eingeben"
+      }
+    },
+    "inbox": {
+      "heading": "Posteingang"
+    }
+  },
+  "payment_terms_options": {
+    "net15": "Netto 15 Tage",
+    "net30": "Netto 30 Tage",
+    "net45": "Netto 45 Tage",
+    "due": "Fällig bei Erhalt"
+  },
+  "member_role_options": {
+    "admin": "Administrator",
+    "finance_manager": "Finanzmanager",
+    "accountant": "Buchhalter",
+    "viewer": "Betrachter",
+    "lite_user": "Lite-Nutzer"
+  },
+  "overview_options": {
+    "this_month": "Diesen Monat",
+    "last_3_months": "Letzte 3 Monate",
+    "last_6_months": "Letzte 6 Monate",
+    "last_12_months": "Letzte 12 Monate"
+  },
+  "bank_account_types": {
+    "savings": "Sparkonto",
+    "current": "Girokonto",
+    "checking": "Girokonto",
+    "personal": "Privatkonto"
+  },
+  "business_types": {
+    "private_limited": "GmbH",
+    "public_limited": "AG",
+    "partnership": "Personengesellschaft",
+    "proprietorship": "Einzelunternehmen",
+    "llc": "LLC",
+    "other": "Sonstiges",
+    "s_corp": "S-Corp",
+    "c_corp": "C-Corp",
+    "non_profit": "Gemeinnützig",
+    "government_agency": "Behörde"
+  },
+  "matching_options": {
+    "none": "Keiner",
+    "no_match_description": "Rechnungen werden ohne Abgleich mit Bestellungen verarbeitet.",
+    "two_way": "2-Wege-Abgleich",
+    "three_way": "3-Wege-Abgleich",
+    "two_way_description": "Rechnung mit Bestellung auf Preis und Menge prüfen.",
+    "three_way_description": "Prüfen, ob Waren bestellt und erhalten wurden, bevor die Rechnung bezahlt wird."
+  },
+  "confirmations": {
+    "request_confirmation": "Bestätigung anfordern",
+    "view_confirmations": "Bestätigungen anzeigen",
+    "title": "Bestätigen",
+    "delete": "Löschen"
+  },
+  "search": {
+    "search_filters": "Suchfilter"
+  },
+  "help_support": {
+    "documentation": "Dokumentation",
+    "email_us": "E-Mail an uns"
+  },
+  "confirm_deletion": {
+    "confirm": "bestätigen",
+    "delete": "Löschen"
+  },
+  "invite_member": {
+    "heading": "Mitglied einladen",
+    "about": "Rever gewährleistet sicheren, rollenbasierten Zugriff zur Optimierung Ihrer Kreditorenbuchhaltung.",
+    "roles": {
+      "member_role": "Mitgliedsrolle",
+      "select_role": "Rolle auswählen",
+      "admin": {
+        "heading": "Administrator",
+        "admin_can": "Admin kann:",
+        "description1": "- Dashboard zur Ansicht von Rechnungsstatistiken aufrufen.",
+        "description2": "- Lieferanten verwalten und Rechnungs-Workflow überwachen.",
+        "description3": "- Genehmigungsworkflows und Organisationseinstellungen verwalten.",
+        "description4": "- Genehmigungsregeln konfigurieren.",
+        "admin_cannot": "Admin kann nicht:",
+        "description5": "- Rechnungen als Genehmiger freigeben, kann aber Genehmiger neu zuweisen."
+      },
+      "finance_manager": {
+        "heading": "Finanzmanager",
+        "finance_manager_can": "Finanzmanager kann:",
+        "description1": "- Dashboard mit Rechnungsdetails aufrufen.",
+        "description2": "- Rechnungen prüfen, genehmigen oder ablehnen.",
+        "description3": "- Details zu Lieferanten und Mitgliedern einsehen.",
+        "finance_manager_cannot": "Finanzmanager kann nicht:",
+        "description4": "- Lieferanten oder Rechnungen erstellen oder ändern.",
+        "description5": "- Auf Benutzerverwaltung oder Organisationseinstellungen zugreifen."
+      },
+      "member": {
+        "heading": "Mitglied",
+        "memeber_can": "Mitglied kann:",
+        "description1": "- Dashboard zur Ansicht von Rechnungsphasen aufrufen.",
+        "description2": "- Lieferantenprofile erstellen und pflegen.",
+        "description3": "- Rechnungen erstellen, ändern, löschen und einreichen.",
+        "description4": "- Teammitglieder und Organisationsdetails einsehen.",
+        "memeber_cannot": "Mitglied kann nicht:",
+        "description5": "- Aktionen genehmigen (Wahrung der Integrität).",
+        "description6": "- Mitglieder einladen oder Genehmigungseinstellungen ändern."
+      },
+      "lite_user": {
+        "heading": "Lite-Nutzer",
+        "select_lite_user": "Lite-Nutzer auswählen",
+        "lite_user_can": "LITE-Nutzer kann:",
+        "description1": "- Empfangsbestätigungen bestätigen.",
+        "description2": "- Zugewiesene Dokumente oder Transaktionen einsehen.",
+        "lite_user_cannot": "LITE-Nutzer kann nicht:",
+        "description3": "- Rechnungen erstellen, prüfen oder genehmigen.",
+        "description4": "- Auf Finanz-Dashboards oder Berichte zugreifen.",
+        "description5": "- Lieferanten oder Organisationseinstellungen verwalten."
+      }
+    },
+    "success_message": {
+      "memeber_update_success": "Mitglied erfolgreich aktualisiert",
+      "invitation_sent": "Einladungsanfrage gesendet"
+    },
+    "error_message": {
+      "memeber_update_failed": "Rolle kann nicht geändert werden – Nutzer hat ausstehende Genehmigungen.",
+      "invitation_failed": "Nutzer existiert bereits in Ihrer Organisation"
+    }
+  }
+}
