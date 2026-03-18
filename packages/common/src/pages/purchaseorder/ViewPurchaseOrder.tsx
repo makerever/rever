@@ -52,7 +52,7 @@ import {
   getPOAuditHistoryApi,
 } from "@rever/services";
 import { ColumnDef, sortingFns } from "@tanstack/react-table";
-
+import { useTranslate } from "@rever/i18n";
 // Main component to display PO details in view mode
 const ViewPODetails = ({
   poDetails,
@@ -98,7 +98,7 @@ const ViewPODetails = ({
   const [poDetailsHeight, setPoDetailsHeight] = useState<number | null>(null);
 
   const [isAssociateLoading, setIsAssociateLoading] = useState<boolean>(true);
-
+  const translate = useTranslate();
   const collator = useMemo(
     () => new Intl.Collator(undefined, { numeric: true, sensitivity: "base" }),
     [],
@@ -325,7 +325,7 @@ const ViewPODetails = ({
       },
       {
         accessorKey: "bill_date",
-        header: "Bill date",
+        header: translate('bills.table_headers.bill_date'),
         accessorFn: (row) => (row.bill_date ? new Date(row.bill_date) : null),
         sortingFn: sortingFns.datetime,
         sortDescFirst: false,
@@ -339,7 +339,7 @@ const ViewPODetails = ({
       },
       {
         accessorKey: "due_date",
-        header: "Due date",
+        header: translate('bills.table_headers.due_date'),
         accessorFn: (row) => (row.due_date ? new Date(row.due_date) : null),
         sortingFn: sortingFns.datetime,
         sortDescFirst: false,
@@ -353,7 +353,7 @@ const ViewPODetails = ({
       },
       {
         accessorKey: "total",
-        header: "Total amount",
+        header: translate('bills.table_headers.total_amount'),
         accessorFn: (row) => Number(row.total) || 0,
         sortingFn: "basic",
         sortDescFirst: false,
@@ -370,7 +370,7 @@ const ViewPODetails = ({
       },
       {
         accessorKey: "status",
-        header: "Stages",
+        header: translate('bills.table_headers.status'),
         sortDescFirst: false,
         cell: ({ row, getValue }) => {
           const value = getValue() as string;
@@ -603,11 +603,11 @@ const ViewPODetails = ({
                 className="grid grid-cols-1 gap-x-5 bg-white rounded-[20px] p-4 border border-secondary-200"
               >
                 <p className="text-neutral-1100 text-xl mb-5 font-medium">
-                  PO details
+                  {translate('purchase_order.po_details')}
                 </p>
                 <div className="flex flex-row items-center border-b border-secondary-200 h-11">
                   <Label
-                    text="Vendor name:"
+                    text={translate('vendors.create_vendor.vendor_name')+":"}
                     className="font-medium text-secondary-700 max-w-60 w-full"
                   />
                   <p
@@ -627,7 +627,7 @@ const ViewPODetails = ({
                 </div>
                 <div className="flex flex-row items-center border-b border-secondary-200 py-1.5 h-11">
                   <Label
-                    text="Total amount:"
+                    text={translate('purchase_order.table_headers.total_amount')+":"}
                     className="font-medium text-secondary-700 max-w-60 w-full"
                   />
                   <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.total })}`}>
@@ -636,7 +636,7 @@ const ViewPODetails = ({
                 </div>
                 <div className="flex flex-row items-center border-b border-secondary-200 py-1.5 h-11">
                   <Label
-                    text="PO date:"
+                    text={translate('purchase_order.table_headers.po_date')+":"}
                     className="font-medium text-secondary-700 max-w-60 w-full"
                   />
                   <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.po_date })}`}>
@@ -645,7 +645,7 @@ const ViewPODetails = ({
                 </div>
                 <div className="flex flex-row items-center border-b border-secondary-200 py-1.5 h-11">
                   <Label
-                    text="Delivery date:"
+                    text={translate('purchase_order.table_headers.delivery_date')+":"}
                     className="font-medium text-secondary-700 max-w-60 w-full"
                   />
                   <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.delivery_date })}`}>
@@ -657,7 +657,7 @@ const ViewPODetails = ({
                 </div>
                 <div className="flex flex-row items-center border-b border-secondary-200 py-3">
                   <Label
-                    text="Vendor address:"
+                    text={translate('vendors.create_vendor.vendor_address.heading')+":"}
                     className="font-medium text-secondary-700 max-w-60 w-full"
                   />
                   <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: billingAddressField })}`}>
@@ -666,7 +666,7 @@ const ViewPODetails = ({
                 </div>
                 <div className="flex flex-row items-center h-11">
                   <Label
-                    text="Payment terms:"
+                    text={translate('purchase_order.create_po.payment_terms')+":"}
                     className="font-medium text-secondary-700 max-w-60 w-full"
                   />
                   <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.payment_terms })}`}>
@@ -684,7 +684,7 @@ const ViewPODetails = ({
                 }}
               >
                 <p className="text-neutral-1100 mb-5 text-xl font-medium">
-                  PO line items
+                  {translate('purchase_order.create_po.po_line_items.heading')}
                 </p>
                 <POLineItemsReadOnly
                   showAuditHistory={showAuditHistory}
@@ -699,7 +699,7 @@ const ViewPODetails = ({
             {fileUrl && showPdf && (
               <div className="relative lg:w-[30%] scrollbar_none rounded-[20px] bg-white border border-secondary-200 overflow-hidden">
                 <p className="p-4 mb-4 pb-0 text-neutral-1100 text-xl font-medium">
-                  PO preview
+                  {translate('purchase_order.po_preview')}
                 </p>
                 <PdfViewer fileUrl={fileUrl} />
               </div>
@@ -732,7 +732,7 @@ const ViewPODetails = ({
         <div className="">
           <div className="flex justify-between items-center p-4">
             <p className="text-neutral-1100 text-lg font-semibold">
-              Associate bills
+              {translate('purchase_order.associate_bills')}
             </p>
             <div
               className="popup-btn rounded-[8px] size-8 btn-secondary-outline"

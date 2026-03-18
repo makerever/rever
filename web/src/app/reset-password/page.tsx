@@ -1,12 +1,13 @@
 // Renders the reset password user interface
 
 import { AuthLayout, ResetPasswordComponent } from "@rever/common";
-
+import { useTranslate } from "@rever/i18n";
 const ResetPassword = () => {
+  const t = useTranslate();
   return (
     <AuthLayout
-      mainTitle={"Create new password"}
-      subTitle={"Please enter strong password to secure your account"}
+      mainTitle={t("create_new_password")}
+      subTitle={t("please_enter_strong_password_to_secure_your_account")}
     >
       <ResetPasswordComponent />
     </AuthLayout>

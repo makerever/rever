@@ -13,6 +13,7 @@ import {
 import Label from "./Label";
 import { useUserStore } from "@rever/stores";
 import { Button, NumberInput, TextAreaInput } from "@rever/common";
+import { useTranslate } from "@rever/i18n";
 
 type Props = {
   bill: Partial<Bill>;
@@ -29,6 +30,7 @@ export default function RequestReceiptView({
   isLoading,
 }: Props) {
   const orgDetails = useUserStore((state) => state.user?.organization);
+  const translate = useTranslate();
 
   const [receivedQuantities, setReceivedQuantities] = useState<
     Record<string, string>
@@ -98,7 +100,7 @@ export default function RequestReceiptView({
           <div className="grid grid-cols-1 gap-x-5">
             <div className="flex flex-row items-center border-b border-secondary-200 pb-3">
               <Label
-                text="Vendor:"
+                text={translate('create_bill.vendor')+":"}
                 className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
               />
               <p className="text-neutral-1100 text-sm">
@@ -118,7 +120,7 @@ export default function RequestReceiptView({
 
             <div className="flex flex-row items-center border-b border-secondary-200 py-3">
               <Label
-                text="Bill date:  "
+                text={translate('create_bill.bill_date')}
                 className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
               />
               <p className="text-neutral-1100 text-sm">
@@ -128,7 +130,7 @@ export default function RequestReceiptView({
 
             <div className="flex flex-row items-center pt-3">
               <Label
-                text="Due date:  "
+                text={translate('create_bill.due_date')+':'}
                 className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
               />
               <p className="text-neutral-1100 text-sm">

@@ -23,6 +23,7 @@
       "@/*": ["./src/*"],
       "@rever/common": ["../packages/common/src"],
       "@rever/constants": ["../packages/constants/src"],
+      "@rever/i18n": ["../packages/i18n/src"],
       "@rever/services": ["../packages/services/src"],
       "@rever/stores": ["../packages/stores/src"],
       "@rever/types": ["../packages/types/src"],

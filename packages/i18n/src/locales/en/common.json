@@ -68,7 +68,8 @@
     "notification": "Notification",
     "appereance": "Appereance",
     "back_home": "Back to home",
-    "back_confirmations": "Back to confirmations"
+    "back_confirmations": "Back to confirmations",
+    "logout": "Logout"
   },
   "global_search": {
     "vendors": "Vendors",
@@ -77,7 +78,7 @@
     "members": "Members",
     "create_po": "Create PO",
     "create_bill": "Create bill",
-    "inbox": "Inobx",
+    "inbox": "Inbox",
     "profile": "Profile",
     "change_password": "Change password"
   },
@@ -205,12 +206,12 @@
     "heading": "Bills",
     "forward_bill": "Forward your bills to create expenses automatically at:",
     "stage": {
-      "Overview": "Overview",
-      "Under review": "Under review",
-      "Under approval": "Under approval",
-      "Approved": "Approved",
-      "Ledger entry": "Ledger entry",
-      "Rejected": "Rejected"
+      "overview": "Overview",
+      "under_review": "Under review",
+      "under_approval": "Under approval",
+      "approved": "Approved",
+      "ledger_entry": "Ledger entry",
+      "rejected": "Rejected"
     },
     "filter": {
       "status": "Status"
@@ -258,6 +259,8 @@
   },
   "purchase_order": {
     "heading": "Purchase orders",
+    "po_details": "PO details",
+    "associate_bills": "Associate bills",
     "buttons": {
       "upload_po": "Upload POs",
       "create_po": "Create purchase order"
@@ -303,7 +306,18 @@
       "grand_total": "Grand total",
       "notes": "Notes",
       "enter_notes": "Enter notes"
-    }
+    },
+    "po_preview": "PO preview",
+    "consumed": "Consumed",
+    "available": "Available",
+    "view_po": {
+      "no_pos": "No line items to display.",
+      "grand_total": "Grand total",
+      "total_tax": "Total tax",
+      "sub_total": "Sub total"
+    },
+    "rejection_reason": "Rejection reason",
+    "notes": "Notes:"
   },
   "vendors": {
     "heading": "Vendors",
@@ -323,6 +337,10 @@
       "status": "Status"
     },
     "rows_per_page": "Rows per page",
+    "view_vendors": {
+      "no_vendors": "No vendors found",
+      "search_vendors": "Search vendors"
+    },
     "create_vendor": {
       "heading": "New vendor",
       "vendor_details":{
@@ -333,7 +351,8 @@
         "mobile": "Mobile",
         "tax_id": "Tax ID",
         "website": "Website",
-        "payment_terms": "Payment terms"
+        "payment_terms": "Payment terms",
+        "contact": "Contact"
       },
       "vendor_address": {
         "heading": "Vendor address",
@@ -414,13 +433,129 @@
         "notes": "Notes",
         "enter_notes": "Enter notes"
       }
-
-
     },
     "inbox": {
       "heading": "Inbox"
     }
-  
+  },
+  "payment_terms_options": {
+    "net15": "Net 15 days",
+    "net30": "Net 30 days",
+    "net45": "Net 45 days",
+    "due": "Due on receipt"
+  },
+  "member_role_options": {
+    "admin": "Admin",
+    "finance_manager": "Finance manager",
+    "accountant": "Accountant",
+    "viewer": "Viewer",
+    "lite_user": "Lite user"
+  },
+  "overview_options": {
+    "this_month": "This month",
+    "last_3_months": "Last 3 months",
+    "last_6_months": "Last 6 months",
+    "last_12_months": "Last 12 months"
+   },
+   "bank_account_types": {
+    "savings": "Savings",
+    "current": "Current",
+    "checking": "Checking",
+    "personal": "Personal"
+   },
+   "business_types": {
+    "private_limited": "Private limited",
+    "public_limited": "Public limited",
+    "partnership": "Partnership",
+    "proprietorship": "Sole Proprietor",
+    "llc": "LLC",
+    "other": "Other",
+    "s_corp": "S-Corp",
+    "c_corp": "C-Corp",
+    "non_profit": "Non-profit",
+    "government_agency": "Government agency"
+   },
+   "matching_options": {
+    "none":"None",
+    "no_match_description": "Bills will be processed without comparing them against POs or receipts.",
+    "two_way": "2-Way match",
+    "three_way": "3-Way match",
+    "two_way_description": "Verify that the vendor invoice matches the corresponding PO for price and quantity.",
+    "three_way_description":"Verify that the goods were both ordered and received before the invoice is paid."
+   },
+   "confirmations": {
+    "request_confirmation": "Request confirmation",
+    "view_confirmations": "View confirmations",
+    "title": "Confirm",
+    "delete":"Delete"
+  },
+  "search": {
+    "search_filters": "Search filters"
+  },
+  "help_support": {
+    "documentation": "Documentation",
+    "email_us": "Email us"
+  },
+  "confirm_deletion": {
+    "confirm": "confirm",
+    "delete": "Delete"
+  },
+  "invite_member": {
+    "heading": "Invite member",
+    "about":"Rever ensures secure, role-based access to streamline your accounts payable process by maintaining clear responsibilities and preventing conflicts in financial workflows.",
+    "roles": {
+      "member_role": "Member role",
+      "select_role": "Select role",
+      "admin": {
+        "heading": "Admin",
+        "admin_can": "Admin can:",
+        "description1": "- Access the dashboard to view insights on total bills that are approved, under review, and awaiting approval.",
+        "description2": "- Manage vendor information and supervise the end-to-end bill workflow.",
+        "description3": "- Set up and manage approval workflows and organizational configurations.",
+        "description4": "- Configure approval rules and organization settings.",
+        "admin_cannot": "Admin cannot:",
+        "description5": "- Approve a bill as an approver, but can re-assign the approver."
+      },
+      "finance_manager": {
+        "heading": "Finance Manager",
+        "finance_manager_can": "Finance manager can:",
+        "description1": "- Access dashboard showing insights on total bills that are approved, reviewed, and awaiting approval.",
+        "description2": "- Review, approve, or reject bills, reinforcing financial oversight and decision-making authority.",
+        "description3": "- Has visibility into vendor, member, and organization details to make informed and accurate approval decisions.",
+        "finance_manager_cannot": "Finance manager cannot:",
+        "description4": "- Create or modify vendors or bills, ensuring the role remains solely focused on review and approval responsibilities.",
+        "description5": "- Access to user management and organizational settings is restricted to uphold segregation of duties and ensure compliance."
+      },
+      "member": {
+        "heading": "Member",
+        "memeber_can": "Member can:",
+        "description1": "- Access the dashboard to view insights on total bills that are approved, reviewed, and awaiting approval.",
+        "description2": "- Create and maintain vendor profiles.",
+        "description3": "- Create, modify, delete, and submit bills, enabling end-to-end management of the bill lifecycle.",
+        "description4": "- Can view team members and organizational details to remain informed about the company's structure and hierarchy.",
+        "memeber_cannot": "Member cannot:",
+        "description5": "- Approve actions to maintain the integrity and independence of the approval process.",
+        "description6": "- Invite members or modify approval settings, keeping the role focused within its operational boundaries."
+      },
+      "lite_user": {
+        "heading": "Lite User",
+        "select_lite_user": "Select lite user",
+        "lite_user_can": "LITE user can:",
+        "description1": "- Confirm Request Receipt Confirmations, serving as an acknowledgment that a bill or invoice has been received by the relevant department or stakeholder.",
+        "description2": "- View the specific documents or transactions assigned to them for confirmation, ensuring transparency in the receipt lifecycle.",
+        "lite_user_cannot": "LITE user cannot:",
+        "description3": "- Create, review, approve, or reject bills to ensure this role is limited to acknowledgment duties only.",
+        "description4": "- Access financial dashboards, advanced reports, or decision-making tools.",
+        "description5": "- Access or manage vendors, users, or organizational settings to preserve strict data governance and minimize risk exposure."
+      }
+    },
+    "success_message": {
+      "memeber_update_success": "Member updated successfully",
+      "invitation_sent": "Invitation request sent"
+    },
+    "error_message": {
+      "memeber_update_failed": "Cannot change role — User has pending approvals.",
+      "invitation_failed": "User already exists in your organization"
+     }
   }
-
 }

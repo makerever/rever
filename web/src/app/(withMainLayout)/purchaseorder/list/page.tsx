@@ -25,10 +25,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { PURCHASE_ORDER_API, useApi } from "@rever/services";
 import { Paperclip } from "lucide-react";
+import { useTranslate } from "@rever/i18n";
 
 // Main component for displaying the bill list
 const PurchaseOrderList = () => {
   const router = useRouter();
+  const translate = useTranslate();
 
   const [activeTab, setActiveTab] = useState<string | undefined>("All POs");
   const [poData, setPOData] = useState<PurchaseOrder[]>([]);
@@ -92,7 +94,7 @@ const PurchaseOrderList = () => {
       },
       {
         accessorKey: "po_date",
-        header: "PO date",
+        header: translate('purchase_order.table_headers.po_date'),
         accessorFn: (row) => (row.po_date ? new Date(row.po_date) : null),
         sortingFn: sortingFns.datetime,
         sortDescFirst: false,
@@ -106,7 +108,7 @@ const PurchaseOrderList = () => {
       },
       {
         accessorKey: "delivery_date",
-        header: "Delivery date",
+        header: translate('purchase_order.table_headers.delivery_date'),
         accessorFn: (row) =>
           row.delivery_date ? new Date(row.delivery_date) : null,
         sortingFn: sortingFns.datetime,
@@ -121,7 +123,7 @@ const PurchaseOrderList = () => {
       },
       {
         accessorKey: "vendor",
-        header: "Vendor",
+        header: translate('purchase_order.table_headers.vendor'),
         accessorFn: (row) => row.vendor?.name || "",
         sortingFn: "alphanumeric",
         sortDescFirst: false,
@@ -143,7 +145,7 @@ const PurchaseOrderList = () => {
       },
       {
         accessorKey: "total",
-        header: "Total amount",
+        header: translate('purchase_order.table_headers.total'),
         accessorFn: (row) => Number(row.total) || 0,
         sortingFn: "basic",
         sortDescFirst: false,
@@ -160,7 +162,7 @@ const PurchaseOrderList = () => {
       },
       {
         accessorKey: "status",
-        header: "Stages",
+        header: translate('purchase_order.table_headers.status'),
         sortDescFirst: false,
         cell: ({ row, getValue }) => {
           const value = getValue() as string;
@@ -191,7 +193,7 @@ const PurchaseOrderList = () => {
         },
       },
     ],
-    [collator, orgDetails?.date_format, router],
+    [collator, orgDetails?.date_format, router, translate],
   );
 
   // Effect to process and set bill data when API data changes
@@ -255,9 +257,9 @@ const PurchaseOrderList = () => {
     <>
       <DataTable
         onActionBtClick={handleRedirect}
-        addBtnText={hasPermission("purchaseorder", "create") ? "Create PO" : ""}
-        tableHeading="Purchase orders"
-        uploadBtnText="Upload POs"
+        addBtnText={hasPermission("purchaseorder", "create") ? translate('global_search.create_po') : ""}
+        tableHeading={translate('sidebar.expenses.purchase_order')}
+        uploadBtnText={translate('purchase_order.buttons.upload_po')}
         onUploadBtnClick={() => setIsFileUploadModal(true)}
         tableData={filteredPurchaseOrder}
         columns={columns}

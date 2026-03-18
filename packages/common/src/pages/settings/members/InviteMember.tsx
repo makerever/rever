@@ -25,51 +25,47 @@ import {
   createInviteMemberSchema,
   inviteMemberSchemaValues,
 } from "@rever/validations";
-import { memberRoleOptions } from "@rever/constants";
-
+import { memberRoleOptions as memberRoleOptionsBase } from "@rever/constants";
+import { useTranslate } from "@rever/i18n";
 type RoleDescriptionsProps = {
   role: string;
 };
 
 function RoleDescriptions({ role }: RoleDescriptionsProps) {
+  const translate = useTranslate();
   return (
     <div className="mt-2 w-full px-4">
       <p className="text-xs font-medium text-secondary-700 mb-5">
-        Rever ensures secure, role-based access to streamline your accounts
-        payable process by maintaining clear responsibilities and preventing
-        conflicts in financial workflows.
+        {translate('invite_member.about')}
       </p>
       <div className="bg-blue-50 border border-blue-100 rounded-xl p-2.5">
         {/* Admin */}
         {role === "admin" ? (
           <div>
             <h3 className="text-sm font-semibold text-neutral-1100 flex items-center gap-1.5">
-              <CircleCheck width={14} /> Admin can:
+              <CircleCheck width={14} /> {translate('invite_member.roles.admin.admin_can')}
             </h3>
 
             <ul className="font-medium ms-5 text-xs text-neutral-1100 mt-2">
               <li>
-                - Access the dashboard to view insights on total bills that are
-                approved, under review, and awaiting approval.
+                {translate('invite_member.roles.admin.description1')}
               </li>
               <li className="mt-2">
-                - Manage vendor information and supervise the end-to-end bill
-                workflow.
+                  {translate('invite_member.roles.admin.description2')}
               </li>
               <li className="mt-2">
-                - Set up and manage approval workflows and organizational
-                configurations.
+                {translate('invite_member.roles.admin.description3')}
               </li>
               <li className="mt-2">
-                - Configure approval rules and organization settings.
+                {translate('invite_member.roles.admin.description4')}
               </li>
             </ul>
             <h3 className="mt-4 text-sm font-semibold text-neutral-1100 flex items-center gap-1.5">
-              <CircleX width={14} /> Admin cannot:
+              <CircleX width={14} /> {translate('invite_member.roles.admin.admin_cannot')}
             </h3>
             <ul className="font-medium ms-5 text-xs text-neutral-1100 mt-1">
               <li>
-                - Approve a bill as an approver, but can re-assign the approver.
+                {translate('invite_member.roles.admin.description5')}
               </li>
             </ul>
           </div>
@@ -79,34 +75,31 @@ function RoleDescriptions({ role }: RoleDescriptionsProps) {
         {role === "member" ? (
           <div>
             <h3 className="text-sm font-semibold text-neutral-1100 flex items-center gap-1.5">
-              <CircleCheck width={14} /> Member can:
+              <CircleCheck width={14} /> {translate('invite_member.roles.member.member_can')}
             </h3>
             <ul className="font-medium ms-5 text-xs text-neutral-1100 mt-2">
               <li>
-                - Access the dashboard to view insights on total bills that are
-                approved, reviewed, and awaiting approval.
-              </li>
-              <li className="mt-2">- Create and maintain vendor profiles.</li>
-              <li className="mt-2">
-                - Create, modify, delete, and submit bills, enabling end-to-end
-                management of the bill lifecycle.
+                {translate('invite_member.roles.member.description1')}
               </li>
               <li className="mt-2">
-                - Can view team members and organizational details to remain
-                informed about the company's structure and hierarchy.
+                {translate('invite_member.roles.member.description2')}
+              </li>
+              <li className="mt-2">
+                {translate('invite_member.roles.member.description3')}
+              </li>
+              <li className="mt-2">
+                {translate('invite_member.roles.member.description4')}
               </li>
             </ul>
             <h3 className="mt-4 text-sm font-semibold text-neutral-1100 flex items-center gap-1.5">
-              <CircleX width={14} /> Member cannot:
+              <CircleX width={14} /> {translate('invite_member.roles.member.member_cannot')}
             </h3>
             <ul className="font-medium ms-5 text-xs text-neutral-1100 mt-1">
               <li>
-                - Approve actions to maintain the integrity and independence of
-                the approval process.
+                {translate('invite_member.roles.member.description5')}
               </li>
               <li className="mt-2">
-                - Invite members or modify approval settings, keeping the role
-                focused within its operational boundaries.
+                {translate('invite_member.roles.member.description6')}
               </li>
             </ul>
           </div>
@@ -116,34 +109,28 @@ function RoleDescriptions({ role }: RoleDescriptionsProps) {
         {role === "finance_manager" ? (
           <div>
             <h3 className="text-sm font-semibold text-neutral-1100 flex items-center gap-1.5">
-              <CircleCheck width={14} /> Finance Manager can:
+              <CircleCheck width={14} /> {translate('invite_member.roles.finance_manager.finance_manager_can')}
             </h3>
             <ul className="font-medium ms-5 text-xs text-neutral-1100 mt-2">
               <li>
-                - Access dashboard showing insights on total bills that are
-                approved, reviewed, and awaiting approval.
+                {translate('invite_member.roles.finance_manager.description1')}
               </li>
               <li className="mt-2">
-                - Review, approve, or reject bills, reinforcing financial
-                oversight and decision-making authority.
+                {translate('invite_member.roles.finance_manager.description2')}
               </li>
               <li className="mt-2">
-                - Has visibility into vendor, member, and organization details
-                to make informed and accurate approval decisions.
+                {translate('invite_member.roles.finance_manager.description3')}
               </li>
             </ul>
             <h3 className="mt-4 text-sm font-semibold text-neutral-1100 flex items-center gap-1.5">
-              <CircleX width={14} /> Finance Manager cannot:
+              <CircleX width={14} /> {translate('invite_member.roles.finance_manager.finance_manager_cannot')}
             </h3>
             <ul className="font-medium ms-5 text-xs text-neutral-1100 mt-1">
               <li>
-                - Create or modify vendors or bills, ensuring the role remains
-                solely focused on review and approval responsibilities.
+                {translate('invite_member.roles.finance_manager.description4')}
               </li>
               <li className="mt-2">
-                - Access to user management and organizational settings is
-                restricted to uphold segregation of duties and ensure
-                compliance.
+                {translate('invite_member.roles.finance_manager.description5')}
               </li>
             </ul>
           </div>
@@ -153,35 +140,28 @@ function RoleDescriptions({ role }: RoleDescriptionsProps) {
         {role === "lite_user" ? (
           <div>
             <h3 className="text-sm font-semibold text-neutral-1100 flex items-center gap-1.5">
-              <CircleCheck width={14} /> LITE User can:
+              <CircleCheck width={14} /> {translate('invite_member.roles.lite_user.lite_user_can')}
             </h3>
             <ul className="font-medium ms-5 text-xs text-neutral-1100 mt-2">
               <li>
-                - Confirm Request Receipt Confirmations, serving as an
-                acknowledgment that a bill or invoice has been received by the
-                relevant department or stakeholder.
+                {translate('invite_member.roles.lite_user.description1')}
               </li>
               <li className="mt-2">
-                - View the specific documents or transactions assigned to them
-                for confirmation, ensuring transparency in the receipt
-                lifecycle.
+                {translate('invite_member.roles.lite_user.description2')}
               </li>
             </ul>
             <h3 className="mt-4 text-sm font-semibold text-neutral-1100 flex items-center gap-1.5">
-              <CircleX width={14} /> LITE User cannot:
+              <CircleX width={14} /> {translate('invite_member.roles.lite_user.lite_user_cannot')}
             </h3>
             <ul className="font-medium ms-5 text-xs text-neutral-1100 mt-1">
               <li>
-                - Create, review, approve, or reject bills to ensure this role
-                is limited to acknowledgment duties only.
+                {translate('invite_member.roles.lite_user.description3')}
               </li>
               <li className="mt-2">
-                - Access financial dashboards, advanced reports, or
-                decision-making tools.
+                {translate('invite_member.roles.lite_user.description4')}
               </li>
               <li className="mt-2">
-                - Access or manage vendors, users, or organizational settings to
-                preserve strict data governance and minimize risk exposure.
+                {translate('invite_member.roles.lite_user.description5')}
               </li>
             </ul>
           </div>
@@ -194,7 +174,7 @@ function RoleDescriptions({ role }: RoleDescriptionsProps) {
 const InviteMember = ({ onClose, editMemberData }: InviteMemberProps) => {
   const userDetails = useUserStore((state) => state.user);
   const domain = userDetails?.email?.split("@")[1];
-
+  const translate = useTranslate();
   const {
     register,
     handleSubmit,
@@ -209,6 +189,9 @@ const InviteMember = ({ onClose, editMemberData }: InviteMemberProps) => {
   });
 
   const [isLoaderFormSubmit, setIsLoaderFormSubmit] = useState(false);
+  const memberRoleOptions = memberRoleOptionsBase.map((option)=>{
+    return{...option, label:translate('member_role_options.' + option.value)}
+  })
 
   const setUser = useUserStore((state) => state.setUser);
 
@@ -231,7 +214,7 @@ const InviteMember = ({ onClose, editMemberData }: InviteMemberProps) => {
       const response = await updateMemberApi(data, String(editMemberData.id));
       if (response?.status === 200) {
         const response = await getLoggedInUserDetails();
-        showSuccessToast("Member updated successfully");
+        showSuccessToast(translate('invite_member.success_message.member_update_success'));
         if (response?.status === 200) {
           setUser(response?.data);
           onClose();
@@ -241,7 +224,7 @@ const InviteMember = ({ onClose, editMemberData }: InviteMemberProps) => {
       } else {
         if (response?.data?.role && response?.data?.role[0]) {
           setIsLoaderFormSubmit(false);
-          showErrorToast("Cannot change role — User has pending approvals.");
+          showErrorToast(translate('invite_member.error_message.member_update_failed') + " " + response?.data?.role[0]);
         }
       }
     } else {
@@ -249,7 +232,7 @@ const InviteMember = ({ onClose, editMemberData }: InviteMemberProps) => {
       const response = await inviteUserApi(data);
       if (response?.status === 202) {
         const response = await getLoggedInUserDetails();
-        showSuccessToast("Invitation request sent");
+        showSuccessToast(translate('invite_member.success_message.invitation_sent'));
         if (response?.status === 200) {
           setUser(response?.data);
           onClose();
@@ -259,7 +242,7 @@ const InviteMember = ({ onClose, editMemberData }: InviteMemberProps) => {
       } else {
         if (response?.data?.detail) {
           setIsLoaderFormSubmit(false);
-          showErrorToast("User already exists in your organization");
+          showErrorToast(translate('invite_member.error_message.invitation_failed') + " " + response?.data?.detail);
         }
       }
     }
@@ -288,20 +271,20 @@ const InviteMember = ({ onClose, editMemberData }: InviteMemberProps) => {
           {/* Email and role fields */}
           <div className="px-4">
             <div>
-              <Label htmlFor="email" text="Enter email address" isRequired />
+              <Label htmlFor="email" text={translate('placeholders.enter_email')} isRequired />
               <TextInput
                 register={register("email")}
                 id="email"
-                placeholder="Enter email"
+                placeholder={translate('placeholders.enter_email')}
                 error={errors.email}
                 value={getValues("email")}
                 disabled={editMemberData ? true : false}
               />
             </div>
             <div className="mt-4">
-              <Label htmlFor="role" text="Role" isRequired />
+              <Label htmlFor="role" text={translate('profile.role')} isRequired />
               <SelectComponent
-                title="Member Role"
+                title={translate('invite_member.roles.member_role')}
                 name="role"
                 isDisabled={false ? true : false}
                 register={register}
@@ -309,7 +292,7 @@ const InviteMember = ({ onClose, editMemberData }: InviteMemberProps) => {
                 getValues={getValues}
                 error={errors.role}
                 options={memberRoleOptions}
-                placeholder="Select role"
+                placeholder={translate('invite_member.roles.select_role')}
               // isClearable={true}
               />
             </div>

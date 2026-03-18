@@ -24,8 +24,10 @@ import { showSuccessToast } from "@rever/common";
 import { hasPermission } from "@rever/utils";
 import { PageLoader } from "@rever/common";
 import { CitiesOption, StateOption } from "@rever/types";
+import { useTranslate } from "@rever/i18n";
 
 const GeneralSettings = () => {
+  const translate = useTranslate();
   // Initialize react-hook-form with Zod validation
   const {
     register,
@@ -228,14 +230,14 @@ const GeneralSettings = () => {
           <div className="w-full rounded-[20px] border bg-white shadow-xs p-4 min-h-[calc(100vh-160px)]">
             <div className="flex flex-row items-center border-b border-secondary-200 pb-3">
               <Label
-                text="Organization name:"
+                text={translate('general.org_name')+":"}
                 className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
               />
               <div className="w-1/3">
                 <TextInput
                   register={register("org_name")}
                   id="org_name"
-                  placeholder="Enter org name"
+                  placeholder={translate('placeholders.organization')}
                   error={errors.org_name}
                   value={getValues("org_name")}
                   disabled
@@ -244,7 +246,7 @@ const GeneralSettings = () => {
             </div>
             <div className="flex flex-row items-center border-b border-secondary-200 py-3">
               <Label
-                text="Base currency:"
+                text={translate('general.base_currency')+":"}
                 className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
               />
               <div className="w-1/3">
@@ -255,14 +257,14 @@ const GeneralSettings = () => {
                   error={errors?.currency}
                   getValues={getValues}
                   options={currencyOptions}
-                  placeholder="Select base currency"
+                  placeholder={translate('placeholders.select_base_currency')}
                   isDisabled
                 />
               </div>
             </div>
             <div className="flex flex-row items-center border-b border-secondary-200 py-3">
               <Label
-                text="Date format:"
+                text={translate('general.date_format')+":"}
                 className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
               />
               <div className="w-1/3">
@@ -273,21 +275,21 @@ const GeneralSettings = () => {
                   error={errors?.date_format}
                   getValues={getValues}
                   options={dateFormatOptions}
-                  placeholder="Select date format"
+                  placeholder={translate('placeholders.select_date_format')}
                   isDisabled={!hasPermission("general", "update")}
                 />
               </div>
             </div>
             <div className="flex flex-row items-center border-b border-secondary-200 py-3">
               <Label
-                text="Email:"
+                text={translate('general.email')+":"}
                 className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
               />
               <div className="w-1/3">
                 <TextInput
                   register={register("email")}
                   id="email"
-                  placeholder="Enter org email"
+                  placeholder={translate('placeholders.enter_email')}
                   error={errors.email}
                   value={getValues("email")}
                   disabled={true}
@@ -296,7 +298,7 @@ const GeneralSettings = () => {
             </div>
             <div className="flex flex-row items-center border-b border-secondary-200 py-3">
               <Label
-                text="Contact:"
+                text={translate('general.phone_number')+":"}
                 className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
               />
               <div className="w-1/3">
@@ -318,7 +320,7 @@ const GeneralSettings = () => {
 
             <div className="flex flex-row items-center border-b border-secondary-200 py-3">
               <Label
-                text="Business type:"
+                text={translate('general.business_type')+":"}
                 className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
               />
               <div className="w-1/3">
@@ -329,7 +331,7 @@ const GeneralSettings = () => {
                   error={errors?.business_type}
                   getValues={getValues}
                   options={businessTypeOptions}
-                  placeholder="Select business type"
+                  placeholder={translate('placeholders.business_type')}
                   isClearable
                   isDisabled={!hasPermission("general", "update")}
                 />
@@ -337,7 +339,7 @@ const GeneralSettings = () => {
             </div>
             <div className="flex flex-row items-center border-b border-secondary-200 py-3">
               <Label
-                text="Industry:"
+                text={translate('general.industry')+":"}
                 className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
               />
               <div className="w-1/3">
@@ -348,7 +350,7 @@ const GeneralSettings = () => {
                   error={errors?.industry}
                   getValues={getValues}
                   options={industryOptions}
-                  placeholder="Select industry"
+                  placeholder={translate('placeholders.select_industry')}
                   isClearable
                   isDisabled={!hasPermission("general", "update")}
                 />
@@ -356,7 +358,7 @@ const GeneralSettings = () => {
             </div>
             <div className="flex flex-row items-center border-b border-secondary-200 py-3">
               <Label
-                text="Country:"
+                text={translate('general.country')+":"}
                 className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
               />
               <div className="w-1/3">
@@ -367,7 +369,7 @@ const GeneralSettings = () => {
                   trigger={trigger}
                   error={errors?.address?.country}
                   options={countryOptions}
-                  placeholder="Select country"
+                  placeholder={translate('placeholders.select_country')}
                   isClearable={true}
                   isDisabled={!hasPermission("general", "update")}
                 />
@@ -375,7 +377,7 @@ const GeneralSettings = () => {
             </div>
             <div className="flex flex-row items-center border-b border-secondary-200 py-3">
               <Label
-                text="State:"
+                text={translate('general.state')+":"}
                 className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
               />
               <div className="w-1/3">
@@ -386,7 +388,7 @@ const GeneralSettings = () => {
                   getValues={getValues}
                   error={errors?.address?.state}
                   options={stateOptionsList}
-                  placeholder="Select state"
+                  placeholder={translate('placeholders.select_state')}
                   isClearable={true}
                   isDisabled={!hasPermission("general", "update")}
                 />
@@ -395,7 +397,7 @@ const GeneralSettings = () => {
 
             <div className="flex flex-row items-center border-b border-secondary-200 py-3">
               <Label
-                text="City:"
+                text={translate('general.city')+":"}
                 className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
               />
               <div className="w-1/3">
@@ -406,7 +408,7 @@ const GeneralSettings = () => {
                   trigger={trigger}
                   error={errors?.address?.city}
                   options={cityOptionsList}
-                  placeholder="Select city"
+                  placeholder={translate('placeholders.select_city')}
                   isClearable={true}
                   isDisabled={!hasPermission("general", "update")}
                 />
@@ -414,14 +416,14 @@ const GeneralSettings = () => {
             </div>
             <div className="flex flex-row items-center border-b border-secondary-200 py-3">
               <Label
-                text="ZIP code:"
+                text={translate('general.zipcode')+":"}
                 className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
               />
               <div className="w-1/3">
                 <TextInput
                   register={register("address.zip_code")}
                   id="zip_code"
-                  placeholder="Enter zipcode"
+                  placeholder={translate('placeholders.enter_zipcode')}
                   error={errors?.address?.zip_code}
                   value={getValues("address.zip_code")}
                   disabled={!hasPermission("general", "update")}

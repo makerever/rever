@@ -7,7 +7,9 @@
     "jsx": "react-jsx",
     "paths": {
       "@rever/common": ["."],
-      "@rever/common/*": ["*"]
+      "@rever/common/*": ["*"],
+      "@rever/i18n": ["../i18n/src"],
+      "@rever/i18n/*": ["../i18n/src/*"]
     }
   },
   "include": ["src"]

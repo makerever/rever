@@ -11,6 +11,7 @@ import { CirclePlus, Dot, LogOut, UserRoundPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useLoader } from "@rever/common";
+import { useTranslate } from "@rever/i18n";
 
 // OrgProfile component displays a popup with organization actions and profile info
 const OrgProfile = ({
@@ -21,6 +22,7 @@ const OrgProfile = ({
   // Get logout function from user store
   const logoutUser = useUserStore((state) => state.logout);
   const { setShow } = useLoader();
+  const translate = useTranslate();
 
   const router = useRouter();
 
@@ -83,14 +85,14 @@ const OrgProfile = ({
           className="menu-item menu-item-sidebar"
         >
           <CirclePlus size={16} />
-          <p className="ms-1.5">Create bills</p>
+          <p className="ms-1.5">{translate('global_search.create_bill')}</p>
         </div>
       ) : null}
 
       {/* Logout action */}
       <div onClick={logOut} className="menu-item menu-item-sidebar-danger">
         <LogOut size={16} />
-        <p className="ms-1.5">Logout</p>
+        <p className="ms-1.5">{translate('profile_sidebar.logout')}</p>
       </div>
     </div>
   );

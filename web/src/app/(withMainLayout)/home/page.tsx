@@ -258,17 +258,17 @@ const Home = () => {
               value={billSummaryData?.total}
             />
             <Card
-              heading="Under review"
+              heading={translate('vendors.vendor_credit.stagebar.under_review')}
               icon={<FileClock width={20} />}
               value={billSummaryData?.in_review}
             />
             <Card
-              heading="Under approval"
+              heading={translate('vendors.vendor_credit.stagebar.under_approval')}
               icon={<FileCheck width={20} />}
               value={billSummaryData?.under_approval}
             />
             <Card
-              heading="Approved"
+              heading={translate('vendors.vendor_credit.stagebar.approved')}
               icon={<CircleCheck width={20} />}
               value={billSummaryData?.approved}
             />
@@ -293,13 +293,13 @@ const Home = () => {
               series={billStageSegregation.map((v) => v?.count)}
               billAllData={billStageSegregation}
               isDataLoading={isPieChartLoading}
-              heading="Bills by stage"
+              heading={translate('home.bills_by_stage.heading')}
               labels={[
-                "Under review",
-                "Under approval",
-                "Approved",
-                "Rejected",
-                "Ledger entry",
+                translate('bills.stage.under_review'),
+                translate('bills.stage.under_approval'),
+                translate('bills.stage.approved'),
+                translate('bills.stage.rejected'),
+                translate('bills.stage.ledger_entry'),
               ]}
               colors={["#F5D670", "#79D7EC", "#AAD57B", "#E57C98", "#8582E5"]}
               barChartFilter={radialChartFilter}

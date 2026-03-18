@@ -11,6 +11,7 @@ import {
 } from "@rever/common";
 import { I18nProvider } from "@rever/i18n";
 
+
 const geist = Geist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {

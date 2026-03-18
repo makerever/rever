@@ -1,39 +1,39 @@
 {
-  "welcome": "Bienvenido a Rever",
+  "welcome": "Bienvenido a Rever dentro de welcome",
   "placeholders": {
     "search": "Buscar",
     "email_input": "nombre@empresa.com",
-    "first_name": "Ingrese nombre",
-    "last_name": "Ingrese apellido",
-    "organization": "Ingrese nombre de la organización",
-    "password": "Ingrese contraseña",
-    "confirm_password": "Confirmar contraseña",
-    "select_base_currency": "Seleccionar moneda base",
-    "select_date_format": "Seleccionar formato de fecha",
-    "enter_email": "Ingrese correo electrónico",
-    "business_type": "Seleccionar tipo de negocio",
-    "select_industry": "Seleccionar industria",
-    "select_country": "Seleccionar país",
-    "select_state": "Seleccionar estado",
-    "select_city": "Seleccionar ciudad",
-    "enter_zipcode": "Ingrese código postal",
-    "select_language": "Seleccionar idioma",
-    "search_total_bills": "Buscar total de facturas",
-    "global_search": "Buscar cualquier cosa",
+    "first_name": "Ingrese el nombre",
+    "last_name": "Ingrese el apellido",
+    "organization": "Ingrese el nombre de la organización",
+    "password": "Ingrese la contraseña",
+    "confirm_password": "Confirme la contraseña",
+    "select_base_currency": "Seleccione la moneda base",
+    "select_date_format": "Seleccione el formato de fecha",
+    "enter_email": "Ingrese el correo electrónico",
+    "business_type": "Seleccione el tipo de negocio",
+    "select_industry": "Seleccione la industria",
+    "select_country": "Seleccione el país",
+    "select_state": "Seleccione el estado",
+    "select_city": "Seleccione la ciudad",
+    "enter_zipcode": "Ingrese el código postal",
+    "select_language": "Seleccione el idioma",
+    "search_total_bills": "Buscar facturas totales",
+    "global_search": "Buscar algo",
     "search_bill": "Buscar facturas",
     "bill": {
-      "enter_bill": "Ingrese número de factura",
+      "enter_bill": "Ingrese el número de factura",
       "select_vendor": "Seleccionar proveedor",
       "select_po": "Seleccionar orden de compra",
       "select_pt": "Seleccionar términos de pago",
       "select_bill_date": "Seleccionar fecha de factura",
       "select_due_date": "Seleccionar fecha de vencimiento",
-      "select_coa": "Seleccionar catálogo de cuentas"
+      "select_coa": "Seleccionar COA"
     }
   },
   "buttons": {
     "continue": "Continuar",
-    "register": "Registrar",
+    "register": "Registrarse",
     "back": "Atrás",
     "save": "Guardar",
     "save_draft": "Guardar como borrador",
@@ -47,7 +47,7 @@
       "purchase_order": "Órdenes de compra",
       "vendors": "Proveedores",
       "approvals": "Aprobaciones",
-      "coa": "Catálogo de cuentas",
+      "coa": "Plan de cuentas",
       "confirmations": "Confirmaciones"
     },
     "inbox": "Bandeja de entrada",
@@ -68,14 +68,15 @@
     "notification": "Notificación",
     "appereance": "Apariencia",
     "back_home": "Volver al inicio",
-    "back_confirmations": "Volver a confirmaciones"
+    "back_confirmations": "Volver a confirmaciones",
+    "logout": "Cerrar sesión"
   },
   "global_search": {
     "vendors": "Proveedores",
-    "po": "Órdenes de compra",
+    "po": "OC",
     "bills": "Facturas",
     "members": "Miembros",
-    "create_po": "Crear orden de compra",
+    "create_po": "Crear OC",
     "create_bill": "Crear factura",
     "inbox": "Bandeja de entrada",
     "profile": "Perfil",
@@ -94,7 +95,7 @@
       "last_12_months": "Últimos 12 meses"
     },
     "dashboard_options": {
-      "overview": "Resumen general",
+      "overview": "Resumen",
       "2way_match": "Cotejo de 2 vías",
       "3way_match": "Cotejo de 3 vías"
     }
@@ -133,7 +134,7 @@
         "under_review": "En revisión",
         "under_approval": "En aprobación",
         "approved": "Aprobado",
-        "ledger_entry": "Entrada de libro mayor",
+        "ledger_entry": "Asiento contable",
         "rejected": "Rechazado"
       },
       "2_way": {
@@ -143,11 +144,11 @@
         },
         "bills_with_po": {
           "heading": "Facturas con OC",
-          "tooltip": "Facturas vinculadas a una orden de compra"
+          "tooltip": "Facturas vinculadas a una OC"
         },
         "bills_without_po": {
           "heading": "Facturas sin OC",
-          "tooltip": "Facturas sin orden de compra"
+          "tooltip": "Facturas sin OC"
         },
         "duplicate_bills": {
           "heading": "Facturas duplicadas",
@@ -178,17 +179,17 @@
       "exact_match": "Coincidencia exacta",
       "partial_match": "Coincidencia parcial",
       "mismatch": "Discrepancia",
-      "tooltip": "Vista histórica del rendimiento del cotejo de facturas para rastrear tendencias en el tiempo"
+      "tooltip": "Vista histórica del rendimiento de cotejo de sus facturas para seguir tendencias a lo largo del tiempo"
     },
     "bills_by_stage": {
       "heading": "Facturas por etapa",
       "tooltip": "Facturas segregadas por su etapa actual en el flujo de trabajo de aprobación"
     },
     "analytics": "Analítica",
-    "insights": "Información",
+    "insights": "Perspectivas",
     "Total bills": "Total de facturas",
-    "Bills with PO": "Facturas con orden de compra",
-    "Bills without PO": "Facturas sin orden de compra",
+    "Bills with PO": "Facturas con OC",
+    "Bills without PO": "Facturas sin OC",
     "Duplicate bills": "Facturas duplicadas"
   },
   "data_table": {
@@ -205,12 +206,12 @@
     "heading": "Facturas",
     "forward_bill": "Reenvíe sus facturas para crear gastos automáticamente en:",
     "stage": {
-      "Overview": "Resumen",
-      "Under review": "En revisión",
-      "Under approval": "En aprobación",
-      "Approved": "Aprobado",
-      "Ledger entry": "Entrada de libro mayor",
-      "Rejected": "Rechazado"
+      "overview": "Resumen",
+      "under_review": "En revisión",
+      "under_approval": "En aprobación",
+      "approved": "Aprobado",
+      "ledger_entry": "Asiento contable",
+      "rejected": "Rechazado"
     },
     "filter": {
       "status": "Estado"
@@ -239,16 +240,16 @@
     "bill_date": "Fecha de factura",
     "due_date": "Fecha de vencimiento",
     "bill_line_items": {
-      "heading": "Partidas de la factura",
+      "heading": "Líneas de factura",
       "description": "Descripción",
-      "coa": "Catálogo de cuentas",
+      "coa": "Plan de cuentas",
       "product_code": "Código de producto",
       "qty": "Cant.",
       "unit_price": "Precio unitario",
       "amount": "Monto",
       "action": "Acción"
     },
-    "new_item": "Nuevo ítem de factura",
+    "new_item": "Nuevo artículo de factura",
     "sub_total": "Subtotal",
     "total_tax": "Impuesto total",
     "total": "Total",
@@ -258,6 +259,8 @@
   },
   "purchase_order": {
     "heading": "Órdenes de compra",
+    "po_details": "Detalles de la OC",
+    "associate_bills": "Asociar facturas",
     "buttons": {
       "upload_po": "Subir OC",
       "create_po": "Crear orden de compra"
@@ -288,22 +291,33 @@
       "po_date": "Fecha de OC",
       "delivery_date": "Fecha de entrega",
       "po_line_items": {
-        "heading": "Partidas de la OC",
+        "heading": "Líneas de OC",
         "description": "Descripción",
-        "coa": "Catálogo de cuentas",
+        "coa": "Plan de cuentas",
         "qty": "Cant.",
         "unit_price": "Precio unitario",
         "amount": "Monto",
         "action": "Acción"
       },
-      "new_item": "Nuevo ítem de OC",
+      "new_item": "Nuevo artículo de OC",
       "sub_total": "Subtotal",
       "total_tax": "Impuesto total",
       "total": "Total",
       "grand_total": "Total general",
       "notes": "Notas",
       "enter_notes": "Ingrese notas"
-    }
+    },
+    "po_preview": "Vista previa de OC",
+    "consumed": "Consumido",
+    "available": "Disponible",
+    "view_po": {
+      "no_pos": "No hay líneas para mostrar.",
+      "grand_total": "Total general",
+      "total_tax": "Impuesto total",
+      "sub_total": "Subtotal"
+    },
+    "rejection_reason": "Razón de rechazo",
+    "notes": "Notas:"
   },
   "vendors": {
     "heading": "Proveedores",
@@ -319,10 +333,14 @@
       "vendor": "Proveedor",
       "company_name": "Nombre de la empresa",
       "email": "Correo electrónico",
-      "tax_id": "ID de impuesto",
+      "tax_id": "ID fiscal",
       "status": "Estado"
     },
     "rows_per_page": "Filas por página",
+    "view_vendors": {
+      "no_vendors": "No se encontraron proveedores",
+      "search_vendors": "Buscar proveedores"
+    },
     "create_vendor": {
       "heading": "Nuevo proveedor",
       "vendor_details": {
@@ -331,9 +349,10 @@
         "company_name": "Nombre de la empresa",
         "email": "Correo electrónico",
         "mobile": "Móvil",
-        "tax_id": "ID de impuesto",
+        "tax_id": "ID fiscal",
         "website": "Sitio web",
-        "payment_terms": "Términos de pago"
+        "payment_terms": "Términos de pago",
+        "contact": "Contacto"
       },
       "vendor_address": {
         "heading": "Dirección del proveedor",
@@ -346,7 +365,7 @@
       },
       "bank_account_details": {
         "heading": "Detalles de la cuenta bancaria",
-        "account_holder_name": "Nombre del titular de la cuenta",
+        "account_holder_name": "Nombre del titular",
         "bank_name": "Nombre del banco",
         "account_number": "Número de cuenta"
       }
@@ -377,8 +396,8 @@
       "rows_per_page": "Filas por página",
       "upload_vendor_credit": {
         "heading": "Subir archivos",
-        "subheading": "Seleccione los archivos que desee subir",
-        "input_label": "Haga clic o arrastre archivos aquí para subir",
+        "subheading": "Seleccione los archivos que desea subir",
+        "input_label": "Haga clic o suelte los archivos aquí para subir",
         "input_helper_text": "Suba hasta 50 archivos, cada uno de máximo 5 MB"
       },
       "create_vendor_credit": {
@@ -399,14 +418,14 @@
           "vendor_credit_date": "Fecha de crédito"
         },
         "vendor_credit_line_items": {
-          "heading": "Partidas del crédito",
+          "heading": "Líneas de crédito",
           "description": "Descripción",
           "qty": "Cant.",
           "unit_price": "Precio unitario",
           "amount": "Monto",
           "action": "Acción"
         },
-        "new_item": "Nuevo ítem de crédito",
+        "new_item": "Nuevo artículo de crédito",
         "sub_total": "Subtotal",
         "total_tax": "Impuesto total",
         "grand_total": "Total general",
@@ -417,6 +436,126 @@
     },
     "inbox": {
       "heading": "Bandeja de entrada"
+    }
+  },
+  "payment_terms_options": {
+    "net15": "Neto 15 días",
+    "net30": "Neto 30 días",
+    "net45": "Neto 45 días",
+    "due": "Vencimiento al recibir"
+  },
+  "member_role_options": {
+    "admin": "Administrador",
+    "finance_manager": "Gerente de finanzas",
+    "accountant": "Contador",
+    "viewer": "Visor",
+    "lite_user": "Usuario Lite"
+  },
+  "overview_options": {
+    "this_month": "Este mes",
+    "last_3_months": "Últimos 3 meses",
+    "last_6_months": "Últimos 6 meses",
+    "last_12_months": "Últimos 12 meses"
+  },
+  "bank_account_types": {
+    "savings": "Ahorros",
+    "current": "Corriente",
+    "checking": "Cheques",
+    "personal": "Personal"
+  },
+  "business_types": {
+    "private_limited": "Sociedad limitada privada",
+    "public_limited": "Sociedad anónima",
+    "partnership": "Sociedad",
+    "proprietorship": "Propietario único",
+    "llc": "LLC",
+    "other": "Otro",
+    "s_corp": "S-Corp",
+    "c_corp": "C-Corp",
+    "non_profit": "Sin fines de lucro",
+    "government_agency": "Agencia gubernamental"
+  },
+  "matching_options": {
+    "none": "Ninguno",
+    "no_match_description": "Las facturas se procesarán sin compararlas con OC o recibos.",
+    "two_way": "Cotejo de 2 vías",
+    "three_way": "Cotejo de 3 vías",
+    "two_way_description": "Verificar que la factura coincida con la OC en precio y cantidad.",
+    "three_way_description": "Verificar que los bienes fueron pedidos y recibidos antes de pagar la factura."
+  },
+  "confirmations": {
+    "request_confirmation": "Solicitar confirmación",
+    "view_confirmations": "Ver confirmaciones",
+    "title": "Confirmar",
+    "delete": "Eliminar"
+  },
+  "search": {
+    "search_filters": "Filtros de búsqueda"
+  },
+  "help_support": {
+    "documentation": "Documentación",
+    "email_us": "Envíenos un correo"
+  },
+  "confirm_deletion": {
+    "confirm": "confirmar",
+    "delete": "Eliminar"
+  },
+  "invite_member": {
+    "heading": "Invitar miembro",
+    "about": "Rever garantiza un acceso seguro basado en roles para agilizar su proceso de cuentas por pagar manteniendo responsabilidades claras.",
+    "roles": {
+      "member_role": "Rol del miembro",
+      "select_role": "Seleccionar rol",
+      "admin": {
+        "heading": "Administrador",
+        "admin_can": "El administrador puede:",
+        "description1": "- Acceder al tablero para ver información de facturas.",
+        "description2": "- Gestionar proveedores y supervisar el flujo de facturas.",
+        "description3": "- Configurar flujos de aprobación y ajustes de la organización.",
+        "description4": "- Configurar reglas de aprobación.",
+        "admin_cannot": "El administrador no puede:",
+        "description5": "- Aprobar una factura como aprobador, pero puede reasignarla."
+      },
+      "finance_manager": {
+        "heading": "Gerente de Finanzas",
+        "finance_manager_can": "El gerente de finanzas puede:",
+        "description1": "- Acceder al tablero con información de facturas.",
+        "description2": "- Revisar, aprobar o rechazar facturas.",
+        "description3": "- Ver detalles de proveedores y miembros.",
+        "finance_manager_cannot": "El gerente de finanzas no puede:",
+        "description4": "- Crear o modificar proveedores o facturas.",
+        "description5": "- Acceder a la gestión de usuarios o ajustes organizativos."
+      },
+      "member": {
+        "heading": "Miembro",
+        "memeber_can": "El miembro puede:",
+        "description1": "- Acceder al tablero para ver estados de facturas.",
+        "description2": "- Crear y mantener perfiles de proveedores.",
+        "description3": "- Crear, modificar, eliminar y enviar facturas.",
+        "description4": "- Ver miembros del equipo y detalles de la organización.",
+        "memeber_cannot": "El miembro no puede:",
+        "description5": "- Aprobar acciones para mantener la integridad del proceso.",
+        "description6": "- Invitar miembros o modificar ajustes de aprobación."
+      },
+      "lite_user": {
+        "heading": "Usuario Lite",
+        "select_lite_user": "Seleccionar usuario lite",
+        "lite_user_can": "El usuario LITE puede:",
+        "description1": "- Confirmar recepciones de solicitudes.",
+        "description2": "- Ver documentos o transacciones específicos asignados.",
+        "lite_user_cannot": "El usuario LITE no puede:",
+        "description3": "- Crear, revisar, aprobar o rechazar facturas.",
+        "description4": "- Acceder a tableros financieros o reportes avanzados.",
+        "description5": "- Gestionar proveedores, usuarios o ajustes."
+      }
+    },
+    "success_message": {
+      "memeber_update_success": "Miembro actualizado con éxito",
+      "invitation_sent": "Solicitud de invitación enviada"
+    },
+    "error_message": {
+      "memeber_update_failed": "No se puede cambiar el rol — El usuario tiene aprobaciones pendientes.",
+      "invitation_failed": "El usuario ya existe en su organización"
     }
   }
 }

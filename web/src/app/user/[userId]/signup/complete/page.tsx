@@ -27,9 +27,11 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import Cookies from "js-cookie";
+import { useTranslate } from "@rever/i18n";
 
 // Main Invitation component for completing user signup after invitation
 const Invitation = () => {
+  const translate = useTranslate();
   const {
     register,
     handleSubmit,
@@ -126,12 +128,12 @@ const Invitation = () => {
       {/* Page background and centered container */}
 
       <AuthLayout
-        mainTitle="Welcome to Rever"
+        mainTitle = {translate('welcome')}
         subTitle={"Fill up your details to get started"}
       >
         <form onSubmit={handleSubmit(handleInviteMember)}>
           <div>
-            <Label htmlFor="organization" text="Organization name" />
+            <Label htmlFor="organization" text = {translate('general.org_name')} />
             <TextInput
               id="organization"
               value={inviteUserDetails?.organization}
@@ -140,7 +142,7 @@ const Invitation = () => {
           </div>
 
           <div className="mt-4">
-            <Label htmlFor="email" text="Email" />
+            <Label htmlFor="email" text={translate('profile.email')} />
             <TextInput
               id="email"
               value={inviteUserDetails?.email}
@@ -151,22 +153,22 @@ const Invitation = () => {
           <div className="grid grid-cols-2 gap-5 mt-4">
             {/* First name input */}
             <div>
-              <Label htmlFor="first_name" text="First name" isRequired />
+              <Label htmlFor="first_name" text={translate('profile.first_name')} isRequired />
               <TextInput
                 register={register("first_name")}
                 id="first_name"
-                placeholder="Enter first name"
+                placeholder={translate('placeholders.first_name')}
                 error={errors.first_name}
               // value={getValues("first_name")}
               />
             </div>
             {/* Last name input */}
             <div>
-              <Label htmlFor="last_name" text="Last name" isRequired />
+              <Label htmlFor="last_name" text={translate('profile.last_name')} isRequired />
               <TextInput
                 register={register("last_name")}
                 id="last_name"
-                placeholder="Enter last name"
+                placeholder={translate('placeholders.last_name')}
                 error={errors.last_name}
               // value={getValues("last_name")}
               />
@@ -179,7 +181,7 @@ const Invitation = () => {
             <PasswordInput
               register={register("password")}
               id="password"
-              placeholder="Enter password"
+              placeholder={translate('placeholders.password')}
               error={touchedFields.password ? errors.password : undefined}
               value={getValues("password")}
               password={password}
