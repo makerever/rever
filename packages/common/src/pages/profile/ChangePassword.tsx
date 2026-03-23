@@ -5,7 +5,7 @@
 import { changePasswordApi } from "@rever/services";
 import { useState } from "react";
 import {
-  changePasswordSchema,
+  createChangePasswordSchema,
   changePasswordSchemaValues,
 } from "@rever/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,8 +14,10 @@ import { Label } from "@rever/common";
 import { PasswordInput } from "@rever/common";
 import { Button } from "@rever/common";
 import { showErrorToast, showSuccessToast } from "@rever/common";
+import { useTranslate } from "@rever/i18n";
 
 const ChangePassword = () => {
+  const translate = useTranslate();
   const {
     register,
     handleSubmit,
@@ -24,10 +26,9 @@ const ChangePassword = () => {
     reset,
     watch,
   } = useForm({
-    resolver: zodResolver(changePasswordSchema),
+    resolver: zodResolver(createChangePasswordSchema(translate)),
     mode: "onChange",
   });
-
   // Watch for changes in new password and confirm password fields
   const new_password = watch("new_password");
   const confirmPassword = watch("confirmPassword");
@@ -47,7 +48,7 @@ const ChangePassword = () => {
     });
     if (response?.status === 200) {
       if (typeof window !== "undefined") {
-        showSuccessToast("Password changed successfully!");
+        showSuccessToast(translate("profile.change_password.success"));
         setIsLoaderFormSubmit(false);
         reset();
       }
@@ -66,7 +67,7 @@ const ChangePassword = () => {
         <div className="flex items-center justify-between w-full h-8">
           <div className="flex items-center gap-3">
             <p className="text-neutral-1100 text-2xl font-medium">
-              Change password
+              {translate("profile.change_password.heading")}
             </p>
           </div>
         </div>
@@ -83,14 +84,14 @@ const ChangePassword = () => {
           <div className="border-b border-neutral-200 flex items-center pb-3">
             <Label
               htmlFor="old_password"
-              text="Old password:"
+              text={translate("profile.change_password.old_password")}
               className="text-neutral-700 font-medium text-sm max-w-60 w-full"
             />
             <div className="max-w-80 w-full">
               <PasswordInput
                 register={register("old_password")}
                 id="old_password"
-                placeholder="Enter old password"
+                placeholder={translate("profile.change_password.enter_old_password")}
                 error={
                   touchedFields.old_password ? errors.old_password : undefined
                 }
@@ -103,14 +104,14 @@ const ChangePassword = () => {
           <div className="border-b border-neutral-200 flex items-center py-3">
             <Label
               htmlFor="new_password"
-              text="New password:"
+              text={translate("profile.change_password.new_password")}
               className="text-neutral-700 font-medium text-sm max-w-60 w-full"
             />
             <div className="max-w-80 w-full">
               <PasswordInput
                 register={register("new_password")}
                 id="new_password"
-                placeholder="Enter new password"
+                placeholder={translate("profile.change_password.enter_new_password")}
                 error={
                   touchedFields.new_password ? errors.new_password : undefined
                 }
@@ -124,14 +125,14 @@ const ChangePassword = () => {
           <div className="border-b border-neutral-200 flex items-center py-3">
             <Label
               htmlFor="confirmPassword"
-              text="Confirm password:"
+              text={translate("profile.change_password.confirm_password")}
               className="text-neutral-700 font-medium text-sm max-w-60 w-full"
             />
             <div className="max-w-80 w-full">
               <PasswordInput
                 register={register("confirmPassword")}
                 id="confirmPassword"
-                placeholder="Enter confirm password"
+                placeholder={translate("profile.change_password.enter_confirm_password")}
                 error={errors.confirmPassword}
                 value={getValues("confirmPassword")}
               />
@@ -146,7 +147,7 @@ const ChangePassword = () => {
             disabled={
               isPasswordValid || isConfirmPasswordValid || isLoaderFormSubmit
             }
-            name="Save changes"
+            name={translate("profile.change_password.save_changes")}
             button_type="primary"
             icon_type={isLoaderFormSubmit ? "loader" : null}
           />

@@ -3,7 +3,7 @@
 "use client";
 
 import {
-  addPurchaseOrderSchema,
+  createAddPurchaseOrderSchema,
   addPurchaseOrderSchemaValues,
 } from "@rever/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -65,9 +65,10 @@ import {
   uploadDocument,
 } from "@rever/services";
 import { useBreadcrumbStore, useUserStore } from "@rever/stores";
+import { useTranslate } from "@rever/i18n";
 import Lottie from "lottie-react";
 
-const getStatusIcon = (status: string, error_message?: string) => {
+const getStatusIcon = (status: string, error_message?: string, fileSizeLimitMsg?: string) => {
   switch (status) {
     case "uploading":
       return <Loader className="animate-spin text-slate-800" size={20} />;
@@ -82,11 +83,7 @@ const getStatusIcon = (status: string, error_message?: string) => {
     case "failed":
       return (
         <CustomTooltip
-          content={
-            error_message
-              ? error_message
-              : "File must be under 5MB and limited to 5 pages"
-          }
+          content={error_message || fileSizeLimitMsg || "File must be under 5MB and limited to 5 pages"}
           side="right"
         >
           <div>
@@ -104,6 +101,7 @@ const POLL_DELAY_MS = 2000;
 const PDF_TYPE = "application/pdf";
 
 const AddPOComponentWithParams = () => {
+  const translate = useTranslate();
   const {
     register,
     handleSubmit,
@@ -115,7 +113,7 @@ const AddPOComponentWithParams = () => {
     watch,
     resetField,
   } = useForm({
-    resolver: zodResolver(addPurchaseOrderSchema),
+    resolver: zodResolver(createAddPurchaseOrderSchema(translate)),
     mode: "onChange",
     defaultValues: {
       items: [
@@ -283,7 +281,7 @@ const AddPOComponentWithParams = () => {
             uploadRes?.data[0] ===
             "Your subscription has expired. Please renew to continue."
           ) {
-            showErrorToast(uploadRes?.data[0]);
+            showErrorToast(translate("common.subscription_expired"));
             setShowPdf(false);
             setFileUrl(null);
             setFileDetails(null);
@@ -291,12 +289,12 @@ const AddPOComponentWithParams = () => {
             setShowPdf(false);
             setFileUrl(null);
             setFileDetails(null);
-            showErrorToast("File must be under 5MB and limited to 5 pages");
+            showErrorToast(translate("common.file_size_limit"));
           }
         }
       }
     } else {
-      alert("Please upload a valid PDF file.");
+      alert(translate("common.upload_valid_pdf"));
     }
   };
 
@@ -318,7 +316,7 @@ const AddPOComponentWithParams = () => {
           setFileUrl(null);
           setFileDetails(null);
           showErrorToast(
-            error_message || "File must be under 5MB and limited to 5 pages",
+            error_message || translate("common.file_size_limit"),
           );
           break;
         }
@@ -333,7 +331,7 @@ const AddPOComponentWithParams = () => {
     if (!fileResponse?.id) return;
     const response = await deletePOAttachment(fileResponse?.id || "");
     if (response?.status === 204 && idValue) {
-      showSuccessToast("PO attachment deleted");
+      showSuccessToast(translate("purchase_order.attachment_deleted"));
       fetchPODetailsById(idValue);
     }
   }, [fileResponse?.id, idValue, fetchPODetailsById]);
@@ -401,7 +399,7 @@ const AddPOComponentWithParams = () => {
       if (idValue) {
         const response = await updatePOApi(poDetailsPayload, idValue);
         if (response?.status === 200) {
-          showSuccessToast("PO updated successfully");
+          showSuccessToast(translate("purchase_order.updated"));
           // router.push("/purchaseorder/list");
           router.push(`/purchaseorder/view?id=${idValue}`);
         } else {
@@ -421,13 +419,13 @@ const AddPOComponentWithParams = () => {
               response?.data?.id,
             );
             if (responseFile?.status === 201) {
-              showSuccessToast("PO created successfully");
+              showSuccessToast(translate("purchase_order.created"));
             } else {
-              showErrorToast("Something went wrong!!");
+              showErrorToast(translate("common.something_went_wrong"));
             }
             router.push("/purchaseorder/list");
           } else {
-            showSuccessToast("PO created successfully");
+            showSuccessToast(translate("purchase_order.created"));
             router.push("/purchaseorder/list");
           }
         } else {
@@ -453,7 +451,7 @@ const AddPOComponentWithParams = () => {
             <div className="flex items-center gap-3">
               {/* Po number */}
               <p className="text-neutral-1100 font-medium text-2xl">
-                {poDetails?.po_number ?? "New PO"}
+                {poDetails?.po_number ?? translate("purchase_order.new_po")}
               </p>
 
               {/* Toggle to show/hide PDF if fileUrl exists */}
@@ -461,7 +459,7 @@ const AddPOComponentWithParams = () => {
                 <div className="flex items-center">
                   <ToggleSwitch isOn={showPdf} setIsOn={setShowPdf} />
                   <p className="ms-1.5 text-sm text-neutral-1100 font-medium">
-                    {!showPdf ? "Show pdf" : "Hide pdf"}
+                    {!showPdf ? translate("purchase_order.actions.show_pdf") : translate("purchase_order.actions.hide_pdf")}
                   </p>
                 </div>
               ) : null}
@@ -482,7 +480,7 @@ const AddPOComponentWithParams = () => {
                     />
 
                     <Button
-                      name={idValue ? "Upload PO" : "Extract PO"}
+                      name={idValue ? translate("purchase_order.upload_po_btn") : translate("purchase_order.extract_po_btn")}
                       button_type="primary-outline"
                       icon_type="upload"
                       disabled={isLoaderFormSubmit}
@@ -495,7 +493,7 @@ const AddPOComponentWithParams = () => {
               <div className="flex items-center gap-3">
                 <div className="w-fit">
                   <Button
-                    name="Cancel"
+                    name={translate("buttons.cancel")}
                     onClick={() =>
                       idValue
                         ? router.push(`/purchaseorder/view?id=${idValue}`)
@@ -507,24 +505,24 @@ const AddPOComponentWithParams = () => {
                 </div>
                 {!idValue || poDetails?.status === "draft" ? (
                   <DropdownButton
-                    name="Save"
+                    name={translate("buttons.save")}
                     onActionBtClick={() => {
                       triggerSubmit("in_review");
                     }}
                     onClose={() => setShowBtnPopup(false)}
                     onBtnPopupItemsClick={(val) => {
-                      if (val === "Save as draft") {
+                      if (val === translate("buttons.save_draft")) {
                         triggerSubmit("draft");
                       }
                     }}
                     onClickArrow={() => setShowBtnPopup(true)}
                     showBtnPopup={showBtnPopup}
-                    btnPopupItems={["Save", "Save as draft"]}
+                    btnPopupItems={[translate("buttons.save"), translate("buttons.save_draft")]}
                     button_type="primary"
                   />
                 ) : (
                   <Button
-                    name="Save"
+                    name={translate("buttons.save")}
                     onClick={() => triggerSubmit("in_review")}
                     button_type="primary"
                     icon_type={isLoaderFormSubmit ? "loader" : null}
@@ -550,21 +548,21 @@ const AddPOComponentWithParams = () => {
                 >
                   {/* PO details fields */}
                   <p className="text-neutral-1100 text-xl font-medium mb-5">
-                    PO details
+                    {translate("purchase_order.po_details")}
                   </p>
                   <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
                     <div>
-                      <Label htmlFor="poNumber" text="PO number" />
+                      <Label htmlFor="poNumber" text={translate("purchase_order.create_po.po_number")} />
                       <TextInput
                         register={register("poNumber")}
                         id="poNumber"
-                        placeholder="Enter PO no"
+                        placeholder={translate("placeholders.po.enter_po")}
                         error={errors.poNumber}
                         value={getValues("poNumber")}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="vendor" text="Vendor" isRequired />
+                      <Label htmlFor="vendor" text={translate("purchase_order.create_po.vendor")} isRequired />
                       <SelectComponent
                         name="vendor"
                         register={register}
@@ -572,20 +570,20 @@ const AddPOComponentWithParams = () => {
                         title="Vendor"
                         error={errors?.vendor}
                         options={vendorOptionList}
-                        placeholder="Select vendor"
+                        placeholder={translate("placeholders.bill.select_vendor")}
                         isClearable={true}
                         getValues={getValues}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="payment_terms" text="Payment terms" />
+                      <Label htmlFor="payment_terms" text={translate("purchase_order.create_po.payment_terms")} />
                       <SelectComponent
                         name="payment_terms"
                         register={register}
                         trigger={trigger}
                         error={errors?.payment_terms}
-                        options={paymentTermsOptions}
-                        placeholder="Select payment terms"
+                        options={paymentTermsOptions.map((opt) => ({ ...opt, label: translate(`payment_terms_options.${opt.value}`) }))}
+                        placeholder={translate("placeholders.bill.select_pt")}
                         isClearable={true}
                         getValues={getValues}
                       />
@@ -594,25 +592,25 @@ const AddPOComponentWithParams = () => {
                   {/* PO date and due date fields */}
                   <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5 mb-5">
                     <div>
-                      <Label htmlFor="po_date" text="PO date" />
+                      <Label htmlFor="po_date" text={translate("purchase_order.create_po.po_date")} />
                       <DatePickerDemo
                         register={register}
                         name="po_date"
                         error={errors.po_date}
                         trigger={trigger}
-                        placeholder="Select PO date"
+                        placeholder={translate("placeholders.po.select_po_date")}
                         title="PO date"
                         value={watch("po_date") ?? undefined}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="delivery_date" text="Delivery date" />
+                      <Label htmlFor="delivery_date" text={translate("purchase_order.create_po.delivery_date")} />
                       <DatePickerDemo
                         register={register}
                         name="delivery_date"
                         error={errors.delivery_date}
                         trigger={trigger}
-                        placeholder="Select delivery date"
+                        placeholder={translate("placeholders.po.select_delivery_date")}
                         title="Delivery date"
                         value={watch("delivery_date") ?? undefined}
                         disabledBefore={
@@ -632,7 +630,7 @@ const AddPOComponentWithParams = () => {
                   }}
                 >
                   <p className="text-neutral-1100 text-xl font-medium mb-5 px-4">
-                    PO line items
+                    {translate("purchase_order.create_po.po_line_items.heading")}
                   </p>
                   <POItemsTable
                     getValues={getValues}
@@ -643,12 +641,12 @@ const AddPOComponentWithParams = () => {
                   />
                   <div className="flex items-center justify-between mt-5 px-4">
                     <div className="w-1/2">
-                      <Label htmlFor="comments" text="Notes" />
+                      <Label htmlFor="comments" text={translate("purchase_order.create_po.notes")} />
                       <TextAreaInput
                         rows={4}
                         register={register("comments")}
                         id="comments"
-                        placeholder="Enter notes"
+                        placeholder={translate("purchase_order.create_po.enter_notes")}
                         error={errors.comments}
                         value={getValues("comments") ?? undefined}
                       />
@@ -656,14 +654,14 @@ const AddPOComponentWithParams = () => {
                     {/* PO summary (subtotal, tax, total) */}
                     <div className="p-3 w-72 font-medium text-sm bg-secondary-100 rounded-[20px] flex flex-col gap-5">
                       <div className="grid grid-cols-2">
-                        <p className="text-neutral-1100">Sub total:</p>
+                        <p className="text-neutral-1100">{translate("purchase_order.create_po.sub_total")}:</p>
                         <p className="text-right text-neutral-900">
                           {formatNumber(subtotal, orgDetails?.currency)}
                         </p>
                       </div>
                       <div className="grid items-center grid-cols-2">
                         <div className="flex flex-col text-neutral-1100">
-                          <p className="">Total tax:</p>
+                          <p className="">{translate("purchase_order.create_po.total_tax")}:</p>
                           <span className="text-xs">
                             {formatNumber(totalTaxamount, orgDetails?.currency)}
                           </span>
@@ -682,7 +680,7 @@ const AddPOComponentWithParams = () => {
                         </div>
                       </div>
                       <div className="grid grid-cols-2 font-semibold">
-                        <p className="text-neutral-1100">Grand total:</p>
+                        <p className="text-neutral-1100">{translate("purchase_order.create_po.grand_total")}:</p>
                         <p className="text-right text-neutral-900">
                           {formatNumber(total, orgDetails?.currency)}
                         </p>
@@ -695,7 +693,7 @@ const AddPOComponentWithParams = () => {
               {fileUrl && showPdf && (
                 <div className="relative lg:w-[30%] scrollbar_none rounded-[20px] bg-white border border-secondary-200 overflow-hidden">
                   <p className="p-4 pb-0 text-neutral-1100 text-xl font-medium">
-                    Purchase order preview
+                    {translate("purchase_order.purchase_order_preview")}
                   </p>
                   {files?.status === "done" ? (
                     <div className="flex justify-end py-1 pr-2">
@@ -723,7 +721,7 @@ const AddPOComponentWithParams = () => {
                   {files?.status === "done" ? (
                     <PdfViewer fileUrl={fileUrl} />
                   ) : (
-                    <div className="flex flex-col items-center justify-center h-[580px]">
+                    <div className="flex flex-col items-center justify-center h-145">
                       <div
                         style={{
                           position: "relative",
@@ -752,6 +750,8 @@ const AddPOComponentWithParams = () => {
                         </h2>
                         {getStatusIcon(
                           getStatusLabelForExtraction(files?.status || ""),
+                          undefined,
+                          translate("common.file_size_limit"),
                         )}
                       </div>
                     </div>

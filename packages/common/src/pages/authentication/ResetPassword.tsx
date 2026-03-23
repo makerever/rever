@@ -12,12 +12,14 @@ import { forgotPasswordApi, resetForgotPasswordApi } from "@rever/services";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  resetPasswordSchema,
+  createResetPasswordSchema,
   resetPasswordSchemaValues,
 } from "@rever/validations";
+import { useTranslate } from "@rever/i18n";
 
 // Main ResetPasswordComponent
 const ResetPasswordComponent = () => {
+  const translate = useTranslate();
   // Initialize react-hook-form with Zod validation
   const {
     register,
@@ -29,10 +31,9 @@ const ResetPasswordComponent = () => {
     trigger,
     clearErrors,
   } = useForm({
-    resolver: zodResolver(resetPasswordSchema),
+    resolver: zodResolver(createResetPasswordSchema(translate)),
     mode: "onChange",
   });
-
   const router = useRouter();
 
   // Watch form fields for changes
@@ -92,7 +93,7 @@ const ResetPasswordComponent = () => {
     });
     if (response?.status === 200) {
       if (typeof window !== "undefined") {
-        showSuccessToast("Password reset successfully!");
+        showSuccessToast(translate("auth.password_reset_success"));
         sessionStorage.removeItem("registerEmail");
         setIsLoaderFormSubmit(false);
         router.push("/");
@@ -113,7 +114,7 @@ const ResetPasswordComponent = () => {
     });
     if (response?.status === 202) {
       setOtpSending(false);
-      showSuccessToast("OTP resent. Check your inbox.");
+      showSuccessToast(translate("auth.otp_resent"));
     } else {
       setOtpSending(false);
     }
@@ -140,11 +141,11 @@ const ResetPasswordComponent = () => {
           </div>
           {/* Password input */}
           <div>
-            <Label htmlFor="password" text="Create Password" />
+            <Label htmlFor="password" text={translate("auth.create_password")} />
             <PasswordInput
               register={register("password")}
               id="password"
-              placeholder="Create a strong password"
+              placeholder={translate("auth.create_strong_password")}
               error={touchedFields.password ? errors.password : undefined}
               value={getValues("password")}
               password={password}
@@ -153,11 +154,11 @@ const ResetPasswordComponent = () => {
           </div>
           {/* Confirm password input */}
           <div>
-            <Label htmlFor="confirmPassword" text="Confirm Password" />
+            <Label htmlFor="confirmPassword" text={translate("auth.confirm_password")} />
             <PasswordInput
               register={register("confirmPassword")}
               id="confirmPassword"
-              placeholder="Confirm your password"
+              placeholder={translate("auth.confirm_your_password")}
               error={errors.confirmPassword}
               value={getValues("confirmPassword")}
             />
@@ -175,7 +176,7 @@ const ResetPasswordComponent = () => {
           }
           button_type="primary"
           icon_type={isLoaderFormSubmit ? "loader" : null}
-          name="Reset password"
+          name={translate("auth.reset_password")}
           width="w-full"
         />
       </form>

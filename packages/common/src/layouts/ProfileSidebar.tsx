@@ -21,6 +21,7 @@ import {
   getFirstLetter,
   getLabelForRoles,
 } from "@rever/utils";
+import { useTranslate } from "@rever/i18n";
 
 // Main ProfileSidebar component
 export function ProfileSidebar({
@@ -31,6 +32,7 @@ export function ProfileSidebar({
   const [showUserProfile, setShowUserProfile] = useState<boolean>(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
+  const translate = useTranslate();
   const pathname = usePathname(); // Current route path
   const user = useUserStore((state) => state.user); // Get user info from store
   const router = useRouter();
@@ -183,7 +185,7 @@ export function ProfileSidebar({
                         {/* Show label if sidebar is expanded */}
                         {!isProfileSidebarCollapsed && (
                           <p className="ps-1.5 font-medium text-sm">
-                            {link.name}
+                            {link.i18nKey ? translate(link.i18nKey) : link.name}
                           </p>
                         )}
                       </div>
@@ -214,7 +216,7 @@ export function ProfileSidebar({
                               }`}
                               onClick={() => setHoveredItem(null)}
                             >
-                              {sub.name}
+                              {sub.i18nKey ? translate(sub.i18nKey) : sub.name}
                             </li>
                           </Link>
                         ))}
@@ -247,7 +249,7 @@ export function ProfileSidebar({
                               }`}
                             >
                               <li className="flex font-medium items-center">
-                                {subItem.name}
+                                {subItem.i18nKey ? translate(subItem.i18nKey) : subItem.name}
                               </li>
                             </div>
                           </Link>
@@ -273,7 +275,7 @@ export function ProfileSidebar({
                         {/* Show label if sidebar is expanded */}
                         {!isProfileSidebarCollapsed && (
                           <p className="ps-1.5 font-medium text-xs">
-                            {link.name}
+                            {link.i18nKey ? translate(link.i18nKey) : link.name}
                           </p>
                         )}
                       </div>

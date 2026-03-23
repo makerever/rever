@@ -4,16 +4,7 @@
 import { formatNumber, formatPlainNumber, getAuditFieldValue, getLineItemAuditClass } from "@rever/utils";
 import { useUserStore } from "@rever/stores";
 import { BillLineItemsProps } from "@rever/types";
-
-// Table headers for the read-only bill items table
-const billItemHeaders = [
-  "Description",
-  "Product code",
-  "Qty",
-  "Confirmed Qty",
-  "Unit price",
-  "Amount",
-];
+import { useTranslate } from "@rever/i18n";
 
 export default function BillLineItemsReadOnly({
   showAuditHistory,
@@ -21,6 +12,16 @@ export default function BillLineItemsReadOnly({
   billDetails,
   itemsAuditValidation
 }: BillLineItemsProps) {
+  const translate = useTranslate();
+  const billItemHeaders = [
+    translate("create_bill.bill_line_items.description"),
+    translate("create_bill.bill_line_items.product_code"),
+    translate("create_bill.bill_line_items.qty"),
+    translate("create_bill.confirmed_qty"),
+    translate("create_bill.bill_line_items.unit_price"),
+    translate("create_bill.bill_line_items.amount"),
+  ];
+
   const orgDetails = useUserStore((state) => state.user?.organization);
 
   return (
@@ -174,7 +175,7 @@ export default function BillLineItemsReadOnly({
                 colSpan={6}
                 className="p-4 text-center text-sm text-slate-400"
               >
-                No line items to display.
+                {translate("purchase_order.view_po.no_pos")}
               </td>
             </tr>
           )}

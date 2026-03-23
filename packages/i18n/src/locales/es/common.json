@@ -1,39 +1,45 @@
 {
-  "welcome": "Bienvenido a Rever",
+  "welcome": "Bienvenido a Rever dentro de welcome",
   "placeholders": {
     "search": "Buscar",
     "email_input": "nombre@empresa.com",
-    "first_name": "Ingresa el nombre",
-    "last_name": "Ingresa el apellido",
-    "organization": "Ingresa el nombre de la organización",
-    "password": "Ingresa la contraseña",
-    "confirm_password": "Confirma la contraseña",
-    "select_base_currency": "Selecciona la moneda base",
-    "select_date_format": "Selecciona el formato de fecha",
-    "enter_email": "Ingresa el correo electrónico",
-    "business_type": "Selecciona el tipo de negocio",
-    "select_industry": "Selecciona la industria",
-    "select_country": "Selecciona el país",
-    "select_state": "Selecciona el estado",
-    "select_city": "Selecciona la ciudad",
-    "enter_zipcode": "Ingresa el código postal",
-    "select_language": "Selecciona el idioma",
+    "first_name": "Ingrese el nombre",
+    "last_name": "Ingrese el apellido",
+    "organization": "Ingrese el nombre de la organización",
+    "password": "Ingrese la contraseña",
+    "confirm_password": "Confirme la contraseña",
+    "select_base_currency": "Seleccione la moneda base",
+    "select_date_format": "Seleccione el formato de fecha",
+    "enter_email": "Ingrese el correo electrónico",
+    "business_type": "Seleccione el tipo de negocio",
+    "select_industry": "Seleccione la industria",
+    "select_country": "Seleccione el país",
+    "select_state": "Seleccione el estado",
+    "select_city": "Seleccione la ciudad",
+    "enter_zipcode": "Ingrese el código postal",
+    "select_language": "Seleccione el idioma",
     "search_total_bills": "Buscar facturas totales",
-    "global_search": "Buscar cualquier cosa",
+    "global_search": "Buscar algo",
     "search_bill": "Buscar facturas",
+    "select_option": "Seleccionar una opción",
     "bill": {
-      "enter_bill": "Ingresar número de factura",
+      "enter_bill": "Ingrese el número de factura",
       "select_vendor": "Seleccionar proveedor",
       "select_po": "Seleccionar orden de compra",
       "select_pt": "Seleccionar términos de pago",
       "select_bill_date": "Seleccionar fecha de factura",
       "select_due_date": "Seleccionar fecha de vencimiento",
-      "select_coa": "Seleccionar PDC"
+      "select_coa": "Seleccionar COA"
+    },
+    "po": {
+      "enter_po": "Ingrese el número de OC",
+      "select_po_date": "Seleccionar fecha de OC",
+      "select_delivery_date": "Seleccionar fecha de entrega"
     }
   },
   "buttons": {
     "continue": "Continuar",
-    "register": "Registrar",
+    "register": "Registrarse",
     "back": "Atrás",
     "save": "Guardar",
     "save_draft": "Guardar como borrador",
@@ -50,7 +56,7 @@
       "coa": "Plan de cuentas",
       "confirmations": "Confirmaciones"
     },
-    "inbox": "Bandeja",
+    "inbox": "Bandeja de entrada",
     "settings": {
       "settings": "Configuración",
       "general": "General",
@@ -65,21 +71,29 @@
   "profile_sidebar": {
     "profile": "Perfil",
     "security": "Seguridad",
-    "notification": "Notificaciones",
+    "notification": "Notificación",
+    "preferences": "Preferencias",
     "appereance": "Apariencia",
     "back_home": "Volver al inicio",
-    "back_confirmations": "Volver a confirmaciones"
+    "back_confirmations": "Volver a confirmaciones",
+    "logout": "Cerrar sesión",
+    "personal_settings": "Configuración personal",
+    "organization_settings": "Configuración de la organización"
   },
   "global_search": {
     "vendors": "Proveedores",
-    "po": "Órdenes de compra",
+    "po": "OC",
     "bills": "Facturas",
     "members": "Miembros",
-    "create_po": "Crear orden de compra",
+    "create_po": "Crear OC",
     "create_bill": "Crear factura",
-    "inbox": "Bandeja",
+    "inbox": "Bandeja de entrada",
     "profile": "Perfil",
-    "change_password": "Cambiar contraseña"
+    "change_password": "Cambiar contraseña",
+    "create_vendor": "Crear proveedor",
+    "suggestions": "Sugerencias",
+    "no_results": "No se encontraron resultados.",
+    "search_placeholder": "Buscar..."
   },
   "subscription": {
     "plan": {
@@ -95,8 +109,8 @@
     },
     "dashboard_options": {
       "overview": "Resumen",
-      "2way_match": "Coincidencia 2 vías",
-      "3way_match": "Coincidencia 3 vías"
+      "2way_match": "Cotejo de 2 vías",
+      "3way_match": "Cotejo de 3 vías"
     }
   },
   "general": {
@@ -116,13 +130,24 @@
   },
   "profile": {
     "heading": "Perfil",
-    "profile_settings": "Configuración perfil",
+    "profile_settings": "Configuración del perfil",
     "first_name": "Nombre",
     "last_name": "Apellido",
     "email": "Correo electrónico",
     "timezone": "Zona horaria",
     "role": "Rol",
-    "language": "Idioma"
+    "language": "Idioma",
+    "change_password": {
+      "heading": "Cambiar contraseña",
+      "old_password": "Contraseña antigua:",
+      "enter_old_password": "Ingrese la contraseña antigua",
+      "new_password": "Nueva contraseña:",
+      "enter_new_password": "Ingrese la nueva contraseña",
+      "confirm_password": "Confirmar contraseña:",
+      "enter_confirm_password": "Ingrese la contraseña de confirmación",
+      "save_changes": "Guardar cambios",
+      "success": "¡Contraseña cambiada exitosamente!"
+    }
   },
   "home": {
     "page_name": "Inicio",
@@ -138,16 +163,16 @@
       },
       "2_way": {
         "total_bills": {
-          "heading": "Facturas totales",
+          "heading": "Total de facturas",
           "tooltip": "Los datos excluyen facturas en borrador"
         },
         "bills_with_po": {
           "heading": "Facturas con OC",
-          "tooltip": "Facturas vinculadas a una orden de compra"
+          "tooltip": "Facturas vinculadas a una OC"
         },
         "bills_without_po": {
           "heading": "Facturas sin OC",
-          "tooltip": "Facturas sin orden de compra"
+          "tooltip": "Facturas sin OC"
         },
         "duplicate_bills": {
           "heading": "Facturas duplicadas",
@@ -156,62 +181,85 @@
       }
     },
     "bill_match_status": {
-      "heading": "Estado coincidencia",
+      "heading": "Estado de cotejo de facturas",
       "tooltip": {
-        "body": "Cómo coinciden las facturas con la orden de compra:",
+        "body": "Cómo coincide la factura con la OC:",
         "exact_match": {
           "heading": "Coincidencia exacta",
-          "body": "La factura coincide perfectamente con la orden de compra."
+          "body": "La factura coincide perfectamente con la OC."
         },
         "partial_match": {
           "heading": "Coincidencia parcial",
           "body": "Algunos detalles difieren."
         },
         "mismatch": {
-          "heading": "Desajuste",
+          "heading": "Discrepancia",
           "body": "Existen diferencias significativas."
         }
       }
     },
     "match_status_trend": {
-      "heading": "Tendencia coincidencia",
+      "heading": "Tendencia del estado de cotejo",
       "exact_match": "Coincidencia exacta",
       "partial_match": "Coincidencia parcial",
-      "mismatch": "Desajuste",
-      "tooltip": "Vista histórica del rendimiento de coincidencia de facturas para seguir tendencias con el tiempo"
+      "mismatch": "Discrepancia",
+      "tooltip": "Vista histórica del rendimiento de cotejo de sus facturas para seguir tendencias a lo largo del tiempo"
     },
     "bills_by_stage": {
       "heading": "Facturas por etapa",
-      "tooltip": "Facturas clasificadas según su etapa actual en el flujo de aprobación"
+      "tooltip": "Facturas segregadas por su etapa actual en el flujo de trabajo de aprobación"
+    },
+    "charts": {
+      "bills": "Facturas"
     },
     "analytics": "Analítica",
     "insights": "Perspectivas",
-    "Total bills": "Facturas totales",
+    "Total bills": "Total de facturas",
     "Bills with PO": "Facturas con OC",
     "Bills without PO": "Facturas sin OC",
     "Duplicate bills": "Facturas duplicadas"
   },
   "data_table": {
-    "empty": "Esta sección está vacía actualmente.",
-    "message": "Puedes explorar otras secciones mientras tanto.",
+    "empty": "Esta sección está actualmente vacía.",
+    "message": "Siéntase libre de explorar otras secciones mientras tanto.",
+    "export": "Exportar datos",
+    "actions": "Acciones",
+    "sync": "Sincronizar",
     "pagination": {
       "items_per_page": "Elementos por página",
+      "rows_per_page": "Filas por página",
       "page": "Página",
       "of": "de",
-      "selected": "Seleccionada"
+      "prev": "Ant.",
+      "next": "Sig.",
+      "selected": "Seleccionado"
     }
   },
   "bills": {
     "heading": "Facturas",
-    "forward_bill": "Reenvía tus facturas para crear gastos automáticamente en:",
-    "stage": {
-      "Overview": "Resumen",
-      "Under review": "En revisión",
-      "Under approval": "En aprobación",
-      "Approved": "Aprobado",
-      "Ledger entry": "Asiento contable",
-      "Rejected": "Rechazado"
+    "actions": {
+      "edit_bill": "Editar Factura",
+      "delete_bill": "Eliminar Factura",
+      "audit_history": "Historial de auditoría",
+      "show_pdf": "Mostrar PDF",
+      "hide_pdf": "Ocultar PDF",
+      "view_match": "Ver cotejo",
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "send_for_approval": "Enviar para aprobación",
+      "pdf_attached": "PDF adjunto"
     },
+    "forward_bill": "Reenvíe sus facturas para crear gastos automáticamente en:",
+    "stage": {
+      "all_bills": "Todas las facturas",
+      "overview": "Resumen",
+      "under_review": "En revisión",
+      "under_approval": "En aprobación",
+      "approved": "Aprobado",
+      "ledger_entry": "Asiento contable",
+      "rejected": "Rechazado"
+    },
+    "approval_heading": "Aprobaciones de facturas",
     "filter": {
       "status": "Estado"
     },
@@ -223,12 +271,47 @@
       "bill": "Factura",
       "bill_date": "Fecha de factura",
       "due_date": "Fecha de vencimiento",
-      "po": "Orden de compra",
+      "po": "OC",
       "vendor": "Proveedor",
       "total_amount": "Monto total",
       "stages": "Etapas",
       "status": "Estado"
     }
+  },
+  "validation": {
+    "email_required": "El correo electrónico es obligatorio",
+    "enter_valid_email": "Ingrese un correo electrónico válido",
+    "email_domain": "El correo debe terminar con @{domain}",
+    "role_required": "El rol es obligatorio",
+    "first_name_required": "El nombre es obligatorio",
+    "last_name_required": "El apellido es obligatorio",
+    "org_currency_required": "La moneda de la organización es obligatoria",
+    "org_name_required": "El nombre de la organización es obligatorio",
+    "old_password_required": "La contraseña anterior es obligatoria",
+    "otp_required": "El OTP es obligatorio",
+    "vendor_name_required": "El nombre del proveedor es obligatorio",
+    "vendor_required": "El proveedor es obligatorio",
+    "bill_date_required": "La fecha de la factura es obligatoria",
+    "due_date_required": "La fecha de vencimiento es obligatoria",
+    "po_date_required": "La fecha de la OC es obligatoria",
+    "delivery_date_required": "La fecha de entrega es obligatoria",
+    "website_https": "El sitio web debe comenzar con https://",
+    "password_min": "Mínimo 8 caracteres requeridos.",
+    "password_uppercase": "Agrega una letra mayúscula.",
+    "password_lowercase": "Agrega una letra minúscula.",
+    "password_number": "Agrega un número.",
+    "password_special": "Agrega un carácter especial.",
+    "passwords_no_match": "Las contraseñas no coinciden."
+  },
+  "common": {
+    "something_went_wrong": "¡Algo salió mal!!",
+    "file_size_limit": "El archivo debe pesar menos de 5 MB y tener un máximo de 5 páginas",
+    "upload_valid_pdf": "Por favor suba un archivo PDF válido.",
+    "you_are_viewing": "Está viendo",
+    "version": "versión",
+    "confirmation_history": "Historial de confirmaciones",
+    "subscription_expired": "Su suscripción ha expirado. Por favor renuévela para continuar.",
+    "is_required": "es obligatorio"
   },
   "create_bill": {
     "heading": "Detalles de la factura",
@@ -243,17 +326,490 @@
       "description": "Descripción",
       "coa": "Plan de cuentas",
       "product_code": "Código de producto",
-      "qty": "Cantidad",
+      "qty": "Cant.",
       "unit_price": "Precio unitario",
-      "amount": "Importe",
+      "amount": "Monto",
       "action": "Acción"
     },
+    "confirmed_qty": "Cant. Confirmada",
     "new_item": "Nuevo artículo de factura",
-    "sub_total": "Sub total",
+    "sub_total": "Subtotal",
     "total_tax": "Impuesto total",
     "total": "Total",
     "notes": "Notas",
-    "enter_notes": "Ingresar notas",
-    "extract_pdf": "Extraer PDF"
+    "enter_notes": "Ingrese notas",
+    "extract_pdf": "Extraer PDF",
+    "bill_preview": "Vista previa de factura",
+    "new_bill": "Nueva factura",
+    "upload_bill": "Subir factura",
+    "extract_bill": "Extraer factura",
+    "created": "Factura creada exitosamente",
+    "updated": "Factura actualizada exitosamente",
+    "attachment_deleted": "Adjunto de factura eliminado"
+  },
+  "purchase_order": {
+    "heading": "Órdenes de compra",
+    "approval_heading": "Aprobaciones de OC",
+    "actions": {
+      "edit_po": "Editar OC",
+      "delete_po": "Eliminar OC",
+      "associated_bills": "Facturas asociadas",
+      "audit_history": "Historial de auditoría",
+      "show_pdf": "Mostrar PDF",
+      "hide_pdf": "Ocultar PDF",
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "send_for_approval": "Enviar para aprobación"
+    },
+    "po_details": "Detalles de la OC",
+    "associate_bills": "Asociar facturas",
+    "buttons": {
+      "upload_po": "Subir OC",
+      "create_po": "Crear orden de compra"
+    },
+    "stagebar": {
+      "all_pos": "Todas las OC",
+      "all_vendor_credits": "Todos los créditos de proveedor",
+      "under_review": "En revisión",
+      "under_approval": "En aprobación",
+      "approved": "Aprobado",
+      "rejected": "Rechazado",
+      "draft": "Borrador"
+    },
+    "search": "Buscar órdenes de compra",
+    "export": "Exportar datos",
+    "table_headers": {
+      "po": "OC",
+      "po_date": "Fecha de OC",
+      "delivery_date": "Fecha de entrega",
+      "vendor": "Proveedor",
+      "total_amount": "Monto total",
+      "status": "Etapas"
+    },
+    "create_po": {
+      "heading": "Nueva OC",
+      "po_number": "Número de OC",
+      "vendor": "Proveedor",
+      "payment_terms": "Términos de pago",
+      "po_date": "Fecha de OC",
+      "delivery_date": "Fecha de entrega",
+      "po_line_items": {
+        "heading": "Líneas de OC",
+        "description": "Descripción",
+        "coa": "Plan de cuentas",
+        "qty": "Cant.",
+        "unit_price": "Precio unitario",
+        "amount": "Monto",
+        "action": "Acción"
+      },
+      "new_item": "Nuevo artículo de OC",
+      "sub_total": "Subtotal",
+      "total_tax": "Impuesto total",
+      "total": "Total",
+      "grand_total": "Total general",
+      "notes": "Notas",
+      "enter_notes": "Ingrese notas"
+    },
+    "po_preview": "Vista previa de OC",
+    "consumed": "Consumido",
+    "available": "Disponible",
+    "available_qty": "Cantidad disponible",
+    "view_po": {
+      "no_pos": "No hay líneas para mostrar.",
+      "grand_total": "Total general",
+      "total_tax": "Impuesto total",
+      "sub_total": "Subtotal"
+    },
+    "rejection_reason": "Razón de rechazo",
+    "notes": "Notas:",
+    "new_po": "Nueva OC",
+    "purchase_order_preview": "Vista previa de orden de compra",
+    "upload_po_btn": "Subir OC",
+    "extract_po_btn": "Extraer OC",
+    "created": "OC creada exitosamente",
+    "updated": "OC actualizada exitosamente",
+    "attachment_deleted": "Adjunto de OC eliminado"
+  },
+  "vendors": {
+    "heading": "Proveedores",
+    "actions": {
+      "edit_vendor": "Editar proveedor",
+      "associated_bills": "Facturas asociadas"
+    },
+    "status": {
+      "Heading": "Estado",
+      "active": "Activo",
+      "inactive": "Inactivo"
+    },
+    "buttons": {
+      "create_vendor": "Crear proveedor"
+    },
+    "table_headers": {
+      "vendor": "Proveedor",
+      "vendor_name": "Nombre del proveedor",
+      "company_name": "Nombre de la empresa",
+      "email": "Correo electrónico",
+      "tax_id": "ID fiscal",
+      "status": "Estado"
+    },
+    "rows_per_page": "Filas por página",
+    "view_vendors": {
+      "no_vendors": "No se encontraron proveedores",
+      "search_vendors": "Buscar proveedores"
+    },
+    "create_vendor": {
+      "heading": "Nuevo proveedor",
+      "vendor_details": {
+        "heading": "Detalles del proveedor",
+        "vendor_name": "Nombre del proveedor",
+        "company_name": "Nombre de la empresa",
+        "email": "Correo electrónico",
+        "mobile": "Móvil",
+        "tax_id": "ID fiscal",
+        "website": "Sitio web",
+        "payment_terms": "Términos de pago",
+        "contact": "Contacto"
+      },
+      "vendor_address": {
+        "heading": "Dirección del proveedor",
+        "address_line_1": "Línea de dirección 1",
+        "address_line_2": "Línea de dirección 2",
+        "country": "País",
+        "state": "Estado",
+        "city": "Ciudad",
+        "zipcode": "Código postal"
+      },
+      "bank_account_details": {
+        "heading": "Detalles de la cuenta bancaria",
+        "account_holder_name": "Nombre del titular",
+        "bank_name": "Nombre del banco",
+        "account_number": "Número de cuenta"
+      }
+    },
+    "vendor_credit": {
+      "heading": "Crédito de proveedor",
+      "buttons": {
+        "create_vendor_credit": "Crear crédito de proveedor",
+        "upload_vendor_credit": "Subir crédito de proveedor"
+      },
+      "stagebar": {
+        "all_vendor_credits": "Todos los créditos de proveedor",
+        "under_review": "En revisión",
+        "under_approval": "En aprobación",
+        "approved": "Aprobado",
+        "rejected": "Rechazado",
+        "draft": "Borrador"
+      },
+      "search": "Buscar créditos de proveedor",
+      "export": "Exportar datos",
+      "table_headers": {
+        "vendor_credit": "Crédito de proveedor",
+        "vendor_credit_date": "Fecha de crédito",
+        "vendor": "Proveedor",
+        "total_amount": "Monto total",
+        "stages": "Estado"
+      },
+      "rows_per_page": "Filas por página",
+      "upload_vendor_credit": {
+        "heading": "Subir archivos",
+        "subheading": "Seleccione los archivos que desea subir",
+        "input_label": "Haga clic o suelte los archivos aquí para subir",
+        "input_helper_text": "Suba hasta 50 archivos, cada uno de máximo 5 MB"
+      },
+      "create_vendor_credit": {
+        "heading": "Nuevo crédito de proveedor",
+        "buttons": {
+          "extract_vendor_credit": "Extraer proveedor",
+          "cancel": "Cancelar",
+          "save": {
+            "heading": "Guardar",
+            "save": "Guardar",
+            "save_as_draft": "Guardar como borrador"
+          }
+        },
+        "vendor_credit_details": {
+          "heading": "Detalles del crédito",
+          "vendor_credit_number": "Número de crédito",
+          "vendor": "Proveedor",
+          "vendor_credit_date": "Fecha de crédito"
+        },
+        "vendor_credit_line_items": {
+          "heading": "Líneas de crédito",
+          "description": "Descripción",
+          "qty": "Cant.",
+          "unit_price": "Precio unitario",
+          "amount": "Monto",
+          "action": "Acción"
+        },
+        "new_item": "Nuevo artículo de crédito",
+        "sub_total": "Subtotal",
+        "total_tax": "Impuesto total",
+        "grand_total": "Total general",
+        "total": "Total",
+        "notes": "Notas",
+        "enter_notes": "Ingrese notas"
+      }
+    },
+    "inbox": {
+      "heading": "Bandeja de entrada"
+    },
+    "created": "Proveedor creado exitosamente",
+    "updated": "Proveedor actualizado exitosamente"
+  },
+  "payment_terms_options": {
+    "net15": "Neto 15 días",
+    "net30": "Neto 30 días",
+    "net45": "Neto 45 días",
+    "due": "Vencimiento al recibir"
+  },
+  "member_role_options": {
+    "admin": "Administrador",
+    "finance_manager": "Gerente de finanzas",
+    "accountant": "Contador",
+    "viewer": "Visor",
+    "lite_user": "Usuario Lite"
+  },
+  "overview_options": {
+    "this_month": "Este mes",
+    "last_3_months": "Últimos 3 meses",
+    "last_6_months": "Últimos 6 meses",
+    "last_12_months": "Últimos 12 meses"
+  },
+  "bank_account_types": {
+    "savings": "Ahorros",
+    "current": "Corriente",
+    "checking": "Cheques",
+    "personal": "Personal"
+  },
+  "business_types": {
+    "private_limited": "Sociedad limitada privada",
+    "public_limited": "Sociedad anónima",
+    "partnership": "Sociedad",
+    "sole_proprietor": "Propietario único",
+    "llc": "LLC",
+    "other": "Otro",
+    "s_corp": "S-Corp",
+    "c_corp": "C-Corp",
+    "nonprofit": "Sin fines de lucro",
+    "government_agency": "Agencia gubernamental"
+  },
+  "matching_options": {
+    "none": "Ninguno",
+    "no_match_description": "Las facturas se procesarán sin compararlas con OC o recibos.",
+    "two_way": "Cotejo de 2 vías",
+    "three_way": "Cotejo de 3 vías",
+    "two_way_description": "Verificar que la factura coincida con la OC en precio y cantidad.",
+    "three_way_description": "Verificar que los bienes fueron pedidos y recibidos antes de pagar la factura."
+  },
+  "confirmations": {
+    "request_confirmation": "Solicitar confirmación",
+    "view_confirmations": "Ver confirmaciones",
+    "title": "Confirmar",
+    "delete": "Eliminar",
+    "no_history": "No se encontró historial de confirmaciones"
+  },
+  "search": {
+    "search_filters": "Filtros de búsqueda"
+  },
+  "help_support": {
+    "documentation": "Documentación",
+    "email_us": "Envíenos un correo"
+  },
+  "auth": {
+    "page_titles": {
+      "sign_in_or_get_started": "Iniciar sesión o comenzar",
+      "sign_in_to_account": "Inicia sesión en tu cuenta",
+      "verify_email": "Verifica tu correo para comenzar",
+      "reset_your_password": "Restablece tu contraseña",
+      "welcome_to_rever": "Bienvenido a Rever",
+      "secure_account": "Asegura tu cuenta",
+      "create_new_password": "Crear nueva contraseña"
+    },
+    "page_subtitles": {
+      "send_code_to_email": "Te enviaremos un código a este correo",
+      "fill_up_details": "Complete sus datos para comenzar",
+      "set_strong_password": "Establece una contraseña segura para proteger tu cuenta",
+      "enter_strong_password": "Ingrese una contraseña segura para proteger su cuenta"
+    },
+    "invalid_user": "Usuario inválido",
+    "terms_notice": "Al continuar, reconoce que entiende y acepta",
+    "terms_of_service": "Términos de servicio",
+    "eula": "EULA",
+    "and": "y",
+    "privacy_policy": "Política de privacidad",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "enter_password": "Ingrese la contraseña",
+    "otp": "OTP",
+    "otp_sent": "OTP enviado exitosamente a su correo electrónico",
+    "please_wait": "Por favor espere",
+    "resend_otp": "Reenviar OTP",
+    "forgot_password": "¿Olvidó su contraseña?",
+    "sign_in": "Iniciar sesión",
+    "sign_in_otp": "Iniciar sesión con OTP",
+    "create_password": "Crear contraseña",
+    "create_strong_password": "Crear una contraseña segura",
+    "confirm_password": "Confirmar contraseña",
+    "confirm_your_password": "Confirme su contraseña",
+    "reset_password": "Restablecer contraseña",
+    "password_reset_success": "¡Contraseña restablecida exitosamente!",
+    "otp_resent": "OTP reenviado. Revise su bandeja de entrada.",
+    "get_reset_code": "Obtener código de restablecimiento",
+    "go_back_sign_in": "Volver a iniciar sesión",
+    "or": "O",
+    "register": {
+      "first_name": "Nombre",
+      "enter_first_name": "Ingrese el nombre",
+      "last_name": "Apellido",
+      "enter_last_name": "Ingrese el apellido",
+      "org_name": "Nombre de la organización",
+      "enter_org_name": "Ingrese el nombre de la organización",
+      "org_currency": "Moneda de la organización",
+      "currency": "Moneda",
+      "select_org_currency": "Seleccione la moneda de la organización",
+      "lets_get_started": "¡Comencemos!"
+    }
+  },
+  "inbox": {
+    "heading": "Notificaciones",
+    "notification": "Notificación",
+    "notification_deleted": "Notificación eliminada",
+    "no_notifications": "No se encontraron notificaciones",
+    "select_notification": "Seleccione una notificación para ver los detalles.",
+    "delete_confirm": "¿Está seguro de que desea eliminar esta notificación?",
+    "view": "Ver"
+  },
+  "confirm_deletion": {
+    "confirm": "confirmar",
+    "delete": "Eliminar"
+  },
+  "industry_options": {
+    "accounting": "Contabilidad y Teneduría",
+    "legal": "Servicios Legales",
+    "retail": "Comercio Minorista",
+    "ecommerce": "Comercio Electrónico",
+    "real_estate": "Bienes Raíces",
+    "restaurants": "Restaurantes y Servicios Alimentarios",
+    "construction": "Construcción y Contratación",
+    "healthcare": "Salud y Medicina",
+    "manufacturing": "Manufactura",
+    "software": "Software/SaaS",
+    "nonprofit": "Sin fines de lucro",
+    "other": "Otro"
+  },
+  "approval_settings": {
+    "bill_enable_label": "Habilitar flujo de aprobación de facturas",
+    "bill_enable_description": "Permita a los gerentes de finanzas agilizar el proceso de aprobación de facturas.",
+    "po_enable_label": "Habilitar flujo de aprobación de OC",
+    "po_enable_description": "Permita a los gerentes de finanzas agilizar el proceso de aprobación de OC.",
+    "level": "NIVEL",
+    "remove": "Eliminar",
+    "add_approver": "Agregar aprobador",
+    "approver": "Aprobador",
+    "select_approver": "Seleccionar aprobador",
+    "disable": "Deshabilitar",
+    "disable_bill_message": "Deshabilitar esto puede afectar las facturas en aprobación, si las hay",
+    "disable_po_message": "Deshabilitar esto puede afectar las OC en aprobación, si las hay",
+    "autosaved": "Los cambios se han guardado automáticamente",
+    "autosave_failed": "Error al guardar automáticamente los aprobadores",
+    "save_failed": "Un aprobador no puede estar asignado a múltiples niveles.",
+    "load_failed": "Error al cargar los datos de aprobación",
+    "toggle_failed": "Error al cambiar el estado de aprobación",
+    "disable_failed": "Error al deshabilitar la aprobación",
+    "cannot_disable": "No se puede deshabilitar la aprobación; algunas OC aún están en proceso de aprobación."
+  },
+  "receipt": {
+    "request_confirmation": {
+      "heading": "Solicitar confirmación",
+      "lite_user": "Usuario Lite",
+      "select_lite_user": "Seleccionar usuario lite",
+      "request": "Solicitar",
+      "request_sent": "Solicitud enviada exitosamente"
+    }
+  },
+  "members": {
+    "active_members": "Miembros activos",
+    "invited_members": "Miembros invitados",
+    "po_approval": "Aprobación de OC",
+    "bill_approval": "Aprobación de factura",
+    "invite_members": "Invitar miembros",
+    "invited_by": "Invitado por",
+    "delete_confirm": "¿Está seguro de que desea eliminar este miembro?",
+    "cannot_delete": "No se puede eliminar al usuario porque está asignado como aprobador"
+  },
+  "controls": {
+    "match_type": "Tipo de cotejo",
+    "four_way_match": "Cotejo de 4 vías",
+    "four_way_match_description": "Verificar que los bienes recibidos cumplan con estándares de calidad específicos."
+  },
+  "preferences": {
+    "notify_submitted": "Notificar cuando se envíen transacciones para aprobación",
+    "notify_submitted_desc": "Reciba notificaciones al instante cuando una transacción esté esperando aprobación en el sistema.",
+    "notify_approved": "Notificar cuando la transacción sea aprobada/rechazada",
+    "notify_approved_desc": "Reciba una notificación en cuanto una transacción sea aprobada/rechazada exitosamente.",
+    "updated": "Preferencia de notificación actualizada exitosamente"
+  },
+  "invite_member": {
+    "heading": "Invitar miembro",
+    "about": "Rever garantiza un acceso seguro basado en roles para agilizar su proceso de cuentas por pagar manteniendo responsabilidades claras.",
+    "email_label": "Ingrese la dirección de correo electrónico",
+    "email_placeholder": "Ingrese el correo electrónico",
+    "save_changes": "Guardar cambios",
+    "send_invite": "Enviar invitación",
+    "edit_prefix": "Editar",
+    "roles": {
+      "member_role": "Rol del miembro",
+      "select_role": "Seleccionar rol",
+      "admin": {
+        "heading": "Administrador",
+        "admin_can": "El administrador puede:",
+        "description1": "- Acceder al tablero para ver información de facturas.",
+        "description2": "- Gestionar proveedores y supervisar el flujo de facturas.",
+        "description3": "- Configurar flujos de aprobación y ajustes de la organización.",
+        "description4": "- Configurar reglas de aprobación.",
+        "admin_cannot": "El administrador no puede:",
+        "description5": "- Aprobar una factura como aprobador, pero puede reasignarla."
+      },
+      "finance_manager": {
+        "heading": "Gerente de Finanzas",
+        "finance_manager_can": "El gerente de finanzas puede:",
+        "description1": "- Acceder al tablero con información de facturas.",
+        "description2": "- Revisar, aprobar o rechazar facturas.",
+        "description3": "- Ver detalles de proveedores y miembros.",
+        "finance_manager_cannot": "El gerente de finanzas no puede:",
+        "description4": "- Crear o modificar proveedores o facturas.",
+        "description5": "- Acceder a la gestión de usuarios o ajustes organizativos."
+      },
+      "member": {
+        "heading": "Miembro",
+        "memeber_can": "El miembro puede:",
+        "description1": "- Acceder al tablero para ver estados de facturas.",
+        "description2": "- Crear y mantener perfiles de proveedores.",
+        "description3": "- Crear, modificar, eliminar y enviar facturas.",
+        "description4": "- Ver miembros del equipo y detalles de la organización.",
+        "memeber_cannot": "El miembro no puede:",
+        "description5": "- Aprobar acciones para mantener la integridad del proceso.",
+        "description6": "- Invitar miembros o modificar ajustes de aprobación."
+      },
+      "lite_user": {
+        "heading": "Usuario Lite",
+        "select_lite_user": "Seleccionar usuario lite",
+        "lite_user_can": "El usuario LITE puede:",
+        "description1": "- Confirmar recepciones de solicitudes.",
+        "description2": "- Ver documentos o transacciones específicos asignados.",
+        "lite_user_cannot": "El usuario LITE no puede:",
+        "description3": "- Crear, revisar, aprobar o rechazar facturas.",
+        "description4": "- Acceder a tableros financieros o reportes avanzados.",
+        "description5": "- Gestionar proveedores, usuarios o ajustes."
+      }
+    },
+    "success_message": {
+      "memeber_update_success": "Miembro actualizado con éxito",
+      "invitation_sent": "Solicitud de invitación enviada"
+    },
+    "error_message": {
+      "memeber_update_failed": "No se puede cambiar el rol — El usuario tiene aprobaciones pendientes.",
+      "invitation_failed": "El usuario ya existe en su organización"
+    }
   }
 }

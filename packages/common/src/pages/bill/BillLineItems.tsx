@@ -17,16 +17,7 @@ import { useEffect, useMemo, useState } from "react";
 import { formatNumber, isNamedObject } from "@rever/utils";
 import { useUserStore } from "@rever/stores";
 import { useApi } from "@rever/services";
-
-const billItemHeaders = [
-  // "#",
-  "Description",
-  "Product code",
-  "Qty",
-  "Unit price",
-  "Amount",
-  "Action",
-];
+import { useTranslate } from "@rever/i18n";
 
 export default function BillLineItemsTable({
   control,
@@ -35,6 +26,16 @@ export default function BillLineItemsTable({
   getValues,
   showItemsDescription,
 }: BillLineItemsTableProps) {
+  const translate = useTranslate();
+  const billItemHeaders = [
+    translate("create_bill.bill_line_items.description"),
+    translate("create_bill.bill_line_items.product_code"),
+    translate("create_bill.bill_line_items.qty"),
+    translate("create_bill.bill_line_items.unit_price"),
+    translate("create_bill.bill_line_items.amount"),
+    translate("create_bill.bill_line_items.action"),
+  ];
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "items",
@@ -176,7 +177,7 @@ export default function BillLineItemsTable({
       <div className="m-4">
         <Button
           onClick={handleAddItem}
-          name="New bill item"
+          name={translate("create_bill.new_item")}
           button_type="secondary"
           icon_type="plus"
         />

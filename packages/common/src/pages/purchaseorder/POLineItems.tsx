@@ -14,14 +14,7 @@ import { poLineItemsTableProps } from "@rever/types";
 import { useEffect, useMemo, useState } from "react";
 import { formatNumber, isNamedObject } from "@rever/utils";
 import { useUserStore } from "@rever/stores";
-
-const poItemHeaders = [
-  "Description",
-  "Qty",
-  "Unit price",
-  "Amount",
-  "Action",
-];
+import { useTranslate } from "@rever/i18n";
 
 export default function POLineItemsTable({
   control,
@@ -30,6 +23,15 @@ export default function POLineItemsTable({
   getValues,
   showItemsDescription,
 }: poLineItemsTableProps) {
+  const translate = useTranslate();
+  const poItemHeaders = [
+    translate("purchase_order.create_po.po_line_items.description"),
+    translate("purchase_order.create_po.po_line_items.qty"),
+    translate("purchase_order.create_po.po_line_items.unit_price"),
+    translate("purchase_order.create_po.po_line_items.amount"),
+    translate("purchase_order.create_po.po_line_items.action"),
+  ];
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "items",
@@ -153,7 +155,7 @@ export default function POLineItemsTable({
       <div className="mt-4 px-4">
         <Button
           onClick={handleAddItem}
-          name="New PO item"
+          name={translate("purchase_order.create_po.new_item")}
           button_type="secondary"
           icon_type="plus"
         />

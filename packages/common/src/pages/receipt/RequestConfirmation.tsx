@@ -17,12 +17,14 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { getMembersListApi, requestConfirmationApi } from "@rever/services";
 import { useUserStore } from "@rever/stores";
+import { useTranslate } from "@rever/i18n";
 
 const RequestConfirmationModal = ({
   onClose,
   billDetails,
   reqConfirmed,
 }: RequestConfirmModalProps) => {
+  const translate = useTranslate();
   const [membersList, setMembersList] = useState<Option[]>([]);
 
   const [isReqConfirmLoading, setIsReqConfirmLoading] =
@@ -61,7 +63,7 @@ const RequestConfirmationModal = ({
     );
 
     if (response?.status === 200) {
-      showSuccessToast("Request sent successfully");
+      showSuccessToast(translate("receipt.request_confirmation.request_sent"));
       setIsReqConfirmLoading(false);
       reqConfirmed();
     }
@@ -71,7 +73,7 @@ const RequestConfirmationModal = ({
     <>
       <div className="p-4 border-b flex justify-between items-center mb-4">
         <h2 className="text-xl text-neutral-1100 font-semibold overflow-hidden text-ellipsis mr-5 whitespace-pre">
-          Request Confirmation
+          {translate("receipt.request_confirmation.heading")}
           {/* - {billDetails?.bill_number} */}
         </h2>
         <button
@@ -83,9 +85,9 @@ const RequestConfirmationModal = ({
       </div>
 
       <div className="px-4">
-        <Label htmlFor="select_user" text="Lite user" />
+        <Label htmlFor="select_user" text={translate("receipt.request_confirmation.lite_user")} />
         <SelectComponent
-          placeholder="Select lite user"
+          placeholder={translate("receipt.request_confirmation.select_lite_user")}
           options={membersList}
           value={selectedLiteUser}
           onChange={(e) => setSelectedLiteUser(e)}
@@ -93,7 +95,7 @@ const RequestConfirmationModal = ({
 
         <div className="mt-14 w-full flex justify-end mb-4 gap-3">
           <Button
-            name="Cancel"
+            name={translate("buttons.cancel")}
             onClick={onClose}
             disabled={isReqConfirmLoading}
             button_type="primary-outline"
@@ -101,7 +103,7 @@ const RequestConfirmationModal = ({
 
           <Button
             type="submit"
-            name="Request"
+            name={translate("receipt.request_confirmation.request")}
             onClick={requestConfirmation}
             disabled={!selectedLiteUser || isReqConfirmLoading}
             button_type="primary"

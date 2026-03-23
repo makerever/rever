@@ -8,6 +8,7 @@ import { Label } from "@rever/common";
 import { STEP } from "@rever/constants";
 import { EmailStepProps } from "@rever/types";
 import { FieldError, FieldValues, Path, PathValue } from "react-hook-form";
+import { useTranslate } from "@rever/i18n";
 
 const EmailStep = <T extends FieldValues>({
   register,
@@ -21,6 +22,7 @@ const EmailStep = <T extends FieldValues>({
   handleEmailCheck,
   isLoaderFormSubmit,
 }: EmailStepProps<T>) => {
+  const translate = useTranslate();
   // Helper to clear specified fields
   const clearFields = (fields: Path<T>[]) => {
     fields.forEach((field) => {
@@ -32,7 +34,7 @@ const EmailStep = <T extends FieldValues>({
     <>
       {/* Email input field with label */}
       <div className="mb-5">
-        <Label htmlFor="email" text="Email" />
+        <Label htmlFor="email" text={translate("auth.email")} />
         <TextInput
           clearInput={() => {
             // Clear email and password fields, reset errors and step
@@ -42,7 +44,7 @@ const EmailStep = <T extends FieldValues>({
           }}
           register={register("email" as Path<T>)}
           id="email"
-          placeholder="name@company.com"
+          placeholder={translate("placeholders.email_input")}
           clearIcon
           error={errors["email"] as FieldError}
           value={getValues("email" as Path<T>)}
@@ -59,7 +61,7 @@ const EmailStep = <T extends FieldValues>({
           <Button
             onClick={handleEmailCheck}
             disabled={isEmailValid || isLoaderFormSubmit}
-            name="Continue"
+            name={translate("buttons.continue")}
             button_type="primary"
             icon_type={isLoaderFormSubmit ? "loader" : null}
             width="w-full"

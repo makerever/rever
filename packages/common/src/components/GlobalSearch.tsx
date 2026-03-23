@@ -14,19 +14,22 @@ import {
   globalSearchRoutesSetting,
 } from "@rever/constants";
 import { hasPermission } from "@rever/utils";
+import { useTranslate } from "@rever/i18n";
 
 type CommandDemoProps = {
   redirectRoute: (url: string) => void;
 };
 
 export function CommandDemo({ redirectRoute }: CommandDemoProps) {
+  const translate = useTranslate();
+
   return (
     <Command className="md:min-w-112.5 border text-neutral-1100">
-      <CommandInput autoFocus placeholder="Search..." />
+      <CommandInput autoFocus placeholder={translate("global_search.search_placeholder")} />
       <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
+        <CommandEmpty>{translate("global_search.no_results")}</CommandEmpty>
 
-        <CommandGroup heading="Suggestions">
+        <CommandGroup heading={translate("global_search.suggestions")}>
           {globalSearchRoutes
             ?.filter((v) => hasPermission(v.f_name, v.a_name))
             .map((v, i) => (
@@ -36,14 +39,14 @@ export function CommandDemo({ redirectRoute }: CommandDemoProps) {
                 onSelect={() => redirectRoute(v.url)}
               >
                 {v.icon}
-                <span>{v.name}</span>
+                <span>{translate(v.i18nKey)}</span>
               </CommandItem>
             ))}
         </CommandGroup>
 
         <CommandSeparator />
 
-        <CommandGroup heading="Settings">
+        <CommandGroup heading={translate("sidebar.settings.settings")}>
           {globalSearchRoutesSetting.map((v, i) => (
             <CommandItem
               key={i}
@@ -51,7 +54,7 @@ export function CommandDemo({ redirectRoute }: CommandDemoProps) {
               onSelect={() => redirectRoute(v.url)}
             >
               {v.icon}
-              <span>{v.name}</span>
+              <span>{translate(v.i18nKey)}</span>
             </CommandItem>
           ))}
         </CommandGroup>

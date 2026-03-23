@@ -5,6 +5,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslate } from "@rever/i18n";
 
 const AuthLayout = ({
   children,
@@ -16,6 +17,7 @@ const AuthLayout = ({
   subTitle: string;
 }>) => {
   const router = useRouter();
+  const translate = useTranslate();
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {
@@ -33,7 +35,7 @@ const AuthLayout = ({
       </div>
 
       {/* Main Content */}
-      <div className="auth-background-shadow rounded-2xl relative mx-6 lg:mx-0 w-full lg:w-[650px] bg-white z-10 flex justify-center items-center">
+      <div className="auth-background-shadow rounded-2xl relative mx-6 lg:mx-0 w-full lg:w-162.5 bg-white z-10 flex justify-center items-center">
         <div className="px-4 py-12 md:px-16 md:py-12 w-full">
           <div className="flex justify-center">
             <Image
@@ -58,27 +60,27 @@ const AuthLayout = ({
           <div>
             {/* Terms and privacy policy notice */}
             <p className="text-secondary-700 font-medium text-xs text-center mt-8">
-              By continuing, you acknowledge that you understand and agree to
+              {translate("auth.terms_notice")}
               the&nbsp;
               <a
                 href="https://rever.ai/legal/terms-and-conditions"
                 target="_blank"
               >
                 <span className="underline font-medium cursor-pointer">
-                  Terms of Service
+                  {translate("auth.terms_of_service")}
                 </span>
               </a>
               ,&nbsp;
               <br />
               <a href="https://rever.ai/legal/eula" target="_blank">
                 <span className="underline font-medium cursor-pointer">
-                  EULA
+                  {translate("auth.eula")}
                 </span>{" "}
               </a>
-              and{" "}
+              {translate("auth.and")}{" "}
               <a href="https://rever.ai/legal/privacy-policy" target="_blank">
                 <span className="underline font-medium cursor-pointer">
-                  Privacy Policy
+                  {translate("auth.privacy_policy")}
                 </span>
               </a>
             </p>

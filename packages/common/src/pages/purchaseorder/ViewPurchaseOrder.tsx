@@ -46,6 +46,7 @@ import POLineItemsReadOnly from "./POLineItemViews";
 import { useUserStore } from "@rever/stores";
 import Link from "next/link";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useTranslate } from "@rever/i18n";
 import {
   getAssociateBillsByPoIDApi,
   getIndividualPOAuditApi,
@@ -70,6 +71,7 @@ const ViewPODetails = ({
   handleRejectionAction,
 }: ViewPODetailsProps) => {
   const router = useRouter();
+  const translate = useTranslate();
 
   const orgDetails = useUserStore((state) => state.user?.organization);
 
@@ -325,7 +327,7 @@ const ViewPODetails = ({
       },
       {
         accessorKey: "bill_date",
-        header: "Bill date",
+        header: translate("bills.table_headers.bill_date"),
         accessorFn: (row) => (row.bill_date ? new Date(row.bill_date) : null),
         sortingFn: sortingFns.datetime,
         sortDescFirst: false,
@@ -339,7 +341,7 @@ const ViewPODetails = ({
       },
       {
         accessorKey: "due_date",
-        header: "Due date",
+        header: translate("bills.table_headers.due_date"),
         accessorFn: (row) => (row.due_date ? new Date(row.due_date) : null),
         sortingFn: sortingFns.datetime,
         sortDescFirst: false,
@@ -353,7 +355,7 @@ const ViewPODetails = ({
       },
       {
         accessorKey: "total",
-        header: "Total amount",
+        header: translate("bills.table_headers.total_amount"),
         accessorFn: (row) => Number(row.total) || 0,
         sortingFn: "basic",
         sortDescFirst: false,
@@ -370,7 +372,7 @@ const ViewPODetails = ({
       },
       {
         accessorKey: "status",
-        header: "Stages",
+        header: translate("purchase_order.table_headers.status"),
         sortDescFirst: false,
         cell: ({ row, getValue }) => {
           const value = getValue() as string;
@@ -404,7 +406,7 @@ const ViewPODetails = ({
   //Options for popup button
   const popupButtonItem: PopupButtonMenuProps[] = [
     {
-      name: "Edit PO",
+      name: translate("purchase_order.actions.edit_po"),
       icon: <Pencil size={16} />,
       isShown:
         hasPermission("purchaseorder", "update") &&
@@ -415,13 +417,13 @@ const ViewPODetails = ({
       },
     },
     {
-      name: "Associated bills",
+      name: translate("purchase_order.actions.associated_bills"),
       icon: <FileSymlink size={16} />,
       isShown: true,
       onClick: () => setAssociateBillsSidePanel(true),
     },
     {
-      name: "Audit history",
+      name: translate("purchase_order.actions.audit_history"),
       icon: <FileClock width={16} />,
       isShown: true,
       onClick: () => {
@@ -430,7 +432,7 @@ const ViewPODetails = ({
       },
     },
     {
-      name: "Delete PO",
+      name: translate("purchase_order.actions.delete_po"),
       icon: <Trash size={16} />,
       isShown:
         hasPermission("purchaseorder", "delete") &&
@@ -478,7 +480,7 @@ const ViewPODetails = ({
                 <div className="flex items-center">
                   <ToggleSwitch isOn={showPdf} setIsOn={setShowPdf} />
                   <p className="ms-2 text-xs text-neutral-1100 dark:text-gray-200">
-                    {!showPdf ? "Show pdf" : "Hide pdf"}
+                    {!showPdf ? translate("purchase_order.actions.show_pdf") : translate("purchase_order.actions.hide_pdf")}
                   </p>
                 </div>
               )}
@@ -491,14 +493,14 @@ const ViewPODetails = ({
                   {currentPoDetails?.status === "under_approval" && isUserApproval ? (
                     <div className="flex items-center gap-3 w-fit">
                       <Button
-                        name="Approve"
+                        name={translate("purchase_order.actions.approve")}
                         onClick={handleApprovalAction}
                         disabled={isLoaderFormSubmit}
                         button_type="primary"
                         icon_type="approve"
                       />
                       <Button
-                        name="Reject"
+                        name={translate("purchase_order.actions.reject")}
                         onClick={handleRejectionAction}
                         disabled={isLoaderFormSubmit}
                         button_type="danger"
@@ -511,7 +513,7 @@ const ViewPODetails = ({
                     <div className="flex items-center gap-3 w-fit">
                       {isApproverAvailable ? (
                         <Button
-                          name="Send for approval"
+                          name={translate("purchase_order.actions.send_for_approval")}
                           onClick={handleSendPOApproval}
                           disabled={isLoaderFormSubmit}
                           button_type="primary"
@@ -519,7 +521,7 @@ const ViewPODetails = ({
                         />
                       ) : (
                         <Button
-                          name="Approve"
+                          name={translate("purchase_order.actions.approve")}
                           onClick={handleApprovePO}
                           disabled={isLoaderFormSubmit}
                           button_type="primary"
@@ -527,7 +529,7 @@ const ViewPODetails = ({
                         />
                       )}
                       <Button
-                        name="Reject"
+                        name={translate("purchase_order.actions.reject")}
                         onClick={handleRejectPO}
                         disabled={isLoaderFormSubmit}
                         button_type="danger"
@@ -569,9 +571,9 @@ const ViewPODetails = ({
                           auditVersionDate !== "--" &&
                           <div className="font-medium text-neutral-1100 text-sm flex items-center justify-end gap-3">
                             <p>
-                              <span>You are viewing </span>
+                              <span>{translate("common.you_are_viewing")} </span>
                               {auditVersionDate}
-                              <span> version</span>
+                              <span> {translate("common.version")}</span>
                             </p>
                             <div
                               className="popup-btn rounded-[8px] size-8 btn-secondary-outline"
@@ -603,11 +605,11 @@ const ViewPODetails = ({
                 className="grid grid-cols-1 gap-x-5 bg-white rounded-[20px] p-4 border border-secondary-200"
               >
                 <p className="text-neutral-1100 text-xl mb-5 font-medium">
-                  PO details
+                  {translate("purchase_order.po_details")}
                 </p>
                 <div className="flex flex-row items-center border-b border-secondary-200 h-11">
                   <Label
-                    text="Vendor name:"
+                    text={translate("vendors.create_vendor.vendor_details.vendor_name") + ":"}
                     className="font-medium text-secondary-700 max-w-60 w-full"
                   />
                   <p
@@ -627,7 +629,7 @@ const ViewPODetails = ({
                 </div>
                 <div className="flex flex-row items-center border-b border-secondary-200 py-1.5 h-11">
                   <Label
-                    text="Total amount:"
+                    text={translate("purchase_order.table_headers.total_amount") + ":"}
                     className="font-medium text-secondary-700 max-w-60 w-full"
                   />
                   <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.total })}`}>
@@ -636,7 +638,7 @@ const ViewPODetails = ({
                 </div>
                 <div className="flex flex-row items-center border-b border-secondary-200 py-1.5 h-11">
                   <Label
-                    text="PO date:"
+                    text={translate("purchase_order.create_po.po_date") + ":"}
                     className="font-medium text-secondary-700 max-w-60 w-full"
                   />
                   <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.po_date })}`}>
@@ -645,7 +647,7 @@ const ViewPODetails = ({
                 </div>
                 <div className="flex flex-row items-center border-b border-secondary-200 py-1.5 h-11">
                   <Label
-                    text="Delivery date:"
+                    text={translate("purchase_order.create_po.delivery_date") + ":"}
                     className="font-medium text-secondary-700 max-w-60 w-full"
                   />
                   <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.delivery_date })}`}>
@@ -657,7 +659,7 @@ const ViewPODetails = ({
                 </div>
                 <div className="flex flex-row items-center border-b border-secondary-200 py-3">
                   <Label
-                    text="Vendor address:"
+                    text={translate("vendors.create_vendor.vendor_address.heading") + ":"}
                     className="font-medium text-secondary-700 max-w-60 w-full"
                   />
                   <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: billingAddressField })}`}>
@@ -666,7 +668,7 @@ const ViewPODetails = ({
                 </div>
                 <div className="flex flex-row items-center h-11">
                   <Label
-                    text="Payment terms:"
+                    text={translate("purchase_order.create_po.payment_terms") + ":"}
                     className="font-medium text-secondary-700 max-w-60 w-full"
                   />
                   <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.payment_terms })}`}>
@@ -684,7 +686,7 @@ const ViewPODetails = ({
                 }}
               >
                 <p className="text-neutral-1100 mb-5 text-xl font-medium">
-                  PO line items
+                  {translate("purchase_order.create_po.po_line_items.heading")}
                 </p>
                 <POLineItemsReadOnly
                   showAuditHistory={showAuditHistory}
@@ -699,7 +701,7 @@ const ViewPODetails = ({
             {fileUrl && showPdf && (
               <div className="relative lg:w-[30%] scrollbar_none rounded-[20px] bg-white border border-secondary-200 overflow-hidden">
                 <p className="p-4 mb-4 pb-0 text-neutral-1100 text-xl font-medium">
-                  PO preview
+                  {translate("purchase_order.po_preview")}
                 </p>
                 <PdfViewer fileUrl={fileUrl} />
               </div>
@@ -732,7 +734,7 @@ const ViewPODetails = ({
         <div className="">
           <div className="flex justify-between items-center p-4">
             <p className="text-neutral-1100 text-lg font-semibold">
-              Associate bills
+              {translate("purchase_order.associate_bills")}
             </p>
             <div
               className="popup-btn rounded-[8px] size-8 btn-secondary-outline"

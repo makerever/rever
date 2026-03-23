@@ -17,10 +17,12 @@ import { ColumnDef, sortingFns } from "@tanstack/react-table";
 import { Paperclip } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslate } from "@rever/i18n";
 
 // Main component for displaying the approval list
 const POApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
   const router = useRouter();
+  const translate = useTranslate();
 
   const [poApprovalList, setPoApprovalList] = useState<PurchaseOrder[]>([]);
 
@@ -80,7 +82,7 @@ const POApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
               checked={table.getIsAllPageRowsSelected()}
               onChange={table.getToggleAllPageRowsSelectedHandler()}
             />
-            <span>PO</span>
+            <span>{translate("purchase_order.table_headers.po")}</span>
           </div>
         ),
         cell: ({ row, getValue }) => {
@@ -104,7 +106,7 @@ const POApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
       },
       {
         accessorKey: "po_date",
-        header: "PO date",
+        header: translate("purchase_order.table_headers.po_date"),
         accessorFn: (row) => (row.po_date ? new Date(row.po_date) : null),
         sortingFn: sortingFns.datetime,
         sortDescFirst: false,
@@ -118,7 +120,7 @@ const POApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
       },
       {
         accessorKey: "delivery_date",
-        header: "Delivery date",
+        header: translate("purchase_order.table_headers.delivery_date"),
         accessorFn: (row) =>
           row.delivery_date ? new Date(row.delivery_date) : null,
         sortingFn: sortingFns.datetime,
@@ -133,7 +135,7 @@ const POApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
       },
       {
         accessorKey: "vendor",
-        header: "Vendor",
+        header: translate("purchase_order.table_headers.vendor"),
         accessorFn: (row) => row.vendor?.name || "",
         sortingFn: "alphanumeric",
         sortDescFirst: false,
@@ -152,7 +154,7 @@ const POApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
       },
       {
         accessorKey: "total",
-        header: "Total amount",
+        header: translate("purchase_order.table_headers.total_amount"),
         accessorFn: (row) => Number(row.total) || 0,
         sortingFn: "basic",
         sortDescFirst: false,
@@ -169,7 +171,7 @@ const POApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: translate("purchase_order.table_headers.status"),
         sortDescFirst: false,
         cell: ({ row, getValue }) => {
           const value = getValue() as string;
@@ -183,7 +185,7 @@ const POApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
               />
 
               {row?.original.is_attachment && (
-                <CustomTooltip content="PDF attached">
+                <CustomTooltip content={translate("bills.actions.pdf_attached")}>
                   <div>
                     <Paperclip className="text-slate-400" width={14} />
                   </div>
@@ -217,7 +219,7 @@ const POApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
     <>
       <DataTable
         noStatusFilter
-        tableHeading="Approvals"
+        tableHeading={translate("sidebar.expenses.approvals")}
         tableData={filteredPOApprovals}
         columns={columns}
         setSearch={setSearch}

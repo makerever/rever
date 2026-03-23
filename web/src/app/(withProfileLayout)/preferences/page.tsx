@@ -9,9 +9,11 @@ import {
 } from "@rever/services";
 import { ManageNotificationProps } from "@rever/types";
 import { useEffect, useState } from "react";
+import { useTranslate } from "@rever/i18n";
 
 // Notification settings component
 const Notification = () => {
+  const translate = useTranslate();
   // State for first notification preference (e.g., transaction submitted)
   const [notiPreferenceApp1, setNotiPreferenceApp1] = useState<boolean>(false);
   // State for second notification preference (e.g., transaction approved)
@@ -44,7 +46,7 @@ const Notification = () => {
     const responseData = await updateNotificationStatusApi(data);
 
     if (responseData?.status === 200) {
-      showSuccessToast("Notification preference updated successfully");
+      showSuccessToast(translate("preferences.updated"));
     }
   };
 
@@ -54,7 +56,7 @@ const Notification = () => {
         <div className="flex items-center justify-between w-full h-8">
           <div className="flex items-center gap-3">
             <p className="text-neutral-1100 text-2xl font-medium">
-              Preferences
+              {translate("profile_sidebar.preferences")}
             </p>
           </div>
         </div>
@@ -76,11 +78,10 @@ const Notification = () => {
             />
             <div className="-mt-0.5">
               <p className="font-medium text-sm text-neutral-1100 dark:text-gray-200">
-                Notify when transactions are submitted for approval
+                {translate("preferences.notify_submitted")}
               </p>
               <p className="mt-1 font-medium text-xs text-neutral-700 dark:text-gray-200">
-                Get notified instantly when a transaction is awaiting approval
-                in the system.
+                {translate("preferences.notify_submitted_desc")}
               </p>
             </div>
           </div>
@@ -93,11 +94,10 @@ const Notification = () => {
             />
             <div className="-mt-0.5">
               <p className="font-medium text-sm text-neutral-1100 dark:text-gray-200">
-                Notify when transaction is approved/rejected
+                {translate("preferences.notify_approved")}
               </p>
               <p className="mt-1 font-medium text-xs text-neutral-700 dark:text-gray-200">
-                Receive a notification as soon as a transaction gets
-                approved/rejected successfully.
+                {translate("preferences.notify_approved_desc")}
               </p>
             </div>
           </div>

@@ -39,6 +39,7 @@ import { exportToExcel, hasPermission } from "@rever/utils";
 import Image from "next/image";
 import IconWrapper from "../IconWrapper";
 import { useUserStore } from "@rever/stores";
+import { useTranslate } from "@rever/i18n";
 
 export default function DataTable<
   T extends {
@@ -79,6 +80,7 @@ export default function DataTable<
   defaultSelectedStatusFilter,
   isLoading,
 }: TableProps<T>) {
+  const translate = useTranslate();
   const user = useUserStore((state) => state.user);
 
   const [data, setData] = React.useState<T[]>(() => []);
@@ -329,7 +331,7 @@ export default function DataTable<
             <div className="p-4">
               {setSearch ? (
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-[514px]">
+                  <div className="w-128.5">
                     <SearchInput
                       clearSearch={clearSearch}
                       search={search}
@@ -349,7 +351,7 @@ export default function DataTable<
                         <IconWrapper
                           icon={
                             <CustomTooltip
-                              content="Sync"
+                              content={translate("data_table.sync")}
                               side="bottom"
                               sideOffset={10}
                             >
@@ -377,7 +379,7 @@ export default function DataTable<
                         <Button
                           icon_type="download"
                           button_type="secondary"
-                          name="Export data"
+                          name={translate("data_table.export")}
                           onClick={handleExport}
                           disabled={!selectedRowsData.length}
                         />
@@ -390,14 +392,14 @@ export default function DataTable<
               {!data.length ? (
                 <div className="flex flex-col items-center justify-center h-full p-10 text-neutral-1100 text-sm">
                   <p className="text-secondary-800 text-md font-medium">
-                    This section is currently empty.
+                    {translate("data_table.empty")}
                   </p>
 
                   <p className="text-gray-500 dark:text-gray-400 text-2xs mt-1">
-                    Feel free to explore other sections in the meantime.
+                    {translate("data_table.message")}
                   </p>
                   {flowImageSrc ? (
-                    <div className="relative w-full mt-4 h-[400px]">
+                    <div className="relative w-full mt-4 h-100">
                       <Image
                         alt="Table data not found"
                         src={flowImageSrc}
@@ -409,7 +411,7 @@ export default function DataTable<
                 </div>
               ) : (
                 <>
-                  <div className="rounded-xl border bg-white shadow-xs max-h-[506px] overflow-y-auto custom_scrollbar w-full">
+                  <div className="rounded-xl border bg-white shadow-xs max-h-126.5 overflow-y-auto custom_scrollbar w-full">
                     {/* Horizontal scroll wrapper */}
                     <div className="overflow-x-auto w-full custom_scrollbar">
                       {/* Table stretches to container if small, grows naturally if large */}
@@ -424,8 +426,8 @@ export default function DataTable<
                                     header.column.columnDef.meta as {
                                       width?: string;
                                     }
-                                  )?.width || "min-w-[120px]"
-                                    } ${header.column.columnDef.header === "Total amount" ? "flex justify-end ps-3 pr-10" : ""}`}
+                                  )?.width || "min-w-30"
+                                    } ${(header.column.columnDef.meta as { isAmount?: boolean })?.isAmount ? "flex justify-end ps-3 pr-10" : ""}`}
                                 >
                                   <div className="flex items-center gap-1.5">
                                     {flexRender(
@@ -453,7 +455,7 @@ export default function DataTable<
                               ))}
                               {actions && (
                                 <th className="px-3 py-2.5 font-semibold text-center whitespace-nowrap">
-                                  Actions
+                                  {translate("data_table.actions")}
                                 </th>
                               )}
                             </tr>
@@ -469,8 +471,7 @@ export default function DataTable<
                               {row.getVisibleCells().map((cell) => (
                                 <td
                                   key={cell.id}
-                                  className={`${cell.column.columnDef.header ===
-                                    "Total amount"
+                                  className={`${(cell.column.columnDef.meta as { isAmount?: boolean })?.isAmount
                                     ? "text-right ps-3 pr-10"
                                     : "px-3"
                                     } py-2.5 border-t whitespace-nowrap max-w-40 overflow-hidden text-ellipsis`}

@@ -5,24 +5,26 @@
 import { AuthLayout, LoginSignup } from "@rever/common";
 import { STEP, StepType } from "@rever/constants";
 import { useState } from "react";
+import { useTranslate } from "@rever/i18n";
 
 export default function Home() {
   const [showStep, setShowStep] = useState<StepType>(STEP.EMAIL);
+  const translate = useTranslate();
   return (
     <>
       <AuthLayout
         mainTitle={
           showStep === STEP.FORGOT_PASSWORD
-            ? "Reset Your password"
+            ? translate("auth.page_titles.reset_your_password")
             : showStep === STEP.OTP
-              ? "Verify your email to get started"
+              ? translate("auth.page_titles.verify_email")
               : showStep === STEP.EMAIL
-                ? "Sign in or get started"
-                : "Sign in to your account"
+                ? translate("auth.page_titles.sign_in_or_get_started")
+                : translate("auth.page_titles.sign_in_to_account")
         }
         subTitle={
           showStep === STEP.FORGOT_PASSWORD
-            ? "We’ll send a code to this email"
+            ? translate("auth.page_subtitles.send_code_to_email")
             : ""
         }
       >

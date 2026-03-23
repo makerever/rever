@@ -44,6 +44,7 @@ import BillLineItemsReadOnly from "./BillLineItemViews";
 import { Button } from "@rever/common";
 import { useUserStore } from "@rever/stores";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useTranslate } from "@rever/i18n";
 import {
   getBillAuditHistoryApi,
   getIndividualBillAuditApi,
@@ -71,6 +72,7 @@ const ViewBillDetails = ({
 
   const router = useRouter();
   const orgDetails = useUserStore((state) => state.user?.organization);
+  const translate = useTranslate();
 
   const [currentBillDetails, setCurrentBillDetails] = useState<Partial<Bill>>(billDetails);
   const [latestBillDetials, setLatestBillDetails] = useState<Partial<Bill>>(billDetails);
@@ -287,7 +289,7 @@ const ViewBillDetails = ({
 
   const popupButtonItem = [
     {
-      name: "Edit Bill",
+      name: translate("bills.actions.edit_bill"),
       icon: <Pencil size={16} />,
       isShown: hasPermission("bill", "update") &&
         billDetails?.status !== "approved" &&
@@ -297,7 +299,7 @@ const ViewBillDetails = ({
       },
     },
     {
-      name: "Request Confirmation",
+      name: translate("confirmations.request_confirmation"),
       icon: <UserRoundPlus size={16} />,
       isShown: hasPermission("bill", "view"),
       onClick: () => setReqConfirmationModal(true),
@@ -306,7 +308,7 @@ const ViewBillDetails = ({
         currentBillDetails?.status !== "in_review",
     },
     {
-      name: "View Confirmations",
+      name: translate("confirmations.view_confirmations"),
       icon: <FileCheck size={16} />,
       isShown: hasPermission("bill", "view"),
       onClick: () => setVersionHistorySidePanel(true),
@@ -315,7 +317,7 @@ const ViewBillDetails = ({
         currentBillDetails?.status !== "in_review",
     },
     {
-      name: "Audit history",
+      name: translate("bills.actions.audit_history"),
       icon: <FileClock width={16} />,
       isShown: true,
       onClick: () => {
@@ -324,7 +326,7 @@ const ViewBillDetails = ({
       },
     },
     {
-      name: "Delete Bill",
+      name: translate("bills.actions.delete_bill"),
       icon: <Trash size={16} />,
       isShown:
         hasPermission("bill", "delete") &&
@@ -372,7 +374,7 @@ const ViewBillDetails = ({
               <div className="flex items-center">
                 <ToggleSwitch isOn={showPdf} setIsOn={setShowPdf} />
                 <p className="ms-1.5 text-sm text-neutral-1100 font-medium">
-                  {!showPdf ? "Show pdf" : "Hide pdf"}
+                  {!showPdf ? translate("bills.actions.show_pdf") : translate("bills.actions.hide_pdf")}
                 </p>
               </div>
             )}
@@ -384,7 +386,7 @@ const ViewBillDetails = ({
               <div className="flex items-center gap-3 w-fit">
                 {currentBillDetails?.purchase_order?.id ? (
                   <Button
-                    name="View match"
+                    name={translate("bills.actions.view_match")}
                     onClick={() =>
                       router.push(
                         `/approvals/list/review/match?id=${currentBillDetails?.id}`,
@@ -395,7 +397,7 @@ const ViewBillDetails = ({
                   />
                 ) : (
                   <Button
-                    name="Approve"
+                    name={translate("bills.actions.approve")}
                     onClick={handleApprovalAction}
                     disabled={isLoaderFormSubmit}
                     button_type="primary"
@@ -403,7 +405,7 @@ const ViewBillDetails = ({
                 )}
 
                 <Button
-                  name="Reject"
+                  name={translate("bills.actions.reject")}
                   onClick={handleRejectionAction}
                   disabled={isLoaderFormSubmit}
                   button_type="danger"
@@ -421,7 +423,7 @@ const ViewBillDetails = ({
                     {orgDetails?.matching_type !== "none" &&
                       currentBillDetails?.purchase_order?.id ? (
                       <Button
-                        name="View match"
+                        name={translate("bills.actions.view_match")}
                         onClick={() =>
                           router.push(`/bill/match?id=${currentBillDetails?.id}`)
                         }
@@ -430,7 +432,7 @@ const ViewBillDetails = ({
                       />
                     ) : currentBillDetails?.status === "in_review" ? (
                       <Button
-                        name="Send for approval"
+                        name={translate("bills.actions.send_for_approval")}
                         onClick={handleSendBillApproval}
                         disabled={isLoaderFormSubmit}
                         button_type="primary"
@@ -447,7 +449,7 @@ const ViewBillDetails = ({
                           !currentBillDetails?.purchase_order?.id ? (
                           currentBillDetails?.status === "in_review" && (
                             <Button
-                              name="Approve"
+                              name={translate("bills.actions.approve")}
                               onClick={handleApproveBill}
                               disabled={isLoaderFormSubmit}
                               button_type="primary"
@@ -458,7 +460,7 @@ const ViewBillDetails = ({
                           )
                         ) : (
                           <Button
-                            name="View match"
+                            name={translate("bills.actions.view_match")}
                             onClick={() =>
                               router.push(`/bill/match?id=${currentBillDetails?.id}`)
                             }
@@ -474,7 +476,7 @@ const ViewBillDetails = ({
                 {/* Reject button shown to everyone if status is in_review */}
                 {currentBillDetails?.status === "in_review" && (
                   <Button
-                    name="Reject"
+                    name={translate("bills.actions.reject")}
                     onClick={handleRejectBill}
                     disabled={isLoaderFormSubmit}
                     button_type="danger"
@@ -512,9 +514,9 @@ const ViewBillDetails = ({
                       auditVersionDate !== "--" &&
                       <div className="font-medium text-neutral-1100 text-sm flex items-center justify-end gap-3">
                         <p>
-                          <span>You are viewing </span>
+                          <span>{translate("common.you_are_viewing")} </span>
                           {auditVersionDate}
-                          <span> version</span>
+                          <span> {translate("common.version")}</span>
                         </p>
                         <div
                           className="popup-btn rounded-[8px] size-8 btn-secondary-outline"
@@ -539,12 +541,12 @@ const ViewBillDetails = ({
             className={`border border-secondary-200 rounded-[20px] bg-white p-4`}
           >
             <p className="text-neutral-1100 text-xl mb-5 font-medium">
-              Bill details
+              {translate("create_bill.heading")}
             </p>
             <div className="grid grid-cols-1 gap-x-5">
               <div className="flex flex-row items-center border-b border-secondary-200 pb-3">
                 <Label
-                  text="Vendor:"
+                  text={translate("create_bill.vendor") + ":"}
                   className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
                 />
                 <p className="text-neutral-1100 text-sm font-medium">
@@ -563,7 +565,7 @@ const ViewBillDetails = ({
 
               <div className="flex flex-row items-center border-b border-secondary-200 py-3">
                 <Label
-                  text="Purchase order:"
+                  text={translate("create_bill.purchase_order") + ":"}
                   className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
                 />
                 <p className={`text-neutral-1100 text-sm font-medium ${checkAuditValidation({ showAuditHistory, field: typeof auditValidation?.purchase_order === "object" ? auditValidation?.purchase_order?.po_number : auditValidation?.purchase_order })}`}>
@@ -582,7 +584,7 @@ const ViewBillDetails = ({
 
               <div className="flex flex-row items-center border-b border-secondary-200 py-3">
                 <Label
-                  text="Bill date:"
+                  text={translate("create_bill.bill_date") + ":"}
                   className={`max-w-60 w-full text-secondary-700 mb-0 font-medium `}
                 />
                 <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.bill_date })}`}>
@@ -592,7 +594,7 @@ const ViewBillDetails = ({
 
               <div className="flex flex-row items-center border-b border-secondary-200 py-3">
                 <Label
-                  text="Due date:"
+                  text={translate("create_bill.due_date") + ":"}
                   className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
                 />
                 <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.due_date })}`}>
@@ -602,7 +604,7 @@ const ViewBillDetails = ({
 
               <div className="flex flex-row items-center border-b border-secondary-200 py-3">
                 <Label
-                  text="Vendor address:"
+                  text={translate("vendors.create_vendor.vendor_address.heading") + ":"}
                   className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
                 />
                 <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: billingAddressField })}`}>
@@ -612,7 +614,7 @@ const ViewBillDetails = ({
 
               <div className="flex flex-row items-center py-3">
                 <Label
-                  text="Payment terms:"
+                  text={translate("create_bill.payment_terms") + ":"}
                   className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
                 />
                 <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.payment_terms })}`}>
@@ -630,7 +632,7 @@ const ViewBillDetails = ({
             }}
           >
             <p className="text-neutral-1100 text-xl font-medium mb-5">
-              Bill line Items
+              {translate("create_bill.bill_line_items.heading")}
             </p>
 
             <BillLineItemsReadOnly
@@ -650,7 +652,7 @@ const ViewBillDetails = ({
                       currentBillDetails?.reject_reason !== null &&
                       <div className="mb-4">
                         <Label
-                          text="Rejection reason:"
+                          text={translate("purchase_order.rejection_reason") + ":"}
                           className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
                         />
                         <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.reject_reason })}`}>
@@ -663,7 +665,7 @@ const ViewBillDetails = ({
                 {/* Notes */}
                 <div className="">
                   <Label
-                    text="Notes:"
+                    text={translate("create_bill.notes") + ":"}
                     className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
                   />
                   <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.comments })}`}>
@@ -676,7 +678,7 @@ const ViewBillDetails = ({
               <div className="flex justify-end">
                 <div className="p-4 w-72 font-medium text-sm bg-secondary-100 rounded-[20px]">
                   <div className="grid grid-cols-2">
-                    <p className="text-neutral-1100">Sub total:</p>
+                    <p className="text-neutral-1100">{translate("create_bill.sub_total")}:</p>
                     <span className={`text-neutral-900 text-right ${checkAuditValidation({ showAuditHistory, field: auditValidation?.sub_total })}`}>
                       {formatNumber(
                         currentBillDetails?.sub_total || 0,
@@ -686,7 +688,7 @@ const ViewBillDetails = ({
                   </div>
                   <div className="grid items-center grid-cols-2 pb-2 mt-4 mb-2">
                     <div>
-                      <p className="text-neutral-1100">Total tax:</p>
+                      <p className="text-neutral-1100">{translate("create_bill.total_tax")}:</p>
                       <span className={`text-xs ${checkAuditValidation({ showAuditHistory, field: auditValidation?.total_tax })}`}>
                         {formatNumber(
                           currentBillDetails?.total_tax || 0,
@@ -699,7 +701,7 @@ const ViewBillDetails = ({
                     </div>
                   </div>
                   <div className="grid grid-cols-2 font-semibold">
-                    <p className="text-neutral-1100">Grand total:</p>
+                    <p className="text-neutral-1100">{translate("purchase_order.view_po.grand_total")}:</p>
                     <span className={`text-neutral-900 text-right ${checkAuditValidation({ showAuditHistory, field: auditValidation?.total })}`}>
                       {formatNumber(
                         currentBillDetails?.total || 0,
@@ -716,7 +718,7 @@ const ViewBillDetails = ({
         {fileUrl && showPdf && (
           <div className="relative lg:w-[30%] scrollbar_none rounded-[20px] bg-white border border-secondary-200 overflow-hidden">
             <p className="p-4 mb-4 pb-0 text-neutral-1100 text-xl font-medium">
-              Bill preview
+              {translate("create_bill.bill_preview")}
             </p>
 
             <PdfViewer fileUrl={fileUrl} />
@@ -749,7 +751,7 @@ const ViewBillDetails = ({
         <div className="pb-6">
           <div className="border-b border-secondary-200 p-4 flex justify-between items-center">
             <p className="text-neutral-1100 text-xl font-semibold">
-              Confirmation history
+              {translate("common.confirmation_history")}
             </p>
 
             <button

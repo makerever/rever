@@ -9,8 +9,10 @@ import { useUserStore } from "@rever/stores";
 import { Option } from "@rever/types";
 import { hasPermission } from "@rever/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslate } from "@rever/i18n";
 
 const Controls = () => {
+  const translate = useTranslate();
   const orgDetails = useUserStore((state) => state.user?.organization);
   const user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
@@ -65,7 +67,7 @@ const Controls = () => {
           timezone: user?.timezone,
         });
 
-        showSuccessToast("Changes have been autosaved");
+        showSuccessToast(translate("approval_settings.autosaved"));
       }
     },
     [user, setUser], // dependencies used inside the function
@@ -98,13 +100,13 @@ const Controls = () => {
       <div className="rounded-b-[20px] bg-white p-4 h-28 border border-secondary-200 flex items-end justify-start">
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 w-full h-8">
           <div className="flex items-center gap-2">
-            <p className="text-neutral-1100 text-2xl font-medium">Controls</p>
+            <p className="text-neutral-1100 text-2xl font-medium">{translate("sidebar.settings.controls")}</p>
           </div>
         </div>
       </div>
 
       <div className="w-full rounded-[20px] border bg-white shadow-xs p-4 min-h-[calc(100vh-162px)]">
-        <p className="text-neutral-1100 text-xl font-medium mb-5">Match type</p>
+        <p className="text-neutral-1100 text-xl font-medium mb-5">{translate("controls.match_type")}</p>
         {matchingOptions.map((val) => (
           <label
             key={val.value}
@@ -134,10 +136,10 @@ const Controls = () => {
           <RadioBtn isDisable checked={false} onChange={() => {}} />
           <div>
             <p className="mb-1 text-xs font-semibold text-slate-800">
-              4-Way match
+              {translate("controls.four_way_match")}
             </p>
             <p className="text-2xs text-slate-600">
-              Verify that the goods received meet specific quality standards.
+              {translate("controls.four_way_match_description")}
             </p>
           </div>
         </label>

@@ -2,7 +2,7 @@
 
 "use client";
 
-import { addVendorSchema, addVendorSchemaValues } from "@rever/validations";
+import { createAddVendorSchema, addVendorSchemaValues } from "@rever/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { Label, ToggleSwitch } from "@rever/common";
@@ -26,9 +26,11 @@ import { AddVendorComponentType } from "@rever/types";
 import { PhoneInputComp } from "@rever/common";
 import { PageLoader } from "@rever/common";
 import { useBreadcrumbStore } from "@rever/stores";
+import { useTranslate } from "@rever/i18n";
 
 // Main component for adding or editing a vendor
 const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
+  const translate = useTranslate();
   const {
     register,
     handleSubmit,
@@ -38,7 +40,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
     setValue,
     control,
   } = useForm({
-    resolver: zodResolver(addVendorSchema),
+    resolver: zodResolver(createAddVendorSchema(translate)),
     mode: "onChange",
   });
 
@@ -145,7 +147,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
     const response = await createNewVendorAPI(data);
     if (response.status === 201) {
       setIsLoaderFormSubmit(false);
-      showSuccessToast("Vendor created successfully");
+      showSuccessToast(translate("vendors.created"));
       router.push("/vendor/list");
     } else {
       setIsLoaderFormSubmit(false);
@@ -161,7 +163,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
     const response = await updateVendorAPI(data);
     if (response.status === 200) {
       setIsLoaderFormSubmit(false);
-      showSuccessToast("Vendor updated successfully");
+      showSuccessToast(translate("vendors.updated"));
       router.push("/vendor/list");
     } else {
       setIsLoaderFormSubmit(false);
@@ -225,12 +227,12 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                     <p className="text-neutral-1100 text-2xl font-medium">
                       {vendorId
                         ? `Edit Vendor - ${getValues("vendorName")}`
-                        : "New Vendor"}
+                        : translate("vendors.create_vendor.heading")}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <Button
-                      name="Cancel"
+                      name={translate("buttons.cancel")}
                       onClick={() =>
                         vendorId
                           ? router.push(`/vendor/view?id=${vendorId}`)
@@ -256,14 +258,14 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                   >
                     <div className="w-full flex items-start justify-between">
                       <p className="text-neutral-1100 text-xl mb-5 font-medium">
-                        Vendor details
+                        {translate("vendors.create_vendor.vendor_details.heading")}
                       </p>
                     </div>
                     <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
                       <div>
                         <Label
                           htmlFor="vendorName"
-                          text="Vendor name"
+                          text={translate("vendors.create_vendor.vendor_details.vendor_name")}
                           className=""
                           isRequired
                         />
@@ -278,7 +280,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                       <div>
                         <Label
                           htmlFor="companyName"
-                          text="Company name"
+                          text={translate("vendors.create_vendor.vendor_details.company_name")}
                           className=""
                         />
                         <TextInput
@@ -290,7 +292,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="email" text="Email" className="" />
+                        <Label htmlFor="email" text={translate("vendors.create_vendor.vendor_details.email")} className="" />
                         <TextInput
                           register={register("email")}
                           id="email"
@@ -300,7 +302,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                         />
                       </div>
                       <div className="phone_input">
-                        <Label htmlFor="mobile" text="Mobile" className="" />
+                        <Label htmlFor="mobile" text={translate("vendors.create_vendor.vendor_details.mobile")} className="" />
                         <Controller
                           name="mobile"
                           control={control}
@@ -315,7 +317,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="taxId" text="Tax ID" className="" />
+                        <Label htmlFor="taxId" text={translate("vendors.create_vendor.vendor_details.tax_id")} className="" />
                         <TextInput
                           register={register("taxId")}
                           id="taxId"
@@ -325,7 +327,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="website" text="Website" className="" />
+                        <Label htmlFor="website" text={translate("vendors.create_vendor.vendor_details.website")} className="" />
                         <TextInput
                           register={register("website")}
                           id="website"
@@ -337,7 +339,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                       <div>
                         <Label
                           htmlFor="paymentTerms"
-                          text="Payment terms"
+                          text={translate("vendors.create_vendor.vendor_details.payment_terms")}
                           className=""
                         />
                         <SelectComponent
@@ -345,8 +347,8 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                           register={register}
                           trigger={trigger}
                           error={errors?.paymentTerms}
-                          options={paymentTermsOptions}
-                          placeholder="Select payment terms"
+                          options={paymentTermsOptions.map((opt) => ({ ...opt, label: translate(`payment_terms_options.${opt.value}`) }))}
+                          placeholder={translate("placeholders.bill.select_pt")}
                           isClearable={true}
                           getValues={getValues}
                         />
@@ -382,7 +384,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                   >
                     <div className="w-full flex items-start justify-between">
                       <p className="text-neutral-1100 text-xl mb-5 font-medium">
-                        Vendor Address
+                        {translate("vendors.create_vendor.vendor_address.heading")}
                       </p>
                     </div>
                     <div className="w-full">
@@ -390,7 +392,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                         <div>
                           <Label
                             htmlFor="line1"
-                            text="Address line 1"
+                            text={translate("vendors.create_vendor.vendor_address.address_line_1")}
                             className=""
                           />
                           <TextInput
@@ -404,7 +406,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                         <div>
                           <Label
                             htmlFor="line2"
-                            text="Address line 2"
+                            text={translate("vendors.create_vendor.vendor_address.address_line_2")}
                             className=""
                           />
                           <TextInput
@@ -418,7 +420,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                         <div>
                           <Label
                             htmlFor="country"
-                            text="Country"
+                            text={translate("vendors.create_vendor.vendor_address.country")}
                             className=""
                           />
                           <TextInput
@@ -430,7 +432,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                           />
                         </div>
                         <div>
-                          <Label htmlFor="state" text="State" className="" />
+                          <Label htmlFor="state" text={translate("vendors.create_vendor.vendor_address.state")} className="" />
                           <TextInput
                             register={register("billingAddress.state")}
                             id="state"
@@ -440,7 +442,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                           />
                         </div>
                         <div>
-                          <Label htmlFor="city" text="City" className="" />
+                          <Label htmlFor="city" text={translate("vendors.create_vendor.vendor_address.city")} className="" />
                           <TextInput
                             register={register("billingAddress.city")}
                             id="city"
@@ -475,14 +477,14 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                   >
                     <div className="w-full flex items-start justify-between">
                       <p className="text-neutral-1100 text-xl mb-5 font-medium">
-                        Bank Account Details
+                        {translate("vendors.create_vendor.bank_account_details.heading")}
                       </p>
                     </div>
                     <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
                       <div>
                         <Label
                           htmlFor="account_holder_name"
-                          text="Account holder name"
+                          text={translate("vendors.create_vendor.bank_account_details.account_holder_name")}
                           className=""
                         />
                         <TextInput
@@ -498,7 +500,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                       <div>
                         <Label
                           htmlFor="account_number"
-                          text="Account number"
+                          text={translate("vendors.create_vendor.bank_account_details.account_number")}
                           className=""
                         />
                         <TextInput
@@ -512,7 +514,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                       <div>
                         <Label
                           htmlFor="bank_name"
-                          text="Bank name"
+                          text={translate("vendors.create_vendor.bank_account_details.bank_name")}
                           className=""
                         />
                         <TextInput
