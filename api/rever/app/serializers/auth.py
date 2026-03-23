@@ -170,6 +170,7 @@ class MeSerializer(serializers.ModelSerializer):
             "role",
             "organization",
             "timezone",
+            "locale",
         ]
         read_only_fields = ["id", "email", "role", "organization"]
 
