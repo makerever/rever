@@ -109,11 +109,16 @@ class Organization(BaseModel):
 
 
 class User(AbstractUser):
+    LOCALE_CHOICES = [
+        ("en", "English"),
+        ("es", "Spanish"),
+    ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     organization = models.ForeignKey(
         Organization, on_delete=models.CASCADE, related_name="users", null=True
     )
     email_verified = models.BooleanField(default=False)
+    locale = models.CharField(max_length=10, choices=LOCALE_CHOICES,default="en")
 
     class Role(models.TextChoices):
         SUPER_ADMIN = "admin", "Admin"
