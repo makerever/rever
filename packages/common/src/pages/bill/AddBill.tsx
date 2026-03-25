@@ -595,7 +595,7 @@ const AddBillComponentWithParams = () => {
                           name="vendor"
                           register={register}
                           trigger={trigger}
-                          title="Vendor"
+                          title={translate("create_bill.vendor")}
                           error={errors?.vendor}
                           options={vendorOptionList}
                           placeholder={translate("placeholders.bill.select_vendor")}
@@ -609,7 +609,7 @@ const AddBillComponentWithParams = () => {
                           name="purchase_order"
                           register={register}
                           trigger={trigger}
-                          title="Purchase order"
+                          title={translate("create_bill.purchase_order")}
                           error={errors?.purchase_order}
                           options={purchaseOrderOptionList}
                           placeholder={translate("placeholders.bill.select_po")}
@@ -641,7 +641,7 @@ const AddBillComponentWithParams = () => {
                           error={errors.bill_date}
                           trigger={trigger}
                           placeholder={translate("placeholders.bill.select_bill_date")}
-                          title="Bill date"
+                          title={translate("create_bill.bill_date")}
                           value={watch("bill_date") ?? undefined}
                         />
                       </div>
@@ -656,7 +656,7 @@ const AddBillComponentWithParams = () => {
                           error={errors.due_date}
                           trigger={trigger}
                           placeholder={translate("placeholders.bill.select_due_date")}
-                          title="Due date"
+                          title={translate("create_bill.due_date")}
                           value={watch("due_date") ?? undefined}
                           disabledBefore={
                             watch("bill_date") != null

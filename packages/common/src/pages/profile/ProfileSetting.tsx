@@ -12,9 +12,9 @@ import {
 } from "@rever/validations";
 import { useUserStore } from "@rever/stores";
 import { SelectComponent } from "@rever/common";
-import { getLoggedInUserDetails, updateProfileApi } from "@rever/services";
+import { updateProfileApi } from "@rever/services";
 import { timezoneList } from "@rever/constants";
-import { showErrorToast, showSuccessToast } from "@rever/common";
+import { showSuccessToast } from "@rever/common";
 import { PageLoader } from "@rever/common";
 import { useTranslate } from "@rever/i18n";
 
@@ -46,6 +46,7 @@ const ProfileSettings = () => {
     setValue("email", user?.email || "");
     setValue("role", user?.role);
     setValue("timezone", user?.timezone || "UTC");
+    setValue("locale", user?.locale || "en");
     setIsLoading(false);
   }, [setValue, user]);
 
@@ -79,6 +80,7 @@ const ProfileSettings = () => {
             email: formData.email || "",
             role: formData.role || "",
             timezone: formData.timezone || "",
+            locale: formData.locale || "en",
           };
 
           // If no changes → stop
@@ -102,6 +104,7 @@ const ProfileSettings = () => {
               email: snapshot.email,
               role: snapshot.role,
               timezone: snapshot.timezone,
+              locale: snapshot.locale,
               organization: response?.data?.organization,
             });
 
@@ -198,7 +201,7 @@ const ProfileSettings = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center pt-3">
+                <div className="border-b border-neutral-200 py-3 flex items-center">
                   <Label
                     htmlFor="timezone"
                     text={translate("profile.timezone") + ":"}
@@ -213,6 +216,28 @@ const ProfileSettings = () => {
                       error={errors?.timezone}
                       options={timezoneList}
                       placeholder={translate("profile.timezone")}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center pt-3">
+                  <Label
+                    htmlFor="locale"
+                    text={translate("profile.language") + ":"}
+                    className="text-neutral-700 font-medium text-sm max-w-60 w-full"
+                  />
+                  <div className="max-w-80 w-full">
+                    <SelectComponent
+                      name="locale"
+                      register={register}
+                      trigger={trigger}
+                      getValues={getValues}
+                      error={errors?.locale}
+                      options={[
+                        { value: "en", label: "English" },
+                        { value: "es", label: "Spanish" },
+                      ]}
+                      placeholder={translate("placeholders.select_language")}
                     />
                   </div>
                 </div>

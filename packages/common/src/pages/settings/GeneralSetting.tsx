@@ -198,6 +198,7 @@ const GeneralSettings = () => {
               role: user?.role,
               organization: response?.data,
               timezone: response?.data,
+              locale: user?.locale ?? "en",
             });
 
             lastSavedData.current = snapshot;

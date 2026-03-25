@@ -21,6 +21,7 @@ import {
   formatDate,
   formatNumber,
   getLabelForBillStatus,
+  getStatusTranslationKey,
   getStatusClass,
   hasPermission,
 } from "@rever/utils";
@@ -304,7 +305,7 @@ const ViewPODetails = ({
         sortDescFirst: false,
         header: ({ }) => (
           <div className="flex items-center gap-4">
-            <span>Bill</span>
+            <span>{translate("bills.table_headers.bill")}</span>
           </div>
         ),
         cell: ({ row, getValue }) => {
@@ -382,10 +383,14 @@ const ViewPODetails = ({
               <PillItem
                 className={`${getStatusClass(value || "")}`}
                 isRounded={true}
-                name={value || ""}
+                name={
+                  getStatusTranslationKey(value || "")
+                    ? translate(getStatusTranslationKey(value || "")!)
+                    : (value || "")
+                }
               />
               {row?.original.is_attachment ? (
-                <CustomTooltip content="PDF attached">
+                <CustomTooltip content={translate("bills.actions.pdf_attached")}>
                   <div>
                     <Paperclip className="text-slate-400" width={14} />
                   </div>
@@ -469,11 +474,13 @@ const ViewPODetails = ({
               </p>
               {/* PO status label */}
               <PillItem
-                className={`${getStatusClass(
-                  getLabelForBillStatus(currentPoDetails?.status || ""),
-                )}`}
+                className={`${getStatusClass(currentPoDetails?.status || "")}`}
                 isRounded={true}
-                name={getLabelForBillStatus(currentPoDetails?.status || "")}
+                name={
+                  getStatusTranslationKey(currentPoDetails?.status || "")
+                    ? translate(getStatusTranslationKey(currentPoDetails?.status || "")!)
+                    : getLabelForBillStatus(currentPoDetails?.status || "")
+                }
               />
               {/* Toggle to show/hide PDF if fileUrl exists */}
               {(fileUrl && !showAuditHistory) && (

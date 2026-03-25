@@ -65,12 +65,13 @@ const Controls = () => {
           role: user?.role,
           organization: response?.data,
           timezone: user?.timezone,
+          locale: user?.locale ?? "en",
         });
 
         showSuccessToast(translate("approval_settings.autosaved"));
       }
     },
-    [user, setUser], // dependencies used inside the function
+    [user, setUser, translate],
   );
 
   // AUTOSAVE ON CHANGE

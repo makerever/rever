@@ -4,14 +4,16 @@
 
 import { useEffect } from "react";
 import { AuditHistoryDataProps } from "@rever/types";
-import { formatDate, getLabelForBillStatus, getStatusClass } from "@rever/utils";
+import { formatDate, getStatusClass, getStatusTranslationKey } from "@rever/utils";
 import { useUserStore } from "@rever/stores";
+import { useTranslate } from "@rever/i18n";
 import PageLoader from "../Loader";
 import AuditHistoryCard from "./AuditHistoryCard";
 import PillItem from "../PillItem";
 
 const AuditHistory = ({ data, isLoading, setAuditVersionDate, handleClickAuditHistoryCard, currentVersion, setCurrentVersion }: AuditHistoryDataProps) => {
   const orgDetails = useUserStore((state) => state.user?.organization);
+  const translate = useTranslate();
 
   useEffect(() => {
     setAuditVersionDate(
@@ -35,7 +37,7 @@ const AuditHistory = ({ data, isLoading, setAuditVersionDate, handleClickAuditHi
         <>
           <div className="p-4">
             <p className="mb-4 pb-0 text-neutral-1100 text-xl font-medium">
-              Audit history
+              {translate("bills.actions.audit_history")}
             </p>
             <div className="">
               {
@@ -57,9 +59,13 @@ const AuditHistory = ({ data, isLoading, setAuditVersionDate, handleClickAuditHi
                           pills={
                             <>
                               <PillItem
-                                className={`${getStatusClass(getLabelForBillStatus(item?.status || "") || "")}`}
+                                className={`${getStatusClass(item?.status || "")}`}
                                 isRounded={true}
-                                name={getLabelForBillStatus(item?.status || "")}
+                                name={
+                                  getStatusTranslationKey(item?.status || "")
+                                    ? translate(getStatusTranslationKey(item?.status || "")!)
+                                    : (item?.status || "")
+                                }
                               />
                             </>
                           }
@@ -85,7 +91,7 @@ const AuditHistory = ({ data, isLoading, setAuditVersionDate, handleClickAuditHi
                     <p
                       className="text-center text-sm text-slate-400"
                     >
-                      No Audit data to display.
+                      {translate("common.no_audit_data")}
                     </p>
                   </>
               }

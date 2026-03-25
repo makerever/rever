@@ -15,9 +15,11 @@ import { formatDate, getLabelForBillStatus } from "@rever/utils";
 import { ColumnDef, sortingFns } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslate } from "@rever/i18n";
 
 const RequestReceiptList = () => {
   const router = useRouter();
+  const translate = useTranslate();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [activeTab, setActiveTab] = useState<string | undefined>("Open");
@@ -76,7 +78,7 @@ const RequestReceiptList = () => {
               checked={table.getIsAllPageRowsSelected()}
               onChange={table.getToggleAllPageRowsSelectedHandler()}
             />
-            <span>Bill</span>
+            <span>{translate("bills.table_headers.bill")}</span>
           </div>
         ),
         cell: ({ row, getValue }) => {
@@ -104,7 +106,7 @@ const RequestReceiptList = () => {
       },
       {
         accessorKey: "bill_date",
-        header: "Bill date",
+        header: translate("bills.table_headers.bill_date"),
         accessorFn: (row) => (row.bill_date ? new Date(row.bill_date) : null),
         sortingFn: sortingFns.datetime,
         sortDescFirst: false,
@@ -118,7 +120,7 @@ const RequestReceiptList = () => {
       },
       {
         accessorKey: "assigned_on",
-        header: "Assigned on",
+        header: translate("confirmations.assigned_on"),
         accessorFn: (row) => row.assigned_at || "",
         sortDescFirst: false,
         cell: ({ getValue }) =>
@@ -134,7 +136,7 @@ const RequestReceiptList = () => {
       },
       {
         accessorKey: "requested_by_name",
-        header: "Requested by",
+        header: translate("confirmations.requested_by"),
         accessorFn: (row) => row.requested_by_name || "",
         sortDescFirst: false,
         cell: ({ getValue }) =>
@@ -151,7 +153,7 @@ const RequestReceiptList = () => {
 
       {
         accessorKey: "vendor",
-        header: "Vendor",
+        header: translate("bills.table_headers.vendor"),
         accessorFn: (row) => row?.vendor_name || "",
         sortingFn: "alphanumeric",
         sortDescFirst: false,
@@ -167,7 +169,7 @@ const RequestReceiptList = () => {
           ),
       },
     ],
-    [collator, orgDetails?.date_format, router],
+    [collator, orgDetails?.date_format, router, translate],
   );
 
   // Effect to structure and set request confirmation list data when API data changes
@@ -317,7 +319,7 @@ const RequestReceiptList = () => {
         <>
           {activeTab === "Open" ? (
             <DataTable
-              tableHeading="Request confirmations"
+              tableHeading={translate("confirmations.request_confirmations")}
               tableData={filteredOpenConfirmList}
               columns={requestListColumns}
               tabNames={tabOptionsReceiptConfirm}
@@ -330,7 +332,7 @@ const RequestReceiptList = () => {
             />
           ) : activeTab === "Closed" ? (
             <DataTable
-              tableHeading="Request confirmations"
+              tableHeading={translate("confirmations.request_confirmations")}
               tableData={filteredClosedConfirmList}
               columns={requestListColumns}
               tabNames={tabOptionsReceiptConfirm}
@@ -343,7 +345,7 @@ const RequestReceiptList = () => {
             />
           ) : (
             <DataTable
-              tableHeading="Request confirmations"
+              tableHeading={translate("confirmations.request_confirmations")}
               tableData={filteredRevokedList}
               columns={requestListColumns}
               tabNames={tabOptionsReceiptConfirm}

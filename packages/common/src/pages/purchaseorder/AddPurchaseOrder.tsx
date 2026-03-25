@@ -567,7 +567,7 @@ const AddPOComponentWithParams = () => {
                         name="vendor"
                         register={register}
                         trigger={trigger}
-                        title="Vendor"
+                        title={translate("purchase_order.create_po.vendor")}
                         error={errors?.vendor}
                         options={vendorOptionList}
                         placeholder={translate("placeholders.bill.select_vendor")}
@@ -599,7 +599,7 @@ const AddPOComponentWithParams = () => {
                         error={errors.po_date}
                         trigger={trigger}
                         placeholder={translate("placeholders.po.select_po_date")}
-                        title="PO date"
+                        title={translate("purchase_order.create_po.po_date")}
                         value={watch("po_date") ?? undefined}
                       />
                     </div>
@@ -611,7 +611,7 @@ const AddPOComponentWithParams = () => {
                         error={errors.delivery_date}
                         trigger={trigger}
                         placeholder={translate("placeholders.po.select_delivery_date")}
-                        title="Delivery date"
+                        title={translate("purchase_order.create_po.delivery_date")}
                         value={watch("delivery_date") ?? undefined}
                         disabledBefore={
                           watch("po_date") != null

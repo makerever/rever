@@ -4,7 +4,8 @@ import * as React from "react";
 import { Popover, PopoverTrigger, PopoverContent } from "@rever/common";
 import { PlusCircle, Search, X } from "lucide-react";
 import { CheckBox } from "@rever/common";
-import { getStatusClass } from "@rever/utils";
+import { useTranslate } from "@rever/i18n";
+import { getStatusClass, getStatusTranslationKey } from "@rever/utils";
 
 export interface StatusFilterProps<T extends { status: string }> {
   data: T[];
@@ -19,9 +20,12 @@ export function StatusFilter<T extends { status: string }>({
   selected,
   onChange,
   statusList,
-  filterHeading = "Status",
+  filterHeading,
 }: StatusFilterProps<T>) {
+  const translate = useTranslate();
   const [search, setSearch] = React.useState("");
+  const resolvedFilterHeading =
+    filterHeading || translate("bills.filter.status");
 
   // Compute counts for each status
   const counts = React.useMemo(() => {
@@ -40,9 +44,17 @@ export function StatusFilter<T extends { status: string }>({
   );
 
   // Filter statuses by the search term
-  const visible = (statusList ? statusList : allStatuses).filter(
-    (s) => s && (s as string).toLowerCase().includes(search.toLowerCase()),
-  );
+  const visible = (statusList ? statusList : allStatuses).filter((s) => {
+    const value = String(s);
+    const translated = getStatusTranslationKey(value)
+      ? translate(getStatusTranslationKey(value)!)
+      : value;
+
+    return (
+      value.toLowerCase().includes(search.toLowerCase()) ||
+      translated.toLowerCase().includes(search.toLowerCase())
+    );
+  });
 
   const toggle = (status: string) => {
     const next = selected.includes(status)
@@ -56,7 +68,7 @@ export function StatusFilter<T extends { status: string }>({
       <PopoverTrigger asChild>
         <div className="gap-1 cursor-pointer flex items-center hover:bg-slate-50 text-xs border border-slate-300 border-dashed h-8 rounded-md px-2">
           <PlusCircle width={14} />
-          {filterHeading}
+          {resolvedFilterHeading}
           {selected.length > 0 && (
             <>
               <span className="text-slate-300 mx-2">|</span>
@@ -66,7 +78,9 @@ export function StatusFilter<T extends { status: string }>({
                     key={i}
                     className={`${getStatusClass(v)} inline-flex border px-1 py-0.5 rounded-md items-center justify-center`}
                   >
-                    {v}
+                    {getStatusTranslationKey(v)
+                      ? translate(getStatusTranslationKey(v)!)
+                      : v}
                   </span>
                 );
               })}
@@ -93,7 +107,7 @@ export function StatusFilter<T extends { status: string }>({
           />
           <input
             type="text"
-            placeholder="Search filters"
+            placeholder={translate("search.search_filters")}
             onChange={(e) => setSearch(e.target.value)}
             className="px-7 disabled:bg-gray-100 rounded-md font-light h-8 border text-2xs w-full focus:outline-none text-slate-800"
           />
@@ -110,7 +124,11 @@ export function StatusFilter<T extends { status: string }>({
                 checked={selected.includes(String(status))}
                 onChange={() => toggle(String(status))}
               />
-              <span className="text-xs">{String(status)}</span>
+              <span className="text-xs">
+                {getStatusTranslationKey(String(status))
+                  ? translate(getStatusTranslationKey(String(status))!)
+                  : String(status)}
+              </span>
             </label>
             <span className="text-xs text-gray-500">
               {counts[String(status)] || 0}

@@ -9,7 +9,12 @@ import {
   VendorsAPIData,
   VendorTableList,
 } from "@rever/types";
-import { getLabelForBillStatus, getStatusClass, hasPermission } from "@rever/utils";
+import {
+  getLabelForBillStatus,
+  getStatusClass,
+  getStatusTranslationKey,
+  hasPermission,
+} from "@rever/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -147,9 +152,13 @@ const VendorList = () => {
           return (
             <div className="flex items-center gap-1">
               <PillItem
-                className={`${getStatusClass(getLabelForBillStatus(isActive || "") || "")}`}
+                className={`${getStatusClass(isActive || "")}`}
                 isRounded={true}
-                name={getLabelForBillStatus((isActive) || "")}
+                name={
+                  getStatusTranslationKey(isActive || "")
+                    ? translate(getStatusTranslationKey(isActive || "")!)
+                    : getLabelForBillStatus(isActive || "")
+                }
               />
             </div>
           );

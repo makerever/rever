@@ -19,6 +19,7 @@ import {
   updateVendorCreditApi,
 } from "@rever/services";
 import { useBreadcrumbStore } from "@rever/stores";
+import { useTranslate } from "@rever/i18n";
 import { AttachmentProps, VendorCreditProps } from "@rever/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, Suspense, useState, useCallback } from "react";
@@ -29,6 +30,7 @@ const ViewVendorCreditWithParams = () => {
   const idValue = searchParams.get("id");
 
   const router = useRouter();
+  const translate = useTranslate();
 
   const [vendorCreditDetails, setvendorCreditDetails] = useState<
     Partial<VendorCreditProps>
@@ -102,7 +104,7 @@ const ViewVendorCreditWithParams = () => {
         await deleteVendorCreditAttachment(fileResponse?.id || "");
       }
       setIsPopupOpen(false);
-      showSuccessToast("Vendor credit deleted successfully");
+      showSuccessToast(translate("vendors.vendor_credit.deleted_successfully"));
       router.push("/vendorcredit/list");
     }
   };
@@ -118,7 +120,7 @@ const ViewVendorCreditWithParams = () => {
       );
       if (response?.status === 200) {
         setIsConfirmRejectPopupOpen(false);
-        showSuccessToast("Vendor credit rejected successfully");
+        showSuccessToast(translate("vendors.vendor_credit.rejected_successfully"));
         router.push("/vendorcredit/list");
       } else if (response?.data?.detail) {
         showErrorToast(response.data.detail);
@@ -130,7 +132,7 @@ const ViewVendorCreditWithParams = () => {
         idValue,
       );
       if (response?.status === 200) {
-        showSuccessToast("Vendor credit approved successfully");
+        showSuccessToast(translate("vendors.vendor_credit.approved_successfully"));
         router.push("/vendorcredit/list");
       } else if (response?.data?.detail) {
         showErrorToast(response.data.detail);
@@ -145,7 +147,7 @@ const ViewVendorCreditWithParams = () => {
 
       const response = await sendVendorCreditForApprovalApi(idValue);
       if (response?.status === 200) {
-        showSuccessToast("Vendor credit sent for approval");
+        showSuccessToast(translate("vendors.vendor_credit.sent_for_approval"));
         router.push("/vendorcredit/list");
       } else {
         setIsLoaderFormSubmit(false);
@@ -185,7 +187,7 @@ const ViewVendorCreditWithParams = () => {
         isOpen={isPopupOpen}
         onClose={() => setIsPopupOpen(false)}
         onConfirm={handleDelete}
-        message="Are you sure you want to delete this vendor credit?"
+        message={translate("vendors.vendor_credit.confirm_delete_message")}
       />
 
       {/* Popup for confirming vendor credit rejection */}
@@ -193,8 +195,8 @@ const ViewVendorCreditWithParams = () => {
         isOpen={isConfirmRejectPopupOpen}
         onClose={() => setIsConfirmRejectPopupOpen(false)}
         onConfirm={handleVendorCreditApprovalRejection}
-        message="Are you sure you want to reject this vendor credit?"
-        buttonText="Reject"
+        message={translate("vendors.vendor_credit.confirm_reject_message")}
+        buttonText={translate("purchase_order.actions.reject")}
       />
     </>
   );

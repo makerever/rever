@@ -243,7 +243,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                     />
                     <Button
                       type="submit"
-                      name={vendorId ? "Save changes" : "Save"}
+                      name={vendorId ? translate("buttons.save_changes") : translate("buttons.save")}
                       disabled={isLoaderFormSubmit}
                       button_type="primary"
                       icon_type={isLoaderFormSubmit ? "loader" : null}
@@ -272,7 +272,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                         <TextInput
                           register={register("vendorName")}
                           id="vendorName"
-                          placeholder="Enter vendor name"
+                          placeholder={translate("vendors.create_vendor.vendor_details.enter_vendor_name")}
                           error={errors.vendorName}
                           value={getValues("vendorName")}
                         />
@@ -286,7 +286,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                         <TextInput
                           register={register("companyName")}
                           id="companyName"
-                          placeholder="Enter company name"
+                          placeholder={translate("vendors.create_vendor.vendor_details.enter_company_name")}
                           error={errors.companyName}
                           value={getValues("companyName")}
                         />
@@ -296,7 +296,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                         <TextInput
                           register={register("email")}
                           id="email"
-                          placeholder="Enter email"
+                          placeholder={translate("vendors.create_vendor.vendor_details.enter_email")}
                           error={errors.email}
                           value={getValues("email")}
                         />
@@ -321,7 +321,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                         <TextInput
                           register={register("taxId")}
                           id="taxId"
-                          placeholder="Enter tax id"
+                          placeholder={translate("vendors.create_vendor.vendor_details.enter_tax_id")}
                           error={errors.taxId}
                           value={getValues("taxId")}
                         />
@@ -331,7 +331,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                         <TextInput
                           register={register("website")}
                           id="website"
-                          placeholder="Enter website"
+                          placeholder={translate("vendors.create_vendor.vendor_details.enter_website")}
                           error={errors.website}
                           value={getValues("website") ?? ""}
                         />
@@ -398,7 +398,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                           <TextInput
                             register={register("billingAddress.line1")}
                             id="line1"
-                            placeholder="Enter address line 1"
+                            placeholder={translate("vendors.create_vendor.vendor_address.enter_address_line_1")}
                             error={errors.billingAddress?.line1}
                             value={getValues("billingAddress.line1")}
                           />
@@ -412,7 +412,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                           <TextInput
                             register={register("billingAddress.line2")}
                             id="line2"
-                            placeholder="Enter address line 2"
+                            placeholder={translate("vendors.create_vendor.vendor_address.enter_address_line_2")}
                             error={errors.billingAddress?.line2}
                             value={getValues("billingAddress.line2")}
                           />
@@ -427,7 +427,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                             register={register("billingAddress.country")}
                             id="country"
                             error={errors.billingAddress?.country}
-                            placeholder="Enter country"
+                            placeholder={translate("vendors.create_vendor.vendor_address.enter_country")}
                             value={getValues("billingAddress.country")}
                           />
                         </div>
@@ -437,7 +437,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                             register={register("billingAddress.state")}
                             id="state"
                             error={errors.billingAddress?.state}
-                            placeholder="Enter state"
+                            placeholder={translate("vendors.create_vendor.vendor_address.enter_state")}
                             value={getValues("billingAddress.state")}
                           />
                         </div>
@@ -447,20 +447,20 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                             register={register("billingAddress.city")}
                             id="city"
                             error={errors.billingAddress?.city}
-                            placeholder="Enter city"
+                            placeholder={translate("vendors.create_vendor.vendor_address.enter_city")}
                             value={getValues("billingAddress.city")}
                           />
                         </div>
                         <div>
                           <Label
                             htmlFor="zip_code"
-                            text="PIN code"
+                            text={translate("vendors.create_vendor.vendor_address.pin_code")}
                             className=""
                           />
                           <TextInput
                             register={register("billingAddress.zip_code")}
                             id="zip_code"
-                            placeholder="Enter zipcode"
+                            placeholder={translate("vendors.create_vendor.vendor_address.enter_zipcode")}
                             error={errors.billingAddress?.zip_code}
                             value={getValues("billingAddress.zip_code")}
                           />
@@ -492,7 +492,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                             "bank_account.account_holder_name"
                           )}
                           id="account_holder_name"
-                          placeholder="Enter account holder name"
+                          placeholder={translate("vendors.create_vendor.bank_account_details.enter_account_holder_name")}
                           error={errors.bank_account?.account_holder_name}
                           value={getValues("bank_account.account_holder_name")}
                         />
@@ -506,7 +506,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                         <TextInput
                           register={register("bank_account.account_number")}
                           id="account_number"
-                          placeholder="Enter account number"
+                          placeholder={translate("vendors.create_vendor.bank_account_details.enter_account_number")}
                           error={errors.bank_account?.account_number}
                           value={getValues("bank_account.account_number")}
                         />
@@ -520,7 +520,7 @@ const AddVendorComponent = ({ vendorId }: AddVendorComponentType) => {
                         <TextInput
                           register={register("bank_account.bank_name")}
                           id="bank_name"
-                          placeholder="Enter bank name"
+                          placeholder={translate("vendors.create_vendor.bank_account_details.enter_bank_name")}
                           error={errors.bank_account?.bank_name}
                           value={getValues("bank_account.bank_name")}
                         />

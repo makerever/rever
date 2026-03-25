@@ -22,8 +22,8 @@ import {
 import { useUserStore } from "@rever/stores";
 import { InvitedMemberDataAPIType, MemberDataAPIType } from "@rever/types";
 import {
-  getLabelForBillStatus,
-  getLabelForRoles,
+  getRoleTranslationKey,
+  getStatusTranslationKey,
   getStatusClass,
   hasPermission,
 } from "@rever/utils";
@@ -89,11 +89,13 @@ const MembersList = () => {
         accessorKey: "status",
         header: translate("profile.role"),
         cell: ({ getValue }) => (
-          <div className="flex items-center gap-4">
-            <span className="overflow-hidden text-ellipsis">
-              {getLabelForRoles(getValue() as string)}
-            </span>
-          </div>
+            <div className="flex items-center gap-4">
+              <span className="overflow-hidden text-ellipsis">
+                {getRoleTranslationKey(getValue() as string)
+                  ? translate(getRoleTranslationKey(getValue() as string)!)
+                  : (getValue() as string)}
+              </span>
+            </div>
         ),
         filterFn: (row, columnId, filterValue: string[]) => {
           if (!filterValue?.length) return true;
@@ -224,9 +226,13 @@ const MembersList = () => {
           return (
             <div className="flex items-center pr-2 justify-between w-32">
               <PillItem
-                className={`${getStatusClass(getLabelForBillStatus(value) || "")}`}
+                className={`${getStatusClass(value || "")}`}
                 isRounded={true}
-                name={getLabelForBillStatus(value || "")}
+                name={
+                  getStatusTranslationKey(value || "")
+                    ? translate(getStatusTranslationKey(value || "")!)
+                    : value
+                }
               />
             </div>
           );
@@ -275,7 +281,7 @@ const MembersList = () => {
           .map((v: MemberDataAPIType) => {
             return {
               ...v,
-              status: getLabelForRoles(v?.role),
+              status: v?.role,
             };
           });
         setMembersList(allData);
@@ -293,7 +299,7 @@ const MembersList = () => {
         const allData = response?.data.map((v: InvitedMemberDataAPIType) => {
           return {
             ...v,
-            status: getLabelForRoles(v?.role),
+            status: v?.role,
             invite_status: v?.status,
           };
         });

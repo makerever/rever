@@ -1,5 +1,5 @@
 {
-  "welcome": "Welcome to Rever inside welcome",
+  "welcome": "Welcome to Rever",
   "placeholders": {
     "search": "Search",
     "email_input": "name@company.com",
@@ -31,6 +31,11 @@
       "select_due_date": "Select due date",
       "select_coa": "Select COA"
     },
+    "vendor_credit": {
+      "enter_vendor_credit": "Enter vendor credit",
+      "select_vendor": "Select vendor",
+      "select_vendor_credit_date": "Select vendor credit date"
+    },
     "po": {
       "enter_po": "Enter PO no",
       "select_po_date": "Select PO date",
@@ -43,7 +48,8 @@
     "back": "Back",
     "save": "Save",
     "save_draft": "Save as draft",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "save_changes": "Save changes"
   },
   "sidebar": {
     "home": "Home",
@@ -54,7 +60,8 @@
       "vendors": "Vendors",
       "approvals": "Approvals",
       "coa": "Chart of accounts",
-      "confirmations": "Confirmations"
+      "confirmations": "Confirmations",
+      "vendor_credits": "Vendor credits"
     },
     "inbox": "Inbox",
     "settings": {
@@ -73,7 +80,7 @@
     "security": "Security",
     "notification": "Notification",
     "preferences": "Preferences",
-    "appereance": "Appereance",
+    "appereance": "Appearance",
     "back_home": "Back to home",
     "back_confirmations": "Back to confirmations",
     "logout": "Logout",
@@ -276,7 +283,16 @@
       "total_amount": "Total amount",
       "stages": "Stages",
       "status": "Status"
-    }
+    },
+    "no_po": "No PO",
+    "approved_successfully": "Bill approved successfully",
+    "rejected_successfully": "Bill rejected successfully",
+    "deleted_successfully": "Bill deleted successfully",
+    "sent_for_approval": "Bill sent for approval",
+    "confirm_reject": "Confirm reject bill",
+    "confirm_reject_message": "Are you sure you want to reject this bill?",
+    "confirm_delete_message": "Are you sure you want to delete this bill?",
+    "reject_bill_title": "Reject Bill"
   },
   "validation": {
     "email_required": "Email is required",
@@ -307,11 +323,13 @@
     "something_went_wrong": "Something went wrong!!",
     "file_size_limit": "File must be under 5MB and limited to 5 pages",
     "upload_valid_pdf": "Please upload a valid PDF file.",
+    "confirmation": "Confirmation",
     "you_are_viewing": "You are viewing",
     "version": "version",
     "confirmation_history": "Confirmation history",
     "subscription_expired": "Your subscription has expired. Please renew to continue.",
-    "is_required": "is required"
+    "is_required": "is required",
+    "no_audit_data": "No audit data to display."
   },
   "create_bill": {
     "heading": "Bill details",
@@ -428,7 +446,14 @@
     "extract_po_btn": "Extract PO",
     "created": "PO created successfully",
     "updated": "PO updated successfully",
-    "attachment_deleted": "PO attachment deleted"
+    "attachment_deleted": "PO attachment deleted",
+    "approved_successfully": "PO approved successfully",
+    "rejected_successfully": "PO rejected successfully",
+    "deleted_successfully": "Purchase Order deleted successfully",
+    "sent_for_approval": "PO sent for approval",
+    "confirm_reject": "Confirm reject PO",
+    "confirm_reject_message": "Are you sure you want to reject this PO?",
+    "confirm_delete_message": "Are you sure you want to delete this PO?"
   },
   "vendors": {
     "heading": "Vendors",
@@ -468,7 +493,12 @@
         "tax_id": "Tax ID",
         "website": "Website",
         "payment_terms": "Payment terms",
-        "contact": "Contact"
+        "contact": "Contact",
+        "enter_vendor_name": "Enter vendor name",
+        "enter_company_name": "Enter company name",
+        "enter_email": "Enter email",
+        "enter_tax_id": "Enter tax id",
+        "enter_website": "Enter website"
       },
       "vendor_address": {
         "heading": "Vendor address",
@@ -477,17 +507,43 @@
         "country": "Country",
         "state": "State",
         "city": "City",
-        "zipcode": "Zipcode"
+        "zipcode": "Zipcode",
+        "pin_code": "PIN code",
+        "enter_address_line_1": "Enter address line 1",
+        "enter_address_line_2": "Enter address line 2",
+        "enter_country": "Enter country",
+        "enter_state": "Enter state",
+        "enter_city": "Enter city",
+        "enter_zipcode": "Enter zipcode"
       },
       "bank_account_details": {
         "heading": "Bank account details",
         "account_holder_name": "Account holder name",
         "bank_name": "Bank name",
-        "account_number": "Account number"
+        "account_number": "Account number",
+        "enter_account_holder_name": "Enter account holder name",
+        "enter_account_number": "Enter account number",
+        "enter_bank_name": "Enter bank name"
       }
     },
     "vendor_credit": {
       "heading": "Vendor credit",
+      "preview": "Vendor credit preview",
+      "created": "Vendor credit created successfully",
+      "updated": "Vendor credit updated successfully",
+      "attachment_deleted": "Vendor credit attachment deleted",
+      "approved_successfully": "Vendor credit approved successfully",
+      "rejected_successfully": "Vendor credit rejected successfully",
+      "deleted_successfully": "Vendor credit deleted successfully",
+      "sent_for_approval": "Vendor credit sent for approval",
+      "confirm_reject": "Confirm reject vendor credit",
+      "confirm_reject_message": "Are you sure you want to reject this vendor credit?",
+      "confirm_delete_message": "Are you sure you want to delete this vendor credit?",
+      "reject_reason": "Reject reason",
+      "actions": {
+        "edit_vendor_credit": "Edit vendor credit",
+        "delete_vendor_credit": "Delete vendor credit"
+      },
       "buttons": {
         "create_vendor_credit": "Create vendor credit",
         "upload_vendor_credit": "Upload vendor credit"
@@ -519,7 +575,8 @@
       "create_vendor_credit": {
         "heading": "New vendor credit",
         "buttons":{
-          "extract_vendor_credit": "Extract vendor",
+          "extract_vendor_credit": "Extract vendor credit",
+          "upload_vendor_credit": "Upload vendor credit",
           "cancel": "Cancel",
           "save":{
             "heading": "Save",
@@ -553,6 +610,17 @@
     "inbox": {
       "heading": "Inbox"
     },
+    "view_vendor_credit": {
+      "heading": "Vendor credit details",
+      "vendor": "Vendor:",
+      "vendor_credit_date": "Vendor credit date:",
+      "vendor_address": "Vendor address:",
+      "vendor_credit_line_items": "Vendor credit line items",
+      "notes": "Notes:",
+      "sub_total": "Sub total:",
+      "total_tax": "Total tax:",
+      "grand_total": "Grand total:"
+    },
     "created": "Vendor created successfully",
     "updated": "Vendor updated successfully"
   },
@@ -562,11 +630,17 @@
     "net45": "Net 45 days",
     "due": "Due on receipt"
   },
+  "extraction_status": {
+    "processing": "Processing",
+    "uploading": "Uploading",
+    "extracting": "Extracting",
+    "enriched": "Enriched",
+    "failed": "Failed"
+  },
   "member_role_options": {
     "admin": "Admin",
     "finance_manager": "Finance manager",
-    "accountant": "Accountant",
-    "viewer": "Viewer",
+    "member": "Member",
     "lite_user": "Lite user"
   },
   "overview_options": {
@@ -597,23 +671,36 @@
     "none":"None",
     "no_match_description": "Bills will be processed without comparing them against POs or receipts.",
     "two_way": "2-Way match",
-    "three_way": "3-Way match",
-    "two_way_description": "Verify that the vendor invoice matches the corresponding PO for price and quantity.",
-    "three_way_description":"Verify that the goods were both ordered and received before the invoice is paid."
+   "three_way": "3-Way match",
+   "two_way_description": "Verify that the vendor invoice matches the corresponding PO for price and quantity.",
+    "three_way_description":"Verify that the goods were both ordered and received before the invoice is paid.",
+    "hide_matched_items": "Hide matched items"
    },
    "confirmations": {
     "request_confirmation": "Request confirmation",
     "view_confirmations": "View confirmations",
     "title": "Confirm",
     "delete":"Delete",
-    "no_history": "No confirmation history found"
+    "no_history": "No confirmation history found",
+    "request_confirmations": "Request confirmations",
+    "assigned_on": "Assigned on",
+    "requested_by": "Requested by",
+    "open": "Open",
+    "closed": "Closed",
+    "revoked": "Revoked",
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "completed": "Completed",
+    "expired": "Expired"
   },
   "search": {
     "search_filters": "Search filters"
   },
   "help_support": {
     "documentation": "Documentation",
-    "email_us": "Email us"
+    "email_us": "Email us",
+    "help": "Help",
+    "star_on_github": "Star us on GitHub"
   },
   "auth": {
     "page_titles": {
@@ -702,6 +789,8 @@
     "bill_enable_description": "Allow finance managers to streamline the bill approval process.",
     "po_enable_label": "Enable PO approval workflow",
     "po_enable_description": "Allow finance managers to streamline the PO approval process.",
+    "vendor_credit_enable_label": "Enable vendor credit approval workflow",
+    "vendor_credit_enable_description": "Allow finance managers to streamline the vendor credit approval process.",
     "level": "LEVEL",
     "remove": "Remove",
     "add_approver": "Add approver",
@@ -710,6 +799,7 @@
     "disable": "Disable",
     "disable_bill_message": "Disabling this may impact bills under approval, if any",
     "disable_po_message": "Disabling this may impact PO under approval, if any",
+    "disable_vendor_credit_message": "Disabling this may impact vendor credits under approval, if any",
     "autosaved": "Changes have been autosaved",
     "autosave_failed": "Failed to auto-save approvers",
     "save_failed": "An approver can't be assigned to multiple levels.",
@@ -732,6 +822,7 @@
     "invited_members": "Invited members",
     "po_approval": "PO approval",
     "bill_approval": "Bill approval",
+    "vendor_credit_approval": "Vendor credit approval",
     "invite_members": "Invite members",
     "invited_by": "Invited by",
     "delete_confirm": "Are you sure you want to delete this member?",
@@ -782,12 +873,12 @@
       },
       "member": {
         "heading": "Member",
-        "memeber_can": "Member can:",
+        "member_can": "Member can:",
         "description1": "- Access the dashboard to view insights on total bills that are approved, reviewed, and awaiting approval.",
         "description2": "- Create and maintain vendor profiles.",
         "description3": "- Create, modify, delete, and submit bills, enabling end-to-end management of the bill lifecycle.",
         "description4": "- Can view team members and organizational details to remain informed about the company's structure and hierarchy.",
-        "memeber_cannot": "Member cannot:",
+        "member_cannot": "Member cannot:",
         "description5": "- Approve actions to maintain the integrity and independence of the approval process.",
         "description6": "- Invite members or modify approval settings, keeping the role focused within its operational boundaries."
       },
@@ -804,12 +895,39 @@
       }
     },
     "success_message": {
-      "memeber_update_success": "Member updated successfully",
+      "member_update_success": "Member updated successfully",
       "invitation_sent": "Invitation request sent"
     },
     "error_message": {
-      "memeber_update_failed": "Cannot change role — User has pending approvals.",
+      "member_update_failed": "Cannot change role — User has pending approvals.",
       "invitation_failed": "User already exists in your organization"
      }
+  },
+  "locale_options": {
+    "en": "English",
+    "es": "Spanish"
+  },
+  "breadcrumbs": {
+    "dashboard": "Dashboard",
+    "vendors": "Vendors",
+    "create_vendor": "Create vendor",
+    "bills": "Bills",
+    "create_bill": "Create bill",
+    "view_match": "View match",
+    "vendor_credits": "Vendor credits",
+    "create_vendor_credit": "Create vendor credit",
+    "update": "Update",
+    "confirmations": "Confirmations",
+    "approvals": "Approvals",
+    "purchase_orders": "Purchase orders",
+    "create_po": "Create PO",
+    "inbox": "Inbox",
+    "profile": "Profile",
+    "security": "Security",
+    "preferences": "Preferences",
+    "general_settings": "General settings",
+    "controls": "Controls",
+    "members": "Members",
+    "invite_member": "Invite member"
   }
 }

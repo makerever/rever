@@ -43,6 +43,9 @@ importers:
       '@rever/constants':
         specifier: workspace:*
         version: link:../constants
+      '@rever/i18n':
+        specifier: workspace:*
+        version: link:../i18n
       '@rever/services':
         specifier: workspace:*
         version: link:../services

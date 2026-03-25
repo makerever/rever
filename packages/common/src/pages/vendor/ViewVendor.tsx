@@ -15,6 +15,7 @@ import {
   formatDate,
   formatNumber,
   getLabelForBillStatus,
+  getStatusTranslationKey,
   getStatusClass,
   hasPermission,
 } from "@rever/utils";
@@ -127,7 +128,7 @@ const ViewVendorDetails = ({
         sortDescFirst: false,
         header: ({ }) => (
           <div className="flex items-center gap-4">
-            <span>Bill</span>
+            <span>{translate("bills.table_headers.bill")}</span>
           </div>
         ),
         cell: ({ row, getValue }) => {
@@ -228,13 +229,17 @@ const ViewVendorDetails = ({
             <div className="flex items-center pr-2 justify-between">
               <div className="flex items-center pr-2 justify-between w-32">
                 <PillItem
-                  className={`${getStatusClass(getLabelForBillStatus(value) || "")}`}
+                  className={`${getStatusClass(value || "")}`}
                   isRounded={true}
-                  name={getLabelForBillStatus(value || "")}
+                  name={
+                    getStatusTranslationKey(value || "")
+                      ? translate(getStatusTranslationKey(value || "")!)
+                      : getLabelForBillStatus(value || "")
+                  }
                 />
               </div>
               {row?.original.is_attachment && (
-                <CustomTooltip content="PDF attached">
+                <CustomTooltip content={translate("bills.actions.pdf_attached")}>
                   <div>
                     <Paperclip className="text-slate-400" width={14} />
                   </div>

@@ -16,6 +16,7 @@ import {
   formatDate,
   formatNumber,
   getLabelForBillStatus,
+  getStatusTranslationKey,
   getStatusClass,
   hasPermission,
   // getStatusClass,
@@ -172,9 +173,13 @@ const PurchaseOrderList = () => {
             <div className="flex items-center pr-2 justify-between w-32">
               <div className="flex items-center pr-2 justify-between w-32">
                 <PillItem
-                  className={`${getStatusClass(getLabelForBillStatus(value) || "")}`}
+                  className={`${getStatusClass(value || "")}`}
                   isRounded={true}
-                  name={getLabelForBillStatus(value || "")}
+                  name={
+                    getStatusTranslationKey(value || "")
+                      ? translate(getStatusTranslationKey(value || "")!)
+                      : getLabelForBillStatus(value || "")
+                  }
                 />
               </div>
 

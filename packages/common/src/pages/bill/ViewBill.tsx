@@ -20,6 +20,7 @@ import { deepMatchAuditVersion, formatDate, formatNumber, hasPermission } from "
 import {
   getCombineAddress,
   getLabelForBillStatus,
+  getStatusTranslationKey,
   getLabelForTerm,
   getStatusClass,
   checkAuditValidation
@@ -361,14 +362,22 @@ const ViewBillDetails = ({
               </p>
             </div>
             <PillItem
-              className={`${getStatusClass(getLabelForBillStatus(currentBillDetails?.status || "") || "")}`}
+              className={`${getStatusClass(currentBillDetails?.status || "")}`}
               isRounded={true}
-              name={getLabelForBillStatus(currentBillDetails?.status || "")}
+              name={
+                getStatusTranslationKey(currentBillDetails?.status || "")
+                  ? translate(getStatusTranslationKey(currentBillDetails?.status || "")!)
+                  : getLabelForBillStatus(currentBillDetails?.status || "")
+              }
             />
             <PillItem
-              className={`${getStatusClass(getLabelForBillStatus(currentBillDetails?.match_status || "") || "")}`}
+              className={`${getStatusClass(currentBillDetails?.match_status || "")}`}
               isRounded={true}
-              name={getLabelForBillStatus(currentBillDetails?.match_status || "")}
+              name={
+                getStatusTranslationKey(currentBillDetails?.match_status || "")
+                  ? translate(getStatusTranslationKey(currentBillDetails?.match_status || "")!)
+                  : getLabelForBillStatus(currentBillDetails?.match_status || "")
+              }
             />
             {(fileUrl && !showAuditHistory) && (
               <div className="flex items-center">

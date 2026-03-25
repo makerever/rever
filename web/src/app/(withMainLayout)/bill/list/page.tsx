@@ -18,6 +18,7 @@ import {
   formatDate,
   formatNumber,
   getLabelForBillStatus,
+  getStatusTranslationKey,
   getStatusClass,
 } from "@rever/utils";
 import { ColumnDef, sortingFns } from "@tanstack/react-table";
@@ -197,9 +198,13 @@ const BillList = () => {
           return (
             <div className="flex items-center pr-2 justify-between w-32">
               <PillItem
-                className={`${getStatusClass(getLabelForBillStatus(value) || "")}`}
+                className={`${getStatusClass(value || "")}`}
                 isRounded={true}
-                name={getLabelForBillStatus(value || "")}
+                name={
+                  getStatusTranslationKey(value || "")
+                    ? translate(getStatusTranslationKey(value || "")!)
+                    : getLabelForBillStatus(value || "")
+                }
               />
             </div>
           );
@@ -218,9 +223,13 @@ const BillList = () => {
           return (
             <div className="flex items-center pr-2 justify-between">
               <PillItem
-                className={`${getStatusClass(getLabelForBillStatus(value) || "")}`}
+                className={`${getStatusClass(value || "")}`}
                 isRounded={true}
-                name={getLabelForBillStatus(value || "")}
+                name={
+                  getStatusTranslationKey(value || "")
+                    ? translate(getStatusTranslationKey(value || "")!)
+                    : getLabelForBillStatus(value || "")
+                }
               />
 
               {row?.original.is_attachment && (

@@ -71,7 +71,7 @@ const Invitation = () => {
         }
       }
     },
-    [router],
+    [router, translate],
   );
 
   // Fetch invited user details when userId changes

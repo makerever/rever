@@ -1,8 +1,11 @@
 // Confirmation popup component
+"use client"
 
 import { ConfirmationPopupProps } from "@rever/types";
 import { Loader, X } from "lucide-react";
 import Button from "../components/Button";
+import { useTranslate } from "@rever/i18n";
+
 
 // ConfirmationPopup component displays a modal for confirming deletion or other actions
 const ConfirmationPopup: React.FC<ConfirmationPopupProps> = ({
@@ -17,6 +20,7 @@ const ConfirmationPopup: React.FC<ConfirmationPopupProps> = ({
 }) => {
   // If popup is not open, render nothing
   if (!isOpen) return null;
+  const translate = useTranslate();
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -37,7 +41,7 @@ const ConfirmationPopup: React.FC<ConfirmationPopupProps> = ({
         </p>
         <div className="flex justify-end gap-2 p-4">
           <Button
-            name="Cancel"
+            name={translate("buttons.cancel")}
             onClick={onClose}
             disabled={isConfirmLoading}
             button_type="secondary-outline"

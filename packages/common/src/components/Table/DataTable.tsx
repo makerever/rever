@@ -82,6 +82,8 @@ export default function DataTable<
 }: TableProps<T>) {
   const translate = useTranslate();
   const user = useUserStore((state) => state.user);
+  const billsHeading = translate("bills.heading");
+  const membersHeading = translate("sidebar.settings.members");
 
   const [data, setData] = React.useState<T[]>(() => []);
 
@@ -172,7 +174,7 @@ export default function DataTable<
           else if (key === "match_status") {
             filtered["status" as keyof T] = row.original[key as keyof T]
           }
-          else if (tableHeading === "Members" && key === "status") {
+          else if (tableHeading === membersHeading && key === "status") {
             (filtered as Partial<T> & { role?: T["status"] }).role =
               row.original["status"];
           } else {
@@ -237,7 +239,7 @@ export default function DataTable<
               </div>
 
               <div className="flex items-center gap-3">
-                {tableHeading === "Bills" && activeTab === "Overview" ? (
+                {tableHeading === billsHeading && activeTab === "Overview" ? (
                   <StatusFilter
                     data={data}
                     selected={statusFilter}
@@ -248,7 +250,7 @@ export default function DataTable<
 
                 {!noStatusFilter ? (
                   <>
-                    {tableHeading !== "Bills" ? (
+                    {tableHeading !== billsHeading ? (
                       <StatusFilter
                         data={data}
                         selected={statusFilter}

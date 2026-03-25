@@ -10,6 +10,7 @@ import { useTranslate } from "@rever/i18n";
 const TAB_TRANSLATION_KEYS: Record<string, string> = {
   "All bills": "bills.stage.all_bills",
   "All POs": "purchase_order.stagebar.all_pos",
+  "All vendor credits": "vendors.vendor_credit.stagebar.all_vendor_credits",
   "Overview": "bills.stage.overview",
   "Under review": "bills.stage.under_review",
   "Under approval": "bills.stage.under_approval",
@@ -21,6 +22,10 @@ const TAB_TRANSLATION_KEYS: Record<string, string> = {
   "Invited members": "members.invited_members",
   "PO approval": "members.po_approval",
   "Bill approval": "members.bill_approval",
+  "Vendor credit approval": "members.vendor_credit_approval",
+  Open: "confirmations.open",
+  Closed: "confirmations.closed",
+  Revoked: "confirmations.revoked",
 };
 
 // Tabs component to render tab navigation UI

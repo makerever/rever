@@ -11,6 +11,7 @@ import {
   formatDate,
   formatNumber,
   getLabelForBillStatus,
+  getStatusTranslationKey,
   getStatusClass,
 } from "@rever/utils";
 import { ColumnDef } from "@tanstack/react-table";
@@ -163,7 +164,9 @@ const ApprovalList = () => {
                   value,
                 )}`}
               >
-                {value}
+                {getStatusTranslationKey(value)
+                  ? translate(getStatusTranslationKey(value)!)
+                  : value}
               </span>
             </div>
           );

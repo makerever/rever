@@ -65,7 +65,7 @@ function RoleDescriptions({ role }: RoleDescriptionsProps) {
         {role === "member" ? (
           <div>
             <h3 className="text-sm font-semibold text-neutral-1100 flex items-center gap-1.5">
-              <CircleCheck width={14} /> {translate("invite_member.roles.member.memeber_can")}
+              <CircleCheck width={14} /> {translate("invite_member.roles.member.member_can")}
             </h3>
             <ul className="font-medium ms-5 text-xs text-neutral-1100 mt-2">
               <li>{translate("invite_member.roles.member.description1")}</li>
@@ -74,7 +74,7 @@ function RoleDescriptions({ role }: RoleDescriptionsProps) {
               <li className="mt-2">{translate("invite_member.roles.member.description4")}</li>
             </ul>
             <h3 className="mt-4 text-sm font-semibold text-neutral-1100 flex items-center gap-1.5">
-              <CircleX width={14} /> {translate("invite_member.roles.member.memeber_cannot")}
+              <CircleX width={14} /> {translate("invite_member.roles.member.member_cannot")}
             </h3>
             <ul className="font-medium ms-5 text-xs text-neutral-1100 mt-1">
               <li>{translate("invite_member.roles.member.description5")}</li>
@@ -170,7 +170,7 @@ const InviteMember = ({ onClose, editMemberData }: InviteMemberProps) => {
       const response = await updateMemberApi(data, String(editMemberData.id));
       if (response?.status === 200) {
         const response = await getLoggedInUserDetails();
-        showSuccessToast(translate("invite_member.success_message.memeber_update_success"));
+        showSuccessToast(translate("invite_member.success_message.member_update_success"));
         if (response?.status === 200) {
           setUser(response?.data);
           onClose();
@@ -180,7 +180,7 @@ const InviteMember = ({ onClose, editMemberData }: InviteMemberProps) => {
       } else {
         if (response?.data?.role && response?.data?.role[0]) {
           setIsLoaderFormSubmit(false);
-          showErrorToast(translate("invite_member.error_message.memeber_update_failed"));
+          showErrorToast(translate("invite_member.error_message.member_update_failed"));
         }
       }
     } else {

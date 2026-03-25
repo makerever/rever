@@ -10,6 +10,7 @@ export const createProfileSettingSchema = (t: (key: string) => string) =>
     display_name: z.string().optional(),
     timezone: z.string().optional(),
     role: z.string().optional(),
+    locale: z.string().optional(),
   });
 
 export type profileSettingSchemaValues = z.infer<ReturnType<typeof createProfileSettingSchema>>;

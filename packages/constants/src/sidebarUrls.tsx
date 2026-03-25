@@ -60,6 +60,7 @@ export const sidebarLinks: SidebarLinkProps[] = [
       },
       {
         name: "Vendor credits", // Vendor management routes
+        i18nKey: "sidebar.expenses.vendor_credits",
         url: [
           "/vendorcredit/list",
           "/vendorcredit/add",

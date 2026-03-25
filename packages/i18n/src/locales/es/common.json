@@ -1,5 +1,5 @@
 {
-  "welcome": "Bienvenido a Rever dentro de welcome",
+  "welcome": "Bienvenido a Rever",
   "placeholders": {
     "search": "Buscar",
     "email_input": "nombre@empresa.com",
@@ -31,6 +31,11 @@
       "select_due_date": "Seleccionar fecha de vencimiento",
       "select_coa": "Seleccionar COA"
     },
+    "vendor_credit": {
+      "enter_vendor_credit": "Ingrese el crédito de proveedor",
+      "select_vendor": "Seleccionar proveedor",
+      "select_vendor_credit_date": "Seleccionar fecha de crédito"
+    },
     "po": {
       "enter_po": "Ingrese el número de OC",
       "select_po_date": "Seleccionar fecha de OC",
@@ -43,7 +48,8 @@
     "back": "Atrás",
     "save": "Guardar",
     "save_draft": "Guardar como borrador",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "save_changes": "Guardar cambios"
   },
   "sidebar": {
     "home": "Inicio",
@@ -54,7 +60,8 @@
       "vendors": "Proveedores",
       "approvals": "Aprobaciones",
       "coa": "Plan de cuentas",
-      "confirmations": "Confirmaciones"
+      "confirmations": "Confirmaciones",
+      "vendor_credits": "Créditos de proveedor"
     },
     "inbox": "Bandeja de entrada",
     "settings": {
@@ -276,7 +283,16 @@
       "total_amount": "Monto total",
       "stages": "Etapas",
       "status": "Estado"
-    }
+    },
+    "no_po": "Sin OC",
+    "approved_successfully": "Factura aprobada exitosamente",
+    "rejected_successfully": "Factura rechazada exitosamente",
+    "deleted_successfully": "Factura eliminada exitosamente",
+    "sent_for_approval": "Factura enviada para aprobación",
+    "confirm_reject": "Confirmar rechazo de factura",
+    "confirm_reject_message": "¿Está seguro de que desea rechazar esta factura?",
+    "confirm_delete_message": "¿Está seguro de que desea eliminar esta factura?",
+    "reject_bill_title": "Rechazar factura"
   },
   "validation": {
     "email_required": "El correo electrónico es obligatorio",
@@ -307,11 +323,13 @@
     "something_went_wrong": "¡Algo salió mal!!",
     "file_size_limit": "El archivo debe pesar menos de 5 MB y tener un máximo de 5 páginas",
     "upload_valid_pdf": "Por favor suba un archivo PDF válido.",
+    "confirmation": "Confirmación",
     "you_are_viewing": "Está viendo",
     "version": "versión",
     "confirmation_history": "Historial de confirmaciones",
     "subscription_expired": "Su suscripción ha expirado. Por favor renuévela para continuar.",
-    "is_required": "es obligatorio"
+    "is_required": "es obligatorio",
+    "no_audit_data": "No hay datos de auditoría para mostrar."
   },
   "create_bill": {
     "heading": "Detalles de la factura",
@@ -428,7 +446,14 @@
     "extract_po_btn": "Extraer OC",
     "created": "OC creada exitosamente",
     "updated": "OC actualizada exitosamente",
-    "attachment_deleted": "Adjunto de OC eliminado"
+    "attachment_deleted": "Adjunto de OC eliminado",
+    "approved_successfully": "OC aprobada exitosamente",
+    "rejected_successfully": "OC rechazada exitosamente",
+    "deleted_successfully": "Orden de compra eliminada exitosamente",
+    "sent_for_approval": "OC enviada para aprobación",
+    "confirm_reject": "Confirmar rechazo de OC",
+    "confirm_reject_message": "¿Está seguro de que desea rechazar esta OC?",
+    "confirm_delete_message": "¿Está seguro de que desea eliminar esta OC?"
   },
   "vendors": {
     "heading": "Proveedores",
@@ -468,7 +493,12 @@
         "tax_id": "ID fiscal",
         "website": "Sitio web",
         "payment_terms": "Términos de pago",
-        "contact": "Contacto"
+        "contact": "Contacto",
+        "enter_vendor_name": "Ingrese el nombre del proveedor",
+        "enter_company_name": "Ingrese el nombre de la empresa",
+        "enter_email": "Ingrese el correo electrónico",
+        "enter_tax_id": "Ingrese el ID fiscal",
+        "enter_website": "Ingrese el sitio web"
       },
       "vendor_address": {
         "heading": "Dirección del proveedor",
@@ -477,17 +507,43 @@
         "country": "País",
         "state": "Estado",
         "city": "Ciudad",
-        "zipcode": "Código postal"
+        "zipcode": "Código postal",
+        "pin_code": "Código PIN",
+        "enter_address_line_1": "Ingrese la línea de dirección 1",
+        "enter_address_line_2": "Ingrese la línea de dirección 2",
+        "enter_country": "Ingrese el país",
+        "enter_state": "Ingrese el estado",
+        "enter_city": "Ingrese la ciudad",
+        "enter_zipcode": "Ingrese el código postal"
       },
       "bank_account_details": {
         "heading": "Detalles de la cuenta bancaria",
         "account_holder_name": "Nombre del titular",
         "bank_name": "Nombre del banco",
-        "account_number": "Número de cuenta"
+        "account_number": "Número de cuenta",
+        "enter_account_holder_name": "Ingrese el nombre del titular",
+        "enter_account_number": "Ingrese el número de cuenta",
+        "enter_bank_name": "Ingrese el nombre del banco"
       }
     },
     "vendor_credit": {
       "heading": "Crédito de proveedor",
+      "preview": "Vista previa del crédito de proveedor",
+      "created": "Crédito de proveedor creado exitosamente",
+      "updated": "Crédito de proveedor actualizado exitosamente",
+      "attachment_deleted": "Adjunto de crédito de proveedor eliminado",
+      "approved_successfully": "Crédito de proveedor aprobado exitosamente",
+      "rejected_successfully": "Crédito de proveedor rechazado exitosamente",
+      "deleted_successfully": "Crédito de proveedor eliminado exitosamente",
+      "sent_for_approval": "Crédito de proveedor enviado para aprobación",
+      "confirm_reject": "Confirmar rechazo de crédito de proveedor",
+      "confirm_reject_message": "¿Está seguro de que desea rechazar este crédito de proveedor?",
+      "confirm_delete_message": "¿Está seguro de que desea eliminar este crédito de proveedor?",
+      "reject_reason": "Razón de rechazo",
+      "actions": {
+        "edit_vendor_credit": "Editar crédito de proveedor",
+        "delete_vendor_credit": "Eliminar crédito de proveedor"
+      },
       "buttons": {
         "create_vendor_credit": "Crear crédito de proveedor",
         "upload_vendor_credit": "Subir crédito de proveedor"
@@ -519,7 +575,8 @@
       "create_vendor_credit": {
         "heading": "Nuevo crédito de proveedor",
         "buttons": {
-          "extract_vendor_credit": "Extraer proveedor",
+          "extract_vendor_credit": "Extraer crédito de proveedor",
+          "upload_vendor_credit": "Subir crédito de proveedor",
           "cancel": "Cancelar",
           "save": {
             "heading": "Guardar",
@@ -553,6 +610,17 @@
     "inbox": {
       "heading": "Bandeja de entrada"
     },
+    "view_vendor_credit": {
+      "heading": "Detalles del crédito de proveedor",
+      "vendor": "Proveedor:",
+      "vendor_credit_date": "Fecha del crédito:",
+      "vendor_address": "Dirección del proveedor:",
+      "vendor_credit_line_items": "Líneas de crédito de proveedor",
+      "notes": "Notas:",
+      "sub_total": "Subtotal:",
+      "total_tax": "Impuesto total:",
+      "grand_total": "Total general:"
+    },
     "created": "Proveedor creado exitosamente",
     "updated": "Proveedor actualizado exitosamente"
   },
@@ -562,11 +630,17 @@
     "net45": "Neto 45 días",
     "due": "Vencimiento al recibir"
   },
+  "extraction_status": {
+    "processing": "Procesando",
+    "uploading": "Subiendo",
+    "extracting": "Extrayendo",
+    "enriched": "Enriquecido",
+    "failed": "Fallido"
+  },
   "member_role_options": {
     "admin": "Administrador",
     "finance_manager": "Gerente de finanzas",
-    "accountant": "Contador",
-    "viewer": "Visor",
+    "member": "Miembro",
     "lite_user": "Usuario Lite"
   },
   "overview_options": {
@@ -599,21 +673,34 @@
     "two_way": "Cotejo de 2 vías",
     "three_way": "Cotejo de 3 vías",
     "two_way_description": "Verificar que la factura coincida con la OC en precio y cantidad.",
-    "three_way_description": "Verificar que los bienes fueron pedidos y recibidos antes de pagar la factura."
+    "three_way_description": "Verificar que los bienes fueron pedidos y recibidos antes de pagar la factura.",
+    "hide_matched_items": "Ocultar elementos coincidentes"
   },
   "confirmations": {
     "request_confirmation": "Solicitar confirmación",
     "view_confirmations": "Ver confirmaciones",
     "title": "Confirmar",
     "delete": "Eliminar",
-    "no_history": "No se encontró historial de confirmaciones"
+    "no_history": "No se encontró historial de confirmaciones",
+    "request_confirmations": "Confirmaciones solicitadas",
+    "assigned_on": "Asignado el",
+    "requested_by": "Solicitado por",
+    "open": "Abiertas",
+    "closed": "Cerradas",
+    "revoked": "Revocadas",
+    "pending": "Pendiente",
+    "confirmed": "Confirmado",
+    "completed": "Completado",
+    "expired": "Expirado"
   },
   "search": {
     "search_filters": "Filtros de búsqueda"
   },
   "help_support": {
     "documentation": "Documentación",
-    "email_us": "Envíenos un correo"
+    "email_us": "Envíenos un correo",
+    "help": "Ayuda",
+    "star_on_github": "Danos una estrella en GitHub"
   },
   "auth": {
     "page_titles": {
@@ -702,6 +789,8 @@
     "bill_enable_description": "Permita a los gerentes de finanzas agilizar el proceso de aprobación de facturas.",
     "po_enable_label": "Habilitar flujo de aprobación de OC",
     "po_enable_description": "Permita a los gerentes de finanzas agilizar el proceso de aprobación de OC.",
+    "vendor_credit_enable_label": "Habilitar flujo de aprobación de créditos de proveedor",
+    "vendor_credit_enable_description": "Permita a los gerentes de finanzas agilizar el proceso de aprobación de créditos de proveedor.",
     "level": "NIVEL",
     "remove": "Eliminar",
     "add_approver": "Agregar aprobador",
@@ -710,6 +799,7 @@
     "disable": "Deshabilitar",
     "disable_bill_message": "Deshabilitar esto puede afectar las facturas en aprobación, si las hay",
     "disable_po_message": "Deshabilitar esto puede afectar las OC en aprobación, si las hay",
+    "disable_vendor_credit_message": "Deshabilitar esto puede afectar los créditos de proveedor en aprobación, si los hay",
     "autosaved": "Los cambios se han guardado automáticamente",
     "autosave_failed": "Error al guardar automáticamente los aprobadores",
     "save_failed": "Un aprobador no puede estar asignado a múltiples niveles.",
@@ -732,6 +822,7 @@
     "invited_members": "Miembros invitados",
     "po_approval": "Aprobación de OC",
     "bill_approval": "Aprobación de factura",
+    "vendor_credit_approval": "Aprobación de crédito de proveedor",
     "invite_members": "Invitar miembros",
     "invited_by": "Invitado por",
     "delete_confirm": "¿Está seguro de que desea eliminar este miembro?",
@@ -782,12 +873,12 @@
       },
       "member": {
         "heading": "Miembro",
-        "memeber_can": "El miembro puede:",
+        "member_can": "El miembro puede:",
         "description1": "- Acceder al tablero para ver estados de facturas.",
         "description2": "- Crear y mantener perfiles de proveedores.",
         "description3": "- Crear, modificar, eliminar y enviar facturas.",
         "description4": "- Ver miembros del equipo y detalles de la organización.",
-        "memeber_cannot": "El miembro no puede:",
+        "member_cannot": "El miembro no puede:",
         "description5": "- Aprobar acciones para mantener la integridad del proceso.",
         "description6": "- Invitar miembros o modificar ajustes de aprobación."
       },
@@ -804,12 +895,39 @@
       }
     },
     "success_message": {
-      "memeber_update_success": "Miembro actualizado con éxito",
+      "member_update_success": "Miembro actualizado con éxito",
       "invitation_sent": "Solicitud de invitación enviada"
     },
     "error_message": {
-      "memeber_update_failed": "No se puede cambiar el rol — El usuario tiene aprobaciones pendientes.",
+      "member_update_failed": "No se puede cambiar el rol — El usuario tiene aprobaciones pendientes.",
       "invitation_failed": "El usuario ya existe en su organización"
     }
+  },
+  "locale_options": {
+    "en": "Inglés",
+    "es": "Español"
+  },
+  "breadcrumbs": {
+    "dashboard": "Panel",
+    "vendors": "Proveedores",
+    "create_vendor": "Crear proveedor",
+    "bills": "Facturas",
+    "create_bill": "Crear factura",
+    "view_match": "Ver coincidencia",
+    "vendor_credits": "Créditos de proveedor",
+    "create_vendor_credit": "Crear crédito de proveedor",
+    "update": "Actualizar",
+    "confirmations": "Confirmaciones",
+    "approvals": "Aprobaciones",
+    "purchase_orders": "Órdenes de compra",
+    "create_po": "Crear OC",
+    "inbox": "Bandeja de entrada",
+    "profile": "Perfil",
+    "security": "Seguridad",
+    "preferences": "Preferencias",
+    "general_settings": "Configuración general",
+    "controls": "Controles",
+    "members": "Miembros",
+    "invite_member": "Invitar miembro"
   }
 }

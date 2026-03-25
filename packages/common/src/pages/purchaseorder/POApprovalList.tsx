@@ -10,7 +10,7 @@ import { ApprovalTypes, PurchaseOrder } from "@rever/types";
 import {
   formatDate,
   formatNumber,
-  getLabelForBillStatus,
+  getStatusTranslationKey,
   getStatusClass,
 } from "@rever/utils";
 import { ColumnDef, sortingFns } from "@tanstack/react-table";
@@ -179,9 +179,13 @@ const POApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
           return (
             <div className="flex items-center pr-2 justify-between w-32">
               <PillItem
-                className={`${getStatusClass(getLabelForBillStatus(value) || "")}`}
+                className={`${getStatusClass(value || "")}`}
                 isRounded={true}
-                name={getLabelForBillStatus(value || "")}
+                name={
+                  getStatusTranslationKey(value || "")
+                    ? translate(getStatusTranslationKey(value || "")!)
+                    : value
+                }
               />
 
               {row?.original.is_attachment && (
@@ -200,7 +204,7 @@ const POApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
         },
       },
     ],
-    [collator, orgDetails?.date_format, router],
+    [collator, orgDetails?.date_format, router, translate],
   );
 
   // Filter approvals based on search input

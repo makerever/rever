@@ -22,6 +22,7 @@ import { useBreadcrumbStore } from "@rever/stores";
 import { AttachmentProps, Bill } from "@rever/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, Suspense, useState, useCallback } from "react";
+import { useTranslate } from "@rever/i18n";
 
 // Main component to view a bill, fetches bill details and handles actions
 const ViewBillWithParams = () => {
@@ -29,6 +30,7 @@ const ViewBillWithParams = () => {
   const idValue = searchParams.get("id");
 
   const router = useRouter();
+  const translate = useTranslate();
 
   const [billDetails, setBillDetails] = useState<Partial<Bill>>({});
 
@@ -99,7 +101,7 @@ const ViewBillWithParams = () => {
         await deleteBillAttachment(fileResponse?.id || "");
       }
       setIsPopupOpen(false);
-      showSuccessToast("Bill deleted successfully");
+      showSuccessToast(translate("bills.deleted_successfully"));
       router.push("/bill/list");
     }
   };
@@ -112,7 +114,7 @@ const ViewBillWithParams = () => {
       const response = await updateBillApi({ status: "rejected" }, idValue);
       if (response?.status === 200) {
         setIsConfirmRejectPopupOpen(false);
-        showSuccessToast("Bill rejected successfully");
+        showSuccessToast(translate("bills.rejected_successfully"));
         router.push("/bill/list");
       } else if (response?.data?.detail) {
         showErrorToast(response.data.detail);
@@ -121,7 +123,7 @@ const ViewBillWithParams = () => {
       setIsLoaderFormSubmit(true);
       const response = await updateBillApi({ status: "approved" }, idValue);
       if (response?.status === 200) {
-        showSuccessToast("Bill approved successfully");
+        showSuccessToast(translate("bills.approved_successfully"));
         router.push("/bill/list");
       } else {
         setIsLoaderFormSubmit(false);
@@ -139,7 +141,7 @@ const ViewBillWithParams = () => {
 
       const response = await sendBillForApprovalApi(idValue);
       if (response?.status === 200) {
-        showSuccessToast("Bill sent for approval");
+        showSuccessToast(translate("bills.sent_for_approval"));
         router.push("/bill/list");
       } else {
         setIsLoaderFormSubmit(false);
@@ -179,7 +181,7 @@ const ViewBillWithParams = () => {
         isOpen={isPopupOpen}
         onClose={() => setIsPopupOpen(false)}
         onConfirm={handleDelete}
-        message="Are you sure you want to delete this bill?"
+        message={translate("bills.confirm_delete_message")}
       />
 
       {/* Popup for confirming bill rejection */}
@@ -187,9 +189,9 @@ const ViewBillWithParams = () => {
         isOpen={isConfirmRejectPopupOpen}
         onClose={() => setIsConfirmRejectPopupOpen(false)}
         onConfirm={handleBillApprovalRejection}
-        message="Are you sure you want to reject this bill?"
-        buttonText="Reject"
-        title="Reject Bill"
+        message={translate("bills.confirm_reject_message")}
+        buttonText={translate("bills.actions.reject")}
+        title={translate("bills.reject_bill_title")}
       />
     </>
   );

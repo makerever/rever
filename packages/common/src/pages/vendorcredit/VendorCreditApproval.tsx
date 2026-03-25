@@ -23,6 +23,7 @@ import {
   getMembersListApi,
 } from "@rever/services";
 
+import { useTranslate } from "@rever/i18n";
 import { useUserStore } from "@rever/stores";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -45,6 +46,7 @@ interface Approver {
 }
 
 const VendorCreditApproval = () => {
+  const translate = useTranslate();
   const user = useUserStore((state) => state.user);
   const [isOn, setIsOn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -110,7 +112,7 @@ const VendorCreditApproval = () => {
         setIsApprovalAvailable(false);
       }
     } catch (err) {
-      showErrorToast("Failed to load approval data");
+      showErrorToast(translate("approval_settings.load_failed"));
     } finally {
       setIsLoading(false);
 
@@ -119,7 +121,7 @@ const VendorCreditApproval = () => {
         isInitialLoad.current = false;
       }, 300);
     }
-  }, [user]);
+  }, [translate, user]);
 
   useEffect(() => {
     fetchInitialData();
@@ -139,7 +141,7 @@ const VendorCreditApproval = () => {
         if (res?.status === 200) fetchInitialData();
       }
     } catch (err) {
-      showErrorToast("Error toggling approval status");
+      showErrorToast(translate("approval_settings.toggle_failed"));
     }
   };
 
@@ -152,11 +154,11 @@ const VendorCreditApproval = () => {
       } else {
         showErrorToast(
           res?.data?.detail ||
-          "Cannot disable approval; some POs are still under approval.",
+            translate("approval_settings.disable_vendor_credit_message"),
         );
       }
     } catch {
-      showErrorToast("Failed to disable approval");
+      showErrorToast(translate("approval_settings.disable_failed"));
     }
   };
 
@@ -198,13 +200,13 @@ const VendorCreditApproval = () => {
       const res = await assignApproverApi(dataObj);
 
       if (res?.status === 200) {
-        showSuccessToast("Changes have been autosaved");
+        showSuccessToast(translate("approval_settings.autosaved"));
         lastSavedApprovers.current = JSON.stringify(currentData);
       } else {
-        showErrorToast("An approver can't be assigned to multiple levels.");
+        showErrorToast(translate("approval_settings.save_failed"));
       }
     } catch {
-      showErrorToast("Failed to auto-save approvers");
+      showErrorToast(translate("approval_settings.autosave_failed"));
     }
   };
 
@@ -234,10 +236,10 @@ const VendorCreditApproval = () => {
             <ToggleSwitch isOn={isOn} setIsOn={handleToggle} />
             <div className="ms-3 -mt-0.5">
               <p className="font-medium text-sm text-neutral-1100 dark:text-gray-200">
-                Enable vendor credit approval workflow
+                {translate("approval_settings.vendor_credit_enable_label")}
               </p>
               <p className="mt-1 font-medium text-xs text-secondary-700 dark:text-gray-200">
-                Allow finance managers to streamline the vendor credit approval process.
+                {translate("approval_settings.vendor_credit_enable_description")}
               </p>
             </div>
           </div>
@@ -250,10 +252,10 @@ const VendorCreditApproval = () => {
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
                         <p className="text-xs text-secondary-700 font-medium">
-                          LEVEL {index + 1}
+                          {translate("approval_settings.level")} {index + 1}
                         </p>
                         {approvers.length > 1 && !item.level && (
-                          <CustomTooltip content="Remove">
+                          <CustomTooltip content={translate("approval_settings.remove")}>
                             <IconWrapper
                               onClick={() => handleRemove(index)}
                               icon={
@@ -266,11 +268,11 @@ const VendorCreditApproval = () => {
                     </div>
 
                     <SelectComponent
-                      title="Approver"
+                      title={translate("approval_settings.approver")}
                       name={`approver_${index}`}
                       options={membersList}
                       value={item.approver}
-                      placeholder="Select approver"
+                      placeholder={translate("approval_settings.select_approver")}
                       onChange={(value) => handleChange(index, value)}
                     />
                   </div>
@@ -286,7 +288,7 @@ const VendorCreditApproval = () => {
                     <div className="flex items-center justify-between mt-5">
                       <Button
                         onClick={handleAdd}
-                        name="Add approver"
+                        name={translate("approval_settings.add_approver")}
                         button_type="secondary"
                         icon_type="plus"
                         disabled={approvers.length >= 5 || !item.approver}
@@ -312,12 +314,12 @@ const VendorCreditApproval = () => {
       )}
 
       <ConfirmationPopup
-        title="Confirmation"
+        title={translate("common.confirmation")}
         isOpen={isConfirmRejectPopupOpen}
         onClose={() => setIsConfirmRejectPopupOpen(false)}
         onConfirm={handleDisable}
-        buttonText="Disable"
-        message="Disabling this may impact PO under approval, if any"
+        buttonText={translate("approval_settings.disable")}
+        message={translate("approval_settings.disable_vendor_credit_message")}
       />
     </>
   );

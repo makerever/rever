@@ -10,13 +10,14 @@ import { ApprovalTypes, VendorCreditProps } from "@rever/types";
 import {
   formatDate,
   formatNumber,
-  getLabelForBillStatus,
+  getStatusTranslationKey,
   getStatusClass,
 } from "@rever/utils";
 import { ColumnDef, sortingFns } from "@tanstack/react-table";
 import { Paperclip } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslate } from "@rever/i18n";
 
 // Main component for displaying the approval list
 const VendorCreditApprovalList = ({
@@ -25,6 +26,7 @@ const VendorCreditApprovalList = ({
   setActiveTab,
 }: ApprovalTypes) => {
   const router = useRouter();
+  const translate = useTranslate();
 
   const [approvalList, setApprovalList] = useState<VendorCreditProps[]>([]);
 
@@ -88,7 +90,7 @@ const VendorCreditApprovalList = ({
               checked={table.getIsAllPageRowsSelected()}
               onChange={table.getToggleAllPageRowsSelectedHandler()}
             />
-            <span>Credit number</span>
+            <span>{translate("vendors.vendor_credit.table_headers.vendor_credit")}</span>
           </div>
         ),
         cell: ({ row, getValue }) => {
@@ -112,7 +114,7 @@ const VendorCreditApprovalList = ({
       },
       {
         accessorKey: "txn_date",
-        header: "Vendor credit date",
+        header: translate("vendors.vendor_credit.table_headers.vendor_credit_date"),
         accessorFn: (row) => (row?.txn_date ? new Date(row.txn_date) : null),
         sortingFn: sortingFns.datetime,
         sortDescFirst: false,
@@ -126,7 +128,7 @@ const VendorCreditApprovalList = ({
       },
       {
         accessorKey: "vendor",
-        header: "Vendor",
+        header: translate("vendors.vendor_credit.table_headers.vendor"),
         accessorFn: (row) => row.vendor?.name || "",
         sortingFn: "alphanumeric",
         sortDescFirst: false,
@@ -148,7 +150,7 @@ const VendorCreditApprovalList = ({
       },
       {
         accessorKey: "total",
-        header: "Total amount",
+        header: translate("vendors.vendor_credit.table_headers.total_amount"),
         accessorFn: (row) => Number(row.total) || 0,
         sortingFn: "basic",
         sortDescFirst: false,
@@ -165,7 +167,7 @@ const VendorCreditApprovalList = ({
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: translate("vendors.vendor_credit.table_headers.stages"),
         sortDescFirst: false,
         cell: ({ row, getValue }) => {
           const value = getValue() as string;
@@ -173,13 +175,17 @@ const VendorCreditApprovalList = ({
           return (
             <div className="flex items-center pr-2 justify-between w-32">
               <PillItem
-                className={`${getStatusClass(getLabelForBillStatus(value) || "")}`}
+                className={`${getStatusClass(value || "")}`}
                 isRounded={true}
-                name={getLabelForBillStatus(value || "")}
+                name={
+                  getStatusTranslationKey(value || "")
+                    ? translate(getStatusTranslationKey(value || "")!)
+                    : value
+                }
               />
 
               {row?.original.is_attachment && (
-                <CustomTooltip content="PDF attached">
+                <CustomTooltip content={translate("bills.actions.pdf_attached")}>
                   <div>
                     <Paperclip className="text-slate-400" width={14} />
                   </div>
@@ -194,7 +200,7 @@ const VendorCreditApprovalList = ({
         },
       },
     ],
-    [router, collator, orgDetails?.date_format],
+    [router, collator, orgDetails?.date_format, translate],
   );
 
   // Filter approvals based on search input
@@ -213,7 +219,7 @@ const VendorCreditApprovalList = ({
     <>
       <DataTable
         noStatusFilter
-        tableHeading="Approvals"
+        tableHeading={translate("sidebar.expenses.approvals")}
         tableData={filteredVendorCreditApprovals}
         columns={columns}
         setSearch={setSearch}

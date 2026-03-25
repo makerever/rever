@@ -13,25 +13,20 @@ const messages = { en, es };
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   // Retrieve the user object from the Zustand store
-  // const user = useUserStore(state => state.user);
+  const user = useUserStore(state => state.user);
 
-  // If the user has a saved locale, use it; otherwise, default to English
-  const getInitialLocale = (): Locale => {
-    // const lang = user?.locale as Locale | undefined;
-    const lang = "es";
-    return lang ?? "en";
-  };
+  const locale: Locale = user?.locale === 'es' ? 'es' : 'en';
 
   //Changing browser language on changing the user language
   useEffect(() => {
-    document.documentElement.lang = getInitialLocale();
-  }, [getInitialLocale]);
+    document.documentElement.lang = locale;
+  }, [locale]);
 
   // Wrap all child components with the IntlProvider
   return (
     <IntlProvider
-      messages={messages[getInitialLocale()]}
-      locale={getInitialLocale()}
+      messages={messages[locale]}
+      locale={locale}
     >
       {children}
     </IntlProvider>

@@ -40,10 +40,12 @@ import {
   formatNumber,
   formatPlainNumber,
   getLabelForBillStatus,
+  getStatusTranslationKey,
   getStatusClass,
 } from "@rever/utils";
 import { billMatchHeaders, poMatchHeaders } from "@rever/constants";
 import { useBreadcrumbStore, useUserStore } from "@rever/stores";
+import { useTranslate } from "@rever/i18n";
 import { GripVertical, Info, TriangleAlert } from "lucide-react";
 import {
   DragDropContext,
@@ -66,20 +68,38 @@ const StatusIcon = memo(
     description_status?: string;
     overall_status?: string | null;
   }) => {
+    const translate = useTranslate();
+
     // Fetching diff icons based on status
     const getIconByStatus = () => {
       switch (status) {
         case "Matched":
-          return <PillItem name="Match" className="bg-green-100" isRounded />;
+          return (
+            <PillItem
+              name={translate("home.match_status_trend.exact_match")}
+              className="bg-green-100"
+              isRounded
+            />
+          );
         case "Mismatched":
-          return <PillItem name="Mismatch" className="bg-red-100" isRounded />;
+          return (
+            <PillItem
+              name={translate("home.match_status_trend.mismatch")}
+              className="bg-red-100"
+              isRounded
+            />
+          );
         case "Partial matched":
           return (
-            <PillItem name="Partial" className="bg-orange-100" isRounded />
+            <PillItem
+              name={translate("home.match_status_trend.partial_match")}
+              className="bg-orange-100"
+              isRounded
+            />
           );
         case "poNotAvailable":
           return (
-            <PillItem name="No PO" className="bg-secondary-100" isRounded />
+            <PillItem name={translate("bills.no_po")} className="bg-secondary-100" isRounded />
           );
         default:
           return null;
@@ -725,6 +745,8 @@ const MatchingStatusTable = memo(
 );
 
 const BillPOMatchUI = () => {
+  const translate = useTranslate();
+
   // Router and store hooks
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -880,7 +902,7 @@ const BillPOMatchUI = () => {
     const billData = { status: "approved" };
     const response = await updateBillApi(billData, idValue);
     if (response?.status === 200) {
-      showSuccessToast("Bill approved successfully");
+      showSuccessToast(translate("bills.approved_successfully"));
       router.push("/bill/list");
     } else {
       setIsLoaderFormSubmit(false);
@@ -898,7 +920,7 @@ const BillPOMatchUI = () => {
     };
     const response = await acceptRejectBillApi(data, idValue as string);
     if (response?.status === 200) {
-      showSuccessToast("Bill approved successfully");
+      showSuccessToast(translate("bills.approved_successfully"));
       router.push("/approvals/list/review");
     } else {
       setIsLoaderFormSubmit(false);
@@ -919,16 +941,22 @@ const BillPOMatchUI = () => {
                     {billDetails?.bill_number ?? ""}
                   </p>
                   <PillItem
-                    className={`${getStatusClass(getLabelForBillStatus(billDetails?.status || "") || "")}`}
+                    className={`${getStatusClass(billDetails?.status || "")}`}
                     isRounded={true}
-                    name={getLabelForBillStatus(billDetails?.status || "")}
+                    name={
+                      getStatusTranslationKey(billDetails?.status || "")
+                        ? translate(getStatusTranslationKey(billDetails?.status || "")!)
+                        : getLabelForBillStatus(billDetails?.status || "")
+                    }
                   />
                   <PillItem
-                    className={`${getStatusClass(getLabelForBillStatus(billDetails?.match_status || "") || "")}`}
+                    className={`${getStatusClass(billDetails?.match_status || "")}`}
                     isRounded={true}
-                    name={getLabelForBillStatus(
-                      billDetails?.match_status || "",
-                    )}
+                    name={
+                      getStatusTranslationKey(billDetails?.match_status || "")
+                        ? translate(getStatusTranslationKey(billDetails?.match_status || "")!)
+                        : getLabelForBillStatus(billDetails?.match_status || "")
+                    }
                   />
                 </div>
 
@@ -936,7 +964,7 @@ const BillPOMatchUI = () => {
                   {userDetails?.role === "finance_manager" ? (
                     <div className="flex items-center gap-3 w-fit">
                       <Button
-                        name="Approve"
+                        name={translate("bills.actions.approve")}
                         onClick={handleApprovalAction}
                         button_type="primary"
                         disabled={isLoaderFormSubmit}
@@ -949,7 +977,7 @@ const BillPOMatchUI = () => {
                         <div className="flex items-center gap-3 w-fit">
                           {isApproverAvailable ? (
                             <Button
-                              name="Send for approval"
+                              name={translate("bills.actions.send_for_approval")}
                               onClick={handleSendBillApproval}
                               button_type="primary"
                               disabled={isLoaderFormSubmit}
@@ -959,7 +987,7 @@ const BillPOMatchUI = () => {
                             />
                           ) : (
                             <Button
-                              name="Approve"
+                              name={translate("bills.actions.approve")}
                               onClick={handleBillApprovalRejection}
                               button_type="primary"
                               disabled={isLoaderFormSubmit}
@@ -982,8 +1010,8 @@ const BillPOMatchUI = () => {
               <div className="flex justify-between">
                 <p className="text-neutral-1100 text-xl mb-5 font-medium">
                   {orgDetails?.receipt_confirmation_enabled
-                    ? "3-Way Matching"
-                    : "2-Way Matching"}
+                    ? translate("matching_options.three_way")
+                    : translate("matching_options.two_way")}
                 </p>
                 <div className="flex items-center mb-4">
                   <ToggleSwitch
@@ -991,7 +1019,7 @@ const BillPOMatchUI = () => {
                     setIsOn={setHideMatchItems}
                   />
                   <p className="whitespace-pre ms-1.5 text-sm text-neutral-1100 font-medium">
-                    Hide matched items
+                    {translate("matching_options.hide_matched_items")}
                   </p>
                 </div>
               </div>
