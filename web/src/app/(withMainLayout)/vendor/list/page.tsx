@@ -9,13 +9,20 @@ import {
   VendorsAPIData,
   VendorTableList,
 } from "@rever/types";
-import { getLabelForBillStatus, getStatusClass, hasPermission } from "@rever/utils";
+import {
+  getLabelForBillStatus,
+  getStatusClass,
+  getStatusTranslationKey,
+  hasPermission,
+} from "@rever/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslate } from "@rever/i18n";
 
 const VendorList = () => {
   const router = useRouter();
+  const translate = useTranslate();
 
   const [vendorList, setVendorList] = useState<VendorTableList[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -74,7 +81,7 @@ const VendorList = () => {
               checked={table.getIsAllPageRowsSelected()}
               onChange={table.getToggleAllPageRowsSelectedHandler()}
             />
-            <span>Vendor name</span>
+            <span>{translate("vendors.table_headers.vendor_name")}</span>
           </div>
         ),
         cell: ({ row, getValue }) => {
@@ -98,7 +105,7 @@ const VendorList = () => {
       },
       {
         accessorKey: "companyName",
-        header: "Company name",
+        header: translate("vendors.table_headers.company_name"),
         cell: ({ getValue }) => {
           return (
             <div className="flex items-center gap-4">
@@ -111,7 +118,7 @@ const VendorList = () => {
       },
       {
         accessorKey: "email",
-        header: "Email",
+        header: translate("vendors.table_headers.email"),
         cell: ({ getValue }) => {
           return (
             <div className="flex items-center gap-4">
@@ -124,7 +131,7 @@ const VendorList = () => {
       },
       {
         accessorKey: "taxId",
-        header: "Tax ID",
+        header: translate("vendors.table_headers.tax_id"),
         cell: ({ getValue }) => {
           return (
             <div className="flex items-center gap-4">
@@ -137,7 +144,7 @@ const VendorList = () => {
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: translate("vendors.table_headers.status"),
         cell: ({ getValue }) => {
           const value = getValue() as string;
           const isActive = value.toLowerCase();
@@ -145,9 +152,13 @@ const VendorList = () => {
           return (
             <div className="flex items-center gap-1">
               <PillItem
-                className={`${getStatusClass(getLabelForBillStatus(isActive || "") || "")}`}
+                className={`${getStatusClass(isActive || "")}`}
                 isRounded={true}
-                name={getLabelForBillStatus((isActive) || "")}
+                name={
+                  getStatusTranslationKey(isActive || "")
+                    ? translate(getStatusTranslationKey(isActive || "")!)
+                    : getLabelForBillStatus(isActive || "")
+                }
               />
             </div>
           );
@@ -158,7 +169,7 @@ const VendorList = () => {
         },
       },
     ],
-    [router],
+    [router, translate],
   );
 
   // Redirect to add vendor page
@@ -189,8 +200,8 @@ const VendorList = () => {
       ) : (
         <DataTable
           onActionBtClick={handleRedirect}
-          addBtnText={hasPermission("vendor", "create") ? "Create vendor" : ""}
-          tableHeading="Vendors"
+          addBtnText={hasPermission("vendor", "create") ? translate("vendors.buttons.create_vendor") : ""}
+          tableHeading={translate("vendors.heading")}
           tableData={filteredVendors}
           columns={columns}
           setSearch={setSearch}

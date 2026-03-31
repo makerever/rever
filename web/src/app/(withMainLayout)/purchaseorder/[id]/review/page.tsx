@@ -15,6 +15,7 @@ import { PurchaseOrder } from "@rever/types";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, Suspense, useState, useCallback } from "react";
 import { acceptRejectPOApi, getPODetailsByIdApi } from "@rever/services";
+import { useTranslate } from "@rever/i18n";
 
 // Main component to view a PO, fetches PO details and handles actions
 const ViewPOWithParams = () => {
@@ -22,6 +23,7 @@ const ViewPOWithParams = () => {
   const idValue = params.id; // Get userId from route params
 
   const router = useRouter();
+  const translate = useTranslate();
 
   const [poDetails, setPODetails] = useState<Partial<PurchaseOrder>>({});
 
@@ -63,7 +65,7 @@ const ViewPOWithParams = () => {
     const response = await acceptRejectPOApi(data, idValue as string);
     if (response?.status === 200) {
       router.push("/approvals/list/review");
-      showSuccessToast("PO approved successfully");
+      showSuccessToast(translate("purchase_order.approved_successfully"));
       setIsLoaderFormSubmit(false);
     } else {
       setIsLoaderFormSubmit(false);
@@ -80,7 +82,7 @@ const ViewPOWithParams = () => {
     const response = await acceptRejectPOApi(data, idValue as string);
     if (response?.status === 200) {
       router.push("/approvals/list/review");
-      showSuccessToast("PO rejected successfully");
+      showSuccessToast(translate("purchase_order.rejected_successfully"));
       setIsLoaderFormSubmit(false);
     } else {
       setIsLoaderFormSubmit(false);
@@ -110,14 +112,14 @@ const ViewPOWithParams = () => {
       </div>
       {/* Modal for entering reject reason */}
       <Modal
-        title={`Confirm reject PO`}
+        title={translate("purchase_order.confirm_reject")}
         isOpen={confirmPOReject}
         onClose={() => {
           setConfirmPOReject(false);
         }}
       >
         <div className="mt-8">
-          <Label text="Reject reason" htmlFor="rejectInput" />
+          <Label text={translate("purchase_order.rejection_reason")} htmlFor="rejectInput" />
           <TextAreaInput
             onChange={(e) => setRejectReason(e.target.value)}
             id="rejectInput"

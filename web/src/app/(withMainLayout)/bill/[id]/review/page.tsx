@@ -19,6 +19,7 @@ import {
 import { Bill } from "@rever/types";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, Suspense, useState, useCallback } from "react";
+import { useTranslate } from "@rever/i18n";
 
 // Component to fetch and display bill details based on URL params
 const ViewBillWithParams = () => {
@@ -26,6 +27,7 @@ const ViewBillWithParams = () => {
   const idValue = params.id; // Get userId from route params
 
   const router = useRouter();
+  const translate = useTranslate();
 
   const [billDetails, setBillDetails] = useState<Partial<Bill>>({});
 
@@ -81,7 +83,7 @@ const ViewBillWithParams = () => {
     const response = await acceptRejectBillApi(data, idValue as string);
     if (response?.status === 200) {
       router.push("/approvals/list/review");
-      showSuccessToast("Bill approved successfully");
+      showSuccessToast(translate("bills.approved_successfully"));
       setIsLoaderFormSubmit(false);
     } else {
       setIsLoaderFormSubmit(false);
@@ -98,7 +100,7 @@ const ViewBillWithParams = () => {
     const response = await acceptRejectBillApi(data, idValue as string);
     if (response?.status === 200) {
       router.push("/approvals/list/review");
-      showSuccessToast("Bill rejected successfully");
+      showSuccessToast(translate("bills.rejected_successfully"));
       setIsLoaderFormSubmit(false);
     } else {
       setIsLoaderFormSubmit(false);
@@ -129,14 +131,14 @@ const ViewBillWithParams = () => {
 
       {/* Modal for entering reject reason */}
       <Modal
-        title={`Confirm reject bill`}
+        title={translate("bills.confirm_reject")}
         isOpen={confirmBillReject}
         onClose={() => {
           setConfirmBillReject(false);
         }}
       >
         <div className="mt-8">
-          <Label text="Reject reason" htmlFor="rejectInput" />
+          <Label text={translate("purchase_order.rejection_reason")} htmlFor="rejectInput" />
           <TextAreaInput
             onChange={(e) => setRejectReason(e.target.value)}
             id="rejectInput"

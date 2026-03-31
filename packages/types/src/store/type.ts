@@ -18,6 +18,7 @@ export type LoggedUserProps = {
   last_name: string | undefined;
   email: string | undefined;
   role: string | undefined;
+  locale: string;
   organization: Organization;
   timezone: string | undefined;
 };

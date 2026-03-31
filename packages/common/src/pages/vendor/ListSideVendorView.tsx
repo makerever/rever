@@ -6,6 +6,7 @@ import { useState } from "react";
 import { AlphabetFilter } from "@rever/common";
 import { SearchInput } from "@rever/common";
 import { ListSideVendorViewProps } from "@rever/types";
+import { useTranslate } from "@rever/i18n";
 
 // ListSideVendorView displays a searchable, filterable list of vendors
 const ListSideVendorView = ({
@@ -13,6 +14,7 @@ const ListSideVendorView = ({
   vendorId,
   changeVendor,
 }: ListSideVendorViewProps) => {
+  const translate = useTranslate();
   // State for selected alphabet letter filter
   const [selectedLetter, setSelectedLetter] = useState("");
   // State for search input value
@@ -44,7 +46,7 @@ const ListSideVendorView = ({
       <div className="relative bg-white text-slate-600 rounded-md overflow-hidden w-full shadow">
         {/* Header with title and search input */}
         <div className="flex items-center justify-between gap-4 mx-4">
-          <p className="text-slate-800 py-3 text-sm font-semibold">Vendors</p>
+          <p className="text-slate-800 py-3 text-sm font-semibold">{translate("vendors.heading")}</p>
           <SearchInput
             clearSearch={() => setSearch("")}
             search={search}
@@ -53,7 +55,7 @@ const ListSideVendorView = ({
                 setSearch(e.target.value);
               }
             }}
-            placeholder="Search vendors"
+            placeholder={translate("vendors.view_vendors.search_vendors")}
             noCmdIcon
           />
         </div>
@@ -80,7 +82,7 @@ const ListSideVendorView = ({
           ) : (
             // Show message if no vendors found
             <div className="px-4 py-4 text-xs text-slate-500">
-              No vendors found
+              {translate("vendors.no_vendors_found")}
             </div>
           )}
         </div>

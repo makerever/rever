@@ -134,6 +134,7 @@ export interface OtpInputProps<T extends FieldValues> {
 // Interface for sidebar link props
 export interface SidebarLinkProps {
   name: string;
+  i18nKey?: string;
   url: string | string[];
   activeUrl?: string[];
   icon?: React.ReactNode;
@@ -143,6 +144,7 @@ export interface SidebarLinkProps {
 // Interface for sidebar link
 export interface SidebarLink {
   name: string;
+  i18nKey?: string;
   key?: string;
   url: string | string[];
   activeUrl?: string[];

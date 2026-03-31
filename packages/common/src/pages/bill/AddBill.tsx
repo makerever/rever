@@ -3,7 +3,7 @@
 "use client";
 
 import {
-  addBillSchema,
+  createAddBillSchema,
   addBillSchemaValues,
 } from "@rever/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -48,6 +48,7 @@ import {
   // IntegrationFieldRules,
 } from "@rever/types";
 import { useBreadcrumbStore, useUserStore } from "@rever/stores";
+import { useTranslate } from "@rever/i18n";
 import {
   addBillAttachment,
   createBillApi,
@@ -70,7 +71,7 @@ import {
 } from "lucide-react";
 import Lottie from "lottie-react";
 
-const getStatusIcon = (status: string, error_message?: string) => {
+const getStatusIcon = (status: string, error_message?: string, fileSizeLimitMsg?: string) => {
   switch (status) {
     case "uploading":
       return <Loader className="animate-spin text-slate-800" size={20} />;
@@ -85,11 +86,7 @@ const getStatusIcon = (status: string, error_message?: string) => {
     case "failed":
       return (
         <CustomTooltip
-          content={
-            error_message
-              ? error_message
-              : "File must be under 5MB and limited to 5 pages"
-          }
+          content={error_message || fileSizeLimitMsg || "File must be under 5MB and limited to 5 pages"}
           side="right"
         >
           <div>
@@ -107,6 +104,7 @@ const DELAY_MS = 2000;
 const PDF_TYPE = "application/pdf";
 
 const AddBillComponentWithParams = () => {
+  const translate = useTranslate();
   const [submitType, setSubmitType] = useState("");
   // react-hook-form setup
   const {
@@ -120,7 +118,7 @@ const AddBillComponentWithParams = () => {
     watch,
     resetField,
   } = useForm({
-    resolver: zodResolver(addBillSchema),
+    resolver: zodResolver(createAddBillSchema(translate)),
     mode: "onChange",
     defaultValues: {
       items: [
@@ -362,7 +360,7 @@ const AddBillComponentWithParams = () => {
         if (responseFile?.status === 201) {
           setIsLoaderFormSubmit(false);
           showSuccessToast(
-            idValue ? "Bill updated successfully" : "Bill created successfully",
+            idValue ? translate("create_bill.updated") : translate("create_bill.created"),
           );
           if (idValue) {
             router.push(`/bill/view?id=${idValue}`);
@@ -372,14 +370,14 @@ const AddBillComponentWithParams = () => {
           }
           return;
         } else {
-          showErrorToast("Something went wrong!!");
+          showErrorToast(translate("common.something_went_wrong"));
         }
         router.push("/bill/list");
         return;
       }
       setIsLoaderFormSubmit(false);
       showSuccessToast(
-        idValue ? "Bill updated successfully" : "Bill created successfully",
+        idValue ? translate("create_bill.updated") : translate("create_bill.created"),
       );
       if (idValue) {
         router.push(`/bill/view?id=${idValue}`);
@@ -421,11 +419,11 @@ const AddBillComponentWithParams = () => {
           setShowPdf(false);
           setFileUrl(null);
           setFileDetails(null);
-          showErrorToast("File must be under 5MB and limited to 5 pages");
+          showErrorToast(translate("common.file_size_limit"));
         }
       }
     } else {
-      alert("Please upload a valid PDF file.");
+      alert(translate("common.upload_valid_pdf"));
     }
   };
 
@@ -449,9 +447,7 @@ const AddBillComponentWithParams = () => {
           setFileUrl(null);
           setFileDetails(null);
           showErrorToast(
-            error_message
-              ? error_message
-              : "File must be under 5MB and limited to 5 pages",
+            error_message || translate("common.file_size_limit"),
           );
           break;
         }
@@ -466,7 +462,7 @@ const AddBillComponentWithParams = () => {
   async function deleteBillAttachmentFunc() {
     const response = await deleteBillAttachment(fileResponse?.id || "");
     if (response?.status === 204 && idValue) {
-      showSuccessToast("Bill attachment deleted");
+      showSuccessToast(translate("create_bill.attachment_deleted"));
       getBillDetailsById(idValue);
     }
   }
@@ -482,7 +478,7 @@ const AddBillComponentWithParams = () => {
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-3">
                 <p className="text-neutral-1100 text-2xl font-medium">
-                  {idValue ? billDetails?.bill_number : "New Bill"}
+                  {idValue ? billDetails?.bill_number : translate("create_bill.new_bill")}
                 </p>
 
                 <div className="flex justify-between items-center">
@@ -490,7 +486,7 @@ const AddBillComponentWithParams = () => {
                     <div className="flex items-center">
                       <ToggleSwitch isOn={showPdf} setIsOn={setShowPdf} />
                       <p className="ms-1.5 text-sm text-neutral-1100 font-medium">
-                        {!showPdf ? "Show pdf" : "Hide pdf"}
+                        {!showPdf ? translate("bills.actions.show_pdf") : translate("bills.actions.hide_pdf")}
                       </p>
                     </div>
                   )}
@@ -510,7 +506,7 @@ const AddBillComponentWithParams = () => {
                     />
 
                     <Button
-                      name={idValue ? "Upload bill" : "Extract bill"}
+                      name={idValue ? translate("create_bill.upload_bill") : translate("create_bill.extract_bill")}
                       button_type="primary-outline"
                       icon_type="upload"
                       disabled={isLoaderFormSubmit}
@@ -520,7 +516,7 @@ const AddBillComponentWithParams = () => {
                 ) : null}
 
                 <Button
-                  name="Cancel"
+                  name={translate("buttons.cancel")}
                   onClick={() =>
                     idValue
                       ? router.push(`/bill/view?id=${idValue}`)
@@ -532,24 +528,24 @@ const AddBillComponentWithParams = () => {
 
                 {!idValue || billDetails?.status === "draft" ? (
                   <DropdownButton
-                    name="Save"
+                    name={translate("buttons.save")}
                     onActionBtClick={() => {
                       triggerSubmit("in_review");
                     }}
                     onClose={() => setShowBtnPopup(false)}
                     onBtnPopupItemsClick={(val) => {
-                      if (val === "Save as draft") {
+                      if (val === translate("buttons.save_draft")) {
                         triggerSubmit("draft");
                       }
                     }}
                     onClickArrow={() => setShowBtnPopup(true)}
                     showBtnPopup={showBtnPopup}
-                    btnPopupItems={["Save", "Save as draft"]}
+                    btnPopupItems={[translate("buttons.save"), translate("buttons.save_draft")]}
                     button_type="primary"
                   />
                 ) : (
                   <Button
-                    name="Save"
+                    name={translate("buttons.save")}
                     onClick={() => triggerSubmit("in_review")}
                     button_type="primary"
                     icon_type={isLoaderFormSubmit ? "loader" : null}
@@ -576,60 +572,60 @@ const AddBillComponentWithParams = () => {
                   >
                     {/* Bill details fields */}
                     <p className="text-neutral-1100 text-xl font-medium mb-5">
-                      Bill details
+                      {translate("create_bill.heading")}
                     </p>
                     <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
                       <div>
                         <Label
                           htmlFor="billNumber"
-                          text="Bill number"
+                          text={translate("create_bill.bill_name")}
                           isRequired
                         />
                         <TextInput
                           register={register("billNumber")}
                           id="billNumber"
-                          placeholder="Enter bill no"
+                          placeholder={translate("placeholders.bill.enter_bill")}
                           error={errors.billNumber}
                           value={getValues("billNumber")}
                         />
                       </div>
                       <div>
-                        <Label htmlFor="vendor" text="Vendor" isRequired />
+                        <Label htmlFor="vendor" text={translate("create_bill.vendor")} isRequired />
                         <SelectComponent
                           name="vendor"
                           register={register}
                           trigger={trigger}
-                          title="Vendor"
+                          title={translate("create_bill.vendor")}
                           error={errors?.vendor}
                           options={vendorOptionList}
-                          placeholder="Select vendor"
+                          placeholder={translate("placeholders.bill.select_vendor")}
                           isClearable={true}
                           getValues={getValues}
                         />
                       </div>
                       <div>
-                        <Label htmlFor="purchase_order" text="Purchase order" />
+                        <Label htmlFor="purchase_order" text={translate("create_bill.purchase_order")} />
                         <SelectComponent
                           name="purchase_order"
                           register={register}
                           trigger={trigger}
-                          title="Purchase order"
+                          title={translate("create_bill.purchase_order")}
                           error={errors?.purchase_order}
                           options={purchaseOrderOptionList}
-                          placeholder="Select purchase order"
+                          placeholder={translate("placeholders.bill.select_po")}
                           isClearable={true}
                           getValues={getValues}
                         />
                       </div>
                       <div>
-                        <Label htmlFor="payment_terms" text="Payment terms" />
+                        <Label htmlFor="payment_terms" text={translate("create_bill.payment_terms")} />
                         <SelectComponent
                           name="payment_terms"
                           register={register}
                           trigger={trigger}
                           error={errors?.payment_terms}
-                          options={paymentTermsOptions}
-                          placeholder="Select payment terms"
+                          options={paymentTermsOptions.map((opt) => ({ ...opt, label: translate(`payment_terms_options.${opt.value}`) }))}
+                          placeholder={translate("placeholders.bill.select_pt")}
                           isClearable={true}
                           getValues={getValues}
                         />
@@ -637,30 +633,30 @@ const AddBillComponentWithParams = () => {
                       <div>
                         <Label
                           htmlFor="bill_date"
-                          text="Bill date"
+                          text={translate("create_bill.bill_date")}
                         />
                         <DatePickerDemo
                           register={register}
                           name="bill_date"
                           error={errors.bill_date}
                           trigger={trigger}
-                          placeholder="Select bill date"
-                          title="Bill date"
+                          placeholder={translate("placeholders.bill.select_bill_date")}
+                          title={translate("create_bill.bill_date")}
                           value={watch("bill_date") ?? undefined}
                         />
                       </div>
                       <div>
                         <Label
                           htmlFor="due_date"
-                          text="Due date"
+                          text={translate("create_bill.due_date")}
                         />
                         <DatePickerDemo
                           register={register}
                           name="due_date"
                           error={errors.due_date}
                           trigger={trigger}
-                          placeholder="Select due date"
-                          title="Due date"
+                          placeholder={translate("placeholders.bill.select_due_date")}
+                          title={translate("create_bill.due_date")}
                           value={watch("due_date") ?? undefined}
                           disabledBefore={
                             watch("bill_date") != null
@@ -680,7 +676,7 @@ const AddBillComponentWithParams = () => {
                     }}
                   >
                     <p className="text-neutral-1100 text-xl font-medium mb-5">
-                      Bill line Items
+                      {translate("create_bill.bill_line_items.heading")}
                     </p>
 
                     <BillItemsTable
@@ -694,12 +690,12 @@ const AddBillComponentWithParams = () => {
                     <div className="flex items-center justify-between">
                       {/* Notes */}
                       <div className="w-1/2">
-                        <Label htmlFor="comments" text="Notes" />
+                        <Label htmlFor="comments" text={translate("create_bill.notes")} />
                         <TextAreaInput
                           rows={4}
                           register={register("comments")}
                           id="comments"
-                          placeholder="Enter notes"
+                          placeholder={translate("create_bill.enter_notes")}
                           error={errors.comments}
                           value={getValues("comments") ?? undefined}
                         />
@@ -709,14 +705,14 @@ const AddBillComponentWithParams = () => {
                       <div className="flex justify-end">
                         <div className="p-4 w-72 font-medium text-sm bg-secondary-100 rounded-[20px]">
                           <div className="grid grid-cols-2">
-                            <p className="text-neutral-1100">Sub total:</p>
+                            <p className="text-neutral-1100">{translate("create_bill.sub_total")}:</p>
                             <p className="text-neutral-900 text-right">
                               {formatNumber(subtotal, orgDetails?.currency)}
                             </p>
                           </div>
                           <div className="grid items-center grid-cols-2 pb-2 mt-4 mb-2">
                             <div>
-                              <p className="text-neutral-1100">Total tax:</p>
+                              <p className="text-neutral-1100">{translate("create_bill.total_tax")}:</p>
                               <span className="text-xs">
                                 {formatNumber(
                                   totalTaxamount,
@@ -738,7 +734,7 @@ const AddBillComponentWithParams = () => {
                             </div>
                           </div>
                           <div className="grid grid-cols-2 font-semibold">
-                            <p className="text-neutral-1100">Grand total:</p>
+                            <p className="text-neutral-1100">{translate("purchase_order.create_po.grand_total")}:</p>
                             <p className="text-neutral-900 text-right">
                               {formatNumber(total, orgDetails?.currency)}
                             </p>
@@ -753,7 +749,7 @@ const AddBillComponentWithParams = () => {
               {fileUrl && showPdf && (
                 <div className="relative lg:w-[30%] scrollbar_none rounded-[20px] bg-white border border-secondary-200 overflow-hidden">
                   <p className="p-4 pb-0 text-neutral-1100 text-xl font-medium">
-                    Bill preview
+                    {translate("create_bill.bill_preview")}
                   </p>
                   {files.status === "done" ? (
                     <>
@@ -777,7 +773,7 @@ const AddBillComponentWithParams = () => {
                       <PdfViewer fileUrl={fileUrl} />
                     </>
                   ) : (
-                    <div className="flex flex-col items-center justify-center h-[580px]">
+                    <div className="flex flex-col items-center justify-center h-145">
                       <div
                         style={{
                           position: "relative",
@@ -807,6 +803,7 @@ const AddBillComponentWithParams = () => {
                         {getStatusIcon(
                           getStatusLabelForExtraction(files.status || ""),
                           files.error_message,
+                          translate("common.file_size_limit"),
                         )}
                       </div>
                     </div>

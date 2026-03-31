@@ -14,17 +14,19 @@ import {
 import {
   formatDate,
   formatNumber,
-  getLabelForBillStatus,
+  getStatusTranslationKey,
   getStatusClass,
 } from "@rever/utils";
 import { ColumnDef, sortingFns } from "@tanstack/react-table";
 import { Paperclip } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslate } from "@rever/i18n";
 
 // Main component for displaying the approval list
 const BillApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
   const router = useRouter();
+  const translate = useTranslate();
 
   const [approvalList, setApprovalList] = useState<ApprovalTableList[]>([]);
 
@@ -86,7 +88,7 @@ const BillApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
               checked={table.getIsAllPageRowsSelected()}
               onChange={table.getToggleAllPageRowsSelectedHandler()}
             />
-            <span>Bill</span>
+            <span>{translate("bills.table_headers.bill")}</span>
           </div>
         ),
         cell: ({ row, getValue }) => {
@@ -108,7 +110,7 @@ const BillApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
       },
       {
         accessorKey: "bill_date",
-        header: "Bill date",
+        header: translate("bills.table_headers.bill_date"),
         accessorFn: (row) => (row?.bill_date ? new Date(row.bill_date) : null),
         sortingFn: sortingFns.datetime,
         sortDescFirst: false,
@@ -122,7 +124,7 @@ const BillApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
       },
       {
         accessorKey: "due_date",
-        header: "Due date",
+        header: translate("bills.table_headers.due_date"),
         accessorFn: (row) => (row.due_date ? new Date(row.due_date) : null),
         sortingFn: sortingFns.datetime,
         sortDescFirst: false,
@@ -136,7 +138,7 @@ const BillApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
       },
       {
         accessorKey: "vendor",
-        header: "Vendor",
+        header: translate("bills.table_headers.vendor"),
         accessorFn: (row) => row.vendor?.name || "",
         sortingFn: "alphanumeric",
         sortDescFirst: false,
@@ -158,7 +160,7 @@ const BillApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
       },
       {
         accessorKey: "total",
-        header: "Total amount",
+        header: translate("bills.table_headers.total_amount"),
         accessorFn: (row) => Number(row.total) || 0,
         sortingFn: "basic",
         sortDescFirst: false,
@@ -175,7 +177,7 @@ const BillApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: translate("bills.table_headers.status"),
         sortDescFirst: false,
         cell: ({ row, getValue }) => {
           const value = getValue() as string;
@@ -183,13 +185,17 @@ const BillApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
           return (
             <div className="flex items-center pr-2 justify-between w-32">
               <PillItem
-                className={`${getStatusClass(getLabelForBillStatus(value) || "")}`}
+                className={`${getStatusClass(value || "")}`}
                 isRounded={true}
-                name={getLabelForBillStatus(value || "")}
+                name={
+                  getStatusTranslationKey(value || "")
+                    ? translate(getStatusTranslationKey(value || "")!)
+                    : value
+                }
               />
 
               {row?.original.is_attachment && (
-                <CustomTooltip content="PDF attached">
+                <CustomTooltip content={translate("bills.actions.pdf_attached")}>
                   <div>
                     <Paperclip className="text-slate-400" width={14} />
                   </div>
@@ -204,7 +210,7 @@ const BillApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
         },
       },
     ],
-    [router, collator, orgDetails?.date_format],
+    [router, collator, orgDetails?.date_format, translate],
   );
 
   // Filter approvals based on search input
@@ -223,7 +229,7 @@ const BillApprovalList = ({ tabs, activeTab, setActiveTab }: ApprovalTypes) => {
     <>
       <DataTable
         noStatusFilter
-        tableHeading="Approvals"
+        tableHeading={translate("sidebar.expenses.approvals")}
         tableData={filteredBillApprovals}
         columns={columns}
         setSearch={setSearch}

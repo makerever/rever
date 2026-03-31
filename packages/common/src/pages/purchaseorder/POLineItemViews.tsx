@@ -5,15 +5,7 @@ import { checkAuditValidation, formatNumber, formatPlainNumber, getAuditFieldVal
 import { useUserStore } from "@rever/stores";
 import { POLineItemsProps } from "@rever/types";
 import { CustomTooltip, Label } from "@rever/common";
-
-// Table headers for the read-only PO items table
-const poItemHeaders = [
-  "Description",
-  "Qty",
-  "Available Qty",
-  "Unit price",
-  "Amount",
-];
+import { useTranslate } from "@rever/i18n";
 
 export default function poLineItemsReadOnly({
   showAuditHistory,
@@ -22,6 +14,15 @@ export default function poLineItemsReadOnly({
   itemsAuditValidation,
   auditValidation
 }: POLineItemsProps) {
+  const translate = useTranslate();
+  const poItemHeaders = [
+    translate("purchase_order.create_po.po_line_items.description"),
+    translate("purchase_order.create_po.po_line_items.qty"),
+    translate("purchase_order.available_qty"),
+    translate("purchase_order.create_po.po_line_items.unit_price"),
+    translate("purchase_order.create_po.po_line_items.amount"),
+  ];
+
   const orgDetails = useUserStore((state) => state.user?.organization);
 
   return (
@@ -103,11 +104,11 @@ export default function poLineItemsReadOnly({
                         content={
                           <div className="my-1">
                             <div className="mb-1 flex justify-between gap-2">
-                              <div>Total:</div>{" "}
+                              <div>{translate("purchase_order.create_po.total")}:</div>{" "}
                               <div>{formatPlainNumber(item?.quantity)}</div>
                             </div>
                             <div className="mb-1 flex justify-between gap-2">
-                              <div>Under approval:</div>{" "}
+                              <div>{translate("purchase_order.stagebar.under_approval")}:</div>{" "}
                               <div>
                                 {formatPlainNumber(
                                   item?.pending_approval_quantity,
@@ -115,13 +116,13 @@ export default function poLineItemsReadOnly({
                               </div>
                             </div>
                             <div className="mb-1 flex justify-between gap-2">
-                              <div>Consumed:</div>{" "}
+                              <div>{translate("purchase_order.consumed")}:</div>{" "}
                               <div>
                                 {formatPlainNumber(item?.received_quantity)}
                               </div>
                             </div>
                             <div className="mb-1 flex justify-between gap-2">
-                              <div>Available:</div>{" "}
+                              <div>{translate("purchase_order.available")}:</div>{" "}
                               <div>{formatPlainNumber(balanceQty)}</div>
                             </div>
                           </div>
@@ -169,7 +170,7 @@ export default function poLineItemsReadOnly({
                   colSpan={6}
                   className="min-h-10 p-4 text-center text-sm text-slate-400"
                 >
-                  No line items to display.
+                  {translate("purchase_order.view_po.no_pos")}
                 </td>
               </tr>
             )}
@@ -184,7 +185,7 @@ export default function poLineItemsReadOnly({
               {(poDetails?.reject_reason !== null) &&
                 <div className="mb-4">
                   <Label
-                    text="Rejection reason:"
+                    text={translate("purchase_order.rejection_reason") + ":"}
                     className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
                   />
                   <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.reject_reason })}`}>
@@ -196,7 +197,7 @@ export default function poLineItemsReadOnly({
           {/* Notes */}
           <div className="">
             <Label
-              text="Notes:"
+              text={translate("purchase_order.notes")}
               className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
             />
             <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.comments })}`}>
@@ -208,14 +209,14 @@ export default function poLineItemsReadOnly({
         <div className="flex justify-end">
           <div className="p-4 w-72 font-medium text-neutral-1100 text-sm bg-neutral-100 rounded-[20px] flex flex-col gap-5">
             <div className="grid grid-cols-2">
-              <p className="text-sm font-medium">Sub total</p>
+              <p className="text-sm font-medium">{translate("purchase_order.view_po.sub_total")}</p>
               <p className={`text-neutral-900 text-right ${checkAuditValidation({ showAuditHistory, field: auditValidation?.sub_total })}`}>
                 {formatNumber(poDetails?.sub_total || 0, orgDetails?.currency)}
               </p>
             </div>
             <div className="grid grid-cols-2">
               <p className="text-sm font-medium flex flex-col">
-                Total tax
+                {translate("purchase_order.view_po.total_tax")}
                 <span className={`text-neutral-900 text-xs ${checkAuditValidation({ showAuditHistory, field: auditValidation?.total })}`}>
                   {formatNumber(
                     (Number(poDetails?.total) || 0) -
@@ -229,7 +230,7 @@ export default function poLineItemsReadOnly({
               </p>
             </div>
             <div className="grid grid-cols-2 font-semibold">
-              <p className="text-sm">Grand total</p>
+              <p className="text-sm">{translate("purchase_order.view_po.grand_total")}</p>
               <p className={`text-neutral-900 text-right ${checkAuditValidation({ showAuditHistory, field: auditValidation?.total })}`}>
                 {formatNumber(poDetails?.total || 0, orgDetails?.currency)}
               </p>

@@ -9,7 +9,7 @@ import { TextInput } from "@rever/common";
 import { Button } from "@rever/common";
 import { ChevronLeft } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registerSchema, registerSchemaValues } from "@rever/validations";
+import { createRegisterSchema, registerSchemaValues } from "@rever/validations";
 import { PasswordInput } from "@rever/common";
 import { registerSteps } from "@rever/constants";
 import { useRouter } from "next/navigation";
@@ -22,9 +22,12 @@ import { useUserStore } from "@rever/stores";
 import { showErrorToast } from "@rever/common";
 import { SelectComponent } from "@rever/common";
 import { currencyOptions } from "@rever/constants";
+import { useTranslate } from "@rever/i18n";
 
 // Main RegisterForm component
 const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
+  const translate = useTranslate();
+
   // Initialize react-hook-form with Zod validation
   const {
     register,
@@ -36,10 +39,9 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
     trigger,
     setFocus,
   } = useForm({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(createRegisterSchema(translate)),
     mode: "onChange",
   });
-
   // Watch form fields for changes
   const first_name = watch("first_name");
   const last_name = watch("last_name");
@@ -173,21 +175,21 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
             </div> */}
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <Label htmlFor="first_name" text="First name" isRequired />
+                <Label htmlFor="first_name" text={translate("auth.register.first_name")} isRequired />
                 <TextInput
                   register={register("first_name")}
                   id="first_name"
-                  placeholder="Enter first name"
+                  placeholder={translate("auth.register.enter_first_name")}
                   error={errors.first_name}
                   value={getValues("first_name")}
                 />
               </div>
               <div>
-                <Label htmlFor="last_name" text="Last name" isRequired />
+                <Label htmlFor="last_name" text={translate("auth.register.last_name")} isRequired />
                 <TextInput
                   register={register("last_name")}
                   id="last_name"
-                  placeholder="Enter last name"
+                  placeholder={translate("auth.register.enter_last_name")}
                   error={errors.last_name}
                   value={getValues("last_name")}
                 />
@@ -195,11 +197,11 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
             </div>
 
             <div className="mb-5">
-              <Label htmlFor="org_name" text="Organization name" isRequired />
+              <Label htmlFor="org_name" text={translate("auth.register.org_name")} isRequired />
               <TextInput
                 register={register("org_name")}
                 id="org_name"
-                placeholder="Enter organization name"
+                placeholder={translate("auth.register.enter_org_name")}
                 error={errors.org_name}
                 value={getValues("org_name")}
                 onEnterPress={() => {
@@ -213,18 +215,18 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
             <div className="mb-5">
               <Label
                 htmlFor="base_currency"
-                text="Organization currency"
+                text={translate("auth.register.org_currency")}
                 isRequired
               />
               <SelectComponent
-                title="Currency"
+                title={translate("auth.register.currency")}
                 name="currency"
                 register={register}
                 trigger={trigger}
                 error={errors?.currency}
                 getValues={getValues}
                 options={currencyOptions}
-                placeholder="Select organization currency"
+                placeholder={translate("auth.register.select_org_currency")}
               />
             </div>
           </>
@@ -234,11 +236,11 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
         {showStep === 2 && (
           <div className="grid grid-cols-1 gap-4 mb-4">
             <div>
-              <Label htmlFor="password" text="Create password" />
+              <Label htmlFor="password" text={translate("auth.create_password")} />
               <PasswordInput
                 register={register("password")}
                 id="password"
-                placeholder="Create a strong password"
+                placeholder={translate("auth.create_strong_password")}
                 error={touchedFields.password ? errors.password : undefined}
                 value={getValues("password")}
                 password={password}
@@ -246,11 +248,11 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
               />
             </div>
             <div>
-              <Label htmlFor="confirmPassword" text="Confirm password" />
+              <Label htmlFor="confirmPassword" text={translate("auth.confirm_password")} />
               <PasswordInput
                 register={register("confirmPassword")}
                 id="confirmPassword"
-                placeholder="Confirm your password"
+                placeholder={translate("auth.confirm_your_password")}
                 error={errors.confirmPassword}
                 value={getValues("confirmPassword")}
               />
@@ -263,7 +265,7 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
           <Button
             type="submit"
             disabled={isPasswordValid || isConfirmPasswordValid}
-            name="Let's get started"
+            name={translate("auth.register.lets_get_started")}
             button_type="primary"
             icon_type={isLoaderFormSubmit ? "loader" : null}
             width="w-full"
@@ -276,7 +278,7 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
           <Button
             onClick={goToNextStep}
             disabled={isProfileValid || !isOrgNameValid}
-            name="Continue"
+            name={translate("buttons.continue")}
             button_type="primary"
             width="w-full"
           />
@@ -288,7 +290,7 @@ const RegisterForm = ({ showStep, setShowStep }: RegisterStepProps) => {
             <Button
               onClick={goToPreviousStep}
               disabled={isLoaderFormSubmit}
-              name="Go back"
+              name={translate("buttons.back")}
               button_type="secondary-outline"
               width="w-full"
             />

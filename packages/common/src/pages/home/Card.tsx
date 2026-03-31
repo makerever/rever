@@ -3,8 +3,10 @@
 import { CardProps } from "@rever/types";
 import { useCountAnimation } from "@rever/common";
 import { formatNumber, formatPlainNumber } from "@rever/utils";
+import { useTranslate } from "@rever/i18n";
 
 function Card({ heading, value }: CardProps) {
+  const translate = useTranslate();
   const animatedAmount = useCountAnimation(value?.amount, 500);
 
   return (
@@ -21,7 +23,7 @@ function Card({ heading, value }: CardProps) {
         </div>
 
         <p className="mt-6 text-sm text-neutral-1100 font-medium">
-          {formatPlainNumber(value?.count, false, 0, 2)} bills
+          {formatPlainNumber(value?.count, false, 0, 2)} {translate("home.charts.bills").toLowerCase()}
         </p>
       </div>
     </>

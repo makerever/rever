@@ -23,9 +23,11 @@ import {
 } from "@rever/common";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@rever/stores";
+import { useTranslate } from "@rever/i18n";
 
 export default function Inbox() {
   const router = useRouter();
+  const translate = useTranslate();
   const [message, setMessage] = useState<Message | null>(null);
   const [width, setWidth] = useState<number>(300);
   const isResizing = useRef<boolean>(false);
@@ -114,7 +116,7 @@ export default function Inbox() {
       setIsConfirmDelete(false);
       setSinleMessageLoading(false);
       setMessage(null);
-      showSuccessToast("Notification deleted");
+      showSuccessToast(translate("inbox.notification_deleted"));
       setIsLoading(true);
       getNotificationList();
     }
@@ -126,7 +128,7 @@ export default function Inbox() {
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 w-full h-8">
           <div className="flex items-center gap-2">
             <p className="text-neutral-1100 text-2xl font-medium">
-              Notifications
+              {translate("inbox.heading")}
             </p>
           </div>
         </div>
@@ -205,7 +207,7 @@ export default function Inbox() {
                       unoptimized
                     />
                     <p className="text-xs font-medium text-neutral-700 mt-6">
-                      No notifications found
+                      {translate("inbox.no_notifications")}
                     </p>
                   </div>
                 )}
@@ -237,7 +239,7 @@ export default function Inbox() {
                             <Bell width={16} />
                           </div>
                           <p className="text-sm font-medium ms-3 text-neutral-1100">
-                            Notification
+                            {translate("inbox.notification")}
                           </p>
                         </div>
 
@@ -267,7 +269,7 @@ export default function Inbox() {
                         <div className="w-fit mt-10">
                           <Button
                             type="submit"
-                            name="View"
+                            name={translate("inbox.view")}
                             onClick={() => {
                               user?.role === "finance_manager"
                                 ? router.push(
@@ -285,7 +287,7 @@ export default function Inbox() {
                   ) : (
                     <div className="pt-36 flex flex-col items-center justify-center mt-6 text-xs font-medium text-neutral-700">
                       <BellPlus className="mb-2" width={32} height={32} />
-                      Select a notification to view details.
+                      {translate("inbox.select_notification")}
                     </div>
                   )}
                 </>
@@ -299,7 +301,7 @@ export default function Inbox() {
         isOpen={isConfirmDelete}
         onClose={() => setIsConfirmDelete(false)}
         onConfirm={handleDeleteNotification}
-        message="Are you sure you want to delete this notification?"
+        message={translate("inbox.delete_confirm")}
       />
     </>
   );

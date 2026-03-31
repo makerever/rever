@@ -22,16 +22,18 @@ import {
 import { useUserStore } from "@rever/stores";
 import { InvitedMemberDataAPIType, MemberDataAPIType } from "@rever/types";
 import {
-  getLabelForBillStatus,
-  getLabelForRoles,
+  getRoleTranslationKey,
+  getStatusTranslationKey,
   getStatusClass,
   hasPermission,
 } from "@rever/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { EllipsisVertical, Pencil, Trash } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslate } from "@rever/i18n";
 
 const MembersList = () => {
+  const translate = useTranslate();
   const user = useUserStore((state) => state.user);
   const updateUser = useUserStore.getState().setUser;
   const [openRowId, setOpenRowId] = useState<string | null>(null);
@@ -46,7 +48,7 @@ const MembersList = () => {
               checked={table.getIsAllPageRowsSelected()}
               onChange={table.getToggleAllPageRowsSelectedHandler()}
             />
-            <span>First name</span>
+            <span>{translate("auth.register.first_name")}</span>
           </div>
         ),
         cell: ({ row, getValue }) => (
@@ -63,7 +65,7 @@ const MembersList = () => {
       },
       {
         accessorKey: "last_name",
-        header: "Last name",
+        header: translate("auth.register.last_name"),
         cell: ({ getValue }) => (
           <div className="flex items-center gap-4">
             <span className="overflow-hidden text-ellipsis">
@@ -74,7 +76,7 @@ const MembersList = () => {
       },
       {
         accessorKey: "email",
-        header: "Email",
+        header: translate("profile.email"),
         cell: ({ getValue }) => (
           <div className="flex items-center gap-4">
             <span className="overflow-hidden text-ellipsis">
@@ -85,13 +87,15 @@ const MembersList = () => {
       },
       {
         accessorKey: "status",
-        header: "Role",
+        header: translate("profile.role"),
         cell: ({ getValue }) => (
-          <div className="flex items-center gap-4">
-            <span className="overflow-hidden text-ellipsis">
-              {getLabelForRoles(getValue() as string)}
-            </span>
-          </div>
+            <div className="flex items-center gap-4">
+              <span className="overflow-hidden text-ellipsis">
+                {getRoleTranslationKey(getValue() as string)
+                  ? translate(getRoleTranslationKey(getValue() as string)!)
+                  : (getValue() as string)}
+              </span>
+            </div>
         ),
         filterFn: (row, columnId, filterValue: string[]) => {
           if (!filterValue?.length) return true;
@@ -107,7 +111,7 @@ const MembersList = () => {
               <PopupButton
                 btnPopupItems={[
                   {
-                    name: "Edit",
+                    name: translate("invite_member.edit_prefix"),
                     icon: <Pencil size={16} />,
                     isShown: true,
                     onClick: () => {
@@ -116,7 +120,7 @@ const MembersList = () => {
                     },
                   },
                   {
-                    name: "Delete",
+                    name: translate("confirm_deletion.delete"),
                     icon: <Trash size={16} />,
                     isShown: true,
                     onClick: () => {
@@ -144,7 +148,7 @@ const MembersList = () => {
           ) : null,
       },
     ],
-    [openRowId, user?.id, user?.role],
+    [openRowId, user?.id, user?.role, translate],
   );
 
   const invitedMemberColumns: ColumnDef<InvitedMemberDataAPIType>[] = useMemo(
@@ -157,7 +161,7 @@ const MembersList = () => {
               checked={table.getIsAllPageRowsSelected()}
               onChange={table.getToggleAllPageRowsSelectedHandler()}
             />
-            <span>Email</span>
+            <span>{translate("profile.email")}</span>
           </div>
         ),
         cell: ({ row, getValue }) => (
@@ -174,7 +178,7 @@ const MembersList = () => {
       },
       {
         accessorKey: "invited_by",
-        header: "Invited by",
+        header: translate("members.invited_by"),
         cell: ({ getValue }) => (
           <div className="flex items-center gap-4">
             <span className="overflow-hidden text-ellipsis">
@@ -185,7 +189,7 @@ const MembersList = () => {
       },
       {
         accessorKey: "organization",
-        header: "Organization name",
+        header: translate("general.org_name"),
         cell: ({ getValue }) => (
           <div className="flex items-center gap-4">
             <span className="overflow-hidden text-ellipsis">
@@ -197,7 +201,7 @@ const MembersList = () => {
 
       {
         accessorKey: "status",
-        header: "Role",
+        header: translate("profile.role"),
         cell: ({ getValue }) => {
           const value = getValue() as string;
 
@@ -214,7 +218,7 @@ const MembersList = () => {
       },
       {
         accessorKey: "invite_status",
-        header: "Status",
+        header: translate("vendors.table_headers.status"),
         sortDescFirst: false,
         cell: ({ getValue }) => {
           const value = getValue() as string;
@@ -222,16 +226,20 @@ const MembersList = () => {
           return (
             <div className="flex items-center pr-2 justify-between w-32">
               <PillItem
-                className={`${getStatusClass(getLabelForBillStatus(value) || "")}`}
+                className={`${getStatusClass(value || "")}`}
                 isRounded={true}
-                name={getLabelForBillStatus(value || "")}
+                name={
+                  getStatusTranslationKey(value || "")
+                    ? translate(getStatusTranslationKey(value || "")!)
+                    : value
+                }
               />
             </div>
           );
         },
       },
     ],
-    [],
+    [translate],
   );
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -273,7 +281,7 @@ const MembersList = () => {
           .map((v: MemberDataAPIType) => {
             return {
               ...v,
-              status: getLabelForRoles(v?.role),
+              status: v?.role,
             };
           });
         setMembersList(allData);
@@ -291,7 +299,7 @@ const MembersList = () => {
         const allData = response?.data.map((v: InvitedMemberDataAPIType) => {
           return {
             ...v,
-            status: getLabelForRoles(v?.role),
+            status: v?.role,
             invite_status: v?.status,
           };
         });
@@ -339,9 +347,7 @@ const MembersList = () => {
       getMembersList();
     } else {
       if (response?.data?.detail) {
-        showErrorToast(
-          "Cannot delete user as they are assigned as an approver",
-        );
+        showErrorToast(translate("members.cannot_delete"));
       }
     }
   };
@@ -377,9 +383,9 @@ const MembersList = () => {
           <DataTable
             onActionBtClick={handleRedirect}
             addBtnText={
-              hasPermission("members", "create") ? "Invite members" : ""
+              hasPermission("members", "create") ? translate("members.invite_members") : ""
             }
-            tableHeading="Members"
+            tableHeading={translate("sidebar.settings.members")}
             tableData={filteredMembers}
             columns={columns}
             tabNames={memberTabOptions}
@@ -389,16 +395,16 @@ const MembersList = () => {
             setSearch={setSearch}
             search={search}
             clearSearch={() => setSearch("")}
-            filterHeading="Role"
+            filterHeading={translate("profile.role")}
             isLoading={isLoading}
           />
         ) : (
           <DataTable
             onActionBtClick={handleRedirect}
             addBtnText={
-              hasPermission("members", "create") ? "Invite members" : ""
+              hasPermission("members", "create") ? translate("members.invite_members") : ""
             }
-            tableHeading="Members"
+            tableHeading={translate("sidebar.settings.members")}
             tableData={filteredInvitedMembers}
             columns={invitedMemberColumns}
             tabNames={memberTabOptions}
@@ -408,7 +414,7 @@ const MembersList = () => {
             setSearch={setSearch}
             search={search}
             clearSearch={() => setSearch("")}
-            filterHeading="Role"
+            filterHeading={translate("profile.role")}
             isLoading={isLoading}
           />
         )}
@@ -419,7 +425,7 @@ const MembersList = () => {
         isOpen={isPopupOpen}
         onClose={() => setIsPopupOpen(false)}
         onConfirm={handleDeleteUser}
-        message="Are you sure you want to delete this member?"
+        message={translate("members.delete_confirm")}
       />
 
       <Modal

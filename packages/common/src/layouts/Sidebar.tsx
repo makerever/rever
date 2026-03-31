@@ -18,9 +18,12 @@ import { Modal } from "@rever/common";
 import { CommandDemo } from "@rever/common";
 import { filterSidebarByRole } from "@rever/utils";
 import Image from "next/image";
+import { useTranslate } from "@rever/i18n";
 
 // Sidebar component definition
 export function Sidebar({ isSidebarCollapsed }: SidebarProps) {
+  const translate = useTranslate();
+
   // State for tracking which sidebar item is open (expanded)
   const [openItem, setOpenItem] = useState<string | null>(null);
   // State for showing/hiding user profile popup
@@ -220,7 +223,7 @@ export function Sidebar({ isSidebarCollapsed }: SidebarProps) {
                           {link.icon}
                           {!isSidebarCollapsed && (
                             <p className="ps-1.5 font-medium text-sm">
-                              {link.name}
+                              {link.i18nKey ? translate(link.i18nKey) : link.name}
                             </p>
                           )}
                         </div>
@@ -252,7 +255,7 @@ export function Sidebar({ isSidebarCollapsed }: SidebarProps) {
                                 }`}
                                 onClick={() => setHoveredItem(null)}
                               >
-                                {sub.name}
+                                {sub.i18nKey ? translate(sub.i18nKey) : sub.name}
                               </li>
                             </Link>
                           ))}
@@ -285,7 +288,7 @@ export function Sidebar({ isSidebarCollapsed }: SidebarProps) {
                                 }`}
                               >
                                 <li className="flex items-center">
-                                  {subItem.name}
+                                  {subItem.i18nKey ? translate(subItem.i18nKey) : subItem.name}
                                 </li>
                               </div>
                             </Link>
@@ -309,7 +312,7 @@ export function Sidebar({ isSidebarCollapsed }: SidebarProps) {
                         <div className="flex items-center">
                           {link.icon}
                           {!isSidebarCollapsed && (
-                            <p className="ps-1.5">{link.name}</p>
+                            <p className="ps-1.5">{link.i18nKey ? translate(link.i18nKey) : link.name}</p>
                           )}
                         </div>
                       </li>

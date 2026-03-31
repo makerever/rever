@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { SingleValue } from "react-select";
+import { useTranslate } from "@rever/i18n";
 
 // Home page main component
 const Home = () => {
@@ -42,6 +43,7 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isBarChartLoading, setIsBarChartLoading] = useState<boolean>(true);
   const [isPieChartLoading, setIsPieChartLoading] = useState<boolean>(true);
+  const translate = useTranslate();
 
   const [billSummaryData, setBillsSummaryData] = useState({
     total: {
@@ -229,11 +231,11 @@ const Home = () => {
       <div className="rounded-b-[20px] bg-white p-4 h-28 border border-secondary-200 flex items-end justify-start">
         {/* Header section with overview title and filter */}
         <div className="flex items-center justify-between w-full h-8">
-          <p className="text-neutral-1100 text-2xl font-medium">Overview</p>
+          <p className="text-neutral-1100 text-2xl font-medium">{translate('dropdown.dashboard_options.overview')}</p>
           <div className="w-40">
             {/* Dropdown for overview filter */}
             <SelectComponent
-              options={overviewOptions}
+              options={overviewOptions.map((opt) => ({ ...opt, label: translate(`overview_options.${opt.value}`) }))}
               value={headerFilter}
               onChange={(e) => {
                 setHeaderFilter(e);
@@ -251,22 +253,22 @@ const Home = () => {
           {/* Cards showing summary statistics */}
           <div className="lg:w-1/3">
             <Card
-              heading="Total"
+              heading={translate("home.cards.overview.total")}
               icon={<CircleDollarSign width={20} />}
               value={billSummaryData?.total}
             />
             <Card
-              heading="Under review"
+              heading={translate("home.cards.overview.under_review")}
               icon={<FileClock width={20} />}
               value={billSummaryData?.in_review}
             />
             <Card
-              heading="Under approval"
+              heading={translate("home.cards.overview.under_approval")}
               icon={<FileCheck width={20} />}
               value={billSummaryData?.under_approval}
             />
             <Card
-              heading="Approved"
+              heading={translate("home.cards.overview.approved")}
               icon={<CircleCheck width={20} />}
               value={billSummaryData?.approved}
             />
@@ -276,7 +278,7 @@ const Home = () => {
           <div className="lg:w-2/3">
             {/* Bar chart for analytics */}
             <BarChart
-              heading="Total bills"
+              heading={translate("home.Total bills")}
               months={barGraphData?.months}
               years={barGraphData?.years}
               totalAmount={barGraphData?.totalAmount}
@@ -291,13 +293,13 @@ const Home = () => {
               series={billStageSegregation.map((v) => v?.count)}
               billAllData={billStageSegregation}
               isDataLoading={isPieChartLoading}
-              heading="Bills by stage"
+              heading={translate("home.bills_by_stage.heading")}
               labels={[
-                "Under review",
-                "Under approval",
-                "Approved",
-                "Rejected",
-                "Ledger entry",
+                translate("home.cards.overview.under_review"),
+                translate("home.cards.overview.under_approval"),
+                translate("home.cards.overview.approved"),
+                translate("home.cards.overview.rejected"),
+                translate("home.cards.overview.ledger_entry"),
               ]}
               colors={["#F5D670", "#79D7EC", "#AAD57B", "#E57C98", "#8582E5"]}
               barChartFilter={radialChartFilter}

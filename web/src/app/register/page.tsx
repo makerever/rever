@@ -4,17 +4,19 @@
 
 import { AuthLayout, RegisterStep } from "@rever/common";
 import { useState } from "react";
+import { useTranslate } from "@rever/i18n";
 
 const Register = () => {
   const [showStep, setShowStep] = useState(1);
+  const translate = useTranslate();
 
   return (
     <AuthLayout
-      mainTitle={showStep === 1 ? "Welcome to Rever" : "Secure your account"}
+      mainTitle={showStep === 1 ? translate("auth.page_titles.welcome_to_rever") : translate("auth.page_titles.secure_account")}
       subTitle={
         showStep === 1
-          ? "Fill up your details to get started"
-          : "Set a strong password to protect your account"
+          ? translate("auth.page_subtitles.fill_up_details")
+          : translate("auth.page_subtitles.set_strong_password")
       }
     >
       <RegisterStep showStep={showStep} setShowStep={setShowStep} />

@@ -42,6 +42,7 @@ import {
   VendorCreditProps,
 } from "@rever/types";
 import { useBreadcrumbStore, useUserStore } from "@rever/stores";
+import { useTranslate } from "@rever/i18n";
 import {
   CircleAlert,
   CircleCheck,
@@ -67,7 +68,11 @@ import {
 } from "@rever/services";
 import vendorCreditExtractAnimation from "../../components/animations/vendorCreditExtraction.json";
 
-const getStatusIcon = (status: string, error_message?: string) => {
+const getStatusIcon = (
+  status: string,
+  defaultErrorMessage: string,
+  error_message?: string,
+) => {
   switch (status) {
     case "uploading":
       return <Loader className="animate-spin text-slate-800" size={20} />;
@@ -85,7 +90,7 @@ const getStatusIcon = (status: string, error_message?: string) => {
           content={
             error_message
               ? error_message
-              : "File must be under 5MB and limited to 5 pages"
+              : defaultErrorMessage
           }
           side="right"
         >
@@ -103,6 +108,22 @@ const MAX_ATTEMPTS = 20;
 const DELAY_MS = 2000;
 
 const AddVendorCreditComponentWithParams = () => {
+  const translate = useTranslate();
+  const fileSizeLimitMessage = translate("common.file_size_limit");
+  const uploadValidPdfMessage = translate("common.upload_valid_pdf");
+  const getExtractionStatusLabel = (status: string) => {
+    switch (status) {
+      case "processing":
+      case "uploading":
+      case "extracting":
+      case "enriched":
+      case "failed":
+        return translate(`extraction_status.${status}`);
+      default:
+        return status;
+    }
+  };
+
   // react-hook-form setup
   const {
     register,
@@ -318,8 +339,8 @@ const AddVendorCreditComponentWithParams = () => {
           setIsLoaderFormSubmit(false);
           showSuccessToast(
             idValue
-              ? "Vendor credit updated successfully"
-              : "Vendor credit created successfully",
+              ? translate("vendors.vendor_credit.updated")
+              : translate("vendors.vendor_credit.created"),
           );
           if (idValue) {
             router.push(`/vendorcredit/view?id=${idValue}`);
@@ -331,7 +352,7 @@ const AddVendorCreditComponentWithParams = () => {
           }
           return;
         } else {
-          showErrorToast("Something went wrong!!");
+          showErrorToast(translate("common.something_went_wrong"));
         }
         router.push("/vendorcredit/list");
         return;
@@ -339,8 +360,8 @@ const AddVendorCreditComponentWithParams = () => {
       setIsLoaderFormSubmit(false);
       showSuccessToast(
         idValue
-          ? "Vendor credit updated successfully"
-          : "Vendor credit created successfully",
+          ? translate("vendors.vendor_credit.updated")
+          : translate("vendors.vendor_credit.created"),
       );
       if (idValue) {
         router.push(`/vendorcredit/view?id=${idValue}`);
@@ -386,7 +407,7 @@ const AddVendorCreditComponentWithParams = () => {
             uploadRes?.data[0] ===
             "Your subscription has expired. Please renew to continue."
           ) {
-            showErrorToast(uploadRes?.data[0]);
+            showErrorToast(translate("common.subscription_expired"));
             setShowPdf(false);
             setFileUrl(null);
             setFileDetails(null);
@@ -394,12 +415,12 @@ const AddVendorCreditComponentWithParams = () => {
             setShowPdf(false);
             setFileUrl(null);
             setFileDetails(null);
-            showErrorToast("File must be under 5MB and limited to 5 pages");
+            showErrorToast(fileSizeLimitMessage);
           }
         }
       }
     } else {
-      alert("Please upload a valid PDF file.");
+      alert(uploadValidPdfMessage);
     }
   };
 
@@ -425,7 +446,7 @@ const AddVendorCreditComponentWithParams = () => {
           showErrorToast(
             error_message
               ? error_message
-              : "File must be under 5MB and limited to 5 pages",
+              : fileSizeLimitMessage,
           );
           break;
         }
@@ -440,7 +461,7 @@ const AddVendorCreditComponentWithParams = () => {
   async function deleteVendorCreditAttachmentFunc() {
     const response = await deleteVendorCreditAttachment(fileResponse?.id || "");
     if (response?.status === 204 && idValue) {
-      showSuccessToast("Vendor credit attachment deleted");
+      showSuccessToast(translate("vendors.vendor_credit.attachment_deleted"));
       getVendorCreditDetailsById(idValue);
     }
   }
@@ -458,7 +479,7 @@ const AddVendorCreditComponentWithParams = () => {
                 <p className="text-neutral-1100 text-2xl font-medium">
                   {idValue
                     ? vendorCreditDetails?.credit_note_number
-                    : "New vendor credit"}
+                    : translate("vendors.vendor_credit.create_vendor_credit.heading")}
                 </p>
 
                 <div className="flex justify-between items-center">
@@ -466,7 +487,7 @@ const AddVendorCreditComponentWithParams = () => {
                     <div className="flex items-center">
                       <ToggleSwitch isOn={showPdf} setIsOn={setShowPdf} />
                       <p className="ms-1.5 text-sm text-neutral-1100 font-medium">
-                        {!showPdf ? "Show pdf" : "Hide pdf"}
+                        {!showPdf ? translate("bills.actions.show_pdf") : translate("bills.actions.hide_pdf")}
                       </p>
                     </div>
                   )}
@@ -487,7 +508,9 @@ const AddVendorCreditComponentWithParams = () => {
 
                     <Button
                       name={
-                        idValue ? "Upload vendor credit" : "Extract vendor credit"
+                        idValue
+                          ? translate("vendors.vendor_credit.create_vendor_credit.buttons.upload_vendor_credit")
+                          : translate("vendors.vendor_credit.create_vendor_credit.buttons.extract_vendor_credit")
                       }
                       button_type="primary-outline"
                       icon_type="upload"
@@ -498,7 +521,7 @@ const AddVendorCreditComponentWithParams = () => {
                 ) : null}
 
                 <Button
-                  name="Cancel"
+                  name={translate("vendors.vendor_credit.create_vendor_credit.buttons.cancel")}
                   onClick={() =>
                     idValue
                       ? router.push(`/vendorcredit/view?id=${idValue}`)
@@ -510,24 +533,27 @@ const AddVendorCreditComponentWithParams = () => {
 
                 {!idValue || vendorCreditDetails?.status === "draft" ? (
                   <DropdownButton
-                    name="Save"
+                    name={translate("vendors.vendor_credit.create_vendor_credit.buttons.save.heading")}
                     onActionBtClick={() => {
                       triggerSubmit("in_review");
                     }}
                     onClose={() => setShowBtnPopup(false)}
                     onBtnPopupItemsClick={(val) => {
-                      if (val === "Save as draft") {
+                      if (val === translate("vendors.vendor_credit.create_vendor_credit.buttons.save.save_as_draft")) {
                         triggerSubmit("draft");
                       }
                     }}
                     onClickArrow={() => setShowBtnPopup(true)}
                     showBtnPopup={showBtnPopup}
-                    btnPopupItems={["Save", "Save as draft"]}
+                    btnPopupItems={[
+                      translate("vendors.vendor_credit.create_vendor_credit.buttons.save.save"),
+                      translate("vendors.vendor_credit.create_vendor_credit.buttons.save.save_as_draft"),
+                    ]}
                     button_type="primary"
                   />
                 ) : (
                   <Button
-                    name="Save"
+                    name={translate("vendors.vendor_credit.create_vendor_credit.buttons.save.heading")}
                     onClick={() => triggerSubmit("in_review")}
                     button_type="primary"
                     icon_type={isLoaderFormSubmit ? "loader" : null}
@@ -552,35 +578,49 @@ const AddVendorCreditComponentWithParams = () => {
                     className={`rounded-[20px] bg-white p-4 border border-secondary-200`}
                   >
                     <p className="text-neutral-1100 text-xl font-medium mb-5">
-                      Vendor credit details
+                      {translate("vendors.vendor_credit.create_vendor_credit.vendor_credit_details.heading")}
                     </p>
                     {/* Vendor credit details fields */}
                     <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
                       <div>
                         <Label
                           htmlFor="credit_number"
-                          text="Vendor credit number"
+                          text={translate(
+                            "vendors.vendor_credit.create_vendor_credit.vendor_credit_details.vendor_credit_number",
+                          )}
                           isRequired
                         />
                         <TextInput
                           register={register("credit_number")}
                           id="credit_number"
-                          placeholder="Enter vendor credit"
+                          placeholder={translate(
+                            "placeholders.vendor_credit.enter_vendor_credit",
+                          )}
                           error={errors.credit_number}
                           value={getValues("credit_number")}
                         />
                       </div>
 
                       <div>
-                        <Label htmlFor="vendor" text="Vendor" isRequired />
+                        <Label
+                          htmlFor="vendor"
+                          text={translate(
+                            "vendors.vendor_credit.create_vendor_credit.vendor_credit_details.vendor",
+                          )}
+                          isRequired
+                        />
                         <SelectComponent
                           name="vendor"
                           register={register}
                           trigger={trigger}
-                          title="Vendor"
+                          title={translate(
+                            "vendors.vendor_credit.create_vendor_credit.vendor_credit_details.vendor",
+                          )}
                           error={errors?.vendor}
                           options={vendorOptionList}
-                          placeholder="Select vendor"
+                          placeholder={translate(
+                            "placeholders.vendor_credit.select_vendor",
+                          )}
                           isClearable={true}
                           getValues={getValues}
                         />
@@ -589,7 +629,9 @@ const AddVendorCreditComponentWithParams = () => {
                       <div>
                         <Label
                           htmlFor="credit_date"
-                          text="Vendor credit date"
+                          text={translate(
+                            "vendors.vendor_credit.create_vendor_credit.vendor_credit_details.vendor_credit_date",
+                          )}
                           isRequired
                         />
                         <DatePickerDemo
@@ -597,8 +639,12 @@ const AddVendorCreditComponentWithParams = () => {
                           name="credit_date"
                           error={errors.credit_date}
                           trigger={trigger}
-                          placeholder="Select vendor credit date"
-                          title="Vendor credit date"
+                          placeholder={translate(
+                            "placeholders.vendor_credit.select_vendor_credit_date",
+                          )}
+                          title={translate(
+                            "vendors.vendor_credit.create_vendor_credit.vendor_credit_details.vendor_credit_date",
+                          )}
                           value={watch("credit_date") ?? undefined}
                         />
                       </div>
@@ -644,7 +690,9 @@ const AddVendorCreditComponentWithParams = () => {
                     }}
                   >
                     <p className="text-neutral-1100 text-xl font-medium mb-5">
-                      Vendor credit line items
+                      {translate(
+                        "vendors.vendor_credit.create_vendor_credit.vendor_credit_line_items.heading",
+                      )}
                     </p>
 
                     <VendorCreditLineItemsTable
@@ -659,12 +707,12 @@ const AddVendorCreditComponentWithParams = () => {
                     <div className="flex items-center justify-between">
                       {/* Notes */}
                       <div className="w-1/2">
-                        <Label htmlFor="notes" text="Notes" />
+                        <Label htmlFor="notes" text={translate("vendors.vendor_credit.create_vendor_credit.notes")} />
                         <TextAreaInput
                           rows={4}
                           register={register("notes")}
                           id="notes"
-                          placeholder="Enter notes"
+                          placeholder={translate("vendors.vendor_credit.create_vendor_credit.enter_notes")}
                           error={errors.notes}
                           value={getValues("notes") ?? undefined}
                         />
@@ -674,14 +722,14 @@ const AddVendorCreditComponentWithParams = () => {
                       <div className="flex justify-end">
                         <div className="p-4 w-72 font-medium text-sm bg-secondary-100 rounded-[20px]">
                           <div className="grid grid-cols-2">
-                            <p className="text-neutral-1100">Sub total:</p>
+                            <p className="text-neutral-1100">{translate("vendors.vendor_credit.create_vendor_credit.sub_total")}:</p>
                             <p className="text-neutral-900 text-right">
                               {formatNumber(subtotal, orgDetails?.currency)}
                             </p>
                           </div>
                           <div className="grid items-center grid-cols-2 pb-2 mt-4 mb-2">
                             <div>
-                              <p className="text-neutral-1100">Total tax:</p>
+                              <p className="text-neutral-1100">{translate("vendors.vendor_credit.create_vendor_credit.total_tax")}:</p>
                               <span className="text-xs">
                                 {formatNumber(
                                   totalTaxamount,
@@ -703,7 +751,7 @@ const AddVendorCreditComponentWithParams = () => {
                             </div>
                           </div>
                           <div className="grid grid-cols-2 font-semibold">
-                            <p className="text-neutral-1100">Grand total:</p>
+                            <p className="text-neutral-1100">{translate("vendors.vendor_credit.create_vendor_credit.grand_total")}:</p>
                             <p className="text-neutral-900 text-right">
                               {formatNumber(total, orgDetails?.currency)}
                             </p>
@@ -718,7 +766,7 @@ const AddVendorCreditComponentWithParams = () => {
               {fileUrl && showPdf && (
                 <div className="relative lg:w-[30%] scrollbar_none rounded-[20px] bg-white border border-secondary-200 overflow-hidden">
                   <p className="p-4 pb-0 text-neutral-1100 text-xl font-medium">
-                    Vendor credit Preview
+                    {translate("vendors.vendor_credit.preview")}
                   </p>
                   {files.status === "done" ? (
                     <>
@@ -767,10 +815,13 @@ const AddVendorCreditComponentWithParams = () => {
                       </div>
                       <div className="mb-4 flex items-center gap-2 justify-center">
                         <h2 className="capitalize text-slate-800 text-sm font-medium text-center">
-                          {getStatusLabelForExtraction(files.status || "")}
+                          {getExtractionStatusLabel(
+                            getStatusLabelForExtraction(files.status || ""),
+                          )}
                         </h2>
                         {getStatusIcon(
                           getStatusLabelForExtraction(files.status || ""),
+                          fileSizeLimitMessage,
                           files.error_message,
                         )}
                       </div>

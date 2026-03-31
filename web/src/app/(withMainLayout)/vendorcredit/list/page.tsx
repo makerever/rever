@@ -17,16 +17,19 @@ import {
   formatDate,
   formatNumber,
   getLabelForBillStatus,
+  getStatusTranslationKey,
   getStatusClass,
 } from "@rever/utils";
 import { ColumnDef, sortingFns } from "@tanstack/react-table";
 import { Paperclip } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslate } from "@rever/i18n";
 
 // Main component for displaying the vendor credit list
 const VendorCreditList = () => {
   const router = useRouter();
+  const translate = useTranslate();
 
   const [activeTab, setActiveTab] = useState<string | undefined>("All vendor credits");
   const [vendorCreditData, setVendorCreditData] = useState<VendorCreditProps[]>(
@@ -69,7 +72,7 @@ const VendorCreditList = () => {
               checked={table.getIsAllPageRowsSelected()}
               onChange={table.getToggleAllPageRowsSelectedHandler()}
             />
-            <span>Vendor credit</span>
+            <span>{translate("vendors.vendor_credit.table_headers.vendor_credit")}</span>
           </div>
         ),
         cell: ({ row, getValue }) => {
@@ -95,7 +98,7 @@ const VendorCreditList = () => {
       },
       {
         accessorKey: "txn_date",
-        header: "Vendor credit date",
+        header: translate("vendors.vendor_credit.table_headers.vendor_credit_date"),
         accessorFn: (row) => (row?.txn_date ? new Date(row.txn_date) : null),
         sortingFn: sortingFns.datetime,
         sortDescFirst: false,
@@ -110,7 +113,7 @@ const VendorCreditList = () => {
 
       {
         accessorKey: "vendor",
-        header: "Vendor",
+        header: translate("vendors.vendor_credit.table_headers.vendor"),
         accessorFn: (row) => row.vendor?.name || "",
         sortingFn: "alphanumeric",
         sortDescFirst: false,
@@ -132,7 +135,7 @@ const VendorCreditList = () => {
       },
       {
         accessorKey: "credit_amount",
-        header: "Total amount",
+        header: translate("vendors.vendor_credit.table_headers.total_amount"),
         accessorFn: (row) => Number(row.total) || 0,
         sortingFn: "basic",
         sortDescFirst: false,
@@ -149,7 +152,7 @@ const VendorCreditList = () => {
       },
       {
         accessorKey: "status",
-        header: "Stages",
+        header: translate("vendors.vendor_credit.table_headers.stages"),
         sortDescFirst: false,
         cell: ({ row, getValue }) => {
           const value = getValue() as string;
@@ -158,13 +161,17 @@ const VendorCreditList = () => {
             <div className="flex items-center pr-2 justify-between">
               <div className="flex items-center pr-2 justify-between w-32">
                 <PillItem
-                  className={`${getStatusClass(getLabelForBillStatus(value) || "")}`}
+                  className={`${getStatusClass(value || "")}`}
                   isRounded={true}
-                  name={getLabelForBillStatus(value || "")}
+                  name={
+                    getStatusTranslationKey(value || "")
+                      ? translate(getStatusTranslationKey(value || "")!)
+                      : getLabelForBillStatus(value || "")
+                  }
                 />
               </div>
               {row?.original.is_attachment && (
-                <CustomTooltip content="PDF attached">
+                <CustomTooltip content={translate("bills.actions.pdf_attached")}>
                   <div>
                     <Paperclip className="text-slate-400" width={14} />
                   </div>
@@ -179,7 +186,7 @@ const VendorCreditList = () => {
         },
       },
     ],
-    [collator, orgDetails?.date_format, router],
+    [collator, orgDetails?.date_format, router, translate],
   );
 
   // Effect to process and set vendor credit data when API data changes
@@ -243,9 +250,9 @@ const VendorCreditList = () => {
     <>
       <DataTable
         onActionBtClick={handleRedirect}
-        addBtnText="Create vendor credit"
-        uploadBtnText="Upload vendor credits"
-        tableHeading="Vendor credits"
+        addBtnText={translate("vendors.vendor_credit.buttons.create_vendor_credit")}
+        uploadBtnText={translate("vendors.vendor_credit.buttons.upload_vendor_credit")}
+        tableHeading={translate("vendors.vendor_credit.heading")}
         tableData={filteredVendorCredits}
         columns={columns}
         tabNames={tabOptionsVendorCredit}

@@ -4,7 +4,7 @@
 
 import { Button } from "@rever/common";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginFormSchemaValues, loginSignupSchema } from "@rever/validations";
+import { loginFormSchemaValues, createLoginSignupSchema } from "@rever/validations";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -26,9 +26,12 @@ import Cookies from "js-cookie";
 import { setAuthToken } from "@rever/services";
 import { useUserStore } from "@rever/stores";
 import { STEP } from "@rever/constants";
+import { useTranslate } from "@rever/i18n";
 
 // Main LoginSignup component
 const LoginSignup = ({ showStep, setShowStep }: LoginStepProps) => {
+  const translate = useTranslate();
+
   const {
     register,
     handleSubmit,
@@ -39,7 +42,7 @@ const LoginSignup = ({ showStep, setShowStep }: LoginStepProps) => {
     clearErrors,
     trigger,
   } = useForm({
-    resolver: zodResolver(loginSignupSchema),
+    resolver: zodResolver(createLoginSignupSchema(translate)),
     mode: "onChange",
   });
 
@@ -177,7 +180,7 @@ const LoginSignup = ({ showStep, setShowStep }: LoginStepProps) => {
     const response = await loginViaOtpApi({ email: getValues("email") });
     if (response?.status === 202) {
       if (isResendOtp) {
-        showSuccessToast("OTP resent. Check your inbox.");
+        showSuccessToast(translate("auth.otp_resent"));
       } else {
         setShowStep(STEP.OTP);
       }
@@ -194,7 +197,7 @@ const LoginSignup = ({ showStep, setShowStep }: LoginStepProps) => {
         email: getValues("email"),
       });
       if (response?.status === 202) {
-        showSuccessToast("OTP resent. Check your inbox.");
+        showSuccessToast(translate("auth.otp_resent"));
         setOtpSending(false);
         setShowStep(STEP.OTP);
       } else {
@@ -261,13 +264,13 @@ const LoginSignup = ({ showStep, setShowStep }: LoginStepProps) => {
           {/* Divider and OTP login button */}
           <div className="flex items-center gap-2 text-slate-600 text-xs my-4">
             <div className="h-px flex-1 bg-secondary-200" />
-            <span className="mb-0.5">Or</span>
+            <span className="mb-0.5">{translate("auth.or")}</span>
             <div className="h-px flex-1 bg-secondary-200" />
           </div>
           <Button
             onClick={() => otpLogin()}
             disabled={isLoaderFormSubmit}
-            name="Sign in using OTP"
+            name={translate("auth.sign_in_otp")}
             button_type="secondary"
             width="w-full"
           />
@@ -299,7 +302,7 @@ const LoginSignup = ({ showStep, setShowStep }: LoginStepProps) => {
           <Button
             onClick={handleGetResetCode}
             disabled={isLoaderFormSubmit}
-            name="Get reset code"
+            name={translate("auth.get_reset_code")}
             button_type="primary"
             width="w-full"
           />
@@ -310,7 +313,7 @@ const LoginSignup = ({ showStep, setShowStep }: LoginStepProps) => {
                 setShowStep(STEP.PASSWORD);
               }}
               disabled={isLoaderFormSubmit}
-              name="Go back to sign in"
+              name={translate("auth.go_back_sign_in")}
               button_type="secondary-outline"
               width="w-full"
             />

@@ -9,6 +9,7 @@ import { useSidebarStore } from "@rever/stores";
 import { useState, useRef, useMemo, useCallback } from "react";
 import { Info } from "lucide-react";
 import { overviewOptions } from "@rever/constants";
+import { useTranslate } from "@rever/i18n";
 
 // Dynamically import ApexCharts to prevent SSR issues
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
@@ -24,14 +25,14 @@ const CHART_CONFIG = {
   DEFAULT_BORDER_COLOR: "#666666",
 } as const;
 
-// Map of chart labels to keys for callback
-const CHART_LABEL_KEYS = {
-  "Under review": "underReview",
-  "Under approval": "underApproval",
-  Approved: "approved",
-  Rejected: "rejected",
-  "Ledger entry": "posted",
-} as const;
+// Ordered keys by slice index position (matches labels array order from parent)
+const STAGE_KEYS = [
+  "underReview",
+  "underApproval",
+  "approved",
+  "rejected",
+  "posted",
+] as const;
 
 const PieChart = ({
   heading,
@@ -47,6 +48,8 @@ const PieChart = ({
   billAllData,
   chartHeight,
 }: PieChartProps) => {
+  const translate = useTranslate();
+
   // Sidebar collapsed state to calculate responsive chart width
   const sidebarCollapsed = useSidebarStore((state) => state.isCollapsed);
 
@@ -120,18 +123,18 @@ const PieChart = ({
       return `
         <div style="padding:8px; background: white; font-size: 12px;">
           <p style="
-            color: #0E1010; 
+            color: #0E1010;
             font-weight: 600;
             margin: 0 0 2px 0;
           ">${label}</p>
           <p style="
-            font-weight: 500; 
+            font-weight: 500;
             color: #738184;
             margin: 0;
-          ">${value} bills</p>
+          ">${value} ${translate("home.charts.bills").toLowerCase()}</p>
       </div>`;
     },
-    [],
+    [translate],
   );
 
   const handleDataPointSelection = useCallback(
@@ -148,19 +151,16 @@ const PieChart = ({
 
           // Map filtered index back to original index
           const originalIndex = originalIndices[index];
-          const label = labels[originalIndex];
 
-          if (onSliceClick && label in CHART_LABEL_KEYS) {
-            onSliceClick(
-              CHART_LABEL_KEYS[label as keyof typeof CHART_LABEL_KEYS],
-            );
+          if (onSliceClick && STAGE_KEYS[originalIndex]) {
+            onSliceClick(STAGE_KEYS[originalIndex]);
           }
 
           isUpdatingRef.current = false;
         }, 0);
       }
     },
-    [originalIndices, labels, onSliceClick],
+    [originalIndices, onSliceClick],
   );
 
   const chartOptions = useMemo<ApexCharts.ApexOptions>(
@@ -243,7 +243,7 @@ const PieChart = ({
         {barChartFilter ? (
           <div className="w-40">
             <SelectComponent
-              options={overviewOptions}
+              options={overviewOptions.map((opt) => ({ ...opt, label: translate(`overview_options.${opt.value}`) }))}
               value={barChartFilter}
               onChange={(e) => setBarChartFilter?.(e)}
             />
@@ -253,8 +253,7 @@ const PieChart = ({
           <CustomTooltip
             content={
               <div>
-                Bills segregated by their current <br /> stage in the approval
-                workflow
+                {translate("home.bills_by_stage.tooltip")}
               </div>
             }
             side="top"

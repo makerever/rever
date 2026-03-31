@@ -4,6 +4,7 @@
 
 import { useUserStore } from "@rever/stores";
 import { RequestedConfirationProps } from "@rever/types";
+import { useTranslate } from "@rever/i18n";
 import {
   formatDate,
   getFirstLetter,
@@ -15,6 +16,7 @@ const VersionHistory = ({
   confirmationHistoryList,
 }: RequestedConfirationProps) => {
   const orgDetails = useUserStore((state) => state.user?.organization);
+  const translate = useTranslate();
   return (
     <div className="ps-6 pr-1 mr-6 h-[calc(100vh-120px)] overflow-auto custom_scrollbar">
       {confirmationHistoryList?.map((v, i) => {
@@ -61,7 +63,7 @@ const VersionHistory = ({
 
       {!confirmationHistoryList?.length && (
         <p className="text-slate-600 text-sm mt-10 text-center">
-          No confirmation history found
+          {translate("confirmations.no_history")}
         </p>
       )}
     </div>

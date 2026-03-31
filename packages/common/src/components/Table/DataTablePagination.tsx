@@ -4,6 +4,7 @@
 
 import { Table } from "@tanstack/react-table";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { useTranslate } from "@rever/i18n";
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
@@ -22,6 +23,7 @@ export function DataTablePagination<TData>({
   hideExportIcon,
   perPageItemCount,
 }: DataTablePaginationProps<TData>) {
+  const translate = useTranslate();
   return (
     <div className="py-4 lg:py-0 md:py-0 font-medium flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm text-neutral-1100">
       {!hideExportIcon ? (
@@ -29,7 +31,7 @@ export function DataTablePagination<TData>({
           {/* {selectedRows} of {totalRows} {tableHeading?.toLocaleLowerCase()}{" "}
           selected */}
 
-          <span className="sm:inline mr-2">Rows per page</span>
+          <span className="sm:inline mr-2">{translate("data_table.pagination.rows_per_page")}</span>
           <select
             value={table.getState().pagination.pageSize}
             onChange={(e) => table.setPageSize(Number(e.target.value))}
@@ -53,7 +55,7 @@ export function DataTablePagination<TData>({
           disabled={!table.getCanPreviousPage()}
           className="hover:cursor-pointer disabled:hover:cursor-default flex items-center gap-1 px-2 py-1 rounded disabled:text-secondary-500"
         >
-          <ChevronLeftIcon width={16} /> Prev
+          <ChevronLeftIcon width={16} /> {translate("data_table.pagination.prev")}
         </button>
 
         {/* Page Dropdown */}
@@ -70,7 +72,7 @@ export function DataTablePagination<TData>({
         </select>
 
         {/* Page Count */}
-        <span className="text-sm">of {table.getPageCount()}</span>
+        <span className="text-sm">{translate("data_table.pagination.of")} {table.getPageCount()}</span>
 
         {/* Next */}
         <button
@@ -78,7 +80,7 @@ export function DataTablePagination<TData>({
           disabled={!table.getCanNextPage()}
           className="hover:cursor-pointer disabled:hover:cursor-default flex items-center gap-1 px-2 py-1 rounded disabled:text-secondary-500"
         >
-          Next <ChevronRightIcon width={16} />
+          {translate("data_table.pagination.next")} <ChevronRightIcon width={16} />
         </button>
       </div>
     </div>

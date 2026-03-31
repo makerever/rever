@@ -14,14 +14,7 @@ import { VendorCreditLineItemsTableProps } from "@rever/types";
 import { useEffect, useMemo } from "react";
 import { formatNumber } from "@rever/utils";
 import { useUserStore } from "@rever/stores";
-
-const creditNoteItemHeaders = [
-  "Description",
-  "Qty",
-  "Unit price",
-  "Amount",
-  "Action",
-];
+import { useTranslate } from "@rever/i18n";
 
 export default function VendorCreditLineItemsTable({
   control,
@@ -30,6 +23,7 @@ export default function VendorCreditLineItemsTable({
   getValues,
   showItemsDescription,
 }: VendorCreditLineItemsTableProps) {
+  const translate = useTranslate();
   const { fields, append, remove } = useFieldArray({
     control,
     name: "items",
@@ -78,7 +72,13 @@ export default function VendorCreditLineItemsTable({
         </colgroup>
         <thead>
           <tr>
-            {creditNoteItemHeaders.map((h, i) => (
+            {[
+              translate("vendors.vendor_credit.create_vendor_credit.vendor_credit_line_items.description"),
+              translate("vendors.vendor_credit.create_vendor_credit.vendor_credit_line_items.qty"),
+              translate("vendors.vendor_credit.create_vendor_credit.vendor_credit_line_items.unit_price"),
+              translate("vendors.vendor_credit.create_vendor_credit.vendor_credit_line_items.amount"),
+              translate("vendors.vendor_credit.create_vendor_credit.vendor_credit_line_items.action"),
+            ].map((h, i) => (
               <th
                 key={i}
                 className={`text-sm text-neutral-1100 font-semibold ${i < 1 ? "" : "text-right"}`}
@@ -157,7 +157,7 @@ export default function VendorCreditLineItemsTable({
       <div className="m-4">
         <Button
           onClick={handleAddItem}
-          name="New vendor credit item"
+          name={translate("vendors.vendor_credit.create_vendor_credit.new_item")}
           button_type="secondary"
           icon_type="plus"
         />

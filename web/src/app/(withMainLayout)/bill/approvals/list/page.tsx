@@ -11,15 +11,18 @@ import {
   formatDate,
   formatNumber,
   getLabelForBillStatus,
+  getStatusTranslationKey,
   getStatusClass,
 } from "@rever/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslate } from "@rever/i18n";
 
 // Main component for displaying the approval list
 const ApprovalList = () => {
   const router = useRouter();
+  const translate = useTranslate();
 
   const [approvalList, setApprovalList] = useState<ApprovalTableList[]>([]);
 
@@ -73,7 +76,7 @@ const ApprovalList = () => {
               checked={table.getIsAllPageRowsSelected()}
               onChange={table.getToggleAllPageRowsSelectedHandler()}
             />
-            <span>Bill</span>
+            <span>{translate("bills.table_headers.bill")}</span>
           </div>
         ),
         cell: ({ row, getValue }) => {
@@ -96,7 +99,7 @@ const ApprovalList = () => {
 
       {
         accessorKey: "bill_date",
-        header: "Bill date",
+        header: translate("bills.table_headers.bill_date"),
         cell: ({ getValue }) => {
           return (
             <div className="flex items-center gap-4">
@@ -109,7 +112,7 @@ const ApprovalList = () => {
       },
       {
         accessorKey: "due_date",
-        header: "Due date",
+        header: translate("bills.table_headers.due_date"),
         cell: ({ getValue }) => {
           return (
             <div className="flex items-center gap-4">
@@ -122,7 +125,7 @@ const ApprovalList = () => {
       },
       {
         accessorKey: "vendor",
-        header: "Vendor",
+        header: translate("bills.table_headers.vendor"),
         cell: ({ getValue }) => {
           const vendor = getValue() as { id: string | number; name: string };
           return (
@@ -136,7 +139,8 @@ const ApprovalList = () => {
       },
       {
         accessorKey: "total",
-        header: "Total amount",
+        header: translate("bills.table_headers.total_amount"),
+        meta: { isAmount: true },
         cell: ({ getValue }) => {
           return (
             <div className="flex items-center gap-4">
@@ -149,7 +153,7 @@ const ApprovalList = () => {
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: translate("bills.table_headers.status"),
         cell: ({ getValue }) => {
           const value = getValue() as string;
 
@@ -160,7 +164,9 @@ const ApprovalList = () => {
                   value,
                 )}`}
               >
-                {value}
+                {getStatusTranslationKey(value)
+                  ? translate(getStatusTranslationKey(value)!)
+                  : value}
               </span>
             </div>
           );
@@ -171,7 +177,7 @@ const ApprovalList = () => {
         },
       },
     ],
-    [router],
+    [router, translate],
   );
 
   // Filter approvals based on search input
@@ -193,7 +199,7 @@ const ApprovalList = () => {
       ) : (
         <DataTable
           noStatusFilter
-          tableHeading="Bill approvals"
+          tableHeading={translate("bills.approval_heading")}
           tableData={filteredApprovals}
           columns={columns}
           setSearch={setSearch}

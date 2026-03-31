@@ -12,6 +12,7 @@ import { useUserStore } from "@rever/stores";
 import { memo } from "react";
 import { PageLoader } from "@rever/common";
 import React from "react";
+import { useTranslate } from "@rever/i18n";
 
 // Dynamically import the Chart component
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
@@ -26,12 +27,13 @@ function AreaChart({
   setBarChartFilter,
   isDataLoading,
 }: BarChartProps) {
+  const translate = useTranslate();
   const sidebarCollapsed = useSidebarStore((state) => state.isCollapsed);
   const orgDetails = useUserStore((state) => state.user?.organization);
 
   const areaSeries = [
     {
-      name: "Bills",
+      name: translate("home.charts.bills"),
       data: totalAmount,
     },
   ];
@@ -150,7 +152,7 @@ function AreaChart({
                 amount,
                 orgDetails?.currency,
               )}</p>
-              <p style="text-align: center; color: #738184; font-weight: 500; margin-top: 2px;">${bills} Bills</p>
+              <p style="text-align: center; color: #738184; font-weight: 500; margin-top: 2px;">${bills} ${translate("home.charts.bills")}</p>
             </div>
           </div>
         `;
@@ -164,7 +166,7 @@ function AreaChart({
         <p className="text-neutral-1100 font-medium text-xl">{heading}</p>
         <div className="w-40">
           <SelectComponent
-            options={barChartOptions}
+            options={barChartOptions.map((opt) => ({ ...opt, label: translate(`overview_options.${opt.value}`) }))}
             value={barChartFilter}
             onChange={(e) => setBarChartFilter?.(e)}
           />

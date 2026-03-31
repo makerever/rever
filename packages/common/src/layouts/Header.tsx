@@ -10,11 +10,13 @@ import { useState } from "react";
 import HelpSupport from "../popup/HelpSupport";
 import { useUserStore } from "@rever/stores";
 import { SidebarProps } from "@rever/types";
+import { useTranslate } from "@rever/i18n";
 // import SearchInput from "../common/inputFields/searchInput/SearchInput";
 
 export function Header({ setIsSidebarCollapsed }: SidebarProps) {
   const pathname = usePathname();
   const [showSupport, setShowSupport] = useState(false);
+  const translate = useTranslate();
 
   return (
     <header className="bg-secondary-200">
@@ -34,7 +36,7 @@ export function Header({ setIsSidebarCollapsed }: SidebarProps) {
         </div>
         {pathname === "/home" ? (
           <div className="flex items-center gap-3">
-            <CustomTooltip content="Star us on GitHub">
+            <CustomTooltip content={translate("help_support.star_on_github")}>
               <a href="https://github.com/makerever/rever" target="_blank">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -54,7 +56,7 @@ export function Header({ setIsSidebarCollapsed }: SidebarProps) {
               </a>
             </CustomTooltip>
             <OutsideClickHandler onClose={() => setShowSupport(false)}>
-              <CustomTooltip content="Help">
+              <CustomTooltip content={translate("help_support.help")}>
                 <div>
                   <CircleHelp
                     onClick={() => setShowSupport(!showSupport)}

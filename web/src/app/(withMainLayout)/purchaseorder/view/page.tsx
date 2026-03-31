@@ -22,6 +22,7 @@ import {
   updatePOApi,
 } from "@rever/services";
 import { useBreadcrumbStore } from "@rever/stores";
+import { useTranslate } from "@rever/i18n";
 
 // Main component to view a PO, fetches PO details and handles actions
 const ViewPOWithParams = () => {
@@ -29,6 +30,7 @@ const ViewPOWithParams = () => {
   const idValue = searchParams.get("id");
 
   const router = useRouter();
+  const translate = useTranslate();
 
   const [poDetails, setPODetails] = useState<Partial<PurchaseOrder>>({});
 
@@ -101,7 +103,7 @@ const ViewPOWithParams = () => {
         await deletePOAttachment(fileResponse?.id || "");
       }
       setIsPopupOpen(false);
-      showSuccessToast("Purchase Order deleted successfully");
+      showSuccessToast(translate("purchase_order.deleted_successfully"));
       router.push("/purchaseorder/list");
     }
   };
@@ -118,7 +120,9 @@ const ViewPOWithParams = () => {
         setIsConfirmRejectPopupOpen(false);
         setIsLoaderFormSubmit(false);
         showSuccessToast(
-          `PO ${isConfirmRejectPopupOpen ? "rejected" : "approved"} successfully`,
+          isConfirmRejectPopupOpen
+            ? translate("purchase_order.rejected_successfully")
+            : translate("purchase_order.approved_successfully"),
         );
         router.push("/purchaseorder/list");
       } else {
@@ -136,7 +140,7 @@ const ViewPOWithParams = () => {
     const response = await sendPOForApprovalApi(idValue);
     if (response?.status === 200) {
       setIsLoaderFormSubmit(false);
-      showSuccessToast("PO sent for approval");
+      showSuccessToast(translate("purchase_order.sent_for_approval"));
       router.push("/purchaseorder/list");
     } else {
       setIsLoaderFormSubmit(false);
@@ -175,7 +179,7 @@ const ViewPOWithParams = () => {
         isOpen={isPopupOpen}
         onClose={() => setIsPopupOpen(false)}
         onConfirm={handleDelete}
-        message="Are you sure you want to delete this PO?"
+        message={translate("purchase_order.confirm_delete_message")}
       />
 
       {/* Popup for confirming PO rejection */}
@@ -183,7 +187,7 @@ const ViewPOWithParams = () => {
         isOpen={isConfirmRejectPopupOpen}
         onClose={() => setIsConfirmRejectPopupOpen(false)}
         onConfirm={handlePOApprovalRejection}
-        message="Are you sure you want to reject this PO?"
+        message={translate("purchase_order.confirm_reject_message")}
         buttonText="Reject"
       />
     </>

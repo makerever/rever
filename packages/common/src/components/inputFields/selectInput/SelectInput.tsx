@@ -4,6 +4,7 @@
 
 import { useThemeStore } from "@rever/stores";
 import { Option, SelectComponentProps } from "@rever/types";
+import { useTranslate } from "@rever/i18n";
 import { BadgeInfo, ChevronDown, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FieldValues } from "react-hook-form";
@@ -57,7 +58,7 @@ const CustomDropdownIndicator = (
 
 // Main SelectComponent definition, generic for react-hook-form FieldValues
 const SelectComponent = <T extends FieldValues>({
-  placeholder = "Select an option",
+  placeholder,
   isDisabled,
   options,
   name,
@@ -73,6 +74,8 @@ const SelectComponent = <T extends FieldValues>({
   noErrorIcon,
 }: SelectComponentProps<T>) => {
   const { theme } = useThemeStore();
+  const translate = useTranslate();
+  const resolvedPlaceholder = placeholder ?? translate("placeholders.select_option");
   const isDarkMode = theme === "light" ? false : true;
 
   // Custom styles for react-select, adapting to theme and error state
@@ -220,9 +223,12 @@ const SelectComponent = <T extends FieldValues>({
         options.filter((option) => selectedValue.includes(option.value)) || [],
       );
     }
-    // If value prop is provided, use it
+    // If value prop is provided, find the matching option (with translated label) from options
     if (value) {
-      setSelectedOption(value);
+      const matchedOption = options.find(
+        (opt) => opt.value === (value as SingleValue<Option>)?.value,
+      );
+      setSelectedOption(matchedOption || value);
     } else if (!selectedValue) {
       setSelectedOption(null);
     }
@@ -278,7 +284,7 @@ const SelectComponent = <T extends FieldValues>({
         isDisabled={isDisabled}
         options={options}
         onInputChange={(input: string) => setSearch(input)}
-        placeholder={placeholder}
+        placeholder={resolvedPlaceholder}
         styles={customStyles}
         isClearable={isClearable}
         onBlur={() => name && trigger?.(name)}
@@ -309,7 +315,7 @@ const SelectComponent = <T extends FieldValues>({
       {!noErrorIcon && error && (
         <div className="flex items-center gap-1 text-danger-600 text-xs mt-1">
           <BadgeInfo width={14} height={14} />
-          <span>{title} is required</span>
+          <span>{title} {translate("common.is_required")}</span>
         </div>
       )}
     </>

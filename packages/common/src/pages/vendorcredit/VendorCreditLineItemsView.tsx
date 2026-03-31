@@ -10,14 +10,7 @@ import {
 } from "@rever/utils";
 import { useUserStore } from "@rever/stores";
 import { VendorCreditLineItemsDetailsProps } from "@rever/types";
-
-// Table headers for the read-only vendor credit items table
-const vendorCreditItemHeaders = [
-  "Description",
-  "Qty",
-  "Unit price",
-  "Amount",
-];
+import { useTranslate } from "@rever/i18n";
 
 export default function VendorCreditLineItemsReadOnly({
   vendorCreditItems = [],
@@ -25,6 +18,7 @@ export default function VendorCreditLineItemsReadOnly({
   itemsAuditValidation,
 }: VendorCreditLineItemsDetailsProps) {
   const orgDetails = useUserStore((state) => state.user?.organization);
+  const translate = useTranslate();
   return (
     <div className="rounded-xl border bg-white overflow-hidden">
       {/* vendor credit items table (read-only) */}
@@ -40,7 +34,12 @@ export default function VendorCreditLineItemsReadOnly({
         <thead className="bg-secondary-100">
           <tr>
             {/* Render table headers */}
-            {vendorCreditItemHeaders.map((h, i) => (
+            {[
+              translate("vendors.vendor_credit.create_vendor_credit.vendor_credit_line_items.description"),
+              translate("vendors.vendor_credit.create_vendor_credit.vendor_credit_line_items.qty"),
+              translate("vendors.vendor_credit.create_vendor_credit.vendor_credit_line_items.unit_price"),
+              translate("vendors.vendor_credit.create_vendor_credit.vendor_credit_line_items.amount"),
+            ].map((h, i) => (
               <th
                 key={i}
                 className={`px-3 py-2 text-sm text-neutral-1100 font-semibold ${i < 1 ? "" : "text-right"}`}

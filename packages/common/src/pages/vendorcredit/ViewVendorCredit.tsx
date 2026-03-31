@@ -11,9 +11,11 @@ import {
 import { Label } from "@rever/common";
 import { ToggleSwitch } from "@rever/common";
 import { checkAuditValidation, deepMatchAuditVersion, formatDate, formatNumber, hasPermission } from "@rever/utils";
+import { useTranslate } from "@rever/i18n";
 import {
   getCombineAddress,
   getLabelForBillStatus,
+  getStatusTranslationKey,
   getStatusClass,
 } from "@rever/utils";
 import { VendorCreditAuditValidationType, VendorCreditProps, ViewVendorCreditDetailsProps } from "@rever/types";
@@ -43,6 +45,7 @@ const ViewVendorCreditDetails = ({
   handleRejectionAction,
 }: ViewVendorCreditDetailsProps) => {
   const router = useRouter();
+  const translate = useTranslate();
 
   const orgDetails = useUserStore((state) => state.user?.organization);
 
@@ -217,7 +220,7 @@ const ViewVendorCreditDetails = ({
 
   const popupButtonItem = [
     {
-      name: "Edit vendor credit",
+      name: translate("vendors.vendor_credit.actions.edit_vendor_credit"),
       icon: <Pencil size={16} />,
       isShown: hasPermission("bill", "update") &&
         vendorCreditDetails?.status !== "approved" &&
@@ -228,7 +231,7 @@ const ViewVendorCreditDetails = ({
       },
     },
     {
-      name: "Audit history",
+      name: translate("bills.actions.audit_history"),
       icon: <FileClock width={16} />,
       isShown: true,
       onClick: () => {
@@ -237,7 +240,7 @@ const ViewVendorCreditDetails = ({
       },
     },
     {
-      name: "Delete vendor credit",
+      name: translate("vendors.vendor_credit.actions.delete_vendor_credit"),
       icon: <Trash size={16} />,
       isShown: hasPermission("bill", "delete") &&
         vendorCreditDetails?.status !== "approved" &&
@@ -272,17 +275,29 @@ const ViewVendorCreditDetails = ({
             {/* PO status label */}
             <PillItem
               className={`${getStatusClass(
-                getLabelForBillStatus((showAuditHistory ? currentVendorCreditDetails?.status : latestVendorCreditDetails?.status) || ""),
+                (showAuditHistory ? currentVendorCreditDetails?.status : latestVendorCreditDetails?.status) || "",
               )}`}
               isRounded={true}
-              name={getLabelForBillStatus((showAuditHistory ? currentVendorCreditDetails?.status : latestVendorCreditDetails?.status) || "")}
+              name={
+                getStatusTranslationKey(
+                  (showAuditHistory ? currentVendorCreditDetails?.status : latestVendorCreditDetails?.status) || "",
+                )
+                  ? translate(
+                    getStatusTranslationKey(
+                      (showAuditHistory ? currentVendorCreditDetails?.status : latestVendorCreditDetails?.status) || "",
+                    )!,
+                  )
+                  : getLabelForBillStatus(
+                    (showAuditHistory ? currentVendorCreditDetails?.status : latestVendorCreditDetails?.status) || "",
+                  )
+              }
             />
             {/* Toggle to show/hide PDF if fileUrl exists */}
             {(fileUrl && !showAuditHistory) && (
               <div className="flex items-center">
                 <ToggleSwitch isOn={showPdf} setIsOn={setShowPdf} />
                 <p className="ms-2 text-xs text-neutral-1100 dark:text-gray-200">
-                  {!showPdf ? "Show pdf" : "Hide pdf"}
+                  {!showPdf ? translate("bills.actions.show_pdf") : translate("bills.actions.hide_pdf")}
                 </p>
               </div>
             )}
@@ -295,14 +310,14 @@ const ViewVendorCreditDetails = ({
                 {latestVendorCreditDetails?.status === "under_approval" && isUserApproval ? (
                   <div className="flex items-center gap-3 w-fit">
                     <Button
-                      name="Approve"
+                      name={translate("bills.actions.approve")}
                       onClick={handleApprovalAction}
                       disabled={isLoaderFormSubmit}
                       button_type="primary"
                       icon_type="approve"
                     />
                     <Button
-                      name="Reject"
+                      name={translate("bills.actions.reject")}
                       onClick={handleRejectionAction}
                       disabled={isLoaderFormSubmit}
                       button_type="danger"
@@ -315,7 +330,7 @@ const ViewVendorCreditDetails = ({
                   <div className="flex items-center gap-3 w-fit">
                     {isApproverAvailable ? (
                       <Button
-                        name="Send for approval"
+                        name={translate("bills.actions.send_for_approval")}
                         onClick={handleSendVendorCreditApproval}
                         disabled={isLoaderFormSubmit}
                         button_type="primary"
@@ -323,7 +338,7 @@ const ViewVendorCreditDetails = ({
                       />
                     ) : (
                       <Button
-                        name="Approve"
+                        name={translate("bills.actions.approve")}
                         onClick={handleApproveVendorCredit}
                         disabled={isLoaderFormSubmit}
                         button_type="primary"
@@ -331,7 +346,7 @@ const ViewVendorCreditDetails = ({
                       />
                     )}
                     <Button
-                      name="Reject"
+                      name={translate("bills.actions.reject")}
                       onClick={handleRejectVendorCredit}
                       disabled={isLoaderFormSubmit}
                       button_type="danger"
@@ -372,9 +387,9 @@ const ViewVendorCreditDetails = ({
                       auditVersionDate !== "--" &&
                       <div className="font-medium text-neutral-1100 text-sm flex items-center justify-end gap-3">
                         <p>
-                          <span>You are viewing </span>
+                          <span>{translate("common.you_are_viewing")} </span>
                           {auditVersionDate}
-                          <span> version</span>
+                          <span> {translate("common.version")}</span>
                         </p>
                         <div
                           className="popup-btn rounded-[8px] size-8 btn-secondary-outline"
@@ -400,12 +415,12 @@ const ViewVendorCreditDetails = ({
             className={`border border-secondary-200 rounded-[20px] bg-white p-4`}
           >
             <p className="text-neutral-1100 text-xl mb-5 font-medium">
-              Vendor credit details
+              {translate("vendors.view_vendor_credit.heading")}
             </p>
             <div className="grid grid-cols-1 gap-x-5">
               <div className="flex flex-row items-center border-b border-secondary-200 pb-3">
                 <Label
-                  text="Vendor:"
+                  text={translate("vendors.view_vendor_credit.vendor")}
                   className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
                 />
                 <p className="text-neutral-1100 text-sm font-medium">
@@ -424,7 +439,7 @@ const ViewVendorCreditDetails = ({
 
               <div className="flex flex-row items-center border-b border-secondary-200 py-3">
                 <Label
-                  text="Vendor credit date:"
+                  text={translate("vendors.view_vendor_credit.vendor_credit_date")}
                   className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
                 />
                 <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.txn_date })}`}>
@@ -437,7 +452,7 @@ const ViewVendorCreditDetails = ({
 
               <div className="flex flex-row items-center py-3">
                 <Label
-                  text="Vendor address:"
+                  text={translate("vendors.view_vendor_credit.vendor_address")}
                   className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
                 />
                 <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: billingAddressField })}`}>
@@ -455,7 +470,7 @@ const ViewVendorCreditDetails = ({
             }}
           >
             <p className="text-neutral-1100 text-xl font-medium mb-5">
-              Vendor credit line items
+              {translate("vendors.view_vendor_credit.vendor_credit_line_items")}
             </p>
 
             <VendorCreditLineItemsReadOnly
@@ -475,7 +490,7 @@ const ViewVendorCreditDetails = ({
                       currentVendorCreditDetails?.reject_reason !== null &&
                       <div className="mb-4">
                         <Label
-                          text="Rejection reason:"
+                          text={translate("purchase_order.rejection_reason") + ":"}
                           className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
                         />
                         <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.reject_reason })}`}>
@@ -488,7 +503,7 @@ const ViewVendorCreditDetails = ({
                 {/* Notes */}
                 <div className="">
                   <Label
-                    text="Notes:"
+                    text={translate("vendors.view_vendor_credit.notes")}
                     className="max-w-60 w-full text-secondary-700 mb-0 font-medium"
                   />
                   <p className={`text-neutral-1100 text-sm ${checkAuditValidation({ showAuditHistory, field: auditValidation?.notes })}`}>
@@ -501,7 +516,7 @@ const ViewVendorCreditDetails = ({
               <div className="flex justify-end">
                 <div className="p-4 w-72 font-medium text-sm bg-secondary-100 rounded-[20px]">
                   <div className="grid grid-cols-2">
-                    <p className="text-neutral-1100">Sub total:</p>
+                    <p className="text-neutral-1100">{translate("vendors.view_vendor_credit.sub_total")}</p>
                     <p className={`text-neutral-1100 text-sm text-right ${checkAuditValidation({ showAuditHistory, field: auditValidation?.sub_total })}`}>
                       {formatNumber(
                         currentVendorCreditDetails?.sub_total || 0,
@@ -511,7 +526,7 @@ const ViewVendorCreditDetails = ({
                   </div>
                   <div className="grid items-center grid-cols-2 pb-2 mt-4 mb-2">
                     <div>
-                      <p className="text-neutral-1100">Total tax:</p>
+                      <p className="text-neutral-1100">{translate("vendors.view_vendor_credit.total_tax")}</p>
                       <span className={`text-neutral-1100 text-xs ${checkAuditValidation({ showAuditHistory, field: auditValidation?.total_tax })}`}>
                         {formatNumber(
                           currentVendorCreditDetails?.total_tax || 0,
@@ -524,7 +539,7 @@ const ViewVendorCreditDetails = ({
                     </div>
                   </div>
                   <div className="grid grid-cols-2 font-semibold">
-                    <p className="text-neutral-1100">Grand total:</p>
+                    <p className="text-neutral-1100">{translate("vendors.view_vendor_credit.grand_total")}</p>
                     <p className={`text-neutral-1100 text-sm text-right ${checkAuditValidation({ showAuditHistory, field: auditValidation?.sub_total })}`}>
                       {formatNumber(
                         currentVendorCreditDetails?.total || 0,
@@ -541,7 +556,7 @@ const ViewVendorCreditDetails = ({
         {fileUrl && showPdf && (
           <div className="relative lg:w-[30%] scrollbar_none rounded-[20px] bg-white border border-secondary-200 overflow-hidden">
             <p className="p-4 mb-4 pb-0 text-neutral-1100 text-xl font-medium">
-              Bill Preview
+              {translate("vendors.vendor_credit.preview")}
             </p>
 
             <PdfViewer fileUrl={fileUrl} />

@@ -19,6 +19,7 @@ import {
 import { VendorCreditProps } from "@rever/types";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, Suspense, useState, useCallback } from "react";
+import { useTranslate } from "@rever/i18n";
 
 // Component to fetch and display vendor credit details based on URL params
 const ViewVendorCreditApprovalWithParams = () => {
@@ -26,6 +27,7 @@ const ViewVendorCreditApprovalWithParams = () => {
     const idValue = params.id; // Get userId from route params
 
     const router = useRouter();
+    const translate = useTranslate();
 
     const [vendorCreditDetails, setVendorCreditDetails] = useState<
         Partial<VendorCreditProps>
@@ -84,7 +86,7 @@ const ViewVendorCreditApprovalWithParams = () => {
         const response = await acceptRejectVendorCreditApi(data, idValue as string);
         if (response?.status === 200) {
             router.push("/approvals/list/review");
-            showSuccessToast("Vendor credit approved successfully");
+            showSuccessToast(translate("vendors.vendor_credit.approved_successfully"));
             setIsLoaderFormSubmit(false);
         } else {
             setIsLoaderFormSubmit(false);
@@ -101,7 +103,7 @@ const ViewVendorCreditApprovalWithParams = () => {
         const response = await acceptRejectVendorCreditApi(data, idValue as string);
         if (response?.status === 200) {
             router.push("/approvals/list/review");
-            showSuccessToast("Vendor credit rejected successfully");
+            showSuccessToast(translate("vendors.vendor_credit.rejected_successfully"));
             setIsLoaderFormSubmit(false);
         } else {
             setIsLoaderFormSubmit(false);
@@ -132,7 +134,7 @@ const ViewVendorCreditApprovalWithParams = () => {
 
             {/* Modal for entering reject reason */}
             <Modal
-                title={`Confirm reject vendor credit`}
+                title={translate("vendors.vendor_credit.confirm_reject")}
                 isOpen={confirmVendorCreditReject}
                 onClose={() => {
                     setConfirmVendorCreditReject(false);
@@ -140,7 +142,7 @@ const ViewVendorCreditApprovalWithParams = () => {
                 }}
             >
                 <div className="mt-8">
-                    <Label text="Reject reason" htmlFor="rejectInput" />
+                    <Label text={translate("vendors.vendor_credit.reject_reason")} htmlFor="rejectInput" />
                     <TextAreaInput
                         onChange={(e) => setRejectReason(e.target.value)}
                         id="rejectInput"
